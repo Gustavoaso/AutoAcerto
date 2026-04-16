@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Motoristas</title>
+  <link rel="stylesheet" href="/frontend/CSS/motoristas.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="layout-principal">
+    <aside class="barra-lateral">
+      <div class="logo-sistema">
+        <div class="icone-logo">🚛</div>
+        <h1 class="titulo-logo">AutoAcerto</h1>
+      </div>
+
+      <nav class="menu-lateral">
+        <a href="home.html" class="item-menu">Dashboard</a>
+        <a href="motoristas.html" class="item-menu ativo">Motoristas</a>
+        <a href="veiculos.html" class="item-menu">Veículos</a>
+        <a href="viagens.html" class="item-menu">Viagens</a>
+        <a href="despesas.html" class="item-menu">Despesas</a>
+        <a href="relatorios.html" class="item-menu">Relatórios</a>
+        <a href="configuracoes.html" class="item-menu">Configurações</a>
+      </nav>
+
+      <div class="rodape-barra">
+        <button class="botao-sair">Sair</button>
+      </div>
+    </aside>
+
+    <main class="conteudo-principal">
+      <header class="topo-pagina">
+        <div class="campo-busca-topo">
+          <input type="text" placeholder="Pesquisar no sistema..." />
+        </div>
+
+        <div class="acoes-topo">
+          <button class="botao-icone">🔔</button>
+          <div class="perfil-usuario">
+            <div class="avatar-usuario">GS</div>
+            <span class="nome-usuario">Gustavo</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="cabecalho-conteudo">
+        <div>
+          <h2 class="titulo-pagina">Motoristas</h2>
+          <p class="subtitulo-pagina">Gerencie os motoristas cadastrados no sistema.</p>
+        </div>
+
+        <button class="botao-primario" id="botaoNovoMotorista">+ Novo motorista</button>
+      </section>
+
+      <section class="grade-resumo">
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Total de motoristas</span>
+          <strong class="valor-resumo" id="totalMotoristas">0</strong>
+        </div>
+
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Motoristas ativos</span>
+          <strong class="valor-resumo" id="totalAtivos">0</strong>
+        </div>
+
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Com CNH válida</span>
+          <strong class="valor-resumo" id="totalCnhValida">0</strong>
+        </div>
+
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Inativos</span>
+          <strong class="valor-resumo" id="totalInativos">0</strong>
+        </div>
+      </section>
+
+      <section class="painel">
+        <div class="cabecalho-painel">
+          <div>
+            <h3>Lista de Motoristas</h3>
+            <p class="texto-auxiliar">Consulte, pesquise e acompanhe os registros cadastrados.</p>
+          </div>
+        </div>
+
+        <div class="barra-filtros">
+          <div class="campo-filtro">
+            <label for="campoPesquisaMotorista">Pesquisar</label>
+            <input type="text" id="campoPesquisaMotorista" placeholder="Nome, CPF, telefone ou CNH" />
+          </div>
+
+          <div class="campo-filtro">
+            <label for="filtroStatus">Status</label>
+            <select id="filtroStatus">
+              <option value="todos">Todos</option>
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tabela-responsiva">
+          <table class="tabela-motoristas">
+            <thead>
+              <tr>
+                <th>Motorista</th>
+                <th>CPF</th>
+                <th>Telefone</th>
+                <th>CNH</th>
+                <th>Status</th>
+                <th>Validade da CNH</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="corpoTabelaMotoristas"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/frontend/JavaScript/motoristas.js"></script>
+</body>
+</html>

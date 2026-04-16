@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Despesas</title>
+  <link rel="stylesheet" href="/frontend/CSS/despesas.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="layout-principal">
+    <aside class="barra-lateral">
+      <div class="logo-sistema">
+        <div class="icone-logo">🚛</div>
+        <h1 class="titulo-logo">AutoAcerto</h1>
+      </div>
+
+      <nav class="menu-lateral">
+        <a href="home.html" class="item-menu">Dashboard</a>
+        <a href="motoristas.html" class="item-menu">Motoristas</a>
+        <a href="veiculos.html" class="item-menu">Veículos</a>
+        <a href="viagens.html" class="item-menu">Viagens</a>
+        <a href="despesas.html" class="item-menu ativo">Despesas</a>
+        <a href="relatorios.html" class="item-menu">Relatórios</a>
+        <a href="configuracoes.html" class="item-menu">Configurações</a>
+      </nav>
+
+      <div class="rodape-barra">
+        <button class="botao-sair">Sair</button>
+      </div>
+    </aside>
+
+    <main class="conteudo-principal">
+      <header class="topo-pagina">
+        <div class="acoes-topo">
+          <button class="botao-icone">🔔</button>
+          <div class="perfil-usuario">
+            <div class="avatar-usuario">GS</div>
+            <span class="nome-usuario">Gustavo</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="cabecalho-conteudo">
+        <div>
+          <h2 class="titulo-pagina">Despesas</h2>
+          <p class="subtitulo-pagina">Controle os gastos lançados nas viagens e acompanhe o impacto financeiro.</p>
+        </div>
+
+        <button class="botao-primario" id="botaoNovaDespesa">+ Nova despesa</button>
+      </section>
+
+      <section class="grade-resumo">
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Total de despesas</span>
+          <strong class="valor-resumo" id="totalDespesas">0</strong>
+        </div>
+
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Valor total</span>
+          <strong class="valor-resumo valor-monetario" id="valorTotalDespesas">R$ 0,00</strong>
+        </div>
+
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Maior categoria</span>
+          <strong class="valor-resumo texto-menor" id="maiorCategoriaDespesa">-</strong>
+        </div>
+
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Viagens com despesa</span>
+          <strong class="valor-resumo" id="totalViagensComDespesa">0</strong>
+        </div>
+      </section>
+
+      <section class="painel">
+        <div class="cabecalho-painel">
+          <div>
+            <h3>Lista de Despesas</h3>
+            <p class="texto-auxiliar">Pesquise e filtre as despesas registradas no sistema.</p>
+          </div>
+        </div>
+
+        <div class="barra-filtros">
+          <div class="campo-filtro">
+            <label for="campoPesquisaDespesa">Pesquisar</label>
+            <input type="text" id="campoPesquisaDespesa" placeholder="Descrição, motorista, categoria ou veículo" />
+          </div>
+
+          <div class="campo-filtro">
+            <label for="filtroCategoriaDespesa">Categoria</label>
+            <select id="filtroCategoriaDespesa">
+              <option value="todas">Todas</option>
+              <option value="combustível">Combustível</option>
+              <option value="pedágio">Pedágio</option>
+              <option value="alimentação">Alimentação</option>
+              <option value="manutenção">Manutenção</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tabela-responsiva">
+          <table class="tabela-despesas">
+            <thead>
+              <tr>
+                <th>Despesa</th>
+                <th>Viagem</th>
+                <th>Motorista</th>
+                <th>Veículo</th>
+                <th>Categoria</th>
+                <th>Data</th>
+                <th>Valor</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="corpoTabelaDespesas"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/frontend/JavaScript/despesas.js"></script>
+</body>
+</html>
