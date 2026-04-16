@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Dashboard</title>
+  <link rel="stylesheet" href="/frontend/CSS/home.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="layout-principal">
+    
+    <aside class="barra-lateral">
+      <div class="logo-sistema">
+        <div class="icone-logo">🚛</div>
+        <h1 class="titulo-logo">AutoAcerto</h1>
+      </div>
+
+      <nav class="menu-lateral">
+        <a href="home.html" class="item-menu ativo">Dashboard</a>
+        <a href="motoristas.html" class="item-menu">Motoristas</a>
+        <a href="veiculos.html" class="item-menu">Veículos</a>
+        <a href="viagens.html" class="item-menu">Viagens</a>
+        <a href="despesas.html" class="item-menu">Despesas</a>
+        <a href="relatorios.html" class="item-menu">Relatórios</a>
+        <a href="configuracoes.html" class="item-menu">Configurações</a>
+      </nav>
+
+      <div class="rodape-barra">
+        <button class="botao-sair">Sair</button>
+      </div>
+    </aside>
+
+    <main class="conteudo-principal">
+      <header class="topo-pagina">
+        <!-- <div class="campo-busca">
+          <input type="text" placeholder="Pesquisar..." />
+        </div> -->
+
+        <div class="acoes-topo">
+          <button class="botao-icone">🔔</button>
+          <div class="perfil-usuario">
+            <div class="avatar-usuario">GS</div>
+            <span class="nome-usuario">Gustavo</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="secao-boas-vindas">
+        <div>
+          <h2 class="titulo-pagina">Dashboard Financeiro</h2>
+          <p class="subtitulo-pagina">Acompanhe os acertos, despesas e resultados das viagens.</p>
+        </div>
+      </section>
+
+      <section class="grade-cards-resumo">
+        <div class="card-resumo card-azul">
+          <div class="topo-card">
+            <span class="icone-card">👨‍✈️</span>
+            <span class="titulo-card">Motoristas</span>
+          </div>
+          <div class="valor-card" id="quantidadeMotoristas">12</div>
+          <div class="descricao-card">Cadastrados no sistema</div>
+          <button class="botao-card">Ver motoristas</button>
+        </div>
+
+        <div class="card-resumo card-verde">
+          <div class="topo-card">
+            <span class="icone-card">🚚</span>
+            <span class="titulo-card">Veículos</span>
+          </div>
+          <div class="valor-card" id="quantidadeVeiculos">8</div>
+          <div class="descricao-card">Ativos no momento</div>
+          <button class="botao-card">Ver veículos</button>
+        </div>
+
+        <div class="card-resumo card-laranja">
+          <div class="topo-card">
+            <span class="icone-card">📍</span>
+            <span class="titulo-card">Viagens</span>
+          </div>
+          <div class="valor-card" id="quantidadeViagens">5</div>
+          <div class="descricao-card">Em andamento</div>
+          <button class="botao-card">Lançar viagem</button>
+        </div>
+
+        <div class="card-resumo card-vermelho">
+          <div class="topo-card">
+            <span class="icone-card">💸</span>
+            <span class="titulo-card">Despesas</span>
+          </div>
+          <div class="valor-card" id="valorDespesas">R$ 3.200,00</div>
+          <div class="descricao-card">Total no mês atual</div>
+          <button class="botao-card">Lançar despesa</button>
+        </div>
+      </section>
+
+      <section class="grade-informacoes">
+        <div class="painel painel-grande">
+          <div class="cabecalho-painel">
+            <h3>Resumo Financeiro</h3>
+          </div>
+
+          <div class="linha-resumo-financeiro">
+            <div class="mini-card mini-card-verde">
+              <span class="rotulo-mini-card">Receita</span>
+              <strong id="valorReceita">R$ 15.400,00</strong>
+            </div>
+
+            <div class="mini-card mini-card-vermelho">
+              <span class="rotulo-mini-card">Despesas</span>
+              <strong id="valorResumoDespesas">R$ 3.200,00</strong>
+            </div>
+
+            <div class="mini-card mini-card-azul">
+              <span class="rotulo-mini-card">Lucro Líquido</span>
+              <strong id="valorLucro">R$ 12.200,00</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="painel painel-pequeno">
+          <div class="cabecalho-painel">
+            <h3>Viagens em Andamento</h3>
+            <a href="#" class="link-painel">Ver todas</a>
+          </div>
+
+          <div class="lista-viagens" id="listaViagens">
+          </div>
+        </div>
+      </section>
+
+      <section class="grade-graficos">
+        <div class="painel">
+          <div class="cabecalho-painel">
+            <h3>Despesas por Categoria</h3>
+          </div>
+
+          <div class="grafico-pizza-falso">
+            <div class="circulo-pizza"></div>
+
+            <div class="legenda-grafico">
+              <div class="item-legenda">
+                <span class="cor-legenda azul"></span>
+                <span>Combustível</span>
+              </div>
+              <div class="item-legenda">
+                <span class="cor-legenda vermelho"></span>
+                <span>Pedágio</span>
+              </div>
+              <div class="item-legenda">
+                <span class="cor-legenda verde"></span>
+                <span>Alimentação</span>
+              </div>
+              <div class="item-legenda">
+                <span class="cor-legenda amarelo"></span>
+                <span>Outros</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="painel">
+          <div class="cabecalho-painel">
+            <h3>Lucro Mensal</h3>
+          </div>
+
+          <div class="grafico-barras" id="graficoBarras">
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/frontend/JavaScript/home.js"></script>
+</body>
+</html>

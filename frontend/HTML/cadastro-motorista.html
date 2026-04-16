@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoAcerto - Cadastro de Motorista</title>
+    <link rel="stylesheet" href="/frontend/CSS/cadastro-motorista.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="layout-principal">
+        <aside class="barra-lateral">
+            <div class="logo-sistema">
+                <div class="icone-logo">🚛</div>
+                <h1 class="titulo-logo">AutoAcerto</h1>
+            </div>
+
+            <nav class="menu-lateral">
+                <a href="home.html" class="item-menu">Dashboard</a>
+                <a href="motoristas.html" class="item-menu ativo">Motoristas</a>
+                <a href="veiculos.html" class="item-menu">Veículos</a>
+                <a href="viagens.html" class="item-menu">Viagens</a>
+                <a href="despesas.html" class="item-menu">Despesas</a>
+                <a href="relatorios.html" class="item-menu">Relatórios</a>
+                <a href="configuracoes.html" class="item-menu">Configurações</a>
+            </nav>
+
+            <div class="rodape-barra">
+                <button class="botao-sair" type="button">Sair</button>
+            </div>
+        </aside>
+
+        <main class="conteudo-principal">
+            <header class="topo-pagina">
+                <div class="acoes-topo">
+                    <button class="botao-icone" type="button">🔔</button>
+                    <div class="perfil-usuario">
+                        <div class="avatar-usuario">GS</div>
+                        <span class="nome-usuario">Gustavo</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="cabecalho-conteudo">
+                <div>
+                    <h2 class="titulo-pagina">Cadastrar Motorista</h2>
+                    <p class="subtitulo-pagina">Preencha os dados abaixo para cadastrar um novo motorista no sistema.
+                    </p>
+                </div>
+            </section>
+
+            <section class="painel-formulario">
+                <div id="formularioMotorista" class="formulario-motorista" onsubmit="return false;">
+                    <div class="grade-formulario">
+                        <div class="grupo-campo">
+                            <label for="nome">Nome completo</label>
+                            <input type="text" id="nome" name="nome" placeholder="Digite o nome completo" required />
+                        </div>
+
+                        <div class="grupo-campo">
+                            <label for="cpf">CPF</label>
+                            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14"
+                                required />
+                        </div>
+
+                        <div class="grupo-campo">
+                            <label for="telefone">Telefone</label>
+                            <input type="text" id="telefone" name="telefone" placeholder="(00) 00000-0000"
+                                maxlength="15" required />
+                        </div>
+
+                        <div class="grupo-campo">
+                            <label for="cnh">CNH</label>
+                            <input type="text" id="cnh" name="cnh" placeholder="Número da CNH" required />
+                        </div>
+
+                        <div class="grupo-campo">
+                            <label for="validadeCnh">Validade da CNH</label>
+                            <input type="date" id="validadeCnh" name="validadeCnh" required />
+                        </div>
+
+                        <div class="grupo-campo">
+                            <label for="status">Status</label>
+                            <select id="status" name="status" required>
+                                <option value="">Selecione</option>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                            </select>
+                        </div>
+
+                        <div class="grupo-campo grupo-campo-largo">
+                            <label for="endereco">Endereço</label>
+                            <input type="text" id="endereco" name="endereco"
+                                placeholder="Rua, número, bairro, cidade" />
+                        </div>
+
+                        <div class="grupo-campo grupo-campo-largo">
+                            <label for="observacoes">Observações</label>
+                            <textarea id="observacoes" name="observacoes" rows="4"
+                                placeholder="Informações adicionais sobre o motorista"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="acoes-formulario">
+                        <button type="button" class="botao-secundario" id="botaoLimpar">Limpar</button>
+                        <button type="button" class="botao-primario" id="botaoSalvarMotorista">
+                            Salvar motorista
+                        </button>
+                    </div>
+
+                    <div id="mensagemRetorno" class="mensagem-retorno"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div id="modalSucesso" class="modal-sucesso oculto">
+        <div class="fundo-modal-sucesso"></div>
+        <div class="caixa-modal-sucesso">
+            <div class="icone-sucesso">✔</div>
+            <h3>Motorista cadastrado</h3>
+            <p>O motorista foi salvo com sucesso no sistema.</p>
+
+            <div class="acoes-modal-sucesso">
+                <button type="button" class="botao-primario" id="botaoOkModal">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/frontend/JavaScript/cadastro-motorista.js"></script>
+</body>
+
+</html>
