@@ -48,7 +48,6 @@
           <h2 class="titulo-pagina">Veículos</h2>
           <p class="subtitulo-pagina">Gerencie os veículos cadastrados e acompanhe a situação da frota.</p>
         </div>
-
         <button class="botao-primario" id="botaoNovoVeiculo">+ Novo veículo</button>
       </section>
 
@@ -57,17 +56,14 @@
           <span class="rotulo-resumo">Total de veículos</span>
           <strong class="valor-resumo" id="totalVeiculos">0</strong>
         </div>
-
         <div class="card-resumo">
           <span class="rotulo-resumo">Veículos ativos</span>
           <strong class="valor-resumo" id="totalVeiculosAtivos">0</strong>
         </div>
-
         <div class="card-resumo">
           <span class="rotulo-resumo">Em viagem</span>
           <strong class="valor-resumo" id="totalEmViagem">0</strong>
         </div>
-
         <div class="card-resumo">
           <span class="rotulo-resumo">Em manutenção</span>
           <strong class="valor-resumo" id="totalEmManutencao">0</strong>
@@ -85,9 +81,8 @@
         <div class="barra-filtros">
           <div class="campo-filtro">
             <label for="campoPesquisaVeiculo">Pesquisar</label>
-            <input type="text" id="campoPesquisaVeiculo" placeholder="Placa, modelo, proprietário ou tipo" />
+            <input type="text" id="campoPesquisaVeiculo" placeholder="Placa, modelo ou proprietário" />
           </div>
-
           <div class="campo-filtro">
             <label for="filtroStatusVeiculo">Status</label>
             <select id="filtroStatusVeiculo">
@@ -106,11 +101,9 @@
               <tr>
                 <th>Veículo</th>
                 <th>Placa</th>
-                <th>Tipo</th>
-                <th>Capacidade</th>
                 <th>Proprietário</th>
+                <th>Ano</th>
                 <th>Status</th>
-                <th>Última viagem</th>
                 <th>Ações</th>
               </tr>
             </thead>

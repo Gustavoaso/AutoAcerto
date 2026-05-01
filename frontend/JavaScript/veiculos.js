@@ -1,141 +1,74 @@
-const veiculos = [
-  {
-    id: 1,
-    placa: "QWE-1234",
-    modelo: "Volvo FH 540",
-    tipo: "Cegonha",
-    capacidade: "11 veículos",
-    proprietario: "Carlos Silva",
-    status: "ativo",
-    ultimaViagem: "01/04/2026"
-  },
-  {
-    id: 2,
-    placa: "RTY-5678",
-    modelo: "Scania R 450",
-    tipo: "Cegonha",
-    capacidade: "10 veículos",
-    proprietario: "Ana Souza",
-    status: "em viagem",
-    ultimaViagem: "03/04/2026"
-  },
-  {
-    id: 3,
-    placa: "UIO-9012",
-    modelo: "Mercedes-Benz Actros",
-    tipo: "Caminhão",
-    capacidade: "8 veículos",
-    proprietario: "João Pereira",
-    status: "manutenção",
-    ultimaViagem: "20/03/2026"
-  },
-  {
-    id: 4,
-    placa: "ASD-3456",
-    modelo: "DAF XF 480",
-    tipo: "Cegonha",
-    capacidade: "11 veículos",
-    proprietario: "Marcos Oliveira",
-    status: "inativo",
-    ultimaViagem: "10/02/2026"
-  },
-  {
-    id: 5,
-    placa: "FGH-7890",
-    modelo: "Iveco S-Way",
-    tipo: "Cegonha",
-    capacidade: "9 veículos",
-    proprietario: "Gustavo Soares",
-    status: "ativo",
-    ultimaViagem: "28/03/2026"
-  }
-];
+const urlApi = "http://localhost:3000/veiculos";
+
+let veiculosTodos = [];
 
 function criarSeloStatusVeiculo(status) {
-  if (status === "ativo") {
-    return '<span class="selo-status selo-ativo">Ativo</span>';
-  }
-
-  if (status === "em viagem") {
-    return '<span class="selo-status selo-em-viagem">Em viagem</span>';
-  }
-
-  if (status === "manutenção") {
-    return '<span class="selo-status selo-manutencao">Manutenção</span>';
-  }
-
+  if (status === "ativo")       return '<span class="selo-status selo-ativo">Ativo</span>';
+  if (status === "em viagem")   return '<span class="selo-status selo-em-viagem">Em viagem</span>';
+  if (status === "manutenção")  return '<span class="selo-status selo-manutencao">Manutenção</span>';
   return '<span class="selo-status selo-inativo">Inativo</span>';
 }
 
-function criarIconeTipoVeiculo(tipo) {
-  if (tipo.toLowerCase() === "cegonha") {
-    return "🚛";
+function renderizarTabelaVeiculos(lista) {
+  const corpo = document.getElementById("corpoTabelaVeiculos");
+  corpo.innerHTML = "";
+
+  if (lista.length === 0) {
+    corpo.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#6b7280;">Nenhum veículo encontrado.</td></tr>';
+    return;
   }
 
-  return "🚚";
-}
-
-function renderizarTabelaVeiculos(listaVeiculos) {
-  const corpoTabelaVeiculos = document.getElementById("corpoTabelaVeiculos");
-  corpoTabelaVeiculos.innerHTML = "";
-
-  listaVeiculos.forEach(function (veiculo) {
+  lista.forEach(function (veiculo) {
     const linha = document.createElement("tr");
     linha.classList.add("linha-tabela");
 
-    linha.innerHTML = `
-      <td>
-        <div class="bloco-veiculo">
-          <div class="avatar-veiculo">${criarIconeTipoVeiculo(veiculo.tipo)}</div>
-          <div>
-            <div class="nome-veiculo">${veiculo.modelo}</div>
-            <div class="texto-secundario">Registro #${veiculo.id}</div>
-          </div>
-        </div>
-      </td>
-      <td>${veiculo.placa}</td>
-      <td>${veiculo.tipo}</td>
-      <td>${veiculo.capacidade}</td>
-      <td>${veiculo.proprietario}</td>
-      <td>${criarSeloStatusVeiculo(veiculo.status)}</td>
-      <td>${veiculo.ultimaViagem}</td>
-      <td>
-        <div class="grupo-acoes">
-          <button class="botao-acao">Ver</button>
-          <button class="botao-acao">Editar</button>
-        </div>
-      </td>
-    `;
+    linha.innerHTML =
+      '<td>' +
+        '<div class="bloco-veiculo">' +
+          '<div class="avatar-veiculo">🚛</div>' +
+          '<div>' +
+            '<div class="nome-veiculo">' + veiculo.modelo + '</div>' +
+            '<div class="texto-secundario">Registro #' + veiculo.id + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</td>' +
+      '<td>' + veiculo.placa + '</td>' +
+      '<td>' + veiculo.proprietario + '</td>' +
+      '<td>' + (veiculo.ano || '—') + '</td>' +
+      '<td>' + criarSeloStatusVeiculo(veiculo.status) + '</td>' +
+      '<td>' +
+        '<div class="grupo-acoes">' +
+          '<button class="botao-acao" onclick="irParaVerVeiculo(' + veiculo.id + ')">Ver</button>' +
+          '<button class="botao-acao" onclick="irParaEditarVeiculo(' + veiculo.id + ')">Editar</button>' +
+        '</div>' +
+      '</td>';
 
-    corpoTabelaVeiculos.appendChild(linha);
+    corpo.appendChild(linha);
   });
 }
 
-function atualizarResumoVeiculos() {
-  const totalVeiculos = veiculos.length;
-  const totalVeiculosAtivos = veiculos.filter(veiculo => veiculo.status === "ativo").length;
-  const totalEmViagem = veiculos.filter(veiculo => veiculo.status === "em viagem").length;
-  const totalEmManutencao = veiculos.filter(veiculo => veiculo.status === "manutenção").length;
-
-  document.getElementById("totalVeiculos").textContent = totalVeiculos;
-  document.getElementById("totalVeiculosAtivos").textContent = totalVeiculosAtivos;
-  document.getElementById("totalEmViagem").textContent = totalEmViagem;
-  document.getElementById("totalEmManutencao").textContent = totalEmManutencao;
+function atualizarResumoVeiculos(lista) {
+  document.getElementById("totalVeiculos").textContent = lista.length;
+  document.getElementById("totalVeiculosAtivos").textContent =
+    lista.filter(function(v) { return v.status === "ativo"; }).length;
+  document.getElementById("totalEmViagem").textContent =
+    lista.filter(function(v) { return v.status === "em viagem"; }).length;
+  document.getElementById("totalEmManutencao").textContent =
+    lista.filter(function(v) { return v.status === "manutenção"; }).length;
 }
 
-function aplicarFiltrosVeiculos() {
-  const valorPesquisa = document.getElementById("campoPesquisaVeiculo").value.toLowerCase().trim();
-  const valorStatus = document.getElementById("filtroStatusVeiculo").value;
+function aplicarFiltros() {
+  var pesquisa = document.getElementById("campoPesquisaVeiculo").value.toLowerCase().trim();
+  var statusSelecionado = document.getElementById("filtroStatusVeiculo").value;
 
-  const listaFiltrada = veiculos.filter(function (veiculo) {
-    const correspondePesquisa =
-      veiculo.placa.toLowerCase().includes(valorPesquisa) ||
-      veiculo.modelo.toLowerCase().includes(valorPesquisa) ||
-      veiculo.proprietario.toLowerCase().includes(valorPesquisa) ||
-      veiculo.tipo.toLowerCase().includes(valorPesquisa);
+  var listaFiltrada = veiculosTodos.filter(function (veiculo) {
+    var correspondePesquisa =
+      (veiculo.placa        || "").toLowerCase().includes(pesquisa) ||
+      (veiculo.modelo       || "").toLowerCase().includes(pesquisa) ||
+      (veiculo.proprietario || "").toLowerCase().includes(pesquisa);
 
-    const correspondeStatus =
-      valorStatus === "todos" || veiculo.status === valorStatus;
+    var correspondeStatus =
+      statusSelecionado === "todos" || veiculo.status === statusSelecionado;
 
     return correspondePesquisa && correspondeStatus;
   });
@@ -143,32 +76,39 @@ function aplicarFiltrosVeiculos() {
   renderizarTabelaVeiculos(listaFiltrada);
 }
 
-function configurarEventosVeiculos() {
-  document
-    .getElementById("campoPesquisaVeiculo")
-    .addEventListener("input", aplicarFiltrosVeiculos);
-
-  document
-    .getElementById("filtroStatusVeiculo")
-    .addEventListener("change", aplicarFiltrosVeiculos);
-
-  document
-    .getElementById("botaoNovoVeiculo")
-    .addEventListener("click", function () {
-      alert("Abrir formulário para cadastrar novo veículo.");
-    });
-
-  document
-    .querySelector(".botao-sair")
-    .addEventListener("click", function () {
-      alert("Saindo do sistema...");
-    });
+function irParaVerVeiculo(id) {
+  window.location.href = "ver-veiculo.html?id=" + id;
 }
 
-function iniciarPaginaVeiculos() {
-  atualizarResumoVeiculos();
-  renderizarTabelaVeiculos(veiculos);
-  configurarEventosVeiculos();
+function irParaEditarVeiculo(id) {
+  window.location.href = "editar-veiculo.html?id=" + id;
 }
 
-document.addEventListener("DOMContentLoaded", iniciarPaginaVeiculos);
+async function carregarVeiculos() {
+  try {
+    var response = await fetch(urlApi);
+    if (!response.ok) throw new Error("Erro na API");
+    veiculosTodos = await response.json();
+    atualizarResumoVeiculos(veiculosTodos);
+    renderizarTabelaVeiculos(veiculosTodos);
+  } catch (erro) {
+    console.error("Erro ao carregar veículos:", erro);
+    document.getElementById("corpoTabelaVeiculos").innerHTML =
+      '<tr><td colspan="6" style="text-align:center;padding:40px;color:#dc2626;">Erro ao conectar com o servidor. Verifique se o backend está em execução.</td></tr>';
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  carregarVeiculos();
+
+  document.getElementById("campoPesquisaVeiculo").addEventListener("input", aplicarFiltros);
+  document.getElementById("filtroStatusVeiculo").addEventListener("change", aplicarFiltros);
+
+  document.getElementById("botaoNovoVeiculo").addEventListener("click", function () {
+    window.location.href = "cadastro-veiculo.html";
+  });
+
+  document.querySelector(".botao-sair").addEventListener("click", function () {
+    alert("Saindo do sistema...");
+  });
+});

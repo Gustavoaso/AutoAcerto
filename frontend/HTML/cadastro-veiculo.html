@@ -16,7 +16,6 @@
         <div class="icone-logo">🚛</div>
         <h1 class="titulo-logo">AutoAcerto</h1>
       </div>
-
       <nav class="menu-lateral">
         <a href="home.html" class="item-menu">Dashboard</a>
         <a href="motoristas.html" class="item-menu">Motoristas</a>
@@ -26,7 +25,6 @@
         <a href="relatorios.html" class="item-menu">Relatórios</a>
         <a href="configuracoes.html" class="item-menu">Configurações</a>
       </nav>
-
       <div class="rodape-barra">
         <button class="botao-sair" type="button">Sair</button>
       </div>
@@ -46,13 +44,14 @@
       <section class="cabecalho-conteudo">
         <div>
           <h2 class="titulo-pagina">Cadastrar Veículo</h2>
-          <p class="subtitulo-pagina">Preencha os dados abaixo para cadastrar um novo veículo no sistema.</p>
+          <p class="subtitulo-pagina">Preencha os dados abaixo para cadastrar um novo veículo na frota.</p>
         </div>
       </section>
 
       <section class="painel-formulario">
         <div id="formularioVeiculo" class="formulario-veiculo">
           <div class="grade-formulario">
+
             <div class="grupo-campo">
               <label for="modelo">Modelo</label>
               <input type="text" id="modelo" name="modelo" placeholder="Ex: Volvo FH 540" required />
@@ -60,24 +59,7 @@
 
             <div class="grupo-campo">
               <label for="placa">Placa</label>
-              <input type="text" id="placa" name="placa" placeholder="Ex: ABC-1234" maxlength="8" required />
-            </div>
-
-            <div class="grupo-campo">
-              <label for="tipo">Tipo</label>
-              <select id="tipo" name="tipo" required>
-                <option value="">Selecione</option>
-                <option value="Cegonha">Cegonha</option>
-                <option value="Caminhão">Caminhão</option>
-                <option value="Bitrem">Bitrem</option>
-                <option value="Carreta">Carreta</option>
-                <option value="Truck">Truck</option>
-              </select>
-            </div>
-
-            <div class="grupo-campo">
-              <label for="capacidade">Capacidade</label>
-              <input type="text" id="capacidade" name="capacidade" placeholder="Ex: 11 veículos" required />
+              <input type="text" id="placa" name="placa" placeholder="AAA-0000 ou AAA0A00" maxlength="8" required />
             </div>
 
             <div class="grupo-campo">
@@ -90,15 +72,23 @@
               <select id="status" name="status" required>
                 <option value="">Selecione</option>
                 <option value="ativo">Ativo</option>
-                <option value="inativo">Inativo</option>
+                <option value="em viagem">Em viagem</option>
                 <option value="manutenção">Manutenção</option>
+                <option value="inativo">Inativo</option>
               </select>
+            </div>
+
+            <div class="grupo-campo">
+              <label for="ano">Ano de fabricação</label>
+              <input type="number" id="ano" name="ano" placeholder="Ex: 2022" min="1950" max="2030" />
             </div>
 
             <div class="grupo-campo grupo-campo-largo">
               <label for="observacoes">Observações</label>
-              <textarea id="observacoes" name="observacoes" rows="4" placeholder="Informações adicionais sobre o veículo"></textarea>
+              <textarea id="observacoes" name="observacoes" rows="4"
+                placeholder="Informações adicionais sobre o veículo"></textarea>
             </div>
+
           </div>
 
           <div class="acoes-formulario">

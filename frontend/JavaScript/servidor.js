@@ -14,6 +14,8 @@ app.get("/", (requisicao, resposta) => {
   resposta.json({ mensagem: "API AutoAcerto funcionando." });
 });
 
+// ─── MOTORISTAS ───────────────────────────────────────────────────────────────
+
 app.post("/motoristas", async (requisicao, resposta) => {
   const {
     nome,
@@ -155,30 +157,59 @@ app.put("/motoristas/:id", async (requisicao, resposta) => {
   }
 });
 
+// ─── VEÍCULOS ─────────────────────────────────────────────────────────────────
+
 app.post("/veiculos", async (requisicao, resposta) => {
-  const { modelo, placa, proprietario, status, ano, observacoes } = requisicao.body;
+  const {
+    modelo,
+    placa,
+    proprietario,
+    status,
+    ano,
+    observacoes
+  } = requisicao.body;
 
   if (!modelo || !placa || !proprietario || !status) {
-    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
+    return resposta.status(400).json({
+      mensagem: "Preencha todos os campos obrigatórios."
+    });
   }
 
   const sql = `
-    INSERT INTO veiculos (modelo, placa, proprietario, status, observacoes)
+    INSERT INTO veiculos (
+      modelo, placa, proprietario, status, ano, observacoes
+    )
     VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING id
   `;
 
-  const valores = [modelo, placa.toUpperCase(), proprietario, status, ano, observacoes || ""];
+  const valores = [
+    modelo,
+    placa.toUpperCase(),
+    proprietario,
+    status,
+    ano || null,
+    observacoes || ""
+  ];
 
   try {
     const resultado = await banco.query(sql, valores);
-    return resposta.status(201).json({ mensagem: "Veículo cadastrado com sucesso.", id: resultado.rows[0].id });
+
+    return resposta.status(201).json({
+      mensagem: "Veículo cadastrado com sucesso.",
+      id: resultado.rows[0].id
+    });
   } catch (erro) {
     if (erro.code === "23505") {
-      return resposta.status(400).json({ mensagem: "Já existe um veículo cadastrado com essa placa." });
+      return resposta.status(400).json({
+        mensagem: "Já existe um veículo cadastrado com essa placa."
+      });
     }
+
     console.error("Erro ao salvar veículo:", erro.message);
-    return resposta.status(500).json({ mensagem: "Erro ao salvar veículo no banco de dados." });
+    return resposta.status(500).json({
+      mensagem: "Erro ao salvar veículo no banco de dados."
+    });
   }
 });
 
@@ -188,7 +219,9 @@ app.get("/veiculos", async (requisicao, resposta) => {
     return resposta.json(resultado.rows);
   } catch (erro) {
     console.error("Erro ao buscar veículos:", erro.message);
-    return resposta.status(500).json({ mensagem: "Erro ao buscar veículos." });
+    return resposta.status(500).json({
+      mensagem: "Erro ao buscar veículos."
+    });
   }
 });
 
@@ -211,21 +244,38 @@ app.get("/veiculos/:id", async (requisicao, resposta) => {
 
 app.put("/veiculos/:id", async (requisicao, resposta) => {
   const { id } = requisicao.params;
-  const { modelo, placa, proprietario, status,ano, observacoes } = requisicao.body;
+  const {
+    modelo,
+    placa,
+    proprietario,
+    status,
+    ano,
+    observacoes
+  } = requisicao.body;
 
   if (!modelo || !placa || !proprietario || !status) {
-    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
+    return resposta.status(400).json({
+      mensagem: "Preencha todos os campos obrigatórios."
+    });
   }
 
   const sql = `
     UPDATE veiculos SET
-      modelo = $1, placa = $2,
-      proprietario = $5, status = $6, ano = $7 observacoes = $8
-    WHERE id = $9
+      modelo = $1, placa = $2, proprietario = $3,
+      status = $4, ano = $5, observacoes = $6
+    WHERE id = $7
     RETURNING *
   `;
 
-  const valores = [modelo, placa.toUpperCase(), proprietario, status, ano, observacoes || "", id];
+  const valores = [
+    modelo,
+    placa.toUpperCase(),
+    proprietario,
+    status,
+    ano || null,
+    observacoes || "",
+    id
+  ];
 
   try {
     const resultado = await banco.query(sql, valores);
@@ -234,15 +284,42 @@ app.put("/veiculos/:id", async (requisicao, resposta) => {
       return resposta.status(404).json({ mensagem: "Veículo não encontrado." });
     }
 
-    return resposta.json({ mensagem: "Veículo atualizado com sucesso.", veiculo: resultado.rows[0] });
+    return resposta.json({
+      mensagem: "Veículo atualizado com sucesso.",
+      veiculo: resultado.rows[0]
+    });
   } catch (erro) {
     if (erro.code === "23505") {
-      return resposta.status(400).json({ mensagem: "Já existe um veículo cadastrado com essa placa." });
+      return resposta.status(400).json({
+        mensagem: "Já existe um veículo cadastrado com essa placa."
+      });
     }
+
     console.error("Erro ao atualizar veículo:", erro.message);
-    return resposta.status(500).json({ mensagem: "Erro ao atualizar veículo no banco de dados." });
+    return resposta.status(500).json({
+      mensagem: "Erro ao atualizar veículo no banco de dados."
+    });
   }
 });
+
+app.delete("/veiculos/:id", async (requisicao, resposta) => {
+  const { id } = requisicao.params;
+
+  try {
+    const resultado = await banco.query("DELETE FROM veiculos WHERE id = $1 RETURNING id", [id]);
+
+    if (resultado.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Veículo não encontrado." });
+    }
+
+    return resposta.json({ mensagem: "Veículo removido com sucesso." });
+  } catch (erro) {
+    console.error("Erro ao remover veículo:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao remover veículo." });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 app.listen(porta, () => {
   console.log(`Servidor rodando em http://localhost:${porta}`);

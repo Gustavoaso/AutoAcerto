@@ -16,7 +16,6 @@
         <div class="icone-logo">🚛</div>
         <h1 class="titulo-logo">AutoAcerto</h1>
       </div>
-
       <nav class="menu-lateral">
         <a href="home.html" class="item-menu">Dashboard</a>
         <a href="motoristas.html" class="item-menu">Motoristas</a>
@@ -26,7 +25,6 @@
         <a href="relatorios.html" class="item-menu">Relatórios</a>
         <a href="configuracoes.html" class="item-menu">Configurações</a>
       </nav>
-
       <div class="rodape-barra">
         <button class="botao-sair" type="button">Sair</button>
       </div>
@@ -55,25 +53,23 @@
       </section>
 
       <section class="painel-detalhes">
+        <div class="cabecalho-veiculo">
+          <div class="avatar-veiculo-grande">🚛</div>
+          <div>
+            <h3 class="nome-veiculo-grande" id="detalheModelo">—</h3>
+            <p class="placa-veiculo" id="detalhePlacaTopo">—</p>
+          </div>
+        </div>
+
         <div class="grade-detalhes">
           <div class="grupo-detalhe">
             <span class="rotulo-detalhe">Modelo</span>
-            <span class="valor-detalhe" id="detalheModelo">—</span>
+            <span class="valor-detalhe" id="detalheModeloGrid">—</span>
           </div>
 
           <div class="grupo-detalhe">
             <span class="rotulo-detalhe">Placa</span>
             <span class="valor-detalhe" id="detalhePlaca">—</span>
-          </div>
-
-          <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Tipo</span>
-            <span class="valor-detalhe" id="detalheTipo">—</span>
-          </div>
-
-          <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Capacidade</span>
-            <span class="valor-detalhe" id="detalheCapacidade">—</span>
           </div>
 
           <div class="grupo-detalhe">
@@ -86,14 +82,19 @@
             <span class="valor-detalhe" id="detalheStatus">—</span>
           </div>
 
-          <div class="grupo-detalhe grupo-detalhe-largo">
-            <span class="rotulo-detalhe">Observações</span>
-            <span class="valor-detalhe" id="detalheObservacoes">—</span>
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Ano de fabricação</span>
+            <span class="valor-detalhe" id="detalheAno">—</span>
           </div>
 
           <div class="grupo-detalhe">
             <span class="rotulo-detalhe">Data de cadastro</span>
             <span class="valor-detalhe" id="detalheDataCadastro">—</span>
+          </div>
+
+          <div class="grupo-detalhe grupo-detalhe-largo">
+            <span class="rotulo-detalhe">Observações</span>
+            <span class="valor-detalhe" id="detalheObservacoes">—</span>
           </div>
         </div>
       </section>

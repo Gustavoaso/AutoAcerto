@@ -245,6 +245,7 @@ body {
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
+  transition: 0.25s;
 }
 
 .botao-primario {
@@ -252,9 +253,17 @@ body {
   color: #ffffff;
 }
 
+.botao-primario:hover {
+  filter: brightness(1.06);
+}
+
 .botao-secundario {
   background: #eef2f7;
   color: var(--cor-texto);
+}
+
+.botao-secundario:hover {
+  background: #e2e8f0;
 }
 
 .mensagem-retorno {
@@ -277,6 +286,7 @@ body {
   color: var(--cor-erro);
 }
 
+/* Modal */
 .modal-sucesso {
   position: fixed;
   top: 0;
@@ -308,7 +318,6 @@ body {
   z-index: 1;
 }
 
-
 .caixa-modal-sucesso {
   width: 100%;
   max-width: 420px;
@@ -321,14 +330,8 @@ body {
 }
 
 @keyframes subirModal {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .icone-sucesso {
@@ -363,63 +366,19 @@ body {
   justify-content: center;
 }
 
-@media (max-width: 640px) {
-  .acoes-modal-sucesso {
-    flex-direction: column;
-  }
-
-  .acoes-modal-sucesso .botao-primario,
-  .acoes-modal-sucesso .botao-secundario {
-    width: 100%;
-  }
-}
-
+/* Responsivo */
 @media (max-width: 900px) {
-  .layout-principal {
-    flex-direction: column;
-  }
-
-  .barra-lateral {
-    width: 100%;
-  }
-
-  .grade-formulario {
-    grid-template-columns: 1fr;
-  }
-
-  .grupo-campo-largo {
-    grid-column: span 1;
-  }
+  .layout-principal { flex-direction: column; }
+  .barra-lateral { width: 100%; }
+  .grade-formulario { grid-template-columns: 1fr; }
+  .grupo-campo-largo { grid-column: span 1; }
 }
 
 @media (max-width: 640px) {
-  .conteudo-principal {
-    padding: 18px;
-  }
-
-  .titulo-pagina {
-    font-size: 1.6rem;
-  }
-
-  .acoes-formulario {
-    flex-direction: column;
-  }
-
-  .botao-primario,
-  .botao-secundario {
-    width: 100%;
-  }
-}
-
-
-
-@media (max-width: 640px) {
-  .acoes-modal-sucesso {
-    flex-direction: column;
-  }
-
-  .acoes-modal-sucesso .botao-primario,
-  .acoes-modal-sucesso .botao-secundario {
-    width: 100%;
-  }
+  .conteudo-principal { padding: 18px; }
+  .titulo-pagina { font-size: 1.6rem; }
+  .acoes-formulario { flex-direction: column; }
+  .botao-primario, .botao-secundario { width: 100%; }
+  .acoes-modal-sucesso { flex-direction: column; }
+  .acoes-modal-sucesso .botao-primario { width: 100%; }
 }
