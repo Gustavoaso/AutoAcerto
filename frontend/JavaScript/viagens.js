@@ -1,180 +1,163 @@
-const viagens = [
-  {
-    id: 1,
-    origem: "Betim - MG",
-    destino: "São Paulo - SP",
-    motorista: "Carlos Silva",
-    veiculo: "Volvo FH 540",
-    placa: "QWE-1234",
-    dataSaida: "01/04/2026",
-    dataChegada: "03/04/2026",
-    valorFrete: 5800,
-    status: "em andamento"
-  },
-  {
-    id: 2,
-    origem: "Contagem - MG",
-    destino: "Curitiba - PR",
-    motorista: "Ana Souza",
-    veiculo: "Scania R 450",
-    placa: "RTY-5678",
-    dataSaida: "25/03/2026",
-    dataChegada: "29/03/2026",
-    valorFrete: 7200,
-    status: "finalizada"
-  },
-  {
-    id: 3,
-    origem: "Belo Horizonte - MG",
-    destino: "Goiânia - GO",
-    motorista: "João Pereira",
-    veiculo: "Mercedes-Benz Actros",
-    placa: "UIO-9012",
-    dataSaida: "20/03/2026",
-    dataChegada: "23/03/2026",
-    valorFrete: 4900,
-    status: "cancelada"
-  },
-  {
-    id: 4,
-    origem: "Betim - MG",
-    destino: "Rio de Janeiro - RJ",
-    motorista: "Marcos Oliveira",
-    veiculo: "DAF XF 480",
-    placa: "ASD-3456",
-    dataSaida: "30/03/2026",
-    dataChegada: "31/03/2026",
-    valorFrete: 3600,
-    status: "finalizada"
-  },
-  {
-    id: 5,
-    origem: "Sete Lagoas - MG",
-    destino: "Vitória - ES",
-    motorista: "Gustavo Lima",
-    veiculo: "Iveco S-Way",
-    placa: "FGH-7890",
-    dataSaida: "02/04/2026",
-    dataChegada: "04/04/2026",
-    valorFrete: 6100,
-    status: "em andamento"
-  }
-];
+const urlApiViagens = "http://localhost:3000/viagens";
+
+let viagens = [];
+
+async function carregarViagens() {
+    try {
+        const response = await fetch(urlApiViagens);
+
+        if (!response.ok) {
+            console.error("Erro ao buscar viagens");
+            return;
+        }
+
+        viagens = await response.json();
+        atualizarResumoViagens();
+        renderizarTabelaViagens(viagens);
+    } catch (erro) {
+        console.error("Erro de conexão com a API:", erro);
+    }
+}
 
 function formatarMoeda(valor) {
-  return valor.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL"
-  });
+    return Number(valor).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+}
+
+function formatarData(dataISO) {
+    if (!dataISO) return "—";
+    const data = new Date(dataISO);
+    const dia = String(data.getUTCDate()).padStart(2, "0");
+    const mes = String(data.getUTCMonth() + 1).padStart(2, "0");
+    const ano = data.getUTCFullYear();
+    return dia + "/" + mes + "/" + ano;
 }
 
 function criarSeloStatusViagem(status) {
-  if (status === "em andamento") {
-    return '<span class="selo-status selo-andamento">Em andamento</span>';
-  }
+    if (status === "em andamento") {
+        return '<span class="selo-status selo-andamento">Em andamento</span>';
+    }
 
-  if (status === "finalizada") {
-    return '<span class="selo-status selo-finalizada">Finalizada</span>';
-  }
+    if (status === "finalizada") {
+        return '<span class="selo-status selo-finalizada">Finalizada</span>';
+    }
 
-  return '<span class="selo-status selo-cancelada">Cancelada</span>';
+    return '<span class="selo-status selo-cancelada">Cancelada</span>';
 }
 
 function renderizarTabelaViagens(listaViagens) {
-  const corpoTabelaViagens = document.getElementById("corpoTabelaViagens");
-  corpoTabelaViagens.innerHTML = "";
+    const corpoTabelaViagens = document.getElementById("corpoTabelaViagens");
+    corpoTabelaViagens.innerHTML = "";
 
-  listaViagens.forEach(function (viagem) {
-    const linha = document.createElement("tr");
-    linha.classList.add("linha-tabela");
+    if (listaViagens.length === 0) {
+        corpoTabelaViagens.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 40px; color: #6b7280;">
+                    Nenhuma viagem encontrada.
+                </td>
+            </tr>
+        `;
+        return;
+    }
 
-    linha.innerHTML = `
-      <td>
-        <div class="bloco-viagem">
-          <div class="avatar-viagem">📍</div>
-          <div>
-            <div class="nome-rota">${viagem.origem} → ${viagem.destino}</div>
-            <div class="texto-secundario">Registro #${viagem.id}</div>
-          </div>
-        </div>
-      </td>
-      <td>${viagem.motorista}</td>
-      <td>${viagem.veiculo} <br><span class="texto-secundario">${viagem.placa}</span></td>
-      <td>${viagem.dataSaida}</td>
-      <td>${viagem.dataChegada}</td>
-      <td>${formatarMoeda(viagem.valorFrete)}</td>
-      <td>${criarSeloStatusViagem(viagem.status)}</td>
-      <td>
-        <div class="grupo-acoes">
-          <button class="botao-acao">Ver</button>
-          <button class="botao-acao">Editar</button>
-        </div>
-      </td>
-    `;
+    listaViagens.forEach(function (viagem) {
+        const linha = document.createElement("tr");
+        linha.classList.add("linha-tabela");
 
-    corpoTabelaViagens.appendChild(linha);
-  });
+        linha.innerHTML = `
+            <td>
+                <div class="bloco-viagem">
+                    <div class="avatar-viagem">📍</div>
+                    <div>
+                        <div class="nome-rota">${viagem.origem} → ${viagem.destino}</div>
+                        <div class="texto-secundario">Registro #${viagem.id}</div>
+                    </div>
+                </div>
+            </td>
+            <td>${viagem.motorista_nome || "—"}</td>
+            <td>
+                ${viagem.veiculo_modelo || "—"}
+                <br>
+                <span class="texto-secundario">${viagem.veiculo_placa || ""}</span>
+            </td>
+            <td>${formatarData(viagem.data_saida)}</td>
+            <td>${formatarData(viagem.data_chegada)}</td>
+            <td>${formatarMoeda(viagem.valor_frete)}</td>
+            <td>${criarSeloStatusViagem(viagem.status)}</td>
+            <td>
+                <div class="grupo-acoes">
+                    <button class="botao-acao" onclick="window.location.href='ver-viagem.html?id=${viagem.id}'">Ver</button>
+                    <button class="botao-acao" onclick="window.location.href='editar-viagem.html?id=${viagem.id}'">Editar</button>
+                </div>
+            </td>
+        `;
+
+        corpoTabelaViagens.appendChild(linha);
+    });
 }
 
 function atualizarResumoViagens() {
-  const totalViagens = viagens.length;
-  const totalEmAndamento = viagens.filter(viagem => viagem.status === "em andamento").length;
-  const totalFinalizadas = viagens.filter(viagem => viagem.status === "finalizada").length;
-  const valorTotalFretes = viagens.reduce((acumulador, viagem) => acumulador + viagem.valorFrete, 0);
+    const totalViagens = viagens.length;
+    const totalEmAndamento = viagens.filter(function (v) { return v.status === "em andamento"; }).length;
+    const totalFinalizadas = viagens.filter(function (v) { return v.status === "finalizada"; }).length;
+    const valorTotalFretes = viagens.reduce(function (acumulador, v) {
+        return acumulador + Number(v.valor_frete);
+    }, 0);
 
-  document.getElementById("totalViagens").textContent = totalViagens;
-  document.getElementById("totalEmAndamento").textContent = totalEmAndamento;
-  document.getElementById("totalFinalizadas").textContent = totalFinalizadas;
-  document.getElementById("valorTotalFretes").textContent = formatarMoeda(valorTotalFretes);
+    document.getElementById("totalViagens").textContent = totalViagens;
+    document.getElementById("totalEmAndamento").textContent = totalEmAndamento;
+    document.getElementById("totalFinalizadas").textContent = totalFinalizadas;
+    document.getElementById("valorTotalFretes").textContent = formatarMoeda(valorTotalFretes);
 }
 
 function aplicarFiltrosViagens() {
-  const valorPesquisa = document.getElementById("campoPesquisaViagem").value.toLowerCase().trim();
-  const valorStatus = document.getElementById("filtroStatusViagem").value;
+    const valorPesquisa = document.getElementById("campoPesquisaViagem").value.toLowerCase().trim();
+    const valorStatus = document.getElementById("filtroStatusViagem").value;
 
-  const listaFiltrada = viagens.filter(function (viagem) {
-    const correspondePesquisa =
-      viagem.origem.toLowerCase().includes(valorPesquisa) ||
-      viagem.destino.toLowerCase().includes(valorPesquisa) ||
-      viagem.motorista.toLowerCase().includes(valorPesquisa) ||
-      viagem.veiculo.toLowerCase().includes(valorPesquisa) ||
-      viagem.placa.toLowerCase().includes(valorPesquisa);
+    const listaFiltrada = viagens.filter(function (viagem) {
+        const correspondePesquisa =
+            viagem.origem.toLowerCase().includes(valorPesquisa) ||
+            viagem.destino.toLowerCase().includes(valorPesquisa) ||
+            (viagem.motorista_nome && viagem.motorista_nome.toLowerCase().includes(valorPesquisa)) ||
+            (viagem.veiculo_modelo && viagem.veiculo_modelo.toLowerCase().includes(valorPesquisa)) ||
+            (viagem.veiculo_placa && viagem.veiculo_placa.toLowerCase().includes(valorPesquisa));
 
-    const correspondeStatus =
-      valorStatus === "todos" || viagem.status === valorStatus;
+        const correspondeStatus =
+            valorStatus === "todos" || viagem.status === valorStatus;
 
-    return correspondePesquisa && correspondeStatus;
-  });
+        return correspondePesquisa && correspondeStatus;
+    });
 
-  renderizarTabelaViagens(listaFiltrada);
+    renderizarTabelaViagens(listaFiltrada);
 }
 
 function configurarEventosViagens() {
-  document
-    .getElementById("campoPesquisaViagem")
-    .addEventListener("input", aplicarFiltrosViagens);
+    document
+        .getElementById("campoPesquisaViagem")
+        .addEventListener("input", aplicarFiltrosViagens);
 
-  document
-    .getElementById("filtroStatusViagem")
-    .addEventListener("change", aplicarFiltrosViagens);
+    document
+        .getElementById("filtroStatusViagem")
+        .addEventListener("change", aplicarFiltrosViagens);
 
-  document
-    .getElementById("botaoNovaViagem")
-    .addEventListener("click", function () {
-      alert("Abrir formulário para cadastrar nova viagem.");
-    });
+    document
+        .getElementById("botaoNovaViagem")
+        .addEventListener("click", function () {
+            window.location.href = "cadastro-viagem.html";
+        });
 
-  document
-    .querySelector(".botao-sair")
-    .addEventListener("click", function () {
-      alert("Saindo do sistema...");
-    });
+    document
+        .querySelector(".botao-sair")
+        .addEventListener("click", function () {
+            alert("Saindo do sistema...");
+        });
 }
 
 function iniciarPaginaViagens() {
-  atualizarResumoViagens();
-  renderizarTabelaViagens(viagens);
-  configurarEventosViagens();
+    configurarEventosViagens();
+    carregarViagens();
 }
 
 document.addEventListener("DOMContentLoaded", iniciarPaginaViagens);

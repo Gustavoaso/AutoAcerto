@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Editar Viagem</title>
+  <link rel="stylesheet" href="/frontend/CSS/editar-viagem.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="layout-principal">
+    <aside class="barra-lateral">
+      <div class="logo-sistema">
+        <div class="icone-logo">🚛</div>
+        <h1 class="titulo-logo">AutoAcerto</h1>
+      </div>
+
+      <nav class="menu-lateral">
+        <a href="home.html" class="item-menu">Dashboard</a>
+        <a href="motoristas.html" class="item-menu">Motoristas</a>
+        <a href="veiculos.html" class="item-menu">Veículos</a>
+        <a href="viagens.html" class="item-menu ativo">Viagens</a>
+        <a href="despesas.html" class="item-menu">Despesas</a>
+        <a href="relatorios.html" class="item-menu">Relatórios</a>
+        <a href="configuracoes.html" class="item-menu">Configurações</a>
+      </nav>
+
+      <div class="rodape-barra">
+        <button class="botao-sair" type="button">Sair</button>
+      </div>
+    </aside>
+
+    <main class="conteudo-principal">
+      <header class="topo-pagina">
+        <div class="acoes-topo">
+          <button class="botao-icone" type="button">🔔</button>
+          <div class="perfil-usuario">
+            <div class="avatar-usuario">GS</div>
+            <span class="nome-usuario">Gustavo</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="cabecalho-conteudo">
+        <div>
+          <h2 class="titulo-pagina">Editar Viagem</h2>
+          <p class="subtitulo-pagina">Altere os dados da viagem e salve as modificações.</p>
+        </div>
+      </section>
+
+      <section class="painel-formulario">
+        <div id="formularioViagem" class="formulario-viagem">
+          <div class="grade-formulario">
+
+            <div class="grupo-campo">
+              <label for="origem">Origem</label>
+              <input type="text" id="origem" name="origem" placeholder="Ex: Betim - MG" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="destino">Destino</label>
+              <input type="text" id="destino" name="destino" placeholder="Ex: São Paulo - SP" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="motoristaId">Motorista</label>
+              <select id="motoristaId" name="motoristaId" required>
+                <option value="">Selecione</option>
+              </select>
+            </div>
+
+            <div class="grupo-campo">
+              <label for="veiculoId">Veículo</label>
+              <select id="veiculoId" name="veiculoId" required>
+                <option value="">Selecione</option>
+              </select>
+            </div>
+
+            <div class="grupo-campo">
+              <label for="dataSaida">Data de saída</label>
+              <input type="date" id="dataSaida" name="dataSaida" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="dataChegada">Data de chegada</label>
+              <input type="date" id="dataChegada" name="dataChegada" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="valorFrete">Valor do frete (R$)</label>
+              <input type="number" id="valorFrete" name="valorFrete" placeholder="Ex: 5800.00" step="0.01" min="0" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="status">Status</label>
+              <select id="status" name="status" required>
+                <option value="">Selecione</option>
+                <option value="em andamento">Em andamento</option>
+                <option value="finalizada">Finalizada</option>
+                <option value="cancelada">Cancelada</option>
+              </select>
+            </div>
+
+            <div class="grupo-campo grupo-campo-largo">
+              <label for="observacoes">Observações</label>
+              <textarea id="observacoes" name="observacoes" rows="4" placeholder="Informações adicionais sobre a viagem"></textarea>
+            </div>
+
+          </div>
+
+          <div class="acoes-formulario">
+            <button type="button" class="botao-secundario" id="botaoCancelar">Cancelar</button>
+            <button type="button" class="botao-primario" id="botaoSalvarEdicao">Salvar alterações</button>
+          </div>
+
+          <div id="mensagemRetorno" class="mensagem-retorno"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modalSucesso" class="modal-sucesso oculto">
+    <div class="fundo-modal-sucesso"></div>
+    <div class="caixa-modal-sucesso">
+      <div class="icone-sucesso">✔</div>
+      <h3>Viagem atualizada</h3>
+      <p>As alterações foram salvas com sucesso.</p>
+      <div class="acoes-modal-sucesso">
+        <button type="button" class="botao-primario" id="botaoOkModal">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/frontend/JavaScript/editar-viagem.js"></script>
+</body>
+</html>

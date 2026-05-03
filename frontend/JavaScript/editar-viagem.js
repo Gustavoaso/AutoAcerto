@@ -1,0 +1,150 @@
+const urlApiViagens = "http://localhost:3000/viagens";
+const urlApiMotoristas = "http://localhost:3000/motoristas";
+const urlApiVeiculos = "http://localhost:3000/veiculos";
+
+const params = new URLSearchParams(window.location.search);
+const idViagem = params.get("id");
+
+const modal = document.getElementById("modalSucesso");
+const botaoOk = document.getElementById("botaoOkModal");
+
+async function carregarMotoristas(motoristaIdSelecionado) {
+    try {
+        const response = await fetch(urlApiMotoristas);
+
+        if (!response.ok) return;
+
+        const motoristas = await response.json();
+        const selectMotorista = document.getElementById("motoristaId");
+
+        motoristas.forEach(function (motorista) {
+            const opcao = document.createElement("option");
+            opcao.value = motorista.id;
+            opcao.textContent = motorista.nome;
+
+            if (String(motorista.id) === String(motoristaIdSelecionado)) {
+                opcao.selected = true;
+            }
+
+            selectMotorista.appendChild(opcao);
+        });
+    } catch (erro) {
+        console.error("Erro ao carregar motoristas:", erro);
+    }
+}
+
+async function carregarVeiculos(veiculoIdSelecionado) {
+    try {
+        const response = await fetch(urlApiVeiculos);
+
+        if (!response.ok) return;
+
+        const veiculos = await response.json();
+        const selectVeiculo = document.getElementById("veiculoId");
+
+        veiculos.forEach(function (veiculo) {
+            const opcao = document.createElement("option");
+            opcao.value = veiculo.id;
+            opcao.textContent = veiculo.modelo + " — " + veiculo.placa;
+
+            if (String(veiculo.id) === String(veiculoIdSelecionado)) {
+                opcao.selected = true;
+            }
+
+            selectVeiculo.appendChild(opcao);
+        });
+    } catch (erro) {
+        console.error("Erro ao carregar veículos:", erro);
+    }
+}
+
+function formatarDataParaInput(dataISO) {
+    if (!dataISO) return "";
+    const data = new Date(dataISO);
+    const ano = data.getUTCFullYear();
+    const mes = String(data.getUTCMonth() + 1).padStart(2, "0");
+    const dia = String(data.getUTCDate()).padStart(2, "0");
+    return ano + "-" + mes + "-" + dia;
+}
+
+async function carregarViagem() {
+    if (!idViagem) {
+        alert("Viagem não encontrada.");
+        window.location.href = "viagens.html";
+        return;
+    }
+
+    try {
+        const response = await fetch(urlApiViagens + "/" + idViagem);
+
+        if (!response.ok) {
+            alert("Viagem não encontrada.");
+            window.location.href = "viagens.html";
+            return;
+        }
+
+        const viagem = await response.json();
+
+        document.getElementById("origem").value = viagem.origem;
+        document.getElementById("destino").value = viagem.destino;
+        document.getElementById("dataSaida").value = formatarDataParaInput(viagem.data_saida);
+        document.getElementById("dataChegada").value = formatarDataParaInput(viagem.data_chegada);
+        document.getElementById("valorFrete").value = viagem.valor_frete;
+        document.getElementById("status").value = viagem.status;
+        document.getElementById("observacoes").value = viagem.observacoes || "";
+
+        await carregarMotoristas(viagem.motorista_id);
+        await carregarVeiculos(viagem.veiculo_id);
+
+    } catch (erro) {
+        console.error("Erro ao carregar viagem:", erro);
+        alert("Erro de conexão com a API.");
+    }
+}
+
+document.getElementById("botaoSalvarEdicao").addEventListener("click", async function (e) {
+    e.preventDefault();
+
+    const dados = {
+        origem: document.getElementById("origem").value,
+        destino: document.getElementById("destino").value,
+        motoristaId: document.getElementById("motoristaId").value,
+        veiculoId: document.getElementById("veiculoId").value,
+        dataSaida: document.getElementById("dataSaida").value,
+        dataChegada: document.getElementById("dataChegada").value,
+        valorFrete: document.getElementById("valorFrete").value,
+        status: document.getElementById("status").value,
+        observacoes: document.getElementById("observacoes").value
+    };
+
+    try {
+        const response = await fetch(urlApiViagens + "/" + idViagem, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dados)
+        });
+
+        if (!response.ok) {
+            const erro = await response.json();
+            alert(erro.mensagem || "Erro ao atualizar viagem.");
+            return;
+        }
+
+        modal.classList.remove("oculto");
+    } catch (erro) {
+        console.error("Erro geral:", erro);
+        alert("Erro de conexão com a API.");
+    }
+});
+
+botaoOk.addEventListener("click", function () {
+    window.location.href = "viagens.html";
+});
+
+document.getElementById("botaoCancelar").addEventListener("click", function () {
+    window.location.href = "viagens.html";
+});
+
+carregarViagem();
