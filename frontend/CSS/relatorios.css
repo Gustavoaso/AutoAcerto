@@ -1,0 +1,112 @@
+/* =============================================================
+   RELATÓRIOS — estilos específicos
+   Base: /frontend/CSS/global.css
+   ============================================================= */
+
+@import url('/frontend/CSS/global.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Filtros de período */
+.barra-filtros-relatorio {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filtro-periodo {
+  display: flex;
+  gap: 4px;
+  background: var(--cor-superficie-3);
+  padding: 4px;
+  border-radius: var(--raio);
+  border: 1px solid var(--cor-borda);
+}
+
+.botao-periodo {
+  padding: 7px 14px;
+  border-radius: calc(var(--raio) - 2px);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--cor-texto-secundario);
+  cursor: pointer;
+  transition: background var(--transicao), color var(--transicao);
+  border: none;
+  background: none;
+  white-space: nowrap;
+}
+
+.botao-periodo.ativo {
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-weight: 600;
+  box-shadow: var(--sombra-suave);
+}
+
+/* Grade de métricas */
+.grade-metricas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Tabela de relatório */
+.tabela-relatorio {
+  width: 100%;
+}
+
+.tabela-relatorio tfoot td {
+  font-weight: 700;
+  color: var(--cor-texto);
+  border-top: 2px solid var(--cor-borda-forte);
+  padding-top: 12px;
+}
+
+/* Botão de exportar */
+.botao-exportar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+  color: var(--cor-texto-secundario);
+  padding: 8px 14px;
+  border-radius: var(--raio);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transicao), color var(--transicao);
+  text-decoration: none;
+}
+
+.botao-exportar:hover {
+  background: var(--cor-superficie-3);
+  color: var(--cor-texto);
+}
+
+.botao-exportar svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+}
+
+@media (max-width: 1200px) {
+  .grade-metricas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .grade-metricas {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .barra-filtros-relatorio {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
