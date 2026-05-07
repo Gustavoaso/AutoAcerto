@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Editar Despesa</title>
+  <link rel="stylesheet" href="/frontend/CSS/cadastro-viagem.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="layout-principal">
+    <aside class="barra-lateral">
+      <div class="logo-sistema">
+        <div class="icone-logo">ðŸš›</div>
+        <h1 class="titulo-logo">AutoAcerto</h1>
+      </div>
+
+      <nav class="menu-lateral">
+        <a href="home.html" class="item-menu">Dashboard</a>
+        <a href="motoristas.html" class="item-menu">Motoristas</a>
+        <a href="veiculos.html" class="item-menu">VeÃ­culos</a>
+        <a href="viagens.html" class="item-menu">Viagens</a>
+        <a href="despesas.html" class="item-menu ativo">Despesas</a>
+        <a href="relatorios.html" class="item-menu">RelatÃ³rios</a>
+        <a href="configuracoes.html" class="item-menu">ConfiguraÃ§Ãµes</a>
+      </nav>
+
+      <div class="rodape-barra">
+        <button class="botao-sair" type="button">Sair</button>
+      </div>
+    </aside>
+
+    <main class="conteudo-principal">
+      <header class="topo-pagina">
+        <div class="acoes-topo">
+          <button class="botao-icone" type="button">ðŸ””</button>
+          <div class="perfil-usuario">
+            <div class="avatar-usuario">GS</div>
+            <span class="nome-usuario">Gustavo</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="cabecalho-conteudo">
+        <div>
+          <h2 class="titulo-pagina">Editar Despesa</h2>
+          <p class="subtitulo-pagina">Altere os dados da despesa e salve as modificacoes.</p>
+        </div>
+      </section>
+
+      <section class="painel-formulario">
+        <div id="formularioDespesa" class="formulario-despesa">
+          <div class="grade-formulario">
+            <div class="grupo-campo">
+              <label for="viagemId">Viagem</label>
+              <select id="viagemId" name="viagemId" required>
+                <option value="">Selecione</option>
+              </select>
+            </div>
+
+            <div class="grupo-campo">
+              <label for="descricao">Descricao</label>
+              <input type="text" id="descricao" name="descricao" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="categoria">Categoria</label>
+              <select id="categoria" name="categoria" required>
+                <option value="">Selecione</option>
+                <option value="combustivel">Combustivel</option>
+                <option value="pedagio">Pedagio</option>
+                <option value="alimentacao">Alimentacao</option>
+                <option value="manutencao">Manutencao</option>
+                <option value="outros">Outros</option>
+              </select>
+            </div>
+
+            <div class="grupo-campo">
+              <label for="dataDespesa">Data da despesa</label>
+              <input type="date" id="dataDespesa" name="dataDespesa" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="valor">Valor (R$)</label>
+              <input type="number" id="valor" name="valor" step="0.01" min="0" required />
+            </div>
+
+            <div class="grupo-campo grupo-campo-largo">
+              <label for="observacoes">Observacoes</label>
+              <textarea id="observacoes" name="observacoes" rows="4"></textarea>
+            </div>
+          </div>
+
+          <div class="acoes-formulario">
+            <button type="button" class="botao-secundario" id="botaoCancelar">Cancelar</button>
+            <button type="button" class="botao-primario" id="botaoSalvarEdicao">Salvar alteracoes</button>
+          </div>
+
+          <div id="mensagemRetorno" class="mensagem-retorno"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modalSucesso" class="modal-sucesso oculto">
+    <div class="fundo-modal-sucesso"></div>
+    <div class="caixa-modal-sucesso">
+      <div class="icone-sucesso">âœ”</div>
+      <h3>Despesa atualizada</h3>
+      <p>As alteracoes foram salvas com sucesso.</p>
+      <div class="acoes-modal-sucesso">
+        <button type="button" class="botao-primario" id="botaoOkModal">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/frontend/JavaScript/editar-despesa.js"></script>
+</body>
+</html>

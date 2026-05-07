@@ -63,7 +63,7 @@
           </div>
           <div class="valor-card" id="quantidadeMotoristas">12</div>
           <div class="descricao-card">Cadastrados no sistema</div>
-          <button class="botao-card">Ver motoristas</button>
+          <button class="botao-card" id="botaoVerMotoristas">Ver motoristas</button>
         </div>
 
         <div class="card-resumo card-verde">
@@ -73,7 +73,7 @@
           </div>
           <div class="valor-card" id="quantidadeVeiculos">8</div>
           <div class="descricao-card">Ativos no momento</div>
-          <button class="botao-card">Ver veículos</button>
+          <button class="botao-card" id="botaoVerVeiculos">Ver ve&iacute;culos</button>
         </div>
 
         <div class="card-resumo card-laranja">
@@ -83,7 +83,7 @@
           </div>
           <div class="valor-card" id="quantidadeViagens">5</div>
           <div class="descricao-card">Em andamento</div>
-          <button class="botao-card">Lançar viagem</button>
+          <button class="botao-card" id="botaoLancarViagem">Lan&ccedil;ar viagem</button>
         </div>
 
         <div class="card-resumo card-vermelho">
@@ -93,7 +93,7 @@
           </div>
           <div class="valor-card" id="valorDespesas">R$ 3.200,00</div>
           <div class="descricao-card">Total no mês atual</div>
-          <button class="botao-card">Lançar despesa</button>
+          <button class="botao-card" id="botaoLancarDespesa">Lan&ccedil;ar despesa</button>
         </div>
       </section>
 
@@ -124,7 +124,7 @@
         <div class="painel painel-pequeno">
           <div class="cabecalho-painel">
             <h3>Viagens em Andamento</h3>
-            <a href="#" class="link-painel">Ver todas</a>
+            <a href="viagens.html" class="link-painel">Ver todas</a>
           </div>
 
           <div class="lista-viagens" id="listaViagens">
@@ -139,24 +139,24 @@
           </div>
 
           <div class="grafico-pizza-falso">
-            <div class="circulo-pizza"></div>
+            <div class="circulo-pizza" id="graficoCategorias"></div>
 
             <div class="legenda-grafico">
               <div class="item-legenda">
                 <span class="cor-legenda azul"></span>
-                <span>Combustível</span>
+                <span id="legendaCombustivel">Combust&iacute;vel</span>
               </div>
               <div class="item-legenda">
                 <span class="cor-legenda vermelho"></span>
-                <span>Pedágio</span>
+                <span id="legendaPedagio">Ped&aacute;gio</span>
               </div>
               <div class="item-legenda">
                 <span class="cor-legenda verde"></span>
-                <span>Alimentação</span>
+                <span id="legendaAlimentacao">Alimenta&ccedil;&atilde;o</span>
               </div>
               <div class="item-legenda">
                 <span class="cor-legenda amarelo"></span>
-                <span>Outros</span>
+                <span id="legendaOutros">Outros</span>
               </div>
             </div>
           </div>

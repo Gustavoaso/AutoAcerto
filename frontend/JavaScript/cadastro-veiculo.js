@@ -15,10 +15,23 @@ botaoSalvar.addEventListener("click", async function () {
   const modelo = document.getElementById("modelo").value.trim();
   const placa = document.getElementById("placa").value.trim();
   const proprietario = document.getElementById("proprietario").value.trim();
-  const status = document.getElementById("status").value;
+  const status = document.getElementById("status").value.trim();
   const observacoes = document.getElementById("observacoes").value.trim();
 
+  if (!modelo || !placa || !proprietario || !status) {
+    const camposPendentes = [];
+    if (!modelo) camposPendentes.push("modelo");
+    if (!placa) camposPendentes.push("placa");
+    if (!proprietario) camposPendentes.push("proprietario");
+    if (!status) camposPendentes.push("status");
+
+    exibirMensagem("Preencha os campos obrigatorios: " + camposPendentes.join(", ") + ".", "erro");
+    return;
+  }
+
   const dados = { modelo, placa, proprietario, status, observacoes };
+
+  console.log("Dados enviados:", dados);
 
   try {
     const response = await fetch(urlApi, {

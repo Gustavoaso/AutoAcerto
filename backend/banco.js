@@ -55,6 +55,19 @@ observacoes TEXT,
 data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 `);
+
+await banco.query(`
+CREATE TABLE IF NOT EXISTS despesas (
+id SERIAL PRIMARY KEY,
+viagem_id INTEGER REFERENCES viagens(id),
+descricao VARCHAR(255) NOT NULL,
+categoria VARCHAR(30) NOT NULL,
+data_despesa DATE NOT NULL,
+valor NUMERIC(10,2) NOT NULL,
+observacoes TEXT,
+data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+`);
 }
 
 criarTabelas().catch((erro) => console.error("Erro ao criar tabelas:", erro.message));

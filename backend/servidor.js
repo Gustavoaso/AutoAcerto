@@ -166,9 +166,21 @@ app.post("/veiculos", async (req, res) => {
 
   const { modelo, placa, proprietario, status, observacoes } = req.body;
 
-  if (!modelo || !placa || !proprietario || !status) {
+  const modeloTratado = (modelo || "").trim();
+  const placaTratada = (placa || "").trim().toUpperCase();
+  const proprietarioTratado = (proprietario || "").trim();
+  const statusTratado = (status || "").trim();
+  const observacoesTratadas = (observacoes || "").trim();
+
+  if (!modeloTratado || !placaTratada || !proprietarioTratado || !statusTratado) {
+    const camposPendentes = [];
+    if (!modeloTratado) camposPendentes.push("modelo");
+    if (!placaTratada) camposPendentes.push("placa");
+    if (!proprietarioTratado) camposPendentes.push("proprietario");
+    if (!statusTratado) camposPendentes.push("status");
+
     return res.status(400).json({
-      mensagem: "Preencha todos os campos obrigatórios.",
+      mensagem: "Preencha os campos obrigatorios: " + camposPendentes.join(", ") + ".",
       bodyRecebido: req.body
     });
   }
@@ -180,11 +192,11 @@ app.post("/veiculos", async (req, res) => {
   `;
 
   const valores = [
-    modelo,
-    placa.toUpperCase(),
-    proprietario,
-    status,
-    observacoes || ""
+    modeloTratado,
+    placaTratada,
+    proprietarioTratado,
+    statusTratado,
+    observacoesTratadas
   ];
 
   try {
@@ -240,9 +252,22 @@ app.get("/veiculos/:id", async (requisicao, resposta) => {
 app.put("/veiculos/:id", async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { modelo, placa, proprietario, status, observacoes } = requisicao.body;
+  const modeloTratado = (modelo || "").trim();
+  const placaTratada = (placa || "").trim().toUpperCase();
+  const proprietarioTratado = (proprietario || "").trim();
+  const statusTratado = (status || "").trim();
+  const observacoesTratadas = (observacoes || "").trim();
 
-  if (!modelo || !placa || !proprietario || !status) {
-    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
+  if (!modeloTratado || !placaTratada || !proprietarioTratado || !statusTratado) {
+    const camposPendentes = [];
+    if (!modeloTratado) camposPendentes.push("modelo");
+    if (!placaTratada) camposPendentes.push("placa");
+    if (!proprietarioTratado) camposPendentes.push("proprietario");
+    if (!statusTratado) camposPendentes.push("status");
+
+    return resposta.status(400).json({
+      mensagem: "Preencha os campos obrigatorios: " + camposPendentes.join(", ") + "."
+    });
   }
 
   const sql = `
@@ -252,7 +277,14 @@ WHERE id = $6
 RETURNING *
 `;
 
-  const valores = [modelo, placa.toUpperCase(), proprietario, status, observacoes || "", id];
+  const valores = [
+    modeloTratado,
+    placaTratada,
+    proprietarioTratado,
+    statusTratado,
+    observacoesTratadas,
+    id
+  ];
 
   try {
     const resultado = await banco.query(sql, valores);
@@ -440,6 +472,176 @@ RETURNING *
   } catch (erro) {
     console.error("Erro ao atualizar viagem:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao atualizar viagem no banco de dados." });
+  }
+});
+
+// ============================================================
+// DESPESAS
+// ============================================================
+
+app.post("/despesas", async (requisicao, resposta) => {
+  const {
+    viagemId,
+    descricao,
+    categoria,
+    dataDespesa,
+    valor,
+    observacoes
+  } = requisicao.body;
+
+  if (!viagemId || !descricao || !categoria || !dataDespesa || !valor) {
+    return resposta.status(400).json({
+      mensagem: "Preencha todos os campos obrigatorios."
+    });
+  }
+
+  const sql = `
+INSERT INTO despesas (viagem_id, descricao, categoria, data_despesa, valor, observacoes)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id
+`;
+
+  const valores = [
+    viagemId,
+    descricao,
+    categoria,
+    dataDespesa,
+    valor,
+    observacoes || ""
+  ];
+
+  try {
+    const resultado = await banco.query(sql, valores);
+    return resposta.status(201).json({
+      mensagem: "Despesa cadastrada com sucesso.",
+      id: resultado.rows[0].id
+    });
+  } catch (erro) {
+    console.error("Erro ao salvar despesa:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao salvar despesa no banco de dados." });
+  }
+});
+
+app.get("/despesas", async (requisicao, resposta) => {
+  const sql = `
+SELECT
+d.id,
+d.viagem_id,
+d.descricao,
+d.categoria,
+d.data_despesa,
+d.valor,
+d.observacoes,
+d.data_cadastro,
+v.origem,
+v.destino,
+m.nome AS motorista_nome,
+ve.modelo AS veiculo_modelo,
+ve.placa AS veiculo_placa
+FROM despesas d
+LEFT JOIN viagens v ON d.viagem_id = v.id
+LEFT JOIN motoristas m ON v.motorista_id = m.id
+LEFT JOIN veiculos ve ON v.veiculo_id = ve.id
+ORDER BY d.id DESC
+`;
+
+  try {
+    const resultado = await banco.query(sql);
+    return resposta.json(resultado.rows);
+  } catch (erro) {
+    console.error("Erro ao buscar despesas:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao buscar despesas." });
+  }
+});
+
+app.get("/despesas/:id", async (requisicao, resposta) => {
+  const { id } = requisicao.params;
+
+  const sql = `
+SELECT
+d.id,
+d.viagem_id,
+d.descricao,
+d.categoria,
+d.data_despesa,
+d.valor,
+d.observacoes,
+d.data_cadastro,
+v.origem,
+v.destino,
+m.nome AS motorista_nome,
+ve.modelo AS veiculo_modelo,
+ve.placa AS veiculo_placa
+FROM despesas d
+LEFT JOIN viagens v ON d.viagem_id = v.id
+LEFT JOIN motoristas m ON v.motorista_id = m.id
+LEFT JOIN veiculos ve ON v.veiculo_id = ve.id
+WHERE d.id = $1
+`;
+
+  try {
+    const resultado = await banco.query(sql, [id]);
+
+    if (resultado.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Despesa nao encontrada." });
+    }
+
+    return resposta.json(resultado.rows[0]);
+  } catch (erro) {
+    console.error("Erro ao buscar despesa:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao buscar despesa." });
+  }
+});
+
+app.put("/despesas/:id", async (requisicao, resposta) => {
+  const { id } = requisicao.params;
+  const {
+    viagemId,
+    descricao,
+    categoria,
+    dataDespesa,
+    valor,
+    observacoes
+  } = requisicao.body;
+
+  if (!viagemId || !descricao || !categoria || !dataDespesa || !valor) {
+    return resposta.status(400).json({
+      mensagem: "Preencha todos os campos obrigatorios."
+    });
+  }
+
+  const sql = `
+UPDATE despesas SET
+viagem_id = $1, descricao = $2, categoria = $3,
+data_despesa = $4, valor = $5, observacoes = $6
+WHERE id = $7
+RETURNING *
+`;
+
+  const valores = [
+    viagemId,
+    descricao,
+    categoria,
+    dataDespesa,
+    valor,
+    observacoes || "",
+    id
+  ];
+
+  try {
+    const resultado = await banco.query(sql, valores);
+
+    if (resultado.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Despesa nao encontrada." });
+    }
+
+    return resposta.json({
+      mensagem: "Despesa atualizada com sucesso.",
+      despesa: resultado.rows[0]
+    });
+  } catch (erro) {
+    console.error("Erro ao atualizar despesa:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao atualizar despesa no banco de dados." });
   }
 });
 

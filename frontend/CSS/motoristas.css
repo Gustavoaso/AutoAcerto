@@ -442,3 +442,200 @@ body {
     font-size: 1.6rem;
   }
 }
+
+/* Ajuste visual inspirado no layout de referencia */
+:root {
+  --cor-fundo: #071833;
+  --cor-superficie: #ffffff;
+  --cor-primaria: #1458f5;
+  --cor-primaria-escura: #0f3fb6;
+  --cor-texto: #0f1f3d;
+  --cor-texto-secundario: #667085;
+  --cor-borda: #e6ebf2;
+  --sombra-suave: 0 18px 45px rgba(15, 23, 42, 0.08);
+  --raio: 10px;
+  --raio-menor: 8px;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(28, 86, 165, 0.42), transparent 32%),
+    linear-gradient(135deg, #071833 0%, #08234b 48%, #06162d 100%);
+  padding: 16px;
+}
+
+.layout-principal {
+  min-height: calc(100vh - 32px);
+  max-width: 1480px;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid rgba(178, 197, 231, 0.32);
+  border-radius: 12px;
+  background: #f7faff;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
+.barra-lateral {
+  width: 248px;
+  padding: 26px 18px;
+  background: linear-gradient(180deg, #061a38 0%, #082b5c 58%, #06234b 100%);
+}
+
+.logo-sistema {
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.icone-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: rgba(37, 99, 235, 0.18);
+  color: #69a7ff;
+  font-size: 18px;
+}
+
+.titulo-logo {
+  font-size: 1.15rem;
+}
+
+.menu-lateral {
+  gap: 8px;
+}
+
+.item-menu {
+  padding: 13px 14px;
+  border-radius: 8px;
+  color: #d9e6ff;
+  font-size: 0.9rem;
+}
+
+.item-menu.ativo {
+  background: rgba(78, 125, 203, 0.28);
+  box-shadow: none;
+}
+
+.rodape-barra {
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.botao-sair {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 12px;
+  font-size: 0.9rem;
+}
+
+.conteudo-principal {
+  padding: 34px;
+  background: linear-gradient(115deg, rgba(238, 244, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 42%, rgba(246, 249, 255, 0.96) 100%);
+}
+
+.topo-pagina {
+  min-height: 46px;
+  margin-bottom: 10px;
+}
+
+.botao-icone,
+.perfil-usuario,
+.campo-busca-topo input {
+  border: 1px solid var(--cor-borda);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+}
+
+.titulo-pagina {
+  font-size: 1.65rem;
+}
+
+.subtitulo-pagina {
+  font-size: 0.9rem;
+}
+
+.botao-primario {
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: #1458f5;
+}
+
+.grade-resumo {
+  gap: 18px;
+}
+
+.card-resumo,
+.painel {
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.06);
+}
+
+.card-resumo {
+  padding: 20px;
+}
+
+.rotulo-resumo,
+.texto-auxiliar,
+.texto-secundario,
+.campo-filtro label {
+  font-size: 0.82rem;
+}
+
+.valor-resumo {
+  font-size: 1.65rem;
+}
+
+.barra-filtros {
+  padding: 0;
+}
+
+.campo-filtro input,
+.campo-filtro select {
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.tabela-motoristas thead th,
+.tabela-motoristas tbody td {
+  padding: 14px 12px;
+  font-size: 0.86rem;
+}
+
+.avatar-motorista {
+  width: 34px;
+  height: 34px;
+  font-size: 0.8rem;
+}
+
+.selo-status {
+  padding: 6px 10px;
+  font-size: 0.78rem;
+}
+
+.botao-acao {
+  border-radius: 8px;
+  min-width: 42px;
+  height: 30px;
+  padding: 0 10px;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  body {
+    padding: 0;
+  }
+
+  .layout-principal {
+    min-height: 100vh;
+    border-radius: 0;
+  }
+
+  .barra-lateral {
+    width: 100%;
+  }
+
+  .conteudo-principal {
+    padding: 22px;
+  }
+}
