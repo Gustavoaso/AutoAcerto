@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Login</title>
+  <link rel="stylesheet" href="/frontend/CSS/login.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="layout-login">
+
+    <!-- Painel esquerdo — marca -->
+    <div class="painel-marca">
+      <div class="conteudo-marca">
+        <img src="/frontend/imagens/logo-autoacerto.png" alt="AutoAcerto" class="logo-login">
+        <h1 class="slogan">Controle de frota simplificado para quem vive na estrada.</h1>
+        <p class="descricao-marca">Motoristas, viagens, despesas e relatórios em um só lugar.</p>
+      </div>
+    </div>
+
+    <!-- Painel direito — formulário -->
+    <div class="painel-formulario">
+      <div class="caixa-login">
+        <div class="cabecalho-login">
+          <h2 class="titulo-login">Entrar na conta</h2>
+          <p class="subtitulo-login">Informe suas credenciais para acessar o sistema.</p>
+        </div>
+
+        <form class="formulario-login" id="formularioLogin" novalidate>
+          <div class="campo-form">
+            <label for="campoEmail">E-mail</label>
+            <input
+              type="email"
+              id="campoEmail"
+              placeholder="seu@email.com"
+              autocomplete="email"
+              required
+            />
+            <span class="erro-campo" id="erroEmail"></span>
+          </div>
+
+          <div class="campo-form">
+            <label for="campoSenha">Senha</label>
+            <div class="grupo-senha">
+              <input
+                type="password"
+                id="campoSenha"
+                placeholder="Sua senha"
+                autocomplete="current-password"
+                required
+              />
+              <button type="button" class="botao-ver-senha" id="botaoVerSenha" aria-label="Mostrar senha">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+            <span class="erro-campo" id="erroSenha"></span>
+          </div>
+
+          <div class="erro-geral" id="erroGeral"></div>
+
+          <button type="submit" class="botao-primario botao-login" id="botaoEntrar">
+            Entrar
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/frontend/JavaScript/login.js"></script>
+</body>
+
+</html>
