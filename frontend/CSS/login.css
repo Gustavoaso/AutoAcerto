@@ -1,0 +1,241 @@
+/* =============================================================
+   AUTOACERTO — LOGIN
+   Estilos exclusivos da página de login.
+   Variáveis globais herdadas de global.css via layout principal.
+   ============================================================= */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  background-color: #f5f5f3;
+  color: #1a1a1a;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* -------------------------------------------------------
+   LAYOUT
+   ------------------------------------------------------- */
+
+.layout-login {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .layout-login {
+    grid-template-columns: 1fr;
+  }
+
+  .painel-marca {
+    display: none;
+  }
+}
+
+/* -------------------------------------------------------
+   PAINEL ESQUERDO — MARCA
+   ------------------------------------------------------- */
+
+.painel-marca {
+  background-color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+.conteudo-marca {
+  max-width: 380px;
+}
+
+.logo-login {
+  height: 40px;
+  width: auto;
+  margin-bottom: 32px;
+  filter: brightness(0) invert(1);
+}
+
+.slogan {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.35;
+  margin-bottom: 16px;
+}
+
+.descricao-marca {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.6;
+}
+
+/* -------------------------------------------------------
+   PAINEL DIREITO — FORMULÁRIO
+   ------------------------------------------------------- */
+
+.painel-formulario {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  background-color: #ffffff;
+}
+
+.caixa-login {
+  width: 100%;
+  max-width: 380px;
+}
+
+.cabecalho-login {
+  margin-bottom: 28px;
+}
+
+.titulo-login {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+}
+
+.subtitulo-login {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* -------------------------------------------------------
+   FORMULÁRIO
+   ------------------------------------------------------- */
+
+.formulario-login {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.campo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo-form label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.campo-form input {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+  width: 100%;
+}
+
+.campo-form input:focus {
+  border-color: #1a1a1a;
+  box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.08);
+}
+
+.campo-form input.campo-invalido {
+  border-color: #dc2626;
+}
+
+/* -------------------------------------------------------
+   CAMPO SENHA
+   ------------------------------------------------------- */
+
+.grupo-senha {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.grupo-senha input {
+  padding-right: 42px;
+}
+
+.botao-ver-senha {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  transition: color 0.15s ease;
+}
+
+.botao-ver-senha:hover {
+  color: #1a1a1a;
+}
+
+/* -------------------------------------------------------
+   MENSAGENS DE ERRO
+   ------------------------------------------------------- */
+
+.erro-campo {
+  font-size: 0.78rem;
+  color: #dc2626;
+  min-height: 16px;
+}
+
+.erro-geral {
+  font-size: 0.83rem;
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: none;
+}
+
+.erro-geral.visivel {
+  display: block;
+}
+
+/* -------------------------------------------------------
+   BOTÃO ENTRAR
+   ------------------------------------------------------- */
+
+.botao-primario {
+  height: 40px;
+  padding: 0 16px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  width: 100%;
+}
+
+.botao-primario:hover {
+  background-color: #2d2d2d;
+}
+
+.botao-primario:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.botao-login.carregando {
+  opacity: 0.7;
+  pointer-events: none;
+}
