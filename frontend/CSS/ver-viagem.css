@@ -1,320 +1,123 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* =============================================================
+   VER VIAGEM — estilos específicos
+   Base: /frontend/CSS/global.css
+   ============================================================= */
+
+@import url('/frontend/CSS/global.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Cabeçalho da viagem com rota destacada */
+.cabecalho-viagem {
+  background: var(--cor-superficie);
+  border-radius: var(--raio);
+  border: 1px solid var(--cor-borda);
+  box-shadow: var(--sombra-suave);
+  padding: 22px 24px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-:root {
-  --cor-fundo: #f5f7fb;
-  --cor-superficie: #ffffff;
-  --cor-primaria: #1d4ed8;
-  --cor-texto: #172033;
-  --cor-texto-secundario: #6b7280;
-  --cor-borda: #e5e7eb;
-  --cor-sucesso: #16a34a;
-  --cor-sucesso-clara: #dcfce7;
-  --cor-alerta: #2563eb;
-  --cor-alerta-clara: #dbeafe;
-  --cor-erro: #dc2626;
-  --cor-erro-clara: #fee2e2;
-  --sombra-suave: 0 10px 30px rgba(15, 23, 42, 0.06);
-  --raio: 18px;
-  --fonte: "Inter", sans-serif;
+.rota-destaque {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-body {
-  font-family: var(--fonte);
-  background: var(--cor-fundo);
+.cidade-rota {
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--cor-texto);
 }
 
-.layout-principal {
-  display: flex;
-  min-height: 100vh;
-}
-
-.barra-lateral {
-  width: 280px;
-  background: linear-gradient(180deg, #0f2d5c 0%, #173f7a 100%);
-  color: #ffffff;
-  padding: 28px 22px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.logo-sistema {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 36px;
-}
-
-.icone-logo {
-  width: 52px;
-  height: 52px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
-
-.titulo-logo {
-  font-size: 2rem;
-  font-weight: 800;
-}
-
-.menu-lateral {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 1;
-}
-
-.item-menu {
-  text-decoration: none;
-  color: #dce7ff;
-  padding: 16px 18px;
-  border-radius: 14px;
-  font-size: 1rem;
-  font-weight: 600;
-  transition: 0.25s;
-}
-
-.item-menu:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
-
-.item-menu.ativo {
-  background: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
-  box-shadow: inset 3px 0 0 #60a5fa;
-}
-
-.rodape-barra {
-  margin-top: 30px;
-}
-
-.botao-sair {
-  width: 100%;
-  border: none;
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  padding: 15px;
-  border-radius: 14px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.conteudo-principal {
-  flex: 1;
-  width: 100%;
-  padding: 28px;
-}
-
-.topo-pagina {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 28px;
-}
-
-.acoes-topo {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-left: auto;
-}
-
-.botao-icone {
-  width: 48px;
-  height: 48px;
-  border: none;
-  background: #ffffff;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: var(--sombra-suave);
+.seta-rota {
+  color: var(--cor-texto-secundario);
   font-size: 1.1rem;
 }
 
-.perfil-usuario {
+.metadados-viagem {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #ffffff;
-  padding: 8px 14px 8px 8px;
-  border-radius: 999px;
-  box-shadow: var(--sombra-suave);
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
-.avatar-usuario {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb, #60a5fa);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-}
-
-.nome-usuario {
-  font-weight: 600;
-}
-
-.cabecalho-conteudo {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.titulo-pagina {
-  font-size: 2rem;
-  font-weight: 800;
-  margin-bottom: 8px;
-}
-
-.subtitulo-pagina {
-  color: var(--cor-texto-secundario);
-}
-
-.acoes-cabecalho {
-  display: flex;
-  gap: 12px;
-}
-
-.botao-primario,
-.botao-secundario {
-  border: none;
-  padding: 14px 20px;
-  border-radius: 14px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-}
-
-.botao-primario {
-  background: linear-gradient(135deg, var(--cor-primaria), #3b82f6);
-  color: #ffffff;
-}
-
-.botao-secundario {
-  background: #eef2f7;
-  color: var(--cor-texto);
-}
-
-.painel-detalhes {
-  background: var(--cor-superficie);
-  border-radius: var(--raio);
-  box-shadow: var(--sombra-suave);
-  padding: 28px;
-}
-
-.grade-detalhes {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
-
-.grupo-detalhe {
+.meta-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
 }
 
-.grupo-detalhe-largo {
-  grid-column: span 2;
-}
-
-.rotulo-detalhe {
-  font-weight: 700;
-  font-size: 0.85rem;
+.rotulo-meta {
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--cor-texto-secundario);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.04em;
 }
 
-.valor-detalhe {
-  font-size: 1.05rem;
+.valor-meta {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cor-texto);
+}
+
+.valor-meta.monetario {
+  color: var(--cor-sucesso);
+  font-size: 1rem;
+}
+
+/* Grade de detalhes e despesas */
+.grade-detalhes-viagem {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.painel-despesas-viagem {
+  grid-column: 1 / -1;
+}
+
+.grade-campos-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.campo-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rotulo-campo {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.valor-campo {
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--cor-texto);
-  padding: 12px 16px;
-  background: var(--cor-fundo);
-  border-radius: 12px;
-  border: 1px solid var(--cor-borda);
-}
-
-.selo-status {
-  display: inline-block;
-  padding: 6px 16px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  width: fit-content;
-}
-
-.selo-andamento {
-  background: var(--cor-alerta-clara);
-  color: var(--cor-alerta);
-}
-
-.selo-finalizada {
-  background: var(--cor-sucesso-clara);
-  color: var(--cor-sucesso);
-}
-
-.selo-cancelada {
-  background: var(--cor-erro-clara);
-  color: var(--cor-erro);
 }
 
 @media (max-width: 900px) {
-  .layout-principal {
-    flex-direction: column;
-  }
-
-  .barra-lateral {
-    width: 100%;
-  }
-
-  .grade-detalhes {
+  .grade-detalhes-viagem {
     grid-template-columns: 1fr;
   }
 
-  .grupo-detalhe-largo {
-    grid-column: span 1;
+  .painel-despesas-viagem {
+    grid-column: 1;
   }
 
-  .cabecalho-conteudo {
+  .cabecalho-viagem {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
-  }
-}
-
-@media (max-width: 640px) {
-  .conteudo-principal {
-    padding: 18px;
-  }
-
-  .titulo-pagina {
-    font-size: 1.6rem;
-  }
-
-  .acoes-cabecalho {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .botao-primario,
-  .botao-secundario {
-    width: 100%;
   }
 }

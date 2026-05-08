@@ -1,0 +1,79 @@
+/* =============================================================
+   CADASTRO DE DESPESA — estilos específicos
+   Base: /frontend/CSS/global.css
+   ============================================================= */
+
+@import url('/frontend/CSS/global.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Seleção visual de categoria */
+.grade-categorias {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.cartao-categoria {
+  border: 2px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 12px 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color var(--transicao), background var(--transicao);
+  background: var(--cor-superficie-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.cartao-categoria:hover {
+  background: var(--cor-primaria-clara);
+  border-color: var(--cor-primaria);
+}
+
+.cartao-categoria.selecionado {
+  background: var(--cor-primaria-clara);
+  border-color: var(--cor-primaria);
+}
+
+.icone-categoria {
+  font-size: 1.4rem;
+}
+
+.nome-categoria {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+}
+
+.cartao-categoria.selecionado .nome-categoria {
+  color: var(--cor-primaria);
+}
+
+/* Campo de valor com R$ prefixado */
+.campo-moeda {
+  position: relative;
+}
+
+.prefixo-moeda {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.campo-moeda input {
+  padding-left: 36px;
+}
+
+@media (max-width: 640px) {
+  .grade-categorias {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
