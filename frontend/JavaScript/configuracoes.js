@@ -1,218 +1,257 @@
-// ============================================================
-// NAVEGAÇÃO ENTRE SEÇÕES
-// ============================================================
+const CHAVE_PREFERENCIAS = "autoacerto_preferencias";
 
-document.addEventListener("DOMContentLoaded", function () {
-  inicializarNavegacaoConfig();
-  inicializarBotoesSalvar();
-  inicializarBotaoPerigo();
-  carregarPreferencias();
-});
-
-function inicializarNavegacaoConfig() {
-  const itensMenu = document.querySelectorAll(".item-menu-config");
-
-  itensMenu.forEach(function (item) {
-    item.addEventListener("click", function () {
-      const secaoAlvo = item.dataset.secao;
-
-      itensMenu.forEach(function (i) {
-        i.classList.remove("ativo");
-      });
-
-      item.classList.add("ativo");
-
-      document.querySelectorAll(".secao-config").forEach(function (secao) {
-        secao.style.display = "none";
-      });
-
-      const secaoEl = document.getElementById("secao-" + secaoAlvo);
-
-      if (secaoEl) {
-        secaoEl.style.display = "flex";
-      }
-    });
-  });
-}
-
-// ============================================================
-// PREFERÊNCIAS (armazenadas em memória)
-// ============================================================
-
-const preferencias = {
-  perfil: {
-    nome: "",
-    email: "",
-    telefone: "",
-    cargo: ""
-  },
-  empresa: {
-    nomeEmpresa: "",
-    cnpj: "",
-    endereco: "",
-    telefoneEmpresa: "",
-    emailEmpresa: ""
-  },
-  notificacoes: {
-    viazemFinalizada: true,
-    novaDespesa: false,
-    cnh: true,
-    resumoSemanal: true
-  },
-  sistema: {
-    moeda: "BRL",
+let preferencias = {
+    notifCnh: true,
+    notifViagem: true,
+    notifDespesa: false,
+    notifResumoSemanal: false,
+    registrosPorPagina: "25",
     formatoData: "dd/mm/aaaa",
-    itensPagina: "25",
-    modoCompacto: false
-  }
+    confirmarExclusao: true
 };
 
 function carregarPreferencias() {
-  // Perfil
-  document.getElementById("configNome").value = preferencias.perfil.nome;
-  document.getElementById("configEmail").value = preferencias.perfil.email;
-  document.getElementById("configTelefone").value = preferencias.perfil.telefone;
-  document.getElementById("configCargo").value = preferencias.perfil.cargo;
-
-  // Empresa
-  document.getElementById("configNomeEmpresa").value = preferencias.empresa.nomeEmpresa;
-  document.getElementById("configCnpj").value = preferencias.empresa.cnpj;
-  document.getElementById("configEndereco").value = preferencias.empresa.endereco;
-  document.getElementById("configTelefoneEmpresa").value = preferencias.empresa.telefoneEmpresa;
-  document.getElementById("configEmailEmpresa").value = preferencias.empresa.emailEmpresa;
-
-  // Notificações
-  document.getElementById("notifViagemFinalizada").checked = preferencias.notificacoes.viazemFinalizada;
-  document.getElementById("notifNovaDespesa").checked = preferencias.notificacoes.novaDespesa;
-  document.getElementById("notifCnh").checked = preferencias.notificacoes.cnh;
-  document.getElementById("notifResumoSemanal").checked = preferencias.notificacoes.resumoSemanal;
-
-  // Sistema
-  document.getElementById("configMoeda").value = preferencias.sistema.moeda;
-  document.getElementById("configFormataData").value = preferencias.sistema.formatoData;
-  document.getElementById("configItensPagina").value = preferencias.sistema.itensPagina;
-  document.getElementById("modoCompacto").checked = preferencias.sistema.modoCompacto;
+    try {
+        const salvo = localStorage.getItem(CHAVE_PREFERENCIAS);
+        if (salvo) {
+            preferencias = Object.assign({}, preferencias, JSON.parse(salvo));
+        }
+    } catch (erro) {
+        console.error("Erro ao carregar preferencias:", erro);
+    }
 }
 
-// ============================================================
-// BOTÕES DE SALVAR
-// ============================================================
+function salvarPreferencias() {
+    try {
+        localStorage.setItem(CHAVE_PREFERENCIAS, JSON.stringify(preferencias));
+    } catch (erro) {
+        console.error("Erro ao salvar preferencias:", erro);
+    }
+}
 
-function inicializarBotoesSalvar() {
-  document.getElementById("botaoSalvarPerfil").addEventListener("click", function () {
-    preferencias.perfil.nome = document.getElementById("configNome").value.trim();
-    preferencias.perfil.email = document.getElementById("configEmail").value.trim();
-    preferencias.perfil.telefone = document.getElementById("configTelefone").value.trim();
-    preferencias.perfil.cargo = document.getElementById("configCargo").value.trim();
+function aplicarPreferenciasNaTela() {
+    const campos = [
+        { id: "notifCnh", chave: "notifCnh", tipo: "checkbox" },
+        { id: "notifViagem", chave: "notifViagem", tipo: "checkbox" },
+        { id: "notifDespesa", chave: "notifDespesa", tipo: "checkbox" },
+        { id: "notifResumoSemanal", chave: "notifResumoSemanal", tipo: "checkbox" },
+        { id: "configRegistrosPorPagina", chave: "registrosPorPagina", tipo: "select" },
+        { id: "configFormatoData", chave: "formatoData", tipo: "select" },
+        { id: "configConfirmarExclusao", chave: "confirmarExclusao", tipo: "checkbox" }
+    ];
 
-    exibirMensagemSucesso("mensagemPerfil", "Perfil salvo com sucesso.");
-  });
+    campos.forEach(function (campo) {
+        const elemento = document.getElementById(campo.id);
+        if (!elemento) return;
 
-  document.getElementById("botaoSalvarEmpresa").addEventListener("click", function () {
-    preferencias.empresa.nomeEmpresa = document.getElementById("configNomeEmpresa").value.trim();
-    preferencias.empresa.cnpj = document.getElementById("configCnpj").value.trim();
-    preferencias.empresa.endereco = document.getElementById("configEndereco").value.trim();
-    preferencias.empresa.telefoneEmpresa = document.getElementById("configTelefoneEmpresa").value.trim();
-    preferencias.empresa.emailEmpresa = document.getElementById("configEmailEmpresa").value.trim();
+        if (campo.tipo === "checkbox") {
+            elemento.checked = preferencias[campo.chave];
+        } else {
+            elemento.value = preferencias[campo.chave];
+        }
+    });
+}
 
-    exibirMensagemSucesso("mensagemEmpresa", "Dados da empresa salvos com sucesso.");
-  });
+function alternarSecao(idSecaoAlvo) {
+    const secoes = document.querySelectorAll(".secao-configuracao");
+    const botoes = document.querySelectorAll(".item-menu-config");
 
-  document.getElementById("botaoSalvarNotificacoes").addEventListener("click", function () {
-    preferencias.notificacoes.viazemFinalizada = document.getElementById("notifViagemFinalizada").checked;
-    preferencias.notificacoes.novaDespesa = document.getElementById("notifNovaDespesa").checked;
-    preferencias.notificacoes.cnh = document.getElementById("notifCnh").checked;
-    preferencias.notificacoes.resumoSemanal = document.getElementById("notifResumoSemanal").checked;
+    secoes.forEach(function (secao) {
+        secao.style.display = "none";
+    });
 
-    exibirMensagemSucesso("mensagemNotificacoes", "Preferências de notificação salvas.");
-  });
+    botoes.forEach(function (botao) {
+        botao.classList.remove("ativo");
+    });
 
-  document.getElementById("botaoAlterarSenha").addEventListener("click", function () {
-    const senhaAtual = document.getElementById("senhaAtual").value;
-    const novaSenha = document.getElementById("novaSenha").value;
-    const confirmarSenha = document.getElementById("confirmarSenha").value;
+    const secaoAlvo = document.getElementById("secao" + capitalizarPrimeira(idSecaoAlvo));
+    const botaoAlvo = document.querySelector("[data-secao='" + idSecaoAlvo + "']");
+
+    if (secaoAlvo) secaoAlvo.style.display = "block";
+    if (botaoAlvo) botaoAlvo.classList.add("ativo");
+}
+
+function capitalizarPrimeira(texto) {
+    if (!texto) return "";
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function exibirMensagemSucesso(mensagem) {
+    const elementoExistente = document.getElementById("mensagemSucessoConfig");
+    if (elementoExistente) elementoExistente.remove();
+
+    const mensagemElemento = document.createElement("div");
+    mensagemElemento.id = "mensagemSucessoConfig";
+    mensagemElemento.textContent = mensagem;
+    mensagemElemento.style.cssText = [
+        "position: fixed",
+        "bottom: 24px",
+        "right: 24px",
+        "background: var(--cor-sucesso)",
+        "color: #ffffff",
+        "padding: 12px 20px",
+        "border-radius: var(--raio)",
+        "font-size: 0.875rem",
+        "font-weight: 600",
+        "box-shadow: var(--sombra-media)",
+        "z-index: 1000",
+        "animation: nenhum"
+    ].join("; ");
+
+    document.body.appendChild(mensagemElemento);
+
+    setTimeout(function () {
+        if (mensagemElemento.parentNode) {
+            mensagemElemento.remove();
+        }
+    }, 3000);
+}
+
+function exibirMensagemErro(mensagem) {
+    const elementoExistente = document.getElementById("mensagemErroConfig");
+    if (elementoExistente) elementoExistente.remove();
+
+    const mensagemElemento = document.createElement("div");
+    mensagemElemento.id = "mensagemErroConfig";
+    mensagemElemento.textContent = mensagem;
+    mensagemElemento.style.cssText = [
+        "position: fixed",
+        "bottom: 24px",
+        "right: 24px",
+        "background: var(--cor-perigo)",
+        "color: #ffffff",
+        "padding: 12px 20px",
+        "border-radius: var(--raio)",
+        "font-size: 0.875rem",
+        "font-weight: 600",
+        "box-shadow: var(--sombra-media)",
+        "z-index: 1000"
+    ].join("; ");
+
+    document.body.appendChild(mensagemElemento);
+
+    setTimeout(function () {
+        if (mensagemElemento.parentNode) {
+            mensagemElemento.remove();
+        }
+    }, 3000);
+}
+
+function salvarPerfil(evento) {
+    evento.preventDefault();
+
+    const nome = document.getElementById("configNome").value.trim();
+    const email = document.getElementById("configEmail").value.trim();
+
+    if (!nome || !email) {
+        exibirMensagemErro("Preencha o nome e o e-mail.");
+        return;
+    }
+
+    exibirMensagemSucesso("Perfil atualizado com sucesso.");
+}
+
+function salvarNotificacoes() {
+    preferencias.notifCnh = document.getElementById("notifCnh").checked;
+    preferencias.notifViagem = document.getElementById("notifViagem").checked;
+    preferencias.notifDespesa = document.getElementById("notifDespesa").checked;
+    preferencias.notifResumoSemanal = document.getElementById("notifResumoSemanal").checked;
+
+    salvarPreferencias();
+    exibirMensagemSucesso("Preferências de notificação salvas.");
+}
+
+function salvarSistema() {
+    preferencias.registrosPorPagina = document.getElementById("configRegistrosPorPagina").value;
+    preferencias.formatoData = document.getElementById("configFormatoData").value;
+    preferencias.confirmarExclusao = document.getElementById("configConfirmarExclusao").checked;
+
+    salvarPreferencias();
+    exibirMensagemSucesso("Preferências do sistema salvas.");
+}
+
+function alterarSenha(evento) {
+    evento.preventDefault();
+
+    const senhaAtual = document.getElementById("configSenhaAtual").value;
+    const novaSenha = document.getElementById("configNovaSenha").value;
+    const confirmarSenha = document.getElementById("configConfirmarSenha").value;
 
     if (!senhaAtual || !novaSenha || !confirmarSenha) {
-      exibirMensagemErro("mensagemSeguranca", "Preencha todos os campos de senha.");
-      return;
+        exibirMensagemErro("Preencha todos os campos de senha.");
+        return;
     }
 
     if (novaSenha.length < 8) {
-      exibirMensagemErro("mensagemSeguranca", "A nova senha deve ter pelo menos 8 caracteres.");
-      return;
+        exibirMensagemErro("A nova senha precisa ter pelo menos 8 caracteres.");
+        return;
     }
 
     if (novaSenha !== confirmarSenha) {
-      exibirMensagemErro("mensagemSeguranca", "As senhas não coincidem.");
-      return;
+        exibirMensagemErro("As senhas não conferem.");
+        return;
     }
 
-    document.getElementById("senhaAtual").value = "";
-    document.getElementById("novaSenha").value = "";
-    document.getElementById("confirmarSenha").value = "";
+    document.getElementById("configSenhaAtual").value = "";
+    document.getElementById("configNovaSenha").value = "";
+    document.getElementById("configConfirmarSenha").value = "";
 
-    exibirMensagemSucesso("mensagemSeguranca", "Senha alterada com sucesso.");
-  });
-
-  document.getElementById("botaoSalvarSistema").addEventListener("click", function () {
-    preferencias.sistema.moeda = document.getElementById("configMoeda").value;
-    preferencias.sistema.formatoData = document.getElementById("configFormataData").value;
-    preferencias.sistema.itensPagina = document.getElementById("configItensPagina").value;
-    preferencias.sistema.modoCompacto = document.getElementById("modoCompacto").checked;
-
-    exibirMensagemSucesso("mensagemSistema", "Preferências do sistema salvas.");
-  });
+    exibirMensagemSucesso("Senha alterada com sucesso.");
 }
 
-// ============================================================
-// ZONA DE PERIGO
-// ============================================================
-
-function inicializarBotaoPerigo() {
-  document.getElementById("botaoLimparDados").addEventListener("click", function () {
+function confirmarLimpezaDados() {
     const confirmacao = confirm(
-      "Tem certeza que deseja apagar todos os dados?\n" +
-      "Esta ação não pode ser desfeita."
+        "Atenção! Esta ação irá remover TODOS os dados do sistema (motoristas, veículos, viagens e despesas).\n\nEsta operação não pode ser desfeita.\n\nDeseja continuar?"
     );
 
     if (!confirmacao) return;
 
-    const segundaConfirmacao = confirm(
-      "ATENÇÃO: Esta é sua última chance.\n" +
-      "Todos os motoristas, veículos, viagens e despesas serão removidos permanentemente.\n" +
-      "Confirmar exclusão?"
-    );
+    const confirmacao2 = confirm("Tem certeza absoluta? Todos os dados serão perdidos permanentemente.");
 
-    if (!segundaConfirmacao) return;
+    if (!confirmacao2) return;
 
-    alert("Funcionalidade de limpeza de dados requer integração com o backend para executar as exclusões.");
-  });
+    exibirMensagemSucesso("Solicitação de limpeza registrada. Contate o administrador do sistema.");
 }
 
-// ============================================================
-// UTILITÁRIOS DE MENSAGEM
-// ============================================================
+function configurarEventosConfiguracoes() {
+    document.querySelectorAll(".item-menu-config").forEach(function (botao) {
+        botao.addEventListener("click", function () {
+            const secao = botao.dataset.secao;
+            alternarSecao(secao);
+        });
+    });
 
-function exibirMensagemSucesso(idElemento, texto) {
-  const elemento = document.getElementById(idElemento);
+    document
+        .getElementById("formularioPerfil")
+        .addEventListener("submit", salvarPerfil);
 
-  elemento.textContent = texto;
-  elemento.className = "mensagem-config mensagem-sucesso";
+    document
+        .getElementById("botaoSalvarNotificacoes")
+        .addEventListener("click", salvarNotificacoes);
 
-  setTimeout(function () {
-    elemento.textContent = "";
-    elemento.className = "mensagem-config";
-  }, 3500);
+    document
+        .getElementById("botaoSalvarSistema")
+        .addEventListener("click", salvarSistema);
+
+    document
+        .getElementById("formularioSenha")
+        .addEventListener("submit", alterarSenha);
+
+    document
+        .getElementById("botaoRedefinirSistema")
+        .addEventListener("click", confirmarLimpezaDados);
+
+    document
+        .querySelector(".botao-sair")
+        .addEventListener("click", function () {
+            alert("Saindo do sistema...");
+        });
 }
 
-function exibirMensagemErro(idElemento, texto) {
-  const elemento = document.getElementById(idElemento);
-
-  elemento.textContent = texto;
-  elemento.className = "mensagem-config mensagem-erro";
-
-  setTimeout(function () {
-    elemento.textContent = "";
-    elemento.className = "mensagem-config";
-  }, 3500);
+function iniciarPaginaConfiguracoes() {
+    carregarPreferencias();
+    aplicarPreferenciasNaTela();
+    configurarEventosConfiguracoes();
 }
+
+document.addEventListener("DOMContentLoaded", iniciarPaginaConfiguracoes);

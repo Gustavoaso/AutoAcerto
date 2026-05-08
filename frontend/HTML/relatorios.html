@@ -9,38 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    .item-menu {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .item-menu svg {
-      flex-shrink: 0;
-      opacity: 0.75;
-    }
-
-    .item-menu.ativo svg {
-      opacity: 1;
-    }
-
-    .item-menu:hover svg {
-      opacity: 1;
-    }
-
-    .icone-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: none;
-    }
-  </style>
 </head>
 
 <body>
   <div class="layout-principal">
-
     <aside class="barra-lateral">
       <div class="icone-logo">
         <img src="/frontend/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
@@ -130,9 +102,10 @@
       <section class="cabecalho-conteudo">
         <div>
           <h2 class="titulo-pagina">Relatórios</h2>
-          <p class="subtitulo-pagina">Análise financeira e operacional das viagens e despesas.</p>
+          <p class="subtitulo-pagina">Analise receitas, despesas e desempenho das viagens por período.</p>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
+
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <button class="botao-exportar" id="botaoExportarCSV">
             <svg viewBox="0 0 24 24">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -150,180 +123,113 @@
           <button class="botao-periodo" data-periodo="7">7 dias</button>
           <button class="botao-periodo ativo" data-periodo="30">30 dias</button>
           <button class="botao-periodo" data-periodo="90">90 dias</button>
-          <button class="botao-periodo" data-periodo="365">1 ano</button>
+          <button class="botao-periodo" data-periodo="365">12 meses</button>
           <button class="botao-periodo" data-periodo="0">Tudo</button>
         </div>
 
-        <div style="display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap;">
-          <div class="grupo-campo">
-            <label class="rotulo-campo">De</label>
-            <input type="date" id="filtroDataInicio" class="campo-formulario" style="width: 160px;" />
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <div class="campo-filtro">
+            <label for="filtroMotoristaRelatorio">Motorista</label>
+            <select id="filtroMotoristaRelatorio">
+              <option value="todos">Todos</option>
+            </select>
           </div>
-          <div class="grupo-campo">
-            <label class="rotulo-campo">Até</label>
-            <input type="date" id="filtroDataFim" class="campo-formulario" style="width: 160px;" />
+
+          <div class="campo-filtro">
+            <label for="filtroStatusRelatorio">Status da viagem</label>
+            <select id="filtroStatusRelatorio">
+              <option value="todos">Todos</option>
+              <option value="em andamento">Em andamento</option>
+              <option value="finalizada">Finalizada</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
           </div>
-          <button class="botao-primario" id="botaoAplicarFiltro">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-            </svg>
-            Filtrar
-          </button>
         </div>
       </div>
 
       <!-- Cards de métricas -->
       <div class="grade-metricas">
-        <div class="card-metrica">
-          <div class="topo-card-metrica">
-            <span class="rotulo-metrica">Receita Total</span>
-            <span class="icone-metrica icone-verde">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="1" x2="12" y2="23" />
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-            </span>
-          </div>
-          <div class="valor-metrica" id="metricaReceita">R$ 0,00</div>
-          <div class="variacao-metrica" id="variacaoReceita">—</div>
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Receita total</span>
+          <strong class="valor-resumo valor-monetario" id="metricaReceita">R$ 0,00</strong>
         </div>
 
-        <div class="card-metrica">
-          <div class="topo-card-metrica">
-            <span class="rotulo-metrica">Total Despesas</span>
-            <span class="icone-metrica icone-vermelho">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-            </span>
-          </div>
-          <div class="valor-metrica" id="metricaDespesas">R$ 0,00</div>
-          <div class="variacao-metrica" id="variacaoDespesas">—</div>
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Total de despesas</span>
+          <strong class="valor-resumo valor-monetario" id="metricaDespesas">R$ 0,00</strong>
         </div>
 
-        <div class="card-metrica">
-          <div class="topo-card-metrica">
-            <span class="rotulo-metrica">Lucro Líquido</span>
-            <span class="icone-metrica icone-azul">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-                <polyline points="16 7 22 7 22 13" />
-              </svg>
-            </span>
-          </div>
-          <div class="valor-metrica" id="metricaLucro">R$ 0,00</div>
-          <div class="variacao-metrica" id="variacaoLucro">—</div>
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Lucro líquido</span>
+          <strong class="valor-resumo valor-monetario" id="metricaLucro">R$ 0,00</strong>
         </div>
 
-        <div class="card-metrica">
-          <div class="topo-card-metrica">
-            <span class="rotulo-metrica">Viagens Realizadas</span>
-            <span class="icone-metrica icone-roxo">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-            </span>
-          </div>
-          <div class="valor-metrica" id="metricaViagens">0</div>
-          <div class="variacao-metrica" id="variacaoViagens">—</div>
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Viagens no período</span>
+          <strong class="valor-resumo" id="metricaViagens">0</strong>
         </div>
       </div>
 
-      <!-- Grade de painéis -->
-      <div class="grade-informacoes">
-
-        <!-- Despesas por categoria -->
-        <div class="painel painel-grande">
-          <div class="cabecalho-painel">
-            <h3>Despesas por Categoria</h3>
-          </div>
-          <div id="tabelaCategorias">
-            <table class="tabela tabela-relatorio">
-              <thead>
-                <tr>
-                  <th>Categoria</th>
-                  <th>Qtd</th>
-                  <th>Total</th>
-                  <th>% do Total</th>
-                </tr>
-              </thead>
-              <tbody id="corpoTabelaCategorias">
-                <tr>
-                  <td colspan="4" style="text-align: center; padding: 32px; color: var(--cor-texto-fraco);">
-                    Carregando...
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td>Total geral</td>
-                  <td id="totalQtdCategorias">—</td>
-                  <td id="totalValorCategorias">—</td>
-                  <td>100%</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-
-        <!-- Resumo por motorista -->
-        <div class="painel painel-pequeno">
-          <div class="cabecalho-painel">
-            <h3>Top Motoristas</h3>
-          </div>
-          <div id="listaTopMotoristas"></div>
-        </div>
-
-      </div>
-
-      <!-- Tabela de viagens no período -->
-      <div class="painel" style="margin-top: 20px;">
+      <!-- Tabela de viagens com resultado financeiro -->
+      <section class="painel">
         <div class="cabecalho-painel">
-          <h3>Viagens no Período</h3>
-          <span class="contagem-painel" id="contagemViagens">0 viagens</span>
+          <div>
+            <h3>Resultado por Viagem</h3>
+            <p class="texto-auxiliar">Frete recebido, despesas lançadas e lucro de cada viagem no período.</p>
+          </div>
         </div>
-        <div class="container-tabela">
-          <table class="tabela tabela-relatorio">
+
+        <div class="tabela-responsiva">
+          <table class="tabela-relatorio">
             <thead>
               <tr>
                 <th>Rota</th>
                 <th>Motorista</th>
                 <th>Veículo</th>
-                <th>Data Saída</th>
-                <th>Data Chegada</th>
+                <th>Data saída</th>
                 <th>Frete</th>
                 <th>Despesas</th>
-                <th>Resultado</th>
+                <th>Lucro</th>
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody id="corpoTabelaRelatorio">
-              <tr>
-                <td colspan="9" style="text-align: center; padding: 40px; color: var(--cor-texto-fraco);">
-                  Carregando dados...
-                </td>
-              </tr>
-            </tbody>
+            <tbody id="corpoTabelaRelatorio"></tbody>
             <tfoot>
               <tr>
-                <td colspan="5">Totais do período</td>
-                <td id="totalFrete">—</td>
-                <td id="totalDespesasTabela">—</td>
-                <td id="totalResultado">—</td>
+                <td colspan="4">Total geral</td>
+                <td id="rodapeReceita">R$ 0,00</td>
+                <td id="rodapeDespesas">R$ 0,00</td>
+                <td id="rodapeLucro">R$ 0,00</td>
                 <td></td>
               </tr>
             </tfoot>
           </table>
         </div>
-      </div>
+      </section>
 
+      <!-- Tabela de despesas por categoria -->
+      <section class="painel" style="margin-top: 20px;">
+        <div class="cabecalho-painel">
+          <div>
+            <h3>Despesas por Categoria</h3>
+            <p class="texto-auxiliar">Totais agrupados por tipo de despesa no período selecionado.</p>
+          </div>
+        </div>
+
+        <div class="tabela-responsiva">
+          <table class="tabela-relatorio">
+            <thead>
+              <tr>
+                <th>Categoria</th>
+                <th>Quantidade</th>
+                <th>Valor total</th>
+                <th>% do total</th>
+              </tr>
+            </thead>
+            <tbody id="corpoTabelaCategorias"></tbody>
+          </table>
+        </div>
+      </section>
     </main>
   </div>
 
