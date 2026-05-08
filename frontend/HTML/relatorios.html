@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Relatórios</title>
+  <link rel="stylesheet" href="/frontend/CSS/relatorios.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .item-menu {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .item-menu svg {
+      flex-shrink: 0;
+      opacity: 0.75;
+    }
+
+    .item-menu.ativo svg {
+      opacity: 1;
+    }
+
+    .item-menu:hover svg {
+      opacity: 1;
+    }
+
+    .icone-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout-principal">
+
+    <aside class="barra-lateral">
+      <div class="icone-logo">
+        <img src="/frontend/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+      </div>
+
+      <nav class="menu-lateral">
+        <a href="home.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          Dashboard
+        </a>
+        <a href="motoristas.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          Motoristas
+        </a>
+        <a href="veiculos.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="1" />
+            <path d="M16 8h4l3 5v3h-7V8z" />
+            <circle cx="5.5" cy="18.5" r="2.5" />
+            <circle cx="18.5" cy="18.5" r="2.5" />
+          </svg>
+          Veículos
+        </a>
+        <a href="viagens.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          Viagens
+        </a>
+        <a href="despesas.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          Despesas
+        </a>
+        <a href="relatorios.html" class="item-menu ativo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
+          Relatórios
+        </a>
+        <a href="configuracoes.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          Configurações
+        </a>
+      </nav>
+
+      <div class="rodape-barra">
+        <button class="botao-sair">Sair</button>
+      </div>
+    </aside>
+
+    <main class="conteudo-principal">
+      <header class="topo-pagina">
+        <div class="acoes-topo">
+          <button class="botao-icone">🔔</button>
+          <div class="perfil-usuario">
+            <div class="avatar-usuario">GS</div>
+            <span class="nome-usuario">Gustavo</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="cabecalho-conteudo">
+        <div>
+          <h2 class="titulo-pagina">Relatórios</h2>
+          <p class="subtitulo-pagina">Análise financeira e operacional das viagens e despesas.</p>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="botao-exportar" id="botaoExportarCSV">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Exportar CSV
+          </button>
+        </div>
+      </section>
+
+      <!-- Filtros de período -->
+      <div class="barra-filtros-relatorio">
+        <div class="filtro-periodo">
+          <button class="botao-periodo" data-periodo="7">7 dias</button>
+          <button class="botao-periodo ativo" data-periodo="30">30 dias</button>
+          <button class="botao-periodo" data-periodo="90">90 dias</button>
+          <button class="botao-periodo" data-periodo="365">1 ano</button>
+          <button class="botao-periodo" data-periodo="0">Tudo</button>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap;">
+          <div class="grupo-campo">
+            <label class="rotulo-campo">De</label>
+            <input type="date" id="filtroDataInicio" class="campo-formulario" style="width: 160px;" />
+          </div>
+          <div class="grupo-campo">
+            <label class="rotulo-campo">Até</label>
+            <input type="date" id="filtroDataFim" class="campo-formulario" style="width: 160px;" />
+          </div>
+          <button class="botao-primario" id="botaoAplicarFiltro">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            </svg>
+            Filtrar
+          </button>
+        </div>
+      </div>
+
+      <!-- Cards de métricas -->
+      <div class="grade-metricas">
+        <div class="card-metrica">
+          <div class="topo-card-metrica">
+            <span class="rotulo-metrica">Receita Total</span>
+            <span class="icone-metrica icone-verde">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            </span>
+          </div>
+          <div class="valor-metrica" id="metricaReceita">R$ 0,00</div>
+          <div class="variacao-metrica" id="variacaoReceita">—</div>
+        </div>
+
+        <div class="card-metrica">
+          <div class="topo-card-metrica">
+            <span class="rotulo-metrica">Total Despesas</span>
+            <span class="icone-metrica icone-vermelho">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
+            </span>
+          </div>
+          <div class="valor-metrica" id="metricaDespesas">R$ 0,00</div>
+          <div class="variacao-metrica" id="variacaoDespesas">—</div>
+        </div>
+
+        <div class="card-metrica">
+          <div class="topo-card-metrica">
+            <span class="rotulo-metrica">Lucro Líquido</span>
+            <span class="icone-metrica icone-azul">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                <polyline points="16 7 22 7 22 13" />
+              </svg>
+            </span>
+          </div>
+          <div class="valor-metrica" id="metricaLucro">R$ 0,00</div>
+          <div class="variacao-metrica" id="variacaoLucro">—</div>
+        </div>
+
+        <div class="card-metrica">
+          <div class="topo-card-metrica">
+            <span class="rotulo-metrica">Viagens Realizadas</span>
+            <span class="icone-metrica icone-roxo">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </span>
+          </div>
+          <div class="valor-metrica" id="metricaViagens">0</div>
+          <div class="variacao-metrica" id="variacaoViagens">—</div>
+        </div>
+      </div>
+
+      <!-- Grade de painéis -->
+      <div class="grade-informacoes">
+
+        <!-- Despesas por categoria -->
+        <div class="painel painel-grande">
+          <div class="cabecalho-painel">
+            <h3>Despesas por Categoria</h3>
+          </div>
+          <div id="tabelaCategorias">
+            <table class="tabela tabela-relatorio">
+              <thead>
+                <tr>
+                  <th>Categoria</th>
+                  <th>Qtd</th>
+                  <th>Total</th>
+                  <th>% do Total</th>
+                </tr>
+              </thead>
+              <tbody id="corpoTabelaCategorias">
+                <tr>
+                  <td colspan="4" style="text-align: center; padding: 32px; color: var(--cor-texto-fraco);">
+                    Carregando...
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td>Total geral</td>
+                  <td id="totalQtdCategorias">—</td>
+                  <td id="totalValorCategorias">—</td>
+                  <td>100%</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Resumo por motorista -->
+        <div class="painel painel-pequeno">
+          <div class="cabecalho-painel">
+            <h3>Top Motoristas</h3>
+          </div>
+          <div id="listaTopMotoristas"></div>
+        </div>
+
+      </div>
+
+      <!-- Tabela de viagens no período -->
+      <div class="painel" style="margin-top: 20px;">
+        <div class="cabecalho-painel">
+          <h3>Viagens no Período</h3>
+          <span class="contagem-painel" id="contagemViagens">0 viagens</span>
+        </div>
+        <div class="container-tabela">
+          <table class="tabela tabela-relatorio">
+            <thead>
+              <tr>
+                <th>Rota</th>
+                <th>Motorista</th>
+                <th>Veículo</th>
+                <th>Data Saída</th>
+                <th>Data Chegada</th>
+                <th>Frete</th>
+                <th>Despesas</th>
+                <th>Resultado</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="corpoTabelaRelatorio">
+              <tr>
+                <td colspan="9" style="text-align: center; padding: 40px; color: var(--cor-texto-fraco);">
+                  Carregando dados...
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="5">Totais do período</td>
+                <td id="totalFrete">—</td>
+                <td id="totalDespesasTabela">—</td>
+                <td id="totalResultado">—</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/frontend/JavaScript/relatorios.js"></script>
+</body>
+
+</html>

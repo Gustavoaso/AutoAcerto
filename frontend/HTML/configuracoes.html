@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Configurações</title>
+  <link rel="stylesheet" href="/frontend/CSS/configuracoes.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .item-menu {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .item-menu svg {
+      flex-shrink: 0;
+      opacity: 0.75;
+    }
+
+    .item-menu.ativo svg {
+      opacity: 1;
+    }
+
+    .item-menu:hover svg {
+      opacity: 1;
+    }
+
+    .icone-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout-principal">
+
+    <aside class="barra-lateral">
+      <div class="icone-logo">
+        <img src="/frontend/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+      </div>
+
+      <nav class="menu-lateral">
+        <a href="home.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          Dashboard
+        </a>
+        <a href="motoristas.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          Motoristas
+        </a>
+        <a href="veiculos.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="1" />
+            <path d="M16 8h4l3 5v3h-7V8z" />
+            <circle cx="5.5" cy="18.5" r="2.5" />
+            <circle cx="18.5" cy="18.5" r="2.5" />
+          </svg>
+          Veículos
+        </a>
+        <a href="viagens.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          Viagens
+        </a>
+        <a href="despesas.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          Despesas
+        </a>
+        <a href="relatorios.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
+          Relatórios
+        </a>
+        <a href="configuracoes.html" class="item-menu ativo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          Configurações
+        </a>
+      </nav>
+
+      <div class="rodape-barra">
+        <button class="botao-sair">Sair</button>
+      </div>
+    </aside>
+
+    <main class="conteudo-principal">
+      <header class="topo-pagina">
+        <div class="acoes-topo">
+          <button class="botao-icone">🔔</button>
+          <div class="perfil-usuario">
+            <div class="avatar-usuario">GS</div>
+            <span class="nome-usuario">Gustavo</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="cabecalho-conteudo">
+        <div>
+          <h2 class="titulo-pagina">Configurações</h2>
+          <p class="subtitulo-pagina">Gerencie as preferências e dados da sua conta.</p>
+        </div>
+      </section>
+
+      <div class="grade-configuracoes">
+
+        <!-- Menu lateral de seções -->
+        <nav class="menu-configuracoes">
+          <button class="item-menu-config ativo" data-secao="perfil">
+            <svg viewBox="0 0 24 24">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            Perfil
+          </button>
+          <button class="item-menu-config" data-secao="empresa">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Empresa
+          </button>
+          <button class="item-menu-config" data-secao="notificacoes">
+            <svg viewBox="0 0 24 24">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            Notificações
+          </button>
+          <button class="item-menu-config" data-secao="seguranca">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            Segurança
+          </button>
+          <button class="item-menu-config" data-secao="sistema">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            Sistema
+          </button>
+          <button class="item-menu-config" data-secao="perigo">
+            <svg viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              <path d="M10 11v6" />
+              <path d="M14 11v6" />
+              <path d="M9 6V4h6v2" />
+            </svg>
+            Zona de Perigo
+          </button>
+        </nav>
+
+        <!-- Painel de conteúdo das seções -->
+        <div class="secoes-config">
+
+          <!-- Seção: Perfil -->
+          <div class="painel secao-config" id="secao-perfil">
+            <p class="titulo-secao-config">Dados do Perfil</p>
+
+            <div class="grade-formulario-config">
+              <div class="grupo-campo">
+                <label class="rotulo-campo" for="configNome">Nome completo</label>
+                <input type="text" id="configNome" class="campo-formulario" placeholder="Seu nome" />
+              </div>
+              <div class="grupo-campo">
+                <label class="rotulo-campo" for="configEmail">E-mail</label>
+                <input type="email" id="configEmail" class="campo-formulario" placeholder="seu@email.com" />
+              </div>
+              <div class="grupo-campo">
+                <label class="rotulo-campo" for="configTelefone">Telefone</label>
+                <input type="text" id="configTelefone" class="campo-formulario" placeholder="(00) 00000-0000" />
+              </div>
+              <div class="grupo-campo">
+                <label class="rotulo-campo" for="configCargo">Cargo</label>
+                <input type="text" id="configCargo" class="campo-formulario" placeholder="Ex: Gerente de Frotas" />
+              </div>
+            </div>
+
+            <div class="rodape-secao-config">
+              <button class="botao-primario" id="botaoSalvarPerfil">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+                Salvar alterações
+              </button>
+              <span class="mensagem-config" id="mensagemPerfil"></span>
+            </div>
+          </div>
+
+          <!-- Seção: Empresa -->
+          <div class="painel secao-config" id="secao-empresa" style="display: none;">
+            <p class="titulo-secao-config">Dados da Empresa</p>
+
+            <div class="grade-formulario-config">
+              <div class="grupo-campo">
+                <label class="rotulo-campo" for="configNomeEmpresa">Nome da empresa</label>
+                <input type="text" id="configNomeEmpresa" class="campo-formulario" placeholder="Nome da transportadora" />
+              </div>
+              <div class="grupo-campo">
+                <label class="rotulo-campo" for="configCnpj">CNPJ</label>
+                <input type="text" id="configCnpj" class="campo-formulario" placeholder="00.000.000/0000-00" />
+              </div>
+              <div class="grupo-campo" style="grid-column: 1 / -1;">
+                <label class="rotulo-campo" for="configEndereco">Endereço</label>
+                <input type="text" id="configEndereco" class="campo-formulario" placeholder="Rua, número, bairro, cidade - UF" />
+              </div>
+              <div class="grupo-campo">
+                <label class="rotulo-campo" for="configTelefoneEmpresa">Telefone comercial</label>
+                <input type="text" id="configTelefoneEmpresa" class="campo-formulario" placeholder="(00) 0000-0000" />
+              </div>
+              <div class="grupo-campo">
+                <label class="rotulo-campo" for="configEmailEmpresa">E-mail comercial</label>
+                <input type="email" id="configEmailEmpresa" class="campo-formulario" placeholder="contato@empresa.com" />
+              </div>
+            </div>
+
+            <div class="rodape-secao-config">
+              <button class="botao-primario" id="botaoSalvarEmpresa">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+                Salvar alterações
+              </button>
+              <span class="mensagem-config" id="mensagemEmpresa"></span>
+            </div>
+          </div>
+
+          <!-- Seção: Notificações -->
+          <div class="painel secao-config" id="secao-notificacoes" style="display: none;">
+            <p class="titulo-secao-config">Preferências de Notificação</p>
+
+            <div class="secao-config">
+              <div class="linha-config">
+                <div class="info-config">
+                  <span class="titulo-config">Viagem finalizada</span>
+                  <span class="descricao-config">Receber alerta quando uma viagem for marcada como finalizada.</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="notifViagemFinalizada" checked />
+                  <span class="slider-toggle"></span>
+                </label>
+              </div>
+
+              <div class="linha-config">
+                <div class="info-config">
+                  <span class="titulo-config">Nova despesa lançada</span>
+                  <span class="descricao-config">Receber alerta quando uma nova despesa for cadastrada.</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="notifNovaDespesa" />
+                  <span class="slider-toggle"></span>
+                </label>
+              </div>
+
+              <div class="linha-config">
+                <div class="info-config">
+                  <span class="titulo-config">CNH próxima do vencimento</span>
+                  <span class="descricao-config">Receber alerta quando a CNH de um motorista estiver próxima de vencer.</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="notifCnh" checked />
+                  <span class="slider-toggle"></span>
+                </label>
+              </div>
+
+              <div class="linha-config">
+                <div class="info-config">
+                  <span class="titulo-config">Resumo semanal</span>
+                  <span class="descricao-config">Receber um resumo financeiro toda segunda-feira.</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="notifResumoSemanal" checked />
+                  <span class="slider-toggle"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="rodape-secao-config">
+              <button class="botao-primario" id="botaoSalvarNotificacoes">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+                Salvar preferências
+              </button>
+              <span class="mensagem-config" id="mensagemNotificacoes"></span>
+            </div>
+          </div>
+
+          <!-- Seção: Segurança -->
+          <div class="painel secao-config" id="secao-seguranca" style="display: none;">
+            <p class="titulo-secao-config">Segurança da Conta</p>
+
+            <div class="grade-formulario-config">
+              <div class="grupo-campo" style="grid-column: 1 / -1;">
+                <label class="rotulo-campo" for="senhaAtual">Senha atual</label>
+                <input type="password" id="senhaAtual" class="campo-formulario" placeholder="Digite sua senha atual" />
+              </div>
+              <div class="grupo-campo">
+                <label class="rotulo-campo" for="novaSenha">Nova senha</label>
+                <input type="password" id="novaSenha" class="campo-formulario" placeholder="Mínimo 8 caracteres" />
+              </div>
+              <div class="grupo-campo">
+                <label class="rotulo-campo" for="confirmarSenha">Confirmar nova senha</label>
+                <input type="password" id="confirmarSenha" class="campo-formulario" placeholder="Repita a nova senha" />
+              </div>
+            </div>
+
+            <div class="rodape-secao-config">
+              <button class="botao-primario" id="botaoAlterarSenha">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                Alterar senha
+              </button>
+              <span class="mensagem-config" id="mensagemSeguranca"></span>
+            </div>
+          </div>
+
+          <!-- Seção: Sistema -->
+          <div class="painel secao-config" id="secao-sistema" style="display: none;">
+            <p class="titulo-secao-config">Preferências do Sistema</p>
+
+            <div class="secao-config">
+              <div class="linha-config">
+                <div class="info-config">
+                  <span class="titulo-config">Moeda padrão</span>
+                  <span class="descricao-config">Formato de exibição de valores monetários.</span>
+                </div>
+                <select class="campo-formulario" id="configMoeda" style="width: 140px;">
+                  <option value="BRL" selected>R$ — Real</option>
+                  <option value="USD">$ — Dólar</option>
+                  <option value="EUR">€ — Euro</option>
+                </select>
+              </div>
+
+              <div class="linha-config">
+                <div class="info-config">
+                  <span class="titulo-config">Formato de data</span>
+                  <span class="descricao-config">Padrão de exibição das datas no sistema.</span>
+                </div>
+                <select class="campo-formulario" id="configFormataData" style="width: 180px;">
+                  <option value="dd/mm/aaaa" selected>DD/MM/AAAA</option>
+                  <option value="mm/dd/aaaa">MM/DD/AAAA</option>
+                  <option value="aaaa-mm-dd">AAAA-MM-DD</option>
+                </select>
+              </div>
+
+              <div class="linha-config">
+                <div class="info-config">
+                  <span class="titulo-config">Itens por página</span>
+                  <span class="descricao-config">Quantidade de registros exibidos nas listagens.</span>
+                </div>
+                <select class="campo-formulario" id="configItensPagina" style="width: 100px;">
+                  <option value="10">10</option>
+                  <option value="25" selected>25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </div>
+
+              <div class="linha-config">
+                <div class="info-config">
+                  <span class="titulo-config">Modo compacto</span>
+                  <span class="descricao-config">Reduz o espaçamento das tabelas para exibir mais dados.</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="modoCompacto" />
+                  <span class="slider-toggle"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="rodape-secao-config">
+              <button class="botao-primario" id="botaoSalvarSistema">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+                Salvar preferências
+              </button>
+              <span class="mensagem-config" id="mensagemSistema"></span>
+            </div>
+          </div>
+
+          <!-- Seção: Zona de Perigo -->
+          <div class="painel secao-config" id="secao-perigo" style="display: none;">
+            <p class="titulo-secao-config">Zona de Perigo</p>
+
+            <div class="zona-perigo">
+              <div class="titulo-zona-perigo">Limpar todos os dados</div>
+              <p class="descricao-zona-perigo">
+                Esta ação irá remover permanentemente todos os registros de motoristas, veículos, viagens e despesas do sistema.
+                Esta operação não pode ser desfeita.
+              </p>
+              <button class="botao-perigo" id="botaoLimparDados">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                </svg>
+                Limpar todos os dados
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/frontend/JavaScript/configuracoes.js"></script>
+</body>
+
+</html>
