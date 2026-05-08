@@ -93,11 +93,10 @@ body {
   font-size: 0.9375rem;
   line-height: 1.6;
   color: var(--cor-texto);
-  min-height: 100vh;
   background:
     radial-gradient(ellipse at 18% 12%, rgba(29, 88, 232, 0.38) 0%, transparent 38%),
     linear-gradient(150deg, #071428 0%, #0b1d35 45%, #061120 100%);
-  padding: 14px;
+    
 }
 
 img, picture, video, canvas, svg {
@@ -121,14 +120,10 @@ button {
 ------------------------------------------------------- */
 .layout-principal {
   display: flex;
-  min-height: calc(100vh - 28px);
-  max-width: 1500px;
+  min-height: 100vh;
+  max-width: 100%;
   margin: 0 auto;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
-  background: var(--cor-fundo);
+
 }
 
 /* -------------------------------------------------------
@@ -146,37 +141,16 @@ button {
   border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.logo-sistema {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 32px;
-  padding: 0 4px;
-}
-
 .icone-logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(59, 130, 246, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
-
-.icone-logo svg {
-  width: 18px;
-  height: 18px;
-  color: #60a5fa;
-  stroke: #60a5fa;
-}
-
-.titulo-logo {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--sidebar-texto-logo);
-  letter-spacing: -0.01em;
+.imagem-logo {
+  width: 200px;
+  height: auto;
+  display: block;
+  padding-bottom: 10px;
 }
 
 .menu-lateral {
