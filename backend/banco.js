@@ -20,10 +20,7 @@ async function criarTabelas() {
       cpf VARCHAR(14) NOT NULL UNIQUE,
       telefone VARCHAR(15) NOT NULL,
       cnh VARCHAR(50) NOT NULL,
-      validade_cnh DATE NOT NULL,
       status VARCHAR(20) NOT NULL,
-      endereco TEXT,
-      observacoes TEXT,
       data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -35,7 +32,6 @@ async function criarTabelas() {
       placa VARCHAR(10) NOT NULL UNIQUE,
       proprietario VARCHAR(255) NOT NULL,
       status VARCHAR(20) NOT NULL,
-      observacoes TEXT,
       data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -64,7 +60,6 @@ async function criarTabelas() {
       categoria VARCHAR(30) NOT NULL,
       data_despesa DATE NOT NULL,
       valor NUMERIC(10,2) NOT NULL,
-      observacoes TEXT,
       data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);

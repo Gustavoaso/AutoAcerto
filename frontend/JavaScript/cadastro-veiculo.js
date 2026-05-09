@@ -16,7 +16,6 @@ botaoSalvar.addEventListener("click", async function () {
   const placa = document.getElementById("placa").value.trim();
   const proprietario = document.getElementById("proprietario").value.trim();
   const status = document.getElementById("status").value.trim();
-  const observacoes = document.getElementById("observacoes").value.trim();
 
   if (!modelo || !placa || !proprietario || !status) {
     const camposPendentes = [];
@@ -29,14 +28,19 @@ botaoSalvar.addEventListener("click", async function () {
     return;
   }
 
-  const dados = { modelo, placa, proprietario, status, observacoes };
+  const dados = { modelo, placa, proprietario, status };
 
   console.log("Dados enviados:", dados);
+
+  const token = localStorage.getItem("token");
 
   try {
     const response = await fetch(urlApi, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify(dados)
     });
 
@@ -65,7 +69,6 @@ botaoLimpar.addEventListener("click", function () {
   document.getElementById("placa").value = "";
   document.getElementById("proprietario").value = "";
   document.getElementById("status").value = "";
-  document.getElementById("observacoes").value = "";
   mensagemRetorno.className = "mensagem-retorno";
 });
 

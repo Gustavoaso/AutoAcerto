@@ -13,19 +13,19 @@ botaoSalvar.addEventListener("click", async function (e) {
         cpf: document.getElementById("cpf").value,
         telefone: document.getElementById("telefone").value,
         cnh: document.getElementById("cnh").value,
-        validadeCnh: document.getElementById("validadeCnh").value,
-        status: document.getElementById("status").value,
-        endereco: document.getElementById("endereco").value,
-        observacoes: document.getElementById("observacoes").value
+        status: document.getElementById("status").value
     };
 
     console.log("Dados enviados:", dados);
+
+    const token = localStorage.getItem("token");
 
     try {
         const response = await fetch(urlApi, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify(dados)
         });

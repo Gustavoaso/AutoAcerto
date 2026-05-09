@@ -8,16 +8,6 @@ let veiculos = [];
 let viagens = [];
 let despesas = [];
 
-async function buscarDados(urlApi) {
-  const response = await fetch(urlApi);
-
-  if (!response.ok) {
-    throw new Error("Erro ao buscar dados da API.");
-  }
-
-  return response.json();
-}
-
 async function carregarDadosDashboard() {
   try {
     const respostas = await Promise.all([
@@ -158,7 +148,7 @@ function carregarViagensEmAndamento() {
         <div class="rota-viagem">${viagem.origem} -> ${viagem.destino}</div>
         <div class="nome-motorista">${viagem.motorista_nome || "-"}</div>
       </div>
-      <div>ðŸš›</div>
+      <div>🚛</div>
     `;
 
     listaViagens.appendChild(itemViagem);

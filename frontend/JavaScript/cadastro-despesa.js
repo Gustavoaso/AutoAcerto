@@ -7,8 +7,14 @@ const modal = document.getElementById("modalSucesso");
 const botaoOk = document.getElementById("botaoOkModal");
 
 async function carregarViagens() {
+    const token = localStorage.getItem("token");
+    
     try {
-        const response = await fetch(urlApiViagens);
+        const response = await fetch(urlApiViagens, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
 
         if (!response.ok) return;
 
@@ -34,15 +40,17 @@ botaoSalvar.addEventListener("click", async function (e) {
         descricao: document.getElementById("descricao").value,
         categoria: document.getElementById("categoria").value,
         dataDespesa: document.getElementById("dataDespesa").value,
-        valor: document.getElementById("valor").value,
-        observacoes: document.getElementById("observacoes").value
+        valor: document.getElementById("valor").value
     };
+
+    const token = localStorage.getItem("token");
 
     try {
         const response = await fetch(urlApiDespesas, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify(dados)
         });
@@ -71,7 +79,6 @@ botaoLimpar.addEventListener("click", function () {
     document.getElementById("categoria").value = "";
     document.getElementById("dataDespesa").value = "";
     document.getElementById("valor").value = "";
-    document.getElementById("observacoes").value = "";
 });
 
 document.querySelector(".botao-sair").addEventListener("click", function () {

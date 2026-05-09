@@ -15,12 +15,14 @@ function redirecionarPorPerfil(perfil) {
 
 function verificarSessaoExistente() {
     try {
-        const sessao = JSON.parse(sessionStorage.getItem("sessaoAutoAcerto"));
-        if (sessao && sessao.token && sessao.usuario) {
-            redirecionarPorPerfil(sessao.usuario.perfil);
+        const token = localStorage.getItem("token");
+        const usuario = JSON.parse(localStorage.getItem("usuario"));
+        if (token && usuario) {
+            redirecionarPorPerfil(usuario.perfil);
         }
     } catch {
-        sessionStorage.removeItem("sessaoAutoAcerto");
+        localStorage.removeItem("token");
+        localStorage.removeItem("usuario");
     }
 }
 
@@ -110,10 +112,8 @@ function configurarFormulario() {
                 return;
             }
 
-            sessionStorage.setItem("sessaoAutoAcerto", JSON.stringify({
-                token: dados.token,
-                usuario: dados.usuario
-            }));
+            localStorage.setItem("token", dados.token);
+            localStorage.setItem("usuario", JSON.stringify(dados.usuario));
 
             redirecionarPorPerfil(dados.usuario.perfil);
 

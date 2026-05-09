@@ -232,18 +232,18 @@ app.patch("/usuarios/senha", autenticar, async (requisicao, resposta) => {
 // ============================================================
 
 app.post("/motoristas", autenticar, async (requisicao, resposta) => {
-  const { nome, cpf, telefone, cnh, validadeCnh, status, endereco, observacoes } = requisicao.body;
+  const { nome, cpf, telefone, cnh, status } = requisicao.body;
 
-  if (!nome || !cpf || !telefone || !cnh || !validadeCnh || !status) {
+  if (!nome || !cpf || !telefone || !cnh || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   const sql = `
-    INSERT INTO motoristas (nome, cpf, telefone, cnh, validade_cnh, status, endereco, observacoes)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    INSERT INTO motoristas (nome, cpf, telefone, cnh, status)
+    VALUES ($1, $2, $3, $4, $5)
     RETURNING id
   `;
-  const valores = [nome, cpf, telefone, cnh, validadeCnh, status, endereco || "", observacoes || ""];
+  const valores = [nome, cpf, telefone, cnh, status];
 
   try {
     const resultado = await banco.query(sql, valores);
@@ -283,20 +283,19 @@ app.get("/motoristas/:id", autenticar, async (requisicao, resposta) => {
 
 app.put("/motoristas/:id", autenticar, async (requisicao, resposta) => {
   const { id } = requisicao.params;
-  const { nome, cpf, telefone, cnh, validadeCnh, status, endereco, observacoes } = requisicao.body;
+  const { nome, cpf, telefone, cnh, status } = requisicao.body;
 
-  if (!nome || !cpf || !telefone || !cnh || !validadeCnh || !status) {
+  if (!nome || !cpf || !telefone || !cnh || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   const sql = `
     UPDATE motoristas SET
-      nome=$1, cpf=$2, telefone=$3, cnh=$4,
-      validade_cnh=$5, status=$6, endereco=$7, observacoes=$8
-    WHERE id=$9
+      nome=$1, cpf=$2, telefone=$3, cnh=$4, status=$5
+    WHERE id=$6
     RETURNING *
   `;
-  const valores = [nome, cpf, telefone, cnh, validadeCnh, status, endereco || "", observacoes || "", id];
+  const valores = [nome, cpf, telefone, cnh, status, id];
 
   try {
     const resultado = await banco.query(sql, valores);
@@ -318,13 +317,12 @@ app.put("/motoristas/:id", autenticar, async (requisicao, resposta) => {
 // ============================================================
 
 app.post("/veiculos", autenticar, async (req, res) => {
-  const { modelo, placa, proprietario, status, observacoes } = req.body;
+  const { modelo, placa, proprietario, status } = req.body;
 
   const modeloTratado       = (modelo || "").trim();
   const placaTratada        = (placa || "").trim().toUpperCase();
   const proprietarioTratado = (proprietario || "").trim();
   const statusTratado       = (status || "").trim();
-  const observacoesTratadas = (observacoes || "").trim();
 
   if (!modeloTratado || !placaTratada || !proprietarioTratado || !statusTratado) {
     const pendentes = [];
@@ -336,11 +334,11 @@ app.post("/veiculos", autenticar, async (req, res) => {
   }
 
   const sql = `
-    INSERT INTO veiculos (modelo, placa, proprietario, status, observacoes)
-    VALUES ($1, $2, $3, $4, $5)
+    INSERT INTO veiculos (modelo, placa, proprietario, status)
+    VALUES ($1, $2, $3, $4)
     RETURNING id
   `;
-  const valores = [modeloTratado, placaTratada, proprietarioTratado, statusTratado, observacoesTratadas];
+  const valores = [modeloTratado, placaTratada, proprietarioTratado, statusTratado];
 
   try {
     const resultado = await banco.query(sql, valores);
@@ -380,13 +378,12 @@ app.get("/veiculos/:id", autenticar, async (requisicao, resposta) => {
 
 app.put("/veiculos/:id", autenticar, async (requisicao, resposta) => {
   const { id } = requisicao.params;
-  const { modelo, placa, proprietario, status, observacoes } = requisicao.body;
+  const { modelo, placa, proprietario, status } = requisicao.body;
 
   const modeloTratado       = (modelo || "").trim();
   const placaTratada        = (placa || "").trim().toUpperCase();
   const proprietarioTratado = (proprietario || "").trim();
   const statusTratado       = (status || "").trim();
-  const observacoesTratadas = (observacoes || "").trim();
 
   if (!modeloTratado || !placaTratada || !proprietarioTratado || !statusTratado) {
     const pendentes = [];
@@ -399,11 +396,11 @@ app.put("/veiculos/:id", autenticar, async (requisicao, resposta) => {
 
   const sql = `
     UPDATE veiculos SET
-      modelo=$1, placa=$2, proprietario=$3, status=$4, observacoes=$5
-    WHERE id=$6
+      modelo=$1, placa=$2, proprietario=$3, status=$4
+    WHERE id=$5
     RETURNING *
   `;
-  const valores = [modeloTratado, placaTratada, proprietarioTratado, statusTratado, observacoesTratadas, id];
+  const valores = [modeloTratado, placaTratada, proprietarioTratado, statusTratado, id];
 
   try {
     const resultado = await banco.query(sql, valores);
@@ -541,18 +538,18 @@ app.put("/viagens/:id", autenticar, async (requisicao, resposta) => {
 // ============================================================
 
 app.post("/despesas", autenticar, async (requisicao, resposta) => {
-  const { viagemId, descricao, categoria, dataDespesa, valor, observacoes } = requisicao.body;
+  const { viagemId, descricao, categoria, dataDespesa, valor } = requisicao.body;
 
   if (!viagemId || !descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
   }
 
   const sql = `
-    INSERT INTO despesas (viagem_id, descricao, categoria, data_despesa, valor, observacoes)
-    VALUES ($1, $2, $3, $4, $5, $6)
+    INSERT INTO despesas (viagem_id, descricao, categoria, data_despesa, valor)
+    VALUES ($1, $2, $3, $4, $5)
     RETURNING id
   `;
-  const valores = [viagemId, descricao, categoria, dataDespesa, valor, observacoes || ""];
+  const valores = [viagemId, descricao, categoria, dataDespesa, valor];
 
   try {
     const resultado = await banco.query(sql, valores);
@@ -569,7 +566,7 @@ app.get("/despesas", autenticar, async (requisicao, resposta) => {
   let sql = `
     SELECT
       d.id, d.viagem_id, d.descricao, d.categoria,
-      d.data_despesa, d.valor, d.observacoes, d.data_cadastro,
+      d.data_despesa, d.valor, d.data_cadastro,
       v.origem, v.destino,
       m.nome AS motorista_nome,
       ve.modelo AS veiculo_modelo,
@@ -602,7 +599,7 @@ app.get("/despesas/:id", autenticar, async (requisicao, resposta) => {
   const sql = `
     SELECT
       d.id, d.viagem_id, d.descricao, d.categoria,
-      d.data_despesa, d.valor, d.observacoes, d.data_cadastro,
+      d.data_despesa, d.valor, d.data_cadastro,
       v.origem, v.destino,
       m.nome AS motorista_nome,
       ve.modelo AS veiculo_modelo,
@@ -627,7 +624,7 @@ app.get("/despesas/:id", autenticar, async (requisicao, resposta) => {
 
 app.put("/despesas/:id", autenticar, async (requisicao, resposta) => {
   const { id } = requisicao.params;
-  const { viagemId, descricao, categoria, dataDespesa, valor, observacoes } = requisicao.body;
+  const { viagemId, descricao, categoria, dataDespesa, valor } = requisicao.body;
 
   if (!viagemId || !descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
@@ -636,11 +633,11 @@ app.put("/despesas/:id", autenticar, async (requisicao, resposta) => {
   const sql = `
     UPDATE despesas SET
       viagem_id=$1, descricao=$2, categoria=$3,
-      data_despesa=$4, valor=$5, observacoes=$6
-    WHERE id=$7
+      data_despesa=$4, valor=$5
+    WHERE id=$6
     RETURNING *
   `;
-  const valores = [viagemId, descricao, categoria, dataDespesa, valor, observacoes || "", id];
+  const valores = [viagemId, descricao, categoria, dataDespesa, valor, id];
 
   try {
     const resultado = await banco.query(sql, valores);

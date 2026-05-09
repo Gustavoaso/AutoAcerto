@@ -5,34 +5,55 @@
 
 function obterSessao() {
     try {
-        return JSON.parse(sessionStorage.getItem("sessaoAutoAcerto")) || null;
+        const token = localStorage.getItem("token");
+        const usuario = JSON.parse(localStorage.getItem("usuario"));
+        if (token && usuario) {
+            return { token, usuario };
+        }
+        return null;
     } catch {
         return null;
     }
 }
 
 function obterToken() {
-    const sessao = obterSessao();
-    return sessao ? sessao.token : null;
+    return localStorage.getItem("token");
 }
 
 function obterUsuarioLogado() {
-    const sessao = obterSessao();
-    return sessao ? sessao.usuario : null;
+    try {
+        return JSON.parse(localStorage.getItem("usuario"));
+    } catch {
+        return null;
+    }
 }
 
 function encerrarSessao() {
-    sessionStorage.removeItem("sessaoAutoAcerto");
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
     window.location.href = "/frontend/HTML/login.html";
 }
 
 function exigirAutenticacao() {
-    const sessao = obterSessao();
-    if (!sessao || !sessao.token) {
-        window.location.href = "/frontend/HTML/login.html";
+    const token = obterToken();
+    const usuario = obterUsuarioLogado();
+
+    const paginaAtual = window.location.pathname;
+    const paginaLogin = "/frontend/HTML/login.html";
+
+    if (!token || !usuario) {
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("usuario");
+
+        if (paginaAtual !== paginaLogin) {
+            window.location.href = paginaLogin;
+        }
+
         return null;
     }
-    return sessao.usuario;
+
+    return usuario;
 }
 
 function exigirAdmin() {
