@@ -47,8 +47,9 @@ async function criarTabelas() {
       transportadora_id INTEGER REFERENCES transportadoras(id),
       modelo VARCHAR(255) NOT NULL,
       placa VARCHAR(10) NOT NULL UNIQUE,
-      proprietario VARCHAR(255) NOT NULL,
       status VARCHAR(20) NOT NULL,
+      ano INTEGER,
+      observacoes TEXT,
       data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -98,6 +99,13 @@ async function criarTabelas() {
   `);
 
   await garantirEstruturaMultiTransportadora();
+  await garantirEstruturaVeiculos();
+}
+
+async function garantirEstruturaVeiculos() {
+  await banco.query("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS ano INTEGER");
+  await banco.query("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS observacoes TEXT");
+  await banco.query("ALTER TABLE veiculos DROP COLUMN IF EXISTS proprietario");
 }
 
 async function adicionarColunaTransportadora(nomeTabela) {

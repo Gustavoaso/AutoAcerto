@@ -14,32 +14,32 @@ function exibirMensagem(texto, classe) {
 botaoSalvar.addEventListener("click", async function () {
   const modelo = document.getElementById("modelo").value.trim();
   const placa = document.getElementById("placa").value.trim();
-  const proprietario = document.getElementById("proprietario").value.trim();
   const status = document.getElementById("status").value.trim();
+  const anoCampo = document.getElementById("ano").value.trim();
+  const observacoes = document.getElementById("observacoes").value.trim();
 
-  if (!modelo || !placa || !proprietario || !status) {
+  if (!modelo || !placa || !status) {
     const camposPendentes = [];
     if (!modelo) camposPendentes.push("modelo");
     if (!placa) camposPendentes.push("placa");
-    if (!proprietario) camposPendentes.push("proprietario");
     if (!status) camposPendentes.push("status");
 
     exibirMensagem("Preencha os campos obrigatorios: " + camposPendentes.join(", ") + ".", "erro");
     return;
   }
 
-  const dados = { modelo, placa, proprietario, status };
-
-  console.log("Dados enviados:", dados);
+  const dados = { modelo, placa, status };
+  if (anoCampo !== "") dados.ano = parseInt(anoCampo, 10);
+  if (observacoes !== "") dados.observacoes = observacoes;
 
   const token = localStorage.getItem("token");
 
   try {
     const response = await fetch(urlApi, {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+        "Authorization": "Bearer " + token
       },
       body: JSON.stringify(dados)
     });
@@ -52,7 +52,6 @@ botaoSalvar.addEventListener("click", async function () {
 
     mensagemRetorno.className = "mensagem-retorno";
     modal.classList.remove("oculto");
-
   } catch (error) {
     console.error(error);
     exibirMensagem("Erro de conexão com o servidor.", "erro");
@@ -67,22 +66,8 @@ botaoOk.addEventListener("click", function () {
 botaoLimpar.addEventListener("click", function () {
   document.getElementById("modelo").value = "";
   document.getElementById("placa").value = "";
-  document.getElementById("proprietario").value = "";
   document.getElementById("status").value = "";
+  document.getElementById("ano").value = "";
+  document.getElementById("observacoes").value = "";
   mensagemRetorno.className = "mensagem-retorno";
-});
-
-document.querySelector(".botao-sair").addEventListener("click", function () {
-  alert("Saindo do sistema...");
-});
-
-// Máscara de placa: aceita padrão antigo (AAA-0000) e Mercosul (AAA0A00)
-// Limita a 7 caracteres alfanuméricos + hífen automático na posição 4
-document.getElementById("placa").addEventListener("input", function (e) {
-  let valor = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-  if (valor.length > 7) valor = valor.slice(0, 7);
-  if (valor.length > 3) {
-    valor = valor.slice(0, 3) + "-" + valor.slice(3);
-  }
-  e.target.value = valor;
 });

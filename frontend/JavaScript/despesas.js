@@ -1,10 +1,12 @@
 const urlApiDespesas = "http://localhost:3000/despesas";
 
 let despesas = [];
+let despesasVisiveis = [];
+let exclusaoDespesas = null;
 
 async function carregarDespesas() {
     try {
-        const response = await fetch(urlApiDespesas);
+        const response = await fetch(urlApiDespesas, { headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
             console.error("Erro ao buscar despesas");
@@ -74,15 +76,17 @@ function criarSeloCategoria(categoria) {
 function renderizarTabelaDespesas(listaDespesas) {
     const corpoTabelaDespesas = document.getElementById("corpoTabelaDespesas");
     corpoTabelaDespesas.innerHTML = "";
+    despesasVisiveis = listaDespesas;
 
     if (listaDespesas.length === 0) {
         corpoTabelaDespesas.innerHTML = `
             <tr>
-                <td colspan="8" style="text-align: center; padding: 40px; color: #6b7280;">
+                <td colspan="9" style="text-align: center; padding: 40px; color: #6b7280;">
                     Nenhuma despesa encontrada.
                 </td>
             </tr>
         `;
+        if (exclusaoDespesas) exclusaoDespesas.aposRender([]);
         return;
     }
 
@@ -95,6 +99,7 @@ function renderizarTabelaDespesas(listaDespesas) {
             : "-";
 
         linha.innerHTML = `
+            ${exclusaoDespesas ? exclusaoDespesas.colunaLinha(despesa.id) : ""}
             <td>
                 <div class="bloco-despesa">
                     <div class="avatar-despesa">${criarIconeCategoria(despesa.categoria)}</div>
@@ -124,6 +129,8 @@ function renderizarTabelaDespesas(listaDespesas) {
 
         corpoTabelaDespesas.appendChild(linha);
     });
+
+    if (exclusaoDespesas) exclusaoDespesas.aposRender(listaDespesas);
 }
 
 function descobrirMaiorCategoria() {
@@ -204,16 +211,32 @@ function configurarEventosDespesas() {
             window.location.href = "cadastro-despesa.html";
         });
 
-    document
-        .querySelector(".botao-sair")
-        .addEventListener("click", function () {
-            alert("Saindo do sistema...");
-        });
 }
 
 function iniciarPaginaDespesas() {
+    const usuario = exigirAutenticacao();
+    if (!usuario) return;
+    preencherInfoUsuario();
+    configurarBotaoSair();
+    marcarItemMenuLateralAtivo();
+    configurarExclusaoDespesas();
     configurarEventosDespesas();
     carregarDespesas();
+}
+
+function configurarExclusaoDespesas() {
+    if (!window.AutoAcertoExclusao) return;
+
+    exclusaoDespesas = window.AutoAcertoExclusao.criarGerenciadorExclusao({
+        urlApi: urlApiDespesas,
+        seletorTabela: ".tabela-despesas",
+        seletorLinhas: "[data-selecionar-id]",
+        seletorSelecionarTodos: "[data-selecionar-todos-despesas]",
+        singular: "despesa",
+        plural: "despesas",
+        renderizarAtual: function () { renderizarTabelaDespesas(despesasVisiveis); },
+        aoExcluir: carregarDespesas
+    });
 }
 
 document.addEventListener("DOMContentLoaded", iniciarPaginaDespesas);

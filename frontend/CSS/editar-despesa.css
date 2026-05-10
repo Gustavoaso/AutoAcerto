@@ -1,11 +1,11 @@
 /* =============================================================
-   EDITAR VIAGEM — estilos específicos
+   EDITAR DESPESA — estilos específicos
    Base: /frontend/CSS/global.css
    ============================================================= */
 
 @import url('/frontend/CSS/global.css');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-.formulario-viagem {
+.formulario-despesa {
   width: 100%;
 }

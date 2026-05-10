@@ -127,7 +127,8 @@
 
             <div class="grupo-campo">
               <label for="campoCnpjTransportadora">CNPJ</label>
-              <input type="text" id="campoCnpjTransportadora" name="cnpj" placeholder="00.000.000/0000-00" />
+              <input type="text" id="campoCnpjTransportadora" name="cnpj" placeholder="00.000.000/0000-00" maxlength="18"
+                data-mascara="cnpj" autocomplete="off" />
             </div>
 
             <div class="grupo-campo">
@@ -165,6 +166,7 @@
   </div>
 
   <script src="/frontend/JavaScript/auth.js"></script>
+  <script src="/frontend/JavaScript/mascaras.js"></script>
   <script src="/frontend/JavaScript/editar-transportadora.js"></script>
 </body>
 

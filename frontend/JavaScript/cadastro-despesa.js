@@ -35,12 +35,20 @@ async function carregarViagens() {
 botaoSalvar.addEventListener("click", async function (e) {
     e.preventDefault();
 
+    const valorNum = window.AutoAcertoMascaras
+        ? window.AutoAcertoMascaras.moedaParaNumero(document.getElementById("valor").value)
+        : parseFloat(document.getElementById("valor").value);
+    if (valorNum === undefined || isNaN(valorNum) || valorNum <= 0) {
+        alert("Informe um valor válido.");
+        return;
+    }
+
     const dados = {
         viagemId: document.getElementById("viagemId").value,
         descricao: document.getElementById("descricao").value,
         categoria: document.getElementById("categoria").value,
         dataDespesa: document.getElementById("dataDespesa").value,
-        valor: document.getElementById("valor").value
+        valor: valorNum
     };
 
     const token = localStorage.getItem("token");

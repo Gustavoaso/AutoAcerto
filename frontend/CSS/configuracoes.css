@@ -92,7 +92,8 @@
   line-height: 1.5;
 }
 
-.resumo-perfil-config {
+.resumo-perfil-config,
+.resumo-transportadora-config {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -101,6 +102,11 @@
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio);
   background: linear-gradient(135deg, var(--cor-superficie-2), #ffffff);
+}
+
+.resumo-transportadora-config {
+  margin-top: -6px;
+  background: #f8fafc;
 }
 
 .avatar-perfil-config {
@@ -115,6 +121,28 @@
   letter-spacing: 0.02em;
   box-shadow: 0 10px 22px rgba(29, 88, 232, 0.18);
   flex-shrink: 0;
+}
+
+.icone-transportadora-config {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: var(--cor-primaria);
+  background: var(--cor-primaria-clara);
+  border: 1px solid rgba(29, 88, 232, 0.14);
+  flex-shrink: 0;
+}
+
+.icone-transportadora-config svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .rotulo-resumo-perfil {

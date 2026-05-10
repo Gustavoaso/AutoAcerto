@@ -1,0 +1,104 @@
+/* =============================================================
+   VER TRANSPORTADORA — estilos específicos
+   Base: /frontend/CSS/global.css
+   ============================================================= */
+
+@import url('/frontend/CSS/global.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.acoes-cabecalho {
+  display: flex;
+  gap: 10px;
+}
+
+.painel-detalhes {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra-suave);
+  padding: 24px;
+}
+
+.cabecalho-transportadora {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.avatar-transportadora-grande {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--raio-lg);
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+}
+
+.nome-transportadora-grande {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--cor-texto);
+  margin-bottom: 2px;
+}
+
+.cnpj-transportadora {
+  color: var(--cor-texto-secundario);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.grade-detalhes-transportadoras {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.grupo-detalhe {
+  background: var(--cor-superficie-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rotulo-detalhe {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.valor-detalhe {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--cor-texto);
+}
+
+@media (max-width: 900px) {
+  .cabecalho-conteudo {
+    align-items: stretch;
+  }
+
+  .acoes-cabecalho {
+    width: 100%;
+  }
+
+  .acoes-cabecalho .botao-secundario,
+  .acoes-cabecalho .botao-primario {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .grade-detalhes-transportadoras {
+    grid-template-columns: 1fr;
+  }
+}

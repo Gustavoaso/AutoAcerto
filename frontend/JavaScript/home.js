@@ -3,6 +3,15 @@ const urlApiVeiculos = "http://localhost:3000/veiculos";
 const urlApiViagens = "http://localhost:3000/viagens";
 const urlApiDespesas = "http://localhost:3000/despesas";
 
+async function buscarDados(url) {
+  const resposta = await fetch(url);
+  if (!resposta.ok) {
+    const texto = await resposta.text();
+    throw new Error(texto || "HTTP " + resposta.status);
+  }
+  return resposta.json();
+}
+
 let motoristas = [];
 let veiculos = [];
 let viagens = [];
@@ -10,23 +19,30 @@ let despesas = [];
 
 async function carregarDadosDashboard() {
   try {
-    const respostas = await Promise.all([
+    const respostas = await Promise.allSettled([
       buscarDados(urlApiMotoristas),
       buscarDados(urlApiVeiculos),
       buscarDados(urlApiViagens),
       buscarDados(urlApiDespesas)
     ]);
 
-    motoristas = respostas[0];
-    veiculos = respostas[1];
-    viagens = respostas[2];
-    despesas = respostas[3];
+    motoristas = respostas[0].status === "fulfilled" ? respostas[0].value : [];
+    veiculos = respostas[1].status === "fulfilled" ? respostas[1].value : [];
+    viagens = respostas[2].status === "fulfilled" ? respostas[2].value : [];
+    despesas = respostas[3].status === "fulfilled" ? respostas[3].value : [];
 
     atualizarCardsResumo();
     atualizarResumoFinanceiro();
     carregarViagensEmAndamento();
     carregarGraficoCategorias();
     carregarGraficoBarras();
+
+    respostas.forEach(function (resposta, indice) {
+      if (resposta.status === "rejected") {
+        const endpoints = ["motoristas", "veiculos", "viagens", "despesas"];
+        console.error("Falha ao carregar dados de " + endpoints[indice] + " no dashboard:", resposta.reason);
+      }
+    });
   } catch (erro) {
     console.error("Erro ao carregar dashboard:", erro);
   }
@@ -84,17 +100,17 @@ function atualizarCardsResumo() {
   const totalVeiculosAtivos = veiculos.filter(function (veiculo) {
     return veiculo.status === "ativo";
   }).length;
-  const totalViagensEmAndamento = viagens.filter(function (viagem) {
-    return viagem.status === "em andamento";
-  }).length;
-  const valorTotalDespesas = despesas.reduce(function (acumulador, despesa) {
+  const totalViagens = viagens.length;
+  const chaveMesAtual = obterMesAno(new Date().toISOString());
+  const valorTotalDespesasMes = despesas.reduce(function (acumulador, despesa) {
+    if (obterMesAno(despesa.data_despesa) !== chaveMesAtual) return acumulador;
     return acumulador + obterValorDespesa(despesa);
   }, 0);
 
   document.getElementById("quantidadeMotoristas").textContent = totalMotoristas;
   document.getElementById("quantidadeVeiculos").textContent = totalVeiculosAtivos;
-  document.getElementById("quantidadeViagens").textContent = totalViagensEmAndamento;
-  document.getElementById("valorDespesas").textContent = formatarMoeda(valorTotalDespesas);
+  document.getElementById("quantidadeViagens").textContent = totalViagens;
+  document.getElementById("valorDespesas").textContent = formatarMoeda(valorTotalDespesasMes);
 }
 
 function atualizarResumoFinanceiro() {
@@ -324,10 +340,6 @@ function adicionarEventosBotoes() {
 
   document.getElementById("botaoLancarDespesa").addEventListener("click", function () {
     window.location.href = "cadastro-despesa.html";
-  });
-
-  document.querySelector(".botao-sair").addEventListener("click", function () {
-    alert("Saindo do sistema...");
   });
 }
 

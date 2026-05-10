@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AutoAcerto - Editar Despesa</title>
-  <link rel="stylesheet" href="/frontend/CSS/cadastro-viagem.css" />
+  <link rel="stylesheet" href="/frontend/CSS/editar-despesa.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -91,7 +91,7 @@
     <main class="conteudo-principal">
       <header class="topo-pagina">
         <div class="acoes-topo">
-          <button class="botao-icone" type="button">ðŸ””</button>
+          <button class="botao-icone" type="button">??</button>
           <div class="perfil-usuario">
             <div class="avatar-usuario">GS</div>
             <span class="nome-usuario">Gustavo</span>
@@ -140,7 +140,8 @@
 
             <div class="grupo-campo">
               <label for="valor">Valor (R$)</label>
-              <input type="number" id="valor" name="valor" step="0.01" min="0" required />
+              <input type="text" id="valor" name="valor" placeholder="0,00" maxlength="18" inputmode="decimal"
+                data-mascara="moeda" autocomplete="off" required />
             </div>
 
             <div class="grupo-campo grupo-campo-largo">
@@ -173,8 +174,7 @@
   </div>
 
   <script src="/frontend/JavaScript/auth.js"></script>
-
-
+  <script src="/frontend/JavaScript/mascaras.js"></script>
   <script src="/frontend/JavaScript/editar-despesa.js"></script>
 </body>
 

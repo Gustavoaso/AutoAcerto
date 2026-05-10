@@ -1,0 +1,43 @@
+/* =============================================================
+   VER DESPESA — estilos específicos
+   Base: /frontend/CSS/global.css
+   ============================================================= */
+
+@import url('/frontend/CSS/global.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.painel-detalhes {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra-suave);
+  padding: 24px;
+}
+
+.item-detalhe {
+  background: var(--cor-superficie-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-detalhe span {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.item-detalhe strong {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--cor-texto);
+}
+
+.item-detalhe-largo {
+  grid-column: 1 / -1;
+}

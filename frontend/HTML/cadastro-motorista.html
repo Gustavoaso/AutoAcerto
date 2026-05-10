@@ -119,18 +119,19 @@
                         <div class="grupo-campo">
                             <label for="cpf">CPF</label>
                             <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14"
-                                required />
+                                data-mascara="cpf" required />
                         </div>
 
                         <div class="grupo-campo">
                             <label for="telefone">Telefone</label>
                             <input type="text" id="telefone" name="telefone" placeholder="(00) 00000-0000"
-                                maxlength="15" required />
+                                maxlength="15" data-mascara="telefone" required />
                         </div>
 
                         <div class="grupo-campo">
                             <label for="cnh">CNH</label>
-                            <input type="text" id="cnh" name="cnh" placeholder="Número da CNH" required />
+                            <input type="text" id="cnh" name="cnh" placeholder="Número da CNH" maxlength="11"
+                                data-mascara="cnh" required />
                         </div>
 
                         <div class="grupo-campo">
@@ -173,9 +174,7 @@
     </div>
 
     <script src="/frontend/JavaScript/auth.js"></script>
-
-
-    <script src="/frontend/JavaScript/cadastro-motorista.js"></script>
-</body>
+    <script src="/frontend/JavaScript/mascaras.js"></script>
+    <script src="/frontend/JavaScript/cadastro-motorista.js"></script></body>
 
 </html>

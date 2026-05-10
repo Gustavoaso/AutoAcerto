@@ -147,6 +147,17 @@ function ajustarMenuPorPerfil(usuario) {
     });
 }
 
+function marcarItemMenuLateralAtivo() {
+    const caminho = window.location.pathname || "";
+    const arquivo = (caminho.split("/").pop() || "").split("?")[0].split("#")[0];
+
+    document.querySelectorAll(".barra-lateral .menu-lateral .item-menu").forEach(function (link) {
+        const href = (link.getAttribute("href") || "").split("?")[0].split("#")[0];
+        const ativo = href === arquivo;
+        link.classList.toggle("ativo", ativo);
+    });
+}
+
 function inserirMenuTransportadoras() {
     const menu = document.querySelector(".menu-lateral");
     if (!menu || menu.querySelector('[href="transportadoras.html"]')) return;
@@ -173,6 +184,8 @@ function inserirMenuTransportadoras() {
     } else {
         menu.appendChild(item);
     }
+
+    marcarItemMenuLateralAtivo();
 }
 
 function configurarBotaoSair() {
@@ -220,5 +233,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!usuario) return;
 
     preencherInfoUsuario();
+    marcarItemMenuLateralAtivo();
     configurarBotaoSair();
 });

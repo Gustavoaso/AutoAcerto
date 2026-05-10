@@ -1,10 +1,12 @@
 const urlApiViagens = "http://localhost:3000/viagens";
 
 let viagens = [];
+let viagensVisiveis = [];
+let exclusaoViagens = null;
 
 async function carregarViagens() {
     try {
-        const response = await fetch(urlApiViagens);
+        const response = await fetch(urlApiViagens, { headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
             console.error("Erro ao buscar viagens");
@@ -53,15 +55,17 @@ function renderizarTabelaViagens(listaViagens) {
     const podeEditar = usuario && usuario.perfil === "admin";
 
     corpoTabelaViagens.innerHTML = "";
+    viagensVisiveis = listaViagens;
 
     if (listaViagens.length === 0) {
         corpoTabelaViagens.innerHTML = `
             <tr>
-                <td colspan="8" style="text-align: center; padding: 40px; color: #6b7280;">
+                <td colspan="9" style="text-align: center; padding: 40px; color: #6b7280;">
                     Nenhuma viagem encontrada.
                 </td>
             </tr>
         `;
+        if (exclusaoViagens) exclusaoViagens.aposRender([]);
         return;
     }
 
@@ -70,6 +74,7 @@ function renderizarTabelaViagens(listaViagens) {
         linha.classList.add("linha-tabela");
 
         linha.innerHTML = `
+            ${exclusaoViagens ? exclusaoViagens.colunaLinha(viagem.id) : ""}
             <td>
                 <div class="bloco-viagem">
                     <div class="avatar-viagem">📍</div>
@@ -99,6 +104,8 @@ function renderizarTabelaViagens(listaViagens) {
 
         corpoTabelaViagens.appendChild(linha);
     });
+
+    if (exclusaoViagens) exclusaoViagens.aposRender(listaViagens);
 }
 
 function atualizarResumoViagens() {
@@ -152,16 +159,33 @@ function configurarEventosViagens() {
         });
     }
 
-    document
-        .querySelector(".botao-sair")
-        .addEventListener("click", function () {
-            alert("Saindo do sistema...");
-        });
 }
 
 function iniciarPaginaViagens() {
+    const usuario = exigirAutenticacao();
+    if (!usuario) return;
+    preencherInfoUsuario();
+    configurarBotaoSair();
+    marcarItemMenuLateralAtivo();
+    configurarExclusaoViagens();
     configurarEventosViagens();
     carregarViagens();
+}
+
+function configurarExclusaoViagens() {
+    const usuario = obterUsuarioLogado();
+    if (!window.AutoAcertoExclusao || !usuario || usuario.perfil !== "admin") return;
+
+    exclusaoViagens = window.AutoAcertoExclusao.criarGerenciadorExclusao({
+        urlApi: urlApiViagens,
+        seletorTabela: ".tabela-viagens",
+        seletorLinhas: "[data-selecionar-id]",
+        seletorSelecionarTodos: "[data-selecionar-todos-viagens]",
+        singular: "viagem",
+        plural: "viagens",
+        renderizarAtual: function () { renderizarTabelaViagens(viagensVisiveis); },
+        aoExcluir: carregarViagens
+    });
 }
 
 document.addEventListener("DOMContentLoaded", iniciarPaginaViagens);

@@ -1,39 +1,44 @@
 // =============================================================
-// AUTOACERTO — CONFIGURAÇÕES
-// Gerenciamento de perfil, usuários (admin) e segurança.
+// AUTOACERTO ? CONFIGURAÃ‡Ã•ES
+// Gerenciamento de perfil, usuÃ¡rios (admin) e seguranÃ§a.
 // =============================================================
 
-const urlApiUsuarios   = "http://localhost:3000/usuarios";
-const urlApiMotoristas = "http://localhost:3000/motoristas";
-const urlApiSenha      = "http://localhost:3000/usuarios/senha";
+const urlApiUsuarios = "http://localhost:3000/usuarios";
+const urlApiSenha = "http://localhost:3000/usuarios/senha";
 
-let listaUsuarios   = [];
-let listaMotoristas = [];
-let usuarioEmEdicao = null;
+let listaUsuarios = [];
+let usuariosVisiveis = [];
+let exclusaoUsuarios = null;
 
 // -------------------------------------------------------
-// SESSÃO
+// SESSÃƒO
 // -------------------------------------------------------
 
 function iniciarSessaoConfiguracoes() {
-    const usuario = exigirAutenticacao();
-    if (!usuario) return;
+  const usuario = exigirAutenticacao();
+  if (!usuario) return;
 
-    preencherInfoUsuario();
-    configurarBotaoSair();
-    configurarMenuLateral();
-    configurarFormularioPerfil(usuario);
-    configurarFormularioSenha();
+  preencherInfoUsuario();
+  marcarItemMenuLateralAtivo();
+  configurarBotaoSair();
+  configurarMenuLateral();
+  configurarFormularioPerfil(usuario);
+  configurarFormularioSenha();
+  configurarExclusaoUsuarios();
 
-    if (usuario.perfil === "admin") {
-        document.querySelectorAll("[data-apenas-admin]").forEach(function (el) {
-            el.style.removeProperty("display");
-        });
-        carregarUsuarios();
-        carregarMotoristasParaSelect();
-    }
+  if (usuario.perfil === "admin") {
+    document.querySelectorAll("[data-apenas-admin]").forEach(function (el) {
+      el.style.removeProperty("display");
+    });
+    carregarUsuarios();
+  }
 
+  const qs = new URLSearchParams(window.location.search);
+  if (qs.get("secao") === "usuarios" && usuario.perfil === "admin") {
+    ativarSecao("secao-usuarios");
+  } else {
     ativarSecao("secao-perfil");
+  }
 }
 
 // -------------------------------------------------------
@@ -41,22 +46,22 @@ function iniciarSessaoConfiguracoes() {
 // -------------------------------------------------------
 
 function configurarMenuLateral() {
-    document.querySelectorAll(".item-menu-config").forEach(function (item) {
-        item.addEventListener("click", function () {
-            const alvo = item.getAttribute("data-secao");
-            ativarSecao(alvo);
-        });
+  document.querySelectorAll(".item-menu-config").forEach(function (item) {
+    item.addEventListener("click", function () {
+      const alvo = item.getAttribute("data-secao");
+      ativarSecao(alvo);
     });
+  });
 }
 
 function ativarSecao(idSecao) {
-    document.querySelectorAll(".item-menu-config").forEach(function (item) {
-        item.classList.toggle("ativo", item.getAttribute("data-secao") === idSecao);
-    });
+  document.querySelectorAll(".item-menu-config").forEach(function (item) {
+    item.classList.toggle("ativo", item.getAttribute("data-secao") === idSecao);
+  });
 
-    document.querySelectorAll(".secao-config").forEach(function (secao) {
-        secao.style.display = secao.id === idSecao ? "block" : "none";
-    });
+  document.querySelectorAll(".secao-config").forEach(function (secao) {
+    secao.style.display = secao.id === idSecao ?"block" : "none";
+  });
 }
 
 // -------------------------------------------------------
@@ -64,103 +69,91 @@ function ativarSecao(idSecao) {
 // -------------------------------------------------------
 
 function configurarFormularioPerfil(usuario) {
-    document.getElementById("campoPerfil_Nome").value  = usuario.nome  || "";
-    document.getElementById("campoPerfil_Email").value = usuario.email || "";
-    preencherTipoPerfil(usuario);
+  document.getElementById("campoPerfil_Nome").value = usuario.nome || "";
+  document.getElementById("campoPerfil_Email").value = usuario.email || "";
+  preencherTipoPerfil(usuario);
+  preencherTransportadoraPerfil(usuario);
 
-    document.getElementById("formularioPerfil").addEventListener("submit", function (evento) {
-        evento.preventDefault();
-        exibirToast("Funcionalidade disponível em breve.", "info");
-    });
+  document.getElementById("formularioPerfil").addEventListener("submit", function (evento) {
+    evento.preventDefault();
+    exibirToast("Funcionalidade disponÃ­vel em breve.", "info");
+  });
+}
+
+function preencherTransportadoraPerfil(usuario) {
+  const textoTransportadora = document.getElementById("textoTransportadoraPerfil");
+  if (textoTransportadora) {
+    textoTransportadora.textContent = usuario.transportadora_nome || "Transportadora nÃ£o informada";
+  }
 }
 
 function preencherTipoPerfil(usuario) {
-    const perfilFormatado = usuario.perfil === "dono"
-        ? "Dono do sistema"
-        : usuario.perfil === "admin"
-            ? "Administrador"
-            : "Motorista";
-    const seloPerfil = document.getElementById("seloTipoPerfil");
-    const textoPerfil = document.getElementById("textoTipoPerfil");
-    const avatarPerfil = document.getElementById("avatarPerfilConfig");
+  const perfilFormatado = usuario.perfil === "dono"
+    ?"Dono do sistema"
+    : usuario.perfil === "admin"
+      ?"Administrador"
+      : "Motorista";
+  const seloPerfil = document.getElementById("seloTipoPerfil");
+  const textoPerfil = document.getElementById("textoTipoPerfil");
+  const avatarPerfil = document.getElementById("avatarPerfilConfig");
 
-    if (seloPerfil) {
-        seloPerfil.textContent = perfilFormatado;
-        seloPerfil.classList.toggle("selo-perfil-admin", usuario.perfil === "admin");
-    }
+  if (seloPerfil) {
+    seloPerfil.textContent = perfilFormatado;
+    seloPerfil.classList.toggle("selo-perfil-admin", usuario.perfil === "admin");
+  }
 
-    if (textoPerfil) {
-        textoPerfil.textContent = perfilFormatado;
-    }
+  if (textoPerfil) {
+    textoPerfil.textContent = perfilFormatado;
+  }
 
-    if (avatarPerfil) {
-        avatarPerfil.textContent = obterIniciaisNome(usuario.nome || perfilFormatado);
-    }
+  if (avatarPerfil) {
+    avatarPerfil.textContent = obterIniciaisNome(usuario.nome || perfilFormatado);
+  }
 }
 
 // -------------------------------------------------------
-// GERENCIAR USUÁRIOS (apenas admin)
+// GERENCIAR USUÃRIOS (apenas admin)
 // -------------------------------------------------------
 
 async function carregarUsuarios() {
-    try {
-        const resposta = await fetch(urlApiUsuarios, { headers: cabecalhosAutenticados() });
-        if (!resposta.ok) throw new Error("Erro ao buscar usuários.");
-        listaUsuarios = await resposta.json();
-        renderizarTabelaUsuarios(listaUsuarios);
-    } catch (erro) {
-        console.error("Erro ao carregar usuários:", erro.message);
-    }
-}
-
-async function carregarMotoristasParaSelect() {
-    try {
-        const resposta = await fetch(urlApiMotoristas, { headers: cabecalhosAutenticados() });
-        if (!resposta.ok) throw new Error("Erro ao buscar motoristas.");
-        listaMotoristas = await resposta.json();
-        preencherSelectMotoristas();
-    } catch (erro) {
-        console.error("Erro ao carregar motoristas:", erro.message);
-    }
-}
-
-function preencherSelectMotoristas() {
-    const select = document.getElementById("campoModal_MotoristId");
-    if (!select) return;
-
-    select.innerHTML = '<option value="">— Selecione um motorista —</option>';
-    listaMotoristas.forEach(function (motorista) {
-        const opcao = document.createElement("option");
-        opcao.value = motorista.id;
-        opcao.textContent = motorista.nome + " (CPF: " + motorista.cpf + ")";
-        select.appendChild(opcao);
-    });
+  try {
+    const resposta = await fetch(urlApiUsuarios, { headers: cabecalhosAutenticados() });
+    if (!resposta.ok) throw new Error("Erro ao buscar usuÃ¡rios.");
+    listaUsuarios = await resposta.json();
+    usuariosVisiveis = listaUsuarios;
+    renderizarTabelaUsuarios(listaUsuarios);
+  } catch (erro) {
+    console.error("Erro ao carregar usuÃ¡rios:", erro.message);
+  }
 }
 
 function renderizarTabelaUsuarios(lista) {
-    const corpo = document.getElementById("corpoTabelaUsuarios");
-    if (!corpo) return;
+  const corpo = document.getElementById("corpoTabelaUsuarios");
+  if (!corpo) return;
 
-    corpo.innerHTML = "";
+  corpo.innerHTML = "";
 
-    if (lista.length === 0) {
-        corpo.innerHTML = '<tr><td colspan="5" class="celula-vazia">Nenhum usuário cadastrado.</td></tr>';
-        return;
-    }
+  if (lista.length === 0) {
+    corpo.innerHTML = '<tr><td colspan="6" class="celula-vazia">Nenhum usuário cadastrado.</td></tr>';
+    if (exclusaoUsuarios) exclusaoUsuarios.aposRender([]);
+    return;
+  }
 
-    lista.forEach(function (usuario) {
-        const linha = document.createElement("tr");
-        linha.classList.add("linha-tabela");
+  usuariosVisiveis = lista;
+  lista.forEach(function (usuario) {
+    const linha = document.createElement("tr");
+    linha.classList.add("linha-tabela");
 
-        const seloAtivo = usuario.ativo
-            ? '<span class="selo-status selo-ativo">Ativo</span>'
-            : '<span class="selo-status selo-inativo">Inativo</span>';
+    const seloAtivo = usuario.ativo
+      ?'<span class="selo-status selo-ativo">Ativo</span>'
+      : '<span class="selo-status selo-inativo">Inativo</span>';
 
-        const seloPerfil = usuario.perfil === "admin"
-            ? '<span class="selo-status selo-admin">Admin</span>'
-            : '<span class="selo-status selo-motorista-perfil">Motorista</span>';
+    const seloPerfil = usuario.perfil === "admin"
+      ?'<span class="selo-status selo-admin">Admin</span>'
+      : '<span class="selo-status selo-motorista-perfil">Motorista</span>';
 
-        linha.innerHTML = `
+    linha.innerHTML = `
+            ${exclusaoUsuarios ? exclusaoUsuarios.colunaLinha(usuario.id) : ""}
             <td>
                 <div class="bloco-usuario-nome">
                     <div class="avatar-mini">${obterIniciaisNome(usuario.nome)}</div>
@@ -171,171 +164,100 @@ function renderizarTabelaUsuarios(lista) {
                 </div>
             </td>
             <td>${seloPerfil}</td>
-            <td>${usuario.motorista_nome || "—"}</td>
+            <td>${usuario.motorista_nome || "?"}</td>
             <td>${seloAtivo}</td>
             <td>
                 <div class="grupo-acoes">
-                    <button class="botao-acao" onclick="abrirModalEditarUsuario(${usuario.id})">Editar</button>
+                    <button class="botao-acao" type="button" data-editar-usuario="${usuario.id}">Editar</button>
                 </div>
             </td>
         `;
 
-        corpo.appendChild(linha);
+    corpo.appendChild(linha);
+  });
+
+  if (exclusaoUsuarios) exclusaoUsuarios.aposRender(lista);
+
+  corpo.querySelectorAll("[data-editar-usuario]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      const id = btn.getAttribute("data-editar-usuario");
+      window.location.href = "editar-usuario.html?id=" + id;
     });
+  });
 }
 
 function obterIniciaisNome(nome) {
-    return nome
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map(function (parte) { return parte[0].toUpperCase(); })
-        .join("");
+  return nome
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(function (parte) { return parte[0].toUpperCase(); })
+    .join("");
 }
 
-function abrirModalCriarUsuario() {
-    usuarioEmEdicao = null;
-    limparModalUsuario();
-    document.getElementById("tituloModalUsuario").textContent = "Novo usuário";
-    document.getElementById("campoPerfil_ModalAtivo").parentElement.style.display = "none";
-    toggleCampoMotoristaPorPerfil(document.getElementById("campoModal_Perfil").value);
-    document.getElementById("modalUsuario").style.display = "flex";
-}
+function configurarExclusaoUsuarios() {
+  if (!window.AutoAcertoExclusao) return;
 
-function abrirModalEditarUsuario(id) {
-    const usuario = listaUsuarios.find(function (u) { return u.id === id; });
-    if (!usuario) return;
-
-    usuarioEmEdicao = usuario;
-    document.getElementById("tituloModalUsuario").textContent = "Editar usuário";
-    document.getElementById("campoModal_Nome").value          = usuario.nome;
-    document.getElementById("campoModal_Email").value         = usuario.email;
-    document.getElementById("campoModal_Perfil").value        = usuario.perfil;
-    document.getElementById("campoModal_MotoristId").value    = usuario.motorista_id || "";
-    document.getElementById("campoModal_Senha").value         = "";
-    document.getElementById("campoPerfil_ModalAtivo").checked = usuario.ativo;
-    document.getElementById("campoPerfil_ModalAtivo").parentElement.style.display = "flex";
-    toggleCampoMotoristaPorPerfil(usuario.perfil);
-    document.getElementById("modalUsuario").style.display = "flex";
-}
-
-function fecharModalUsuario() {
-    document.getElementById("modalUsuario").style.display = "none";
-    usuarioEmEdicao = null;
-}
-
-function limparModalUsuario() {
-    document.getElementById("campoModal_Nome").value      = "";
-    document.getElementById("campoModal_Email").value     = "";
-    document.getElementById("campoModal_Perfil").value    = "motorista";
-    document.getElementById("campoModal_MotoristId").value = "";
-    document.getElementById("campoModal_Senha").value     = "";
-    document.getElementById("campoPerfil_ModalAtivo").checked = true;
-}
-
-function toggleCampoMotoristaPorPerfil(perfil) {
-    const grupo = document.getElementById("grupoCampoMotoristaModal");
-    if (!grupo) return;
-    grupo.style.display = perfil === "motorista" ? "flex" : "none";
-}
-
-async function salvarUsuarioModal() {
-    const nome        = document.getElementById("campoModal_Nome").value.trim();
-    const email       = document.getElementById("campoModal_Email").value.trim();
-    const perfil      = document.getElementById("campoModal_Perfil").value;
-    const motoristId  = document.getElementById("campoModal_MotoristId").value || null;
-    const senha       = document.getElementById("campoModal_Senha").value;
-    const ativo       = document.getElementById("campoPerfil_ModalAtivo").checked;
-
-    if (!nome || !email || !perfil) {
-        exibirToast("Preencha todos os campos obrigatórios.", "erro");
-        return;
-    }
-
-    if (!usuarioEmEdicao && !senha) {
-        exibirToast("Informe uma senha para o novo usuário.", "erro");
-        return;
-    }
-
-    const corpo = { nome, email, perfil, motorista_id: motoristId, ativo };
-    if (senha) corpo.senha = senha;
-
-    try {
-        const url    = usuarioEmEdicao ? urlApiUsuarios + "/" + usuarioEmEdicao.id : urlApiUsuarios;
-        const metodo = usuarioEmEdicao ? "PUT" : "POST";
-
-        const resposta = await fetch(url, {
-            method: metodo,
-            headers: cabecalhosAutenticados(),
-            body: JSON.stringify(corpo)
-        });
-
-        const dados = await resposta.json();
-
-        if (!resposta.ok) {
-            exibirToast(dados.mensagem || "Erro ao salvar usuário.", "erro");
-            return;
-        }
-
-        exibirToast(dados.mensagem, "sucesso");
-        fecharModalUsuario();
-        carregarUsuarios();
-
-    } catch (erro) {
-        console.error("Erro ao salvar usuário:", erro.message);
-        exibirToast("Erro de conexão com o servidor.", "erro");
-    }
+  exclusaoUsuarios = window.AutoAcertoExclusao.criarGerenciadorExclusao({
+    urlApi: urlApiUsuarios,
+    seletorTabela: ".tabela",
+    seletorLinhas: "[data-selecionar-id]",
+    seletorSelecionarTodos: "[data-selecionar-todos-usuarios]",
+    singular: "usuário",
+    plural: "usuários",
+    renderizarAtual: function () { renderizarTabelaUsuarios(usuariosVisiveis); },
+    aoExcluir: carregarUsuarios
+  });
 }
 
 // -------------------------------------------------------
-// SEGURANÇA
+// SEGURANÃ‡A
 // -------------------------------------------------------
 
 function configurarFormularioSenha() {
-    document.getElementById("formularioSenha").addEventListener("submit", async function (evento) {
-        evento.preventDefault();
+  document.getElementById("formularioSenha").addEventListener("submit", async function (evento) {
+    evento.preventDefault();
 
-        const senhaAtual = document.getElementById("campoSenhaAtual").value;
-        const novaSenha  = document.getElementById("campoNovaSenha").value;
-        const confirmar  = document.getElementById("campoConfirmarSenha").value;
+    const senhaAtual = document.getElementById("campoSenhaAtual").value;
+    const novaSenha = document.getElementById("campoNovaSenha").value;
+    const confirmar = document.getElementById("campoConfirmarSenha").value;
 
-        if (!senhaAtual || !novaSenha || !confirmar) {
-            exibirToast("Preencha todos os campos.", "erro");
-            return;
-        }
+    if (!senhaAtual || !novaSenha || !confirmar) {
+      exibirToast("Preencha todos os campos.", "erro");
+      return;
+    }
 
-        if (novaSenha.length < 8) {
-            exibirToast("A nova senha deve ter pelo menos 8 caracteres.", "erro");
-            return;
-        }
+    if (novaSenha.length < 8) {
+      exibirToast("A nova senha deve ter pelo menos 8 caracteres.", "erro");
+      return;
+    }
 
-        if (novaSenha !== confirmar) {
-            exibirToast("As senhas não conferem.", "erro");
-            return;
-        }
+    if (novaSenha !== confirmar) {
+      exibirToast("As senhas nÃ£o conferem.", "erro");
+      return;
+    }
 
-        try {
-            const resposta = await fetch(urlApiSenha, {
-                method: "PATCH",
-                headers: cabecalhosAutenticados(),
-                body: JSON.stringify({ senhaAtual, novaSenha })
-            });
+    try {
+      const resposta = await fetch(urlApiSenha, {
+        method: "PATCH",
+        headers: cabecalhosAutenticados(),
+        body: JSON.stringify({ senhaAtual, novaSenha })
+      });
 
-            const dados = await resposta.json();
+      const dados = await resposta.json();
 
-            if (!resposta.ok) {
-                exibirToast(dados.mensagem || "Erro ao alterar senha.", "erro");
-                return;
-            }
+      if (!resposta.ok) {
+        exibirToast(dados.mensagem || "Erro ao alterar senha.", "erro");
+        return;
+      }
 
-            exibirToast("Senha alterada com sucesso.", "sucesso");
-            document.getElementById("formularioSenha").reset();
-
-        } catch (erro) {
-            console.error("Erro ao alterar senha:", erro.message);
-            exibirToast("Erro de conexão com o servidor.", "erro");
-        }
-    });
+      exibirToast("Senha alterada com sucesso.", "sucesso");
+      document.getElementById("formularioSenha").reset();
+    } catch (erro) {
+      console.error("Erro ao alterar senha:", erro.message);
+      exibirToast("Erro de conexÃ£o com o servidor.", "erro");
+    }
+  });
 }
 
 // -------------------------------------------------------
@@ -343,31 +265,21 @@ function configurarFormularioSenha() {
 // -------------------------------------------------------
 
 function exibirToast(mensagem, tipo) {
-    const toast = document.getElementById("toastConfiguracao");
-    if (!toast) return;
+  const toast = document.getElementById("toastConfiguracao");
+  if (!toast) return;
 
-    toast.textContent = mensagem;
-    toast.className   = "toast-configuracao ativo toast-" + tipo;
+  toast.textContent = mensagem;
+  toast.className = "toast-configuracao ativo toast-" + tipo;
 
-    clearTimeout(toast._timer);
-    toast._timer = setTimeout(function () {
-        toast.classList.remove("ativo");
-    }, 3500);
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(function () {
+    toast.classList.remove("ativo");
+  }, 3500);
 }
 
 // -------------------------------------------------------
-// INICIALIZAÇÃO
+// INICIALIZAÃ‡ÃƒO
 // -------------------------------------------------------
 
-function iniciarPaginaConfiguracoes() {
-    iniciarSessaoConfiguracoes();
+document.addEventListener("DOMContentLoaded", iniciarSessaoConfiguracoes);
 
-    const selectPerfil = document.getElementById("campoModal_Perfil");
-    if (selectPerfil) {
-        selectPerfil.addEventListener("change", function () {
-            toggleCampoMotoristaPorPerfil(this.value);
-        });
-    }
-}
-
-document.addEventListener("DOMContentLoaded", iniciarPaginaConfiguracoes);

@@ -117,12 +117,8 @@
 
             <div class="grupo-campo">
               <label for="placa">Placa</label>
-              <input type="text" id="placa" name="placa" placeholder="AAA-0000 ou AAA0A00" maxlength="8" required />
-            </div>
-
-            <div class="grupo-campo">
-              <label for="proprietario">Proprietário</label>
-              <input type="text" id="proprietario" name="proprietario" placeholder="Nome do proprietário" required />
+              <input type="text" id="placa" name="placa" placeholder="AAA-0000 ou AAA0A00" maxlength="8"
+                data-mascara="placa" required />
             </div>
 
             <div class="grupo-campo">
@@ -173,9 +169,7 @@
   </div>
 
   <script src="/frontend/JavaScript/auth.js"></script>
-
-
-  <script src="/frontend/JavaScript/editar-veiculo.js"></script>
-</body>
+  <script src="/frontend/JavaScript/mascaras.js"></script>
+  <script src="/frontend/JavaScript/editar-veiculo.js"></script></body>
 
 </html>

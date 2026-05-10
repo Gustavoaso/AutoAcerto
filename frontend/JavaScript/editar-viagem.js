@@ -89,7 +89,11 @@ async function carregarViagem() {
         document.getElementById("destino").value = viagem.destino;
         document.getElementById("dataSaida").value = formatarDataParaInput(viagem.data_saida);
         document.getElementById("dataChegada").value = formatarDataParaInput(viagem.data_chegada);
-        document.getElementById("valorFrete").value = viagem.valor_frete;
+        const vf = Number(viagem.valor_frete);
+        const cent = Math.round(vf * 100);
+        document.getElementById("valorFrete").value = window.AutoAcertoMascaras
+            ? window.AutoAcertoMascaras.aplicarMoeda(String(cent))
+            : String(vf);
         document.getElementById("status").value = viagem.status;
         document.getElementById("observacoes").value = viagem.observacoes || "";
 
@@ -105,6 +109,14 @@ async function carregarViagem() {
 document.getElementById("botaoSalvarEdicao").addEventListener("click", async function (e) {
     e.preventDefault();
 
+    const valorFreteNum = window.AutoAcertoMascaras
+        ? window.AutoAcertoMascaras.moedaParaNumero(document.getElementById("valorFrete").value)
+        : parseFloat(document.getElementById("valorFrete").value);
+    if (isNaN(valorFreteNum) || valorFreteNum <= 0) {
+        alert("Informe um valor de frete válido.");
+        return;
+    }
+
     const dados = {
         origem: document.getElementById("origem").value,
         destino: document.getElementById("destino").value,
@@ -112,7 +124,7 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         veiculoId: document.getElementById("veiculoId").value,
         dataSaida: document.getElementById("dataSaida").value,
         dataChegada: document.getElementById("dataChegada").value,
-        valorFrete: document.getElementById("valorFrete").value,
+        valorFrete: valorFreteNum,
         status: document.getElementById("status").value,
         observacoes: document.getElementById("observacoes").value
     };

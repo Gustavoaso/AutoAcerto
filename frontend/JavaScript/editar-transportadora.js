@@ -48,7 +48,11 @@ async function carregarDadosTransportadora() {
 
 function preencherFormulario(t) {
     document.getElementById("campoNomeTransportadora").value = t.nome || "";
-    document.getElementById("campoCnpjTransportadora").value = t.cnpj || "";
+    const cnpjEl = document.getElementById("campoCnpjTransportadora");
+    cnpjEl.value = t.cnpj || "";
+    if (window.AutoAcertoMascaras) {
+        cnpjEl.value = window.AutoAcertoMascaras.aplicarCnpj(cnpjEl.value);
+    }
     document.getElementById("campoStatusTransportadora").value = t.ativo ? "true" : "false";
 }
 

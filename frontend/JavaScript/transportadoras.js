@@ -6,6 +6,8 @@
 const urlApiTransportadoras = "http://localhost:3000/transportadoras";
 
 let transportadoras = [];
+let transportadorasVisiveis = [];
+let exclusaoTransportadoras = null;
 
 function obterIniciaisTransportadora(nome) {
     return nome
@@ -40,7 +42,7 @@ function exibirToastTransportadora(mensagem, tipo) {
 
 async function carregarTransportadoras() {
     try {
-        const resposta = await fetch(urlApiTransportadoras);
+        const resposta = await fetch(urlApiTransportadoras, { headers: cabecalhosAutenticados() });
 
         if (!resposta.ok) {
             console.error("Erro ao buscar transportadoras.");
@@ -59,9 +61,11 @@ function renderizarTabelaTransportadoras(lista) {
     if (!corpo) return;
 
     corpo.innerHTML = "";
+    transportadorasVisiveis = lista;
 
     if (lista.length === 0) {
-        corpo.innerHTML = '<tr><td colspan="4" class="celula-vazia">Nenhuma transportadora cadastrada.</td></tr>';
+        corpo.innerHTML = '<tr><td colspan="6" class="celula-vazia">Nenhuma transportadora cadastrada.</td></tr>';
+        if (exclusaoTransportadoras) exclusaoTransportadoras.aposRender([]);
         return;
     }
 
@@ -70,10 +74,11 @@ function renderizarTabelaTransportadoras(lista) {
         linha.classList.add("linha-tabela");
 
         const seloStatus = transportadora.ativo
-            ? '<span class="selo-status selo-ativo">Ativa</span>'
+            ?'<span class="selo-status selo-ativo">Ativa</span>'
             : '<span class="selo-status selo-inativo">Inativa</span>';
 
         linha.innerHTML = `
+            ${exclusaoTransportadoras ? exclusaoTransportadoras.colunaLinha(transportadora.id) : ""}
             <td>
                 <div class="bloco-transportadora">
                     <div class="avatar-transportadora">${obterIniciaisTransportadora(transportadora.nome)}</div>
@@ -96,6 +101,8 @@ function renderizarTabelaTransportadoras(lista) {
 
         corpo.appendChild(linha);
     });
+
+    if (exclusaoTransportadoras) exclusaoTransportadoras.aposRender(lista);
 }
 
 function configurarFormularioTransportadora() {
@@ -130,7 +137,7 @@ function configurarFormularioTransportadora() {
         try {
             const resposta = await fetch(urlApiTransportadoras, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: cabecalhosAutenticados(),
                 body: JSON.stringify(dados)
             });
 
@@ -155,8 +162,29 @@ function configurarFormularioTransportadora() {
 }
 
 function iniciarPaginaTransportadoras() {
+    const usuario = exigirAutenticacao();
+    if (!usuario) return;
+    preencherInfoUsuario();
+    configurarBotaoSair();
+    marcarItemMenuLateralAtivo();
+    configurarExclusaoTransportadoras();
     configurarFormularioTransportadora();
     carregarTransportadoras();
+}
+
+function configurarExclusaoTransportadoras() {
+    if (!window.AutoAcertoExclusao) return;
+
+    exclusaoTransportadoras = window.AutoAcertoExclusao.criarGerenciadorExclusao({
+        urlApi: urlApiTransportadoras,
+        seletorTabela: "table",
+        seletorLinhas: "[data-selecionar-id]",
+        seletorSelecionarTodos: "[data-selecionar-todos-transportadoras]",
+        singular: "transportadora",
+        plural: "transportadoras",
+        renderizarAtual: function () { renderizarTabelaTransportadoras(transportadorasVisiveis); },
+        aoExcluir: carregarTransportadoras
+    });
 }
 
 document.addEventListener("DOMContentLoaded", iniciarPaginaTransportadoras);

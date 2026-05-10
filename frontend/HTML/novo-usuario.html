@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoAcerto - Viagens</title>
-  <link rel="stylesheet" href="/frontend/CSS/viagens.css" />
+  <title>AutoAcerto - Novo usuÃ¡rio</title>
+  <link rel="stylesheet" href="/frontend/CSS/editar-motorista.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,10 +14,9 @@
 <body>
   <div class="layout-principal">
     <aside class="barra-lateral">
-     <div class="icone-logo">
+      <div class="icone-logo">
         <img src="/frontend/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
       </div>
-
       <nav class="menu-lateral">
         <a href="home.html" class="item-menu ativo">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -45,7 +44,7 @@
             <circle cx="5.5" cy="18.5" r="2.5" />
             <circle cx="18.5" cy="18.5" r="2.5" />
           </svg>
-          Veículos
+          VeÃ­culos
         </a>
         <a href="viagens.html" class="item-menu">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -70,7 +69,7 @@
             <line x1="12" y1="20" x2="12" y2="4" />
             <line x1="6" y1="20" x2="6" y2="14" />
           </svg>
-          Relatórios
+          RelatÃ³rios
         </a>
         <a href="configuracoes.html" class="item-menu">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -79,111 +78,79 @@
             <path
               d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
-          Configurações
+          ConfiguraÃ§Ãµes
         </a>
       </nav>
-
       <div class="rodape-barra">
-        <button class="botao-sair">Sair</button>
+        <button class="botao-sair" type="button">Sair</button>
       </div>
     </aside>
 
     <main class="conteudo-principal">
       <header class="topo-pagina">
         <div class="acoes-topo">
-          <button class="botao-icone">🔔</button>
           <div class="perfil-usuario">
-            <div class="avatar-usuario">GS</div>
-            <span class="nome-usuario">Gustavo</span>
+            <div class="avatar-usuario">--</div>
+            <span class="nome-usuario">...</span>
           </div>
         </div>
       </header>
 
       <section class="cabecalho-conteudo">
         <div>
-          <h2 class="titulo-pagina">Viagens</h2>
-          <p class="subtitulo-pagina">Controle as viagens, acompanhe status e visualize os valores de frete.</p>
-        </div>
-
-        <button class="botao-primario" id="botaoNovaViagem" data-apenas-admin>+ Nova viagem</button>
-      </section>
-
-      <section class="grade-resumo">
-        <div class="card-resumo">
-          <span class="rotulo-resumo">Total de viagens</span>
-          <strong class="valor-resumo" id="totalViagens">0</strong>
-        </div>
-
-        <div class="card-resumo">
-          <span class="rotulo-resumo">Em andamento</span>
-          <strong class="valor-resumo" id="totalEmAndamento">0</strong>
-        </div>
-
-        <div class="card-resumo">
-          <span class="rotulo-resumo">Finalizadas</span>
-          <strong class="valor-resumo" id="totalFinalizadas">0</strong>
-        </div>
-
-        <div class="card-resumo">
-          <span class="rotulo-resumo">Valor total em fretes</span>
-          <strong class="valor-resumo valor-monetario" id="valorTotalFretes">R$ 0,00</strong>
+          <h2 class="titulo-pagina">Novo usuÃ¡rio</h2>
+          <p class="subtitulo-pagina">Cadastre um usuÃ¡rio com perfil de administrador ou motorista.</p>
         </div>
       </section>
 
-      <section class="painel">
-        <div class="cabecalho-painel">
-          <div>
-            <h3>Lista de Viagens</h3>
-            <p class="texto-auxiliar">Pesquise, filtre e acompanhe cada operação registrada.</p>
+      <section class="painel-formulario">
+        <div class="formulario-motorista" id="formUsuario">
+          <div class="grade-formulario">
+            <div class="grupo-campo">
+              <label for="campoNome">Nome completo</label>
+              <input type="text" id="campoNome" maxlength="255" required placeholder="Nome do usuÃ¡rio" />
+            </div>
+            <div class="grupo-campo">
+              <label for="campoEmail">E-mail</label>
+              <input type="email" id="campoEmail" maxlength="255" required placeholder="email@exemplo.com" />
+            </div>
+            <div class="grupo-campo">
+              <label for="campoPerfil">Perfil</label>
+              <select id="campoPerfil" required>
+                <option value="motorista">Motorista</option>
+                <option value="admin">Administrador</option>
+              </select>
+            </div>
+            <div class="grupo-campo" id="grupoMotoristaVinculo">
+              <label for="campoMotoristaId">Motorista vinculado</label>
+              <select id="campoMotoristaId">
+                <option value="">-- Selecione --</option>
+              </select>
+            </div>
+            <div class="grupo-campo">
+              <label for="campoSenha">Senha</label>
+              <input type="password" id="campoSenha" minlength="8" maxlength="128" required
+                placeholder="MÃ­nimo 8 caracteres" />
+            </div>
+            <div class="grupo-campo campo-checkbox-compacto">
+              <input type="checkbox" id="campoAtivo" checked />
+              <label for="campoAtivo">UsuÃ¡rio ativo</label>
+            </div>
           </div>
-        </div>
-
-        <div class="barra-filtros">
-          <div class="campo-filtro">
-            <label for="campoPesquisaViagem">Pesquisar</label>
-            <input type="text" id="campoPesquisaViagem" placeholder="Origem, destino, motorista, veículo ou placa" />
+          <div class="acoes-formulario">
+            <a href="configuracoes.html?secao=usuarios" class="botao-secundario"
+              style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Cancelar</a>
+            <button type="button" class="botao-primario" id="botaoSalvar">Salvar</button>
           </div>
-
-          <div class="campo-filtro">
-            <label for="filtroStatusViagem">Status</label>
-            <select id="filtroStatusViagem">
-              <option value="todos">Todos</option>
-              <option value="em andamento">Em andamento</option>
-              <option value="finalizada">Finalizada</option>
-              <option value="cancelada">Cancelada</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="tabela-responsiva">
-          <table class="tabela-viagens">
-            <thead>
-              <tr>
-                <th class="coluna-selecao" data-apenas-admin><input type="checkbox" data-selecionar-todos-viagens aria-label="Selecionar todos"></th>
-                <th>Viagem</th>
-                <th>Motorista</th>
-                <th>Veículo</th>
-                <th>Saída</th>
-                <th>Chegada</th>
-                <th>Frete</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="corpoTabelaViagens"></tbody>
-          </table>
+          <p id="msgErro" class="mensagem-retorno" style="display:none;"></p>
         </div>
       </section>
     </main>
   </div>
 
   <script src="/frontend/JavaScript/auth.js"></script>
-    <script src="/frontend/JavaScript/exclusao-listas.js"></script>
-
-
-  <script src="/frontend/JavaScript/viagens.js"></script>
+  <script src="/frontend/JavaScript/novo-usuario.js"></script>
 </body>
 
 </html>
-
 

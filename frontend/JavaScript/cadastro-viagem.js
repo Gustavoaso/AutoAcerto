@@ -54,6 +54,14 @@ async function carregarVeiculos() {
 botaoSalvar.addEventListener("click", async function (e) {
     e.preventDefault();
 
+    const valorFreteNum = window.AutoAcertoMascaras
+        ? window.AutoAcertoMascaras.moedaParaNumero(document.getElementById("valorFrete").value)
+        : parseFloat(document.getElementById("valorFrete").value);
+    if (isNaN(valorFreteNum) || valorFreteNum <= 0) {
+        alert("Informe um valor de frete válido.");
+        return;
+    }
+
     const dados = {
         origem: document.getElementById("origem").value,
         destino: document.getElementById("destino").value,
@@ -61,7 +69,7 @@ botaoSalvar.addEventListener("click", async function (e) {
         veiculoId: document.getElementById("veiculoId").value,
         dataSaida: document.getElementById("dataSaida").value,
         dataChegada: document.getElementById("dataChegada").value,
-        valorFrete: document.getElementById("valorFrete").value,
+        valorFrete: valorFreteNum,
         status: document.getElementById("status").value,
         observacoes: document.getElementById("observacoes").value
     };

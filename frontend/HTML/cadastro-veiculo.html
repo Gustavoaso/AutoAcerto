@@ -117,12 +117,8 @@
 
             <div class="grupo-campo">
               <label for="placa">Placa</label>
-              <input type="text" id="placa" name="placa" placeholder="AAA-0000 ou AAA0A00" maxlength="8" required />
-            </div>
-
-            <div class="grupo-campo">
-              <label for="proprietario">Proprietário</label>
-              <input type="text" id="proprietario" name="proprietario" placeholder="Nome do proprietário" required />
+              <input type="text" id="placa" name="placa" placeholder="AAA-0000 ou AAA0A00" maxlength="8"
+                data-mascara="placa" required />
             </div>
 
             <div class="grupo-campo">
@@ -134,6 +130,17 @@
                 <option value="manutenção">Manutenção</option>
                 <option value="inativo">Inativo</option>
               </select>
+            </div>
+
+            <div class="grupo-campo">
+              <label for="ano">Ano de fabricação</label>
+              <input type="number" id="ano" name="ano" placeholder="Ex: 2022" min="1950" max="2035" />
+            </div>
+
+            <div class="grupo-campo grupo-campo-largo">
+              <label for="observacoes">Observações</label>
+              <textarea id="observacoes" name="observacoes" rows="3"
+                placeholder="Informações adicionais sobre o veículo"></textarea>
             </div>
 
           </div>
@@ -162,9 +169,7 @@
   </div>
 
   <script src="/frontend/JavaScript/auth.js"></script>
-
-
-  <script src="/frontend/JavaScript/cadastro-veiculo.js"></script>
-</body>
+  <script src="/frontend/JavaScript/mascaras.js"></script>
+  <script src="/frontend/JavaScript/cadastro-veiculo.js"></script></body>
 
 </html>

@@ -62,7 +62,11 @@ async function carregarDespesa() {
         document.getElementById("descricao").value = despesa.descricao;
         document.getElementById("categoria").value = despesa.categoria;
         document.getElementById("dataDespesa").value = formatarDataParaInput(despesa.data_despesa);
-        document.getElementById("valor").value = despesa.valor;
+        const vNum = Number(despesa.valor);
+        const cent = Math.round(vNum * 100);
+        document.getElementById("valor").value = window.AutoAcertoMascaras
+            ? window.AutoAcertoMascaras.aplicarMoeda(String(cent))
+            : String(vNum);
         document.getElementById("observacoes").value = despesa.observacoes || "";
 
         await carregarViagens(despesa.viagem_id);
@@ -75,12 +79,20 @@ async function carregarDespesa() {
 document.getElementById("botaoSalvarEdicao").addEventListener("click", async function (e) {
     e.preventDefault();
 
+    const valorNum = window.AutoAcertoMascaras
+        ? window.AutoAcertoMascaras.moedaParaNumero(document.getElementById("valor").value)
+        : parseFloat(document.getElementById("valor").value);
+    if (isNaN(valorNum) || valorNum <= 0) {
+        alert("Informe um valor válido.");
+        return;
+    }
+
     const dados = {
         viagemId: document.getElementById("viagemId").value,
         descricao: document.getElementById("descricao").value,
         categoria: document.getElementById("categoria").value,
         dataDespesa: document.getElementById("dataDespesa").value,
-        valor: document.getElementById("valor").value,
+        valor: valorNum,
         observacoes: document.getElementById("observacoes").value
     };
 

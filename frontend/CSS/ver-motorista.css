@@ -6,6 +6,53 @@
 @import url('/frontend/CSS/global.css');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+.acoes-cabecalho {
+  display: flex;
+  gap: 10px;
+}
+
+.painel-detalhes {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra-suave);
+  padding: 24px;
+}
+
+.grade-detalhes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.grupo-detalhe {
+  background: var(--cor-superficie-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.grupo-detalhe-largo {
+  grid-column: 1 / -1;
+}
+
+.rotulo-detalhe {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.valor-detalhe {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--cor-texto);
+}
+
 /* Layout de detalhes */
 .grade-detalhes-motorista {
   display: grid;
@@ -130,6 +177,10 @@
 }
 
 @media (max-width: 640px) {
+  .grade-detalhes {
+    grid-template-columns: 1fr;
+  }
+
   .grade-campos-info {
     grid-template-columns: 1fr;
   }

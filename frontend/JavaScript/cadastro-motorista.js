@@ -53,18 +53,3 @@ botaoOk.addEventListener("click", function () {
 botaoLimpar.addEventListener("click", function () {
     document.getElementById("formularioMotorista").reset();
 });
-
-document.getElementById("cpf").addEventListener("input", function (e) {
-    e.target.value = e.target.value
-        .replace(/\D/g, "")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-});
-
-document.getElementById("telefone").addEventListener("input", function (e) {
-    e.target.value = e.target.value
-        .replace(/\D/g, "")
-        .replace(/^(\d{2})(\d)/g, "($1) $2")
-        .replace(/(\d{5})(\d)/, "$1-$2");
-});

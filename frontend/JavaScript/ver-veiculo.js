@@ -3,6 +3,16 @@ const urlApi = "http://localhost:3000/veiculos";
 const params = new URLSearchParams(window.location.search);
 const idVeiculo = params.get("id");
 
+function formatarPlacaExibicao(placa) {
+  if (!placa) return "—";
+  if (window.AutoAcertoMascaras) {
+    return window.AutoAcertoMascaras.aplicarPlaca(String(placa).replace(/-/g, ""));
+  }
+  const u = String(placa).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (u.length <= 3) return u || "—";
+  return u.slice(0, 3) + "-" + u.slice(3);
+}
+
 function formatarDataHora(dataISO) {
   if (!dataISO) return "—";
   const data = new Date(dataISO);
@@ -32,11 +42,11 @@ async function carregarVeiculo() {
 
     const veiculo = await response.json();
 
+    const placaFmt = formatarPlacaExibicao(veiculo.placa);
     document.getElementById("detalheModelo").textContent = veiculo.modelo;
-    document.getElementById("detalhePlacaTopo").textContent = veiculo.placa;
+    document.getElementById("detalhePlacaTopo").textContent = placaFmt;
     document.getElementById("detalheModeloGrid").textContent = veiculo.modelo;
-    document.getElementById("detalhePlaca").textContent = veiculo.placa;
-    document.getElementById("detalheProprietario").textContent = veiculo.proprietario;
+    document.getElementById("detalhePlaca").textContent = placaFmt;
     document.getElementById("detalheAno").textContent = veiculo.ano || "—";
     document.getElementById("detalheObservacoes").textContent = veiculo.observacoes || "—";
     document.getElementById("detalheDataCadastro").textContent = formatarDataHora(veiculo.data_cadastro);
