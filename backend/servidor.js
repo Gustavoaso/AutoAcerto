@@ -183,6 +183,31 @@ app.get("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => {
   }
 });
 
+app.get("/transportadoras/:id", exigirDonoSistema, async (requisicao, resposta) => {
+  try {
+    const { id } = requisicao.params;
+    const sql = `
+      SELECT
+        t.id, t.nome, t.cnpj, t.ativo, t.data_cadastro,
+        COUNT(u.id) FILTER (WHERE u.perfil = 'admin') AS total_admins
+      FROM transportadoras t
+      LEFT JOIN usuarios u ON u.transportadora_id = t.id
+      WHERE t.id = $1
+      GROUP BY t.id
+    `;
+    const resultado = await banco.query(sql, [id]);
+    
+    if (resultado.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Transportadora não encontrada." });
+    }
+    
+    return resposta.json(resultado.rows[0]);
+  } catch (erro) {
+    console.error("Erro ao buscar transportadora:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao buscar transportadora." });
+  }
+});
+
 app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => {
   const {
     nomeTransportadora,
@@ -232,6 +257,34 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
     return resposta.status(500).json({ mensagem: "Erro ao criar transportadora." });
   } finally {
     cliente.release();
+  }
+});
+
+app.put("/transportadoras/:id", exigirDonoSistema, async (requisicao, resposta) => {
+  try {
+    const { id } = requisicao.params;
+    const { nome, cnpj, ativo } = requisicao.body;
+
+    if (!nome) {
+      return resposta.status(400).json({ mensagem: "O nome da transportadora é obrigatório." });
+    }
+
+    const sql = `
+      UPDATE transportadoras
+      SET nome = $1, cnpj = $2, ativo = $3
+      WHERE id = $4
+      RETURNING id
+    `;
+    const resultado = await banco.query(sql, [nome, cnpj || null, ativo, id]);
+
+    if (resultado.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Transportadora não encontrada." });
+    }
+
+    return resposta.json({ mensagem: "Transportadora atualizada com sucesso." });
+  } catch (erro) {
+    console.error("Erro ao atualizar transportadora:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao atualizar transportadora." });
   }
 });
 

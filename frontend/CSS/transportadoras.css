@@ -50,6 +50,72 @@
   margin-bottom: 2px;
 }
 
+/* Estilos para páginas de ver e editar */
+.cabecalho-pagina {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.botao-voltar {
+  background: var(--cor-fundo-secundario);
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-texto);
+  padding: 8px 16px;
+  border-radius: var(--raio-sm);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.botao-voltar:hover {
+  background: var(--cor-fundo-hover);
+}
+
+.cartao-detalhes {
+  background: var(--cor-fundo-secundario);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  padding: 24px;
+}
+
+.linha-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.linha-info:last-child {
+  border-bottom: none;
+}
+
+.rotulo-info {
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+}
+
+.valor-info {
+  color: var(--cor-texto);
+  font-weight: 500;
+}
+
+.cartao-formulario {
+  background: var(--cor-fundo-secundario);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  padding: 24px;
+  max-width: 600px;
+}
+
+.carregando {
+  text-align: center;
+  padding: 40px;
+  color: var(--cor-texto-secundario);
+}
+}
+
 .celula-vazia {
   text-align: center;
   color: var(--cor-texto-secundario);
