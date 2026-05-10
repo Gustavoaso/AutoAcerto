@@ -14,7 +14,7 @@
   align-items: start;
 }
 
-.card-perfil-motorista {
+/* .card-perfil-motorista {
   background: var(--cor-superficie);
   border-radius: var(--raio);
   border: 1px solid var(--cor-borda);
@@ -27,7 +27,7 @@
   gap: 10px;
   position: sticky;
   top: 20px;
-}
+} */
 
 .avatar-perfil-motorista {
   width: 72px;
@@ -120,9 +120,9 @@
     grid-template-columns: 1fr;
   }
 
-  .card-perfil-motorista {
+  /* .card-perfil-motorista {
     position: static;
-  }
+  } */
 
   .grade-campos-info {
     grid-template-columns: repeat(2, 1fr);

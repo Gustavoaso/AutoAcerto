@@ -1,45 +1,171 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Transportadora — AutoAcerto</title>
-    <link rel="stylesheet" href="../CSS/transportadoras.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Editar Transportadora</title>
+  <link rel="stylesheet" href="/frontend/CSS/editar-transportadora.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <div class="container-principal">
-        <div class="cabecalho-pagina">
-            <h1>Editar Transportadora</h1>
-            <button class="botao-voltar" onclick="window.location.href='transportadoras.html'">← Voltar</button>
+  <div class="layout-principal">
+    <aside class="barra-lateral">
+      <div class="icone-logo">
+        <img src="/frontend/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+      </div>
+
+      <nav class="menu-lateral">
+        <a href="home.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          Dashboard
+        </a>
+        <a href="motoristas.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          Motoristas
+        </a>
+        <a href="veiculos.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="1" />
+            <path d="M16 8h4l3 5v3h-7V8z" />
+            <circle cx="5.5" cy="18.5" r="2.5" />
+            <circle cx="18.5" cy="18.5" r="2.5" />
+          </svg>
+          Veículos
+        </a>
+        <a href="viagens.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          Viagens
+        </a>
+        <a href="despesas.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          Despesas
+        </a>
+        <a href="relatorios.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
+          Relatórios
+        </a>
+        <a href="transportadoras.html" class="item-menu ativo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="1" />
+            <path d="M16 8h4l3 5v3h-7V8z" />
+            <circle cx="5.5" cy="18.5" r="2.5" />
+            <circle cx="18.5" cy="18.5" r="2.5" />
+          </svg>
+          Transportadoras
+        </a>
+        <a href="configuracoes.html" class="item-menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          Configurações
+        </a>
+      </nav>
+
+      <div class="rodape-barra">
+        <button class="botao-sair">Sair</button>
+      </div>
+    </aside>
+
+    <main class="conteudo-principal">
+      <header class="topo-pagina">
+        <div class="acoes-topo">
+          <button class="botao-icone" type="button">🔔</button>
+          <div class="perfil-usuario">
+            <div class="avatar-usuario">GS</div>
+            <span class="nome-usuario">Gustavo</span>
+          </div>
         </div>
+      </header>
 
-        <div class="cartao-formulario">
-            <form id="formularioEditarTransportadora">
-                <div class="grupo-campo">
-                    <label for="campoNomeTransportadora">Nome da transportadora</label>
-                    <input type="text" id="campoNomeTransportadora" required>
-                </div>
-
-                <div class="grupo-campo">
-                    <label for="campoCnpjTransportadora">CNPJ</label>
-                    <input type="text" id="campoCnpjTransportadora">
-                </div>
-
-                <div class="grupo-campo">
-                    <label for="campoStatusTransportadora">Status</label>
-                    <select id="campoStatusTransportadora" required>
-                        <option value="true">Ativa</option>
-                        <option value="false">Inativa</option>
-                    </select>
-                </div>
-
-                <button type="submit" id="botaoSalvarEdicao" class="botao-primario">Salvar alterações</button>
-            </form>
+      <section class="cabecalho-conteudo">
+        <div>
+          <h2 class="titulo-pagina">Editar Transportadora</h2>
+          <p class="subtitulo-pagina">Altere os dados da transportadora e salve as modificações.</p>
         </div>
+      </section>
+
+      <section class="painel-formulario">
+        <div id="formularioTransportadora">
+          <div class="grade-formulario">
+
+            <div class="grupo-campo">
+              <label for="campoNomeTransportadora">Nome da transportadora</label>
+              <input type="text" id="campoNomeTransportadora" name="nome" placeholder="Ex: Transportadora Silva Ltda" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="campoCnpjTransportadora">CNPJ</label>
+              <input type="text" id="campoCnpjTransportadora" name="cnpj" placeholder="00.000.000/0000-00" />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="campoStatusTransportadora">Status</label>
+              <select id="campoStatusTransportadora" name="status" required>
+                <option value="">Selecione</option>
+                <option value="true">Ativa</option>
+                <option value="false">Inativa</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="acoes-formulario">
+            <button type="button" class="botao-secundario" id="botaoCancelar">Cancelar</button>
+            <button type="button" class="botao-primario" id="botaoSalvarEdicao">Salvar alterações</button>
+          </div>
+
+          <div id="mensagemRetorno" class="mensagem-retorno"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modalSucesso" class="modal-sucesso oculto">
+    <div class="fundo-modal-sucesso"></div>
+    <div class="caixa-modal-sucesso">
+      <div class="icone-sucesso">✔</div>
+      <h3>Transportadora atualizada</h3>
+      <p>As alterações foram salvas com sucesso.</p>
+      <div class="acoes-modal-sucesso">
+        <button type="button" class="botao-primario" id="botaoOkModal">OK</button>
+      </div>
     </div>
+  </div>
 
-    <div id="toastTransportadora" class="toast-configuracao"></div>
-
-    <script src="../JavaScript/editar-transportadora.js"></script>
+  <script src="/frontend/JavaScript/auth.js"></script>
+  <script src="/frontend/JavaScript/editar-transportadora.js"></script>
 </body>
+
 </html>
