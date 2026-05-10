@@ -34,6 +34,16 @@ function encerrarSessao() {
     window.location.href = "/frontend/HTML/login.html";
 }
 
+function paginaPermitidaParaMotorista(caminho) {
+    return caminho.endsWith("/viagens.html") ||
+           caminho.endsWith("/ver-viagem.html") ||
+           caminho.endsWith("/login.html");
+}
+
+function paginaPermitidaParaDonoSistema(caminho) {
+    return true;
+}
+
 function exigirAutenticacao() {
     const token = obterToken();
     const usuario = obterUsuarioLogado();
@@ -50,6 +60,16 @@ function exigirAutenticacao() {
             window.location.href = paginaLogin;
         }
 
+        return null;
+    }
+
+    if (usuario.perfil === "motorista" && !paginaPermitidaParaMotorista(paginaAtual)) {
+        window.location.href = "/frontend/HTML/viagens.html";
+        return null;
+    }
+
+    if (usuario.perfil === "dono" && !paginaPermitidaParaDonoSistema(paginaAtual)) {
+        window.location.href = "/frontend/HTML/transportadoras.html";
         return null;
     }
 
@@ -94,11 +114,64 @@ function preencherInfoUsuario() {
         avatarElement.textContent = iniciais;
     }
 
-    const elementosAdmin = document.querySelectorAll("[data-apenas-admin]");
-    if (usuario.perfil !== "admin") {
-        elementosAdmin.forEach(function (elemento) {
-            elemento.style.display = "none";
-        });
+    document.querySelectorAll("[data-apenas-admin]").forEach(function (elemento) {
+        elemento.style.display = usuario.perfil === "admin" ? "" : "none";
+    });
+
+    document.querySelectorAll("[data-apenas-dono]").forEach(function (elemento) {
+        elemento.style.display = usuario.perfil === "dono" ? "" : "none";
+    });
+
+    ajustarMenuPorPerfil(usuario);
+}
+
+function ajustarMenuPorPerfil(usuario) {
+    if (!usuario) return;
+
+    if (usuario.perfil === "dono") {
+        inserirMenuTransportadoras();
+        return;
+    }
+
+    if (usuario.perfil === "admin") return;
+
+    document.querySelectorAll(".menu-lateral .item-menu").forEach(function (item) {
+        const destino = item.getAttribute("href") || "";
+        if (!destino.endsWith("viagens.html")) {
+            item.style.display = "none";
+        }
+    });
+
+    document.querySelectorAll("[data-apenas-admin]").forEach(function (elemento) {
+        elemento.style.display = "none";
+    });
+}
+
+function inserirMenuTransportadoras() {
+    const menu = document.querySelector(".menu-lateral");
+    if (!menu || menu.querySelector('[href="transportadoras.html"]')) return;
+
+    const item = document.createElement("a");
+    item.href = "transportadoras.html";
+    item.className = "item-menu";
+    if (window.location.pathname.endsWith("/transportadoras.html")) {
+        item.classList.add("ativo");
+    }
+    item.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <path d="M7 8h10" />
+            <path d="M7 12h10" />
+            <path d="M7 16h6" />
+        </svg>
+        Transportadoras
+    `;
+
+    const itemConfiguracoes = menu.querySelector('[href="configuracoes.html"]');
+    if (itemConfiguracoes) {
+        menu.insertBefore(item, itemConfiguracoes);
+    } else {
+        menu.appendChild(item);
     }
 }
 
@@ -109,3 +182,43 @@ function configurarBotaoSair() {
         encerrarSessao();
     });
 }
+
+function configurarFetchAutenticado() {
+    if (window.fetchAutenticadoConfigurado) return;
+
+    const fetchOriginal = window.fetch.bind(window);
+    window.fetch = function (recurso, opcoes) {
+        const url = typeof recurso === "string" ? recurso : recurso.url;
+        const deveAutenticar = url && url.startsWith("http://localhost:3000/") && !url.includes("/auth/login");
+
+        if (!deveAutenticar) {
+            return fetchOriginal(recurso, opcoes);
+        }
+
+        const novasOpcoes = opcoes ? Object.assign({}, opcoes) : {};
+        const headers = new Headers(novasOpcoes.headers || {});
+        const token = obterToken();
+
+        if (token && !headers.has("Authorization")) {
+            headers.set("Authorization", "Bearer " + token);
+        }
+
+        novasOpcoes.headers = headers;
+        return fetchOriginal(recurso, novasOpcoes);
+    };
+
+    window.fetchAutenticadoConfigurado = true;
+}
+
+configurarFetchAutenticado();
+
+document.addEventListener("DOMContentLoaded", function () {
+    const paginaAtual = window.location.pathname;
+    if (paginaAtual.endsWith("/login.html")) return;
+
+    const usuario = exigirAutenticacao();
+    if (!usuario) return;
+
+    preencherInfoUsuario();
+    configurarBotaoSair();
+});

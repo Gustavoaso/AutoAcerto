@@ -81,8 +81,11 @@ document.getElementById("botaoVoltar").addEventListener("click", function () {
     window.location.href = "viagens.html";
 });
 
-document.getElementById("botaoEditar").addEventListener("click", function () {
-    window.location.href = "editar-viagem.html?id=" + idViagem;
-});
+const botaoEditar = document.getElementById("botaoEditar");
+if (botaoEditar) {
+    botaoEditar.addEventListener("click", function () {
+        window.location.href = "editar-viagem.html?id=" + idViagem;
+    });
+}
 
 carregarViagem();

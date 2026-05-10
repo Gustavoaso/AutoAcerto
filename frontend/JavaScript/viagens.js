@@ -49,6 +49,9 @@ function criarSeloStatusViagem(status) {
 
 function renderizarTabelaViagens(listaViagens) {
     const corpoTabelaViagens = document.getElementById("corpoTabelaViagens");
+    const usuario = obterUsuarioLogado();
+    const podeEditar = usuario && usuario.perfil === "admin";
+
     corpoTabelaViagens.innerHTML = "";
 
     if (listaViagens.length === 0) {
@@ -89,7 +92,7 @@ function renderizarTabelaViagens(listaViagens) {
             <td>
                 <div class="grupo-acoes">
                     <button class="botao-acao" onclick="window.location.href='ver-viagem.html?id=${viagem.id}'">Ver</button>
-                    <button class="botao-acao" onclick="window.location.href='editar-viagem.html?id=${viagem.id}'">Editar</button>
+                    ${podeEditar ? `<button class="botao-acao" onclick="window.location.href='editar-viagem.html?id=${viagem.id}'">Editar</button>` : ""}
                 </div>
             </td>
         `;
@@ -142,11 +145,12 @@ function configurarEventosViagens() {
         .getElementById("filtroStatusViagem")
         .addEventListener("change", aplicarFiltrosViagens);
 
-    document
-        .getElementById("botaoNovaViagem")
-        .addEventListener("click", function () {
+    const botaoNovaViagem = document.getElementById("botaoNovaViagem");
+    if (botaoNovaViagem) {
+        botaoNovaViagem.addEventListener("click", function () {
             window.location.href = "cadastro-viagem.html";
         });
+    }
 
     document
         .querySelector(".botao-sair")

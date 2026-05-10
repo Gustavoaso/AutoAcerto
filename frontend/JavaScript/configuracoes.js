@@ -1,6 +1,6 @@
 // =============================================================
 // AUTOACERTO — CONFIGURAÇÕES
-// Gerenciamento de perfil, usuários (admin), sistema e segurança.
+// Gerenciamento de perfil, usuários (admin) e segurança.
 // =============================================================
 
 const urlApiUsuarios   = "http://localhost:3000/usuarios";
@@ -66,11 +66,36 @@ function ativarSecao(idSecao) {
 function configurarFormularioPerfil(usuario) {
     document.getElementById("campoPerfil_Nome").value  = usuario.nome  || "";
     document.getElementById("campoPerfil_Email").value = usuario.email || "";
+    preencherTipoPerfil(usuario);
 
     document.getElementById("formularioPerfil").addEventListener("submit", function (evento) {
         evento.preventDefault();
         exibirToast("Funcionalidade disponível em breve.", "info");
     });
+}
+
+function preencherTipoPerfil(usuario) {
+    const perfilFormatado = usuario.perfil === "dono"
+        ? "Dono do sistema"
+        : usuario.perfil === "admin"
+            ? "Administrador"
+            : "Motorista";
+    const seloPerfil = document.getElementById("seloTipoPerfil");
+    const textoPerfil = document.getElementById("textoTipoPerfil");
+    const avatarPerfil = document.getElementById("avatarPerfilConfig");
+
+    if (seloPerfil) {
+        seloPerfil.textContent = perfilFormatado;
+        seloPerfil.classList.toggle("selo-perfil-admin", usuario.perfil === "admin");
+    }
+
+    if (textoPerfil) {
+        textoPerfil.textContent = perfilFormatado;
+    }
+
+    if (avatarPerfil) {
+        avatarPerfil.textContent = obterIniciaisNome(usuario.nome || perfilFormatado);
+    }
 }
 
 // -------------------------------------------------------
@@ -314,28 +339,6 @@ function configurarFormularioSenha() {
 }
 
 // -------------------------------------------------------
-// SISTEMA
-// -------------------------------------------------------
-
-function configurarSecaoSistema() {
-    const registrosPorPagina = document.getElementById("campoSistema_RegistrosPorPagina");
-    const formatoData        = document.getElementById("campoSistema_FormatoData");
-    const confirmarExclusoes = document.getElementById("campoSistema_ConfirmarExclusoes");
-
-    if (registrosPorPagina)  registrosPorPagina.value   = localStorage.getItem("sistemaRegistrosPagina") || "20";
-    if (formatoData)          formatoData.value          = localStorage.getItem("sistemaFormatoData") || "dd/mm/aaaa";
-    if (confirmarExclusoes)   confirmarExclusoes.checked = localStorage.getItem("sistemaConfirmarExclusoes") !== "false";
-
-    document.getElementById("formularioSistema").addEventListener("submit", function (evento) {
-        evento.preventDefault();
-        if (registrosPorPagina)  localStorage.setItem("sistemaRegistrosPagina", registrosPorPagina.value);
-        if (formatoData)          localStorage.setItem("sistemaFormatoData", formatoData.value);
-        if (confirmarExclusoes)   localStorage.setItem("sistemaConfirmarExclusoes", confirmarExclusoes.checked);
-        exibirToast("Configurações do sistema salvas.", "sucesso");
-    });
-}
-
-// -------------------------------------------------------
 // TOAST
 // -------------------------------------------------------
 
@@ -358,7 +361,6 @@ function exibirToast(mensagem, tipo) {
 
 function iniciarPaginaConfiguracoes() {
     iniciarSessaoConfiguracoes();
-    configurarSecaoSistema();
 
     const selectPerfil = document.getElementById("campoModal_Perfil");
     if (selectPerfil) {

@@ -1,0 +1,69 @@
+/* =============================================================
+   TRANSPORTADORAS — estilos específicos
+   Base: /frontend/CSS/global.css
+   ============================================================= */
+
+@import url('/frontend/CSS/global.css');
+@import url('/frontend/CSS/configuracoes.css');
+
+.grade-transportadoras {
+  display: grid;
+  grid-template-columns: minmax(320px, 420px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.formulario-transportadora .grade-formulario {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.divisor-formulario {
+  padding-top: 16px;
+  margin-top: 4px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.bloco-transportadora {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar-transportadora {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--raio-sm);
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.nome-transportadora {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--cor-texto);
+  margin-bottom: 2px;
+}
+
+.celula-vazia {
+  text-align: center;
+  color: var(--cor-texto-secundario);
+  padding: 32px 16px;
+}
+
+@media (max-width: 980px) {
+  .grade-transportadoras {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .formulario-transportadora .grade-formulario {
+    grid-template-columns: 1fr;
+  }
+}

@@ -6,7 +6,9 @@
 const urlApiLogin = "http://localhost:3000/auth/login";
 
 function redirecionarPorPerfil(perfil) {
-    if (perfil === "admin") {
+    if (perfil === "dono") {
+        window.location.href = "/frontend/HTML/transportadoras.html";
+    } else if (perfil === "admin") {
         window.location.href = "/frontend/HTML/home.html";
     } else {
         window.location.href = "/frontend/HTML/viagens.html";

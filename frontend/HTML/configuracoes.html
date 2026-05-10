@@ -109,10 +109,6 @@
             <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
             Usuários
           </button>
-          <button class="item-menu-config" data-secao="secao-sistema">
-            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>
-            Sistema
-          </button>
           <button class="item-menu-config" data-secao="secao-seguranca">
             <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
             Segurança
@@ -124,20 +120,33 @@
 
           <!-- Seção: Perfil -->
           <div class="secao-config" id="secao-perfil">
-            <div class="painel">
-              <div class="cabecalho-painel"><h3>Informações do Perfil</h3></div>
+            <div class="painel painel-config-card">
+              <div class="cabecalho-painel cabecalho-painel-config">
+                <div>
+                  <h3>Informações do Perfil</h3>
+                  <p>Dados principais da sua conta no AutoAcerto.</p>
+                </div>
+                <span class="selo-perfil-usuario" id="seloTipoPerfil">Perfil</span>
+              </div>
+              <div class="resumo-perfil-config">
+                <div class="avatar-perfil-config" id="avatarPerfilConfig">--</div>
+                <div>
+                  <p class="rotulo-resumo-perfil">Tipo de perfil</p>
+                  <strong id="textoTipoPerfil">Carregando...</strong>
+                </div>
+              </div>
               <form class="formulario-configuracao" id="formularioPerfil">
                 <div class="grade-formulario-config">
-                  <div class="campo-form">
+                  <div class="campo-form campo-config">
                     <label for="campoPerfil_Nome">Nome completo</label>
                     <input type="text" id="campoPerfil_Nome" placeholder="Seu nome" />
                   </div>
-                  <div class="campo-form">
+                  <div class="campo-form campo-config">
                     <label for="campoPerfil_Email">E-mail</label>
                     <input type="email" id="campoPerfil_Email" placeholder="seu@email.com" readonly />
                   </div>
                 </div>
-                <div style="margin-top: 16px;">
+                <div class="acoes-form-config">
                   <button type="submit" class="botao-primario">Salvar alterações</button>
                 </div>
               </form>
@@ -175,85 +184,34 @@
             </div>
           </div>
 
-          <!-- Seção: Sistema -->
-          <div class="secao-config" id="secao-sistema" style="display: none;">
-            <div class="painel">
-              <div class="cabecalho-painel"><h3>Preferências do Sistema</h3></div>
-              <div class="secao-config-interna">
-                <p class="titulo-secao-config">Exibição</p>
-                <form class="formulario-configuracao" id="formularioSistema">
-                  <div class="linha-config">
-                    <div class="info-config">
-                      <span class="titulo-config">Registros por página</span>
-                      <span class="descricao-config">Quantidade de itens exibidos nas listas e tabelas</span>
-                    </div>
-                    <select id="campoSistema_RegistrosPorPagina" class="select-config">
-                      <option value="10">10</option>
-                      <option value="20" selected>20</option>
-                      <option value="50">50</option>
-                      <option value="100">100</option>
-                    </select>
-                  </div>
-                  <div class="linha-config">
-                    <div class="info-config">
-                      <span class="titulo-config">Formato de data</span>
-                      <span class="descricao-config">Padrão de exibição de datas em todo o sistema</span>
-                    </div>
-                    <select id="campoSistema_FormatoData" class="select-config">
-                      <option value="dd/mm/aaaa" selected>DD/MM/AAAA</option>
-                      <option value="mm/dd/aaaa">MM/DD/AAAA</option>
-                      <option value="aaaa-mm-dd">AAAA-MM-DD</option>
-                    </select>
-                  </div>
-                  <div class="linha-config">
-                    <div class="info-config">
-                      <span class="titulo-config">Confirmar exclusões</span>
-                      <span class="descricao-config">Exibir confirmação antes de remover qualquer registro</span>
-                    </div>
-                    <label class="toggle-switch">
-                      <input type="checkbox" id="campoSistema_ConfirmarExclusoes" checked />
-                      <span class="slider-toggle"></span>
-                    </label>
-                  </div>
-                  <div style="margin-top: 20px;">
-                    <button type="submit" class="botao-primario">Salvar preferências</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
           <!-- Seção: Segurança -->
           <div class="secao-config" id="secao-seguranca" style="display: none;">
-            <div class="painel">
-              <div class="cabecalho-painel"><h3>Alterar Senha</h3></div>
+            <div class="painel painel-config-card">
+              <div class="cabecalho-painel cabecalho-painel-config">
+                <div>
+                  <h3>Alterar Senha</h3>
+                  <p>Mantenha sua conta protegida com uma senha forte.</p>
+                </div>
+              </div>
               <form class="formulario-configuracao" id="formularioSenha">
                 <div class="grade-formulario-config">
-                  <div class="campo-form" style="grid-column: 1 / -1;">
+                  <div class="campo-form campo-config campo-config-largo">
                     <label for="campoSenhaAtual">Senha atual</label>
                     <input type="password" id="campoSenhaAtual" placeholder="Digite sua senha atual" />
                   </div>
-                  <div class="campo-form">
+                  <div class="campo-form campo-config">
                     <label for="campoNovaSenha">Nova senha</label>
                     <input type="password" id="campoNovaSenha" placeholder="Mínimo 8 caracteres" />
                   </div>
-                  <div class="campo-form">
+                  <div class="campo-form campo-config">
                     <label for="campoConfirmarSenha">Confirmar nova senha</label>
                     <input type="password" id="campoConfirmarSenha" placeholder="Repita a nova senha" />
                   </div>
                 </div>
-                <div style="margin-top: 16px;">
+                <div class="acoes-form-config">
                   <button type="submit" class="botao-primario">Alterar senha</button>
                 </div>
               </form>
-            </div>
-
-            <div class="zona-perigo" style="margin-top: 20px;">
-              <p class="titulo-zona-perigo">Zona de Perigo</p>
-              <p class="descricao-zona-perigo">As ações abaixo são irreversíveis. Tenha certeza antes de prosseguir.</p>
-              <button class="botao-primario" id="botaoRedefinirSistema" style="background: var(--cor-perigo); border-color: var(--cor-perigo);">
-                Limpar todos os dados do sistema
-              </button>
             </div>
           </div>
 
