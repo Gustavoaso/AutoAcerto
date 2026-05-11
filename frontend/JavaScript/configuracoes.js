@@ -3,8 +3,8 @@
 // Gerenciamento de perfil, usuÃ¡rios (admin) e seguranÃ§a.
 // =============================================================
 
-const urlApiUsuarios = "http://localhost:3000/usuarios";
-const urlApiSenha = "http://localhost:3000/usuarios/senha";
+const urlApiUsuarios = montarUrlApi("/usuarios");
+const urlApiSenha = montarUrlApi("/usuarios/senha");
 
 let listaUsuarios = [];
 let usuariosVisiveis = [];

@@ -1,6 +1,6 @@
-const urlApiViagens = "http://localhost:3000/viagens";
-const urlApiDespesas = "http://localhost:3000/despesas";
-const urlApiMotoristas = "http://localhost:3000/motoristas";
+const urlApiViagens = montarUrlApi("/viagens");
+const urlApiDespesas = montarUrlApi("/despesas");
+const urlApiMotoristas = montarUrlApi("/motoristas");
 
 let viagens = [];
 let despesas = [];

@@ -20,6 +20,28 @@ function obterToken() {
     return localStorage.getItem("token");
 }
 
+function obterApiBaseUrl() {
+    const origemPadrao = window.location.origin;
+    const metaApi = document.querySelector('meta[name="autoacerto-api-base"]');
+    const configurada =
+        window.AUTOACERTO_API_BASE_URL ||
+        (metaApi ? metaApi.getAttribute("content") : "") ||
+        localStorage.getItem("AUTOACERTO_API_BASE_URL");
+    if (configurada && String(configurada).trim()) {
+        return String(configurada).trim().replace(/\/+$/, "");
+    }
+    return origemPadrao.replace(/\/+$/, "");
+}
+
+function montarUrlApi(caminho) {
+    const base = obterApiBaseUrl();
+    const sufixo = String(caminho || "").startsWith("/") ? caminho : "/" + String(caminho || "");
+    return base + sufixo;
+}
+
+window.obterApiBaseUrl = obterApiBaseUrl;
+window.montarUrlApi = montarUrlApi;
+
 function obterUsuarioLogado() {
     try {
         return JSON.parse(localStorage.getItem("usuario"));
@@ -205,11 +227,23 @@ function configurarFetchAutenticado() {
 
     const fetchOriginal = window.fetch.bind(window);
     window.fetch = function (recurso, opcoes) {
-        const url = typeof recurso === "string" ? recurso : recurso.url;
-        const deveAutenticar = url && url.startsWith("http://localhost:3000/") && !url.includes("/auth/login");
+        const urlOriginal = typeof recurso === "string" ? recurso : recurso.url;
+        const baseApi = obterApiBaseUrl();
+        const urlApiLocalAntiga = "http://localhost:3000";
+        let recursoFinal = recurso;
+        let urlFinal = urlOriginal;
+
+        // Mantém retrocompatibilidade com links antigos hardcoded.
+        if (typeof urlOriginal === "string" && urlOriginal.startsWith(urlApiLocalAntiga)) {
+            const relativo = urlOriginal.slice(urlApiLocalAntiga.length);
+            urlFinal = baseApi + relativo;
+            recursoFinal = typeof recurso === "string" ? urlFinal : new Request(urlFinal, recurso);
+        }
+
+        const deveAutenticar = urlFinal && urlFinal.startsWith(baseApi + "/") && !urlFinal.includes("/auth/login");
 
         if (!deveAutenticar) {
-            return fetchOriginal(recurso, opcoes);
+            return fetchOriginal(recursoFinal, opcoes);
         }
 
         const novasOpcoes = opcoes ? Object.assign({}, opcoes) : {};
@@ -221,7 +255,7 @@ function configurarFetchAutenticado() {
         }
 
         novasOpcoes.headers = headers;
-        return fetchOriginal(recurso, novasOpcoes);
+        return fetchOriginal(recursoFinal, novasOpcoes);
     };
 
     window.fetchAutenticadoConfigurado = true;

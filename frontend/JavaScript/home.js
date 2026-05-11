@@ -1,7 +1,7 @@
-const urlApiMotoristas = "http://localhost:3000/motoristas";
-const urlApiVeiculos = "http://localhost:3000/veiculos";
-const urlApiViagens = "http://localhost:3000/viagens";
-const urlApiDespesas = "http://localhost:3000/despesas";
+const urlApiMotoristas = montarUrlApi("/motoristas");
+const urlApiVeiculos = montarUrlApi("/veiculos");
+const urlApiViagens = montarUrlApi("/viagens");
+const urlApiDespesas = montarUrlApi("/despesas");
 
 async function buscarDados(url) {
   const resposta = await fetch(url);

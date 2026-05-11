@@ -1,4 +1,4 @@
-const urlApiViagens = "http://localhost:3000/viagens";
+const urlApiViagens = montarUrlApi("/viagens");
 
 const params = new URLSearchParams(window.location.search);
 const idViagem = params.get("id");

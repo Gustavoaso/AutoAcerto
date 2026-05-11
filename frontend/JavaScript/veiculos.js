@@ -1,4 +1,4 @@
-const urlApi = "http://localhost:3000/veiculos";
+const urlApi = montarUrlApi("/veiculos");
 
 let veiculosTodos = [];
 let veiculosVisiveis = [];

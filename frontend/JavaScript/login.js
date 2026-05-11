@@ -3,7 +3,19 @@
 // Controle do formulário de autenticação.
 // =============================================================
 
-const urlApiLogin = "http://localhost:3000/auth/login";
+function obterApiBaseLogin() {
+    const metaApi = document.querySelector('meta[name="autoacerto-api-base"]');
+    const configurada =
+        window.AUTOACERTO_API_BASE_URL ||
+        (metaApi ? metaApi.getAttribute("content") : "") ||
+        localStorage.getItem("AUTOACERTO_API_BASE_URL");
+    if (configurada && String(configurada).trim()) {
+        return String(configurada).trim().replace(/\/+$/, "");
+    }
+    return window.location.origin.replace(/\/+$/, "");
+}
+
+const urlApiLogin = obterApiBaseLogin() + "/auth/login";
 
 function redirecionarPorPerfil(perfil) {
     if (perfil === "dono") {
@@ -121,7 +133,7 @@ function configurarFormulario() {
 
         } catch (erro) {
             console.error("Erro ao conectar com o servidor:", erro.message);
-            exibirErroGeral("Não foi possível conectar ao servidor. Verifique se ele está rodando.");
+            exibirErroGeral("Não foi possível conectar ao servidor. Verifique a URL da API e se o backend está online.");
         } finally {
             botao.disabled = false;
             botao.classList.remove("carregando");

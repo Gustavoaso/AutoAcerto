@@ -1,5 +1,5 @@
-const urlApiDespesas = "http://localhost:3000/despesas";
-const urlApiViagens = "http://localhost:3000/viagens";
+const urlApiDespesas = montarUrlApi("/despesas");
+const urlApiViagens = montarUrlApi("/viagens");
 
 const params = new URLSearchParams(window.location.search);
 const idDespesa = params.get("id");

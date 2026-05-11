@@ -3,7 +3,7 @@
 // Cadastro de transportadoras e administrador inicial.
 // =============================================================
 
-const urlApiTransportadoras = "http://localhost:3000/transportadoras";
+const urlApiTransportadoras = montarUrlApi("/transportadoras");
 
 let transportadoras = [];
 let transportadorasVisiveis = [];

@@ -1,6 +1,6 @@
-const urlApiViagens = "http://localhost:3000/viagens";
-const urlApiMotoristas = "http://localhost:3000/motoristas";
-const urlApiVeiculos = "http://localhost:3000/veiculos";
+const urlApiViagens = montarUrlApi("/viagens");
+const urlApiMotoristas = montarUrlApi("/motoristas");
+const urlApiVeiculos = montarUrlApi("/veiculos");
 
 const botaoSalvar = document.getElementById("botaoSalvarViagem");
 const botaoLimpar = document.getElementById("botaoLimpar");

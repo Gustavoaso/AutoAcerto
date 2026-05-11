@@ -30,7 +30,7 @@
     const select = document.getElementById("campoContextoTransportadoraMaster");
     select.innerHTML = '<option value="">Carregando...</option>';
 
-    fetch("http://localhost:3000/transportadoras", { headers: cabecalhosAutenticados() })
+    fetch(montarUrlApi("/transportadoras"), { headers: cabecalhosAutenticados() })
       .then(function (r) {
         if (!r.ok) throw new Error("transportadoras");
         return r.json();

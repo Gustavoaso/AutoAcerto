@@ -1,4 +1,4 @@
-const urlApi = "http://localhost:3000/motoristas";
+const urlApi = montarUrlApi("/motoristas");
 
 function configurarFormularioMotorista() {
   const botaoSalvar = document.getElementById("botaoSalvarMotorista");

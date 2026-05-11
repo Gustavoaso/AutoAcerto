@@ -2,7 +2,7 @@
 // AUTOACERTO — EDITAR TRANSPORTADORA
 // =============================================================
 
-const urlApiTransportadoras = "http://localhost:3000/transportadoras";
+const urlApiTransportadoras = montarUrlApi("/transportadoras");
 
 function obterParametroUrl(nome) {
     const params = new URLSearchParams(window.location.search);

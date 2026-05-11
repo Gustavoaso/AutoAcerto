@@ -6,7 +6,7 @@ const jwt     = require("jsonwebtoken");
 const banco   = require("./banco");
 
 const app   = express();
-const porta = 3000;
+const porta = process.env.PORT || 3000;
 const SEGREDO_JWT = process.env.JWT_SECRET || "autoacerto_segredo_dev";
 
 app.use(cors());
