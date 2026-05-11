@@ -1,8 +1,6 @@
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
 
-const { Pool } = require("pg");
-
 const banco = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
