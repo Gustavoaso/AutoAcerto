@@ -11,11 +11,11 @@ const urlApiLogin = obterApiBaseLogin() + "/auth/login";
 
 function redirecionarPorPerfil(perfil) {
     if (perfil === "dono") {
-        window.location.href = "/frontend/HTML/transportadoras.html";
+        window.location.href = "/transportadoras.html";
     } else if (perfil === "admin") {
-        window.location.href = "/frontend/HTML/index.html";
+        window.location.href = "/index.html";
     } else {
-        window.location.href = "/frontend/HTML/viagens.html";
+        window.location.href = "/viagens.html";
     }
 }
 

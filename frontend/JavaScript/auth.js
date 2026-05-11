@@ -53,7 +53,7 @@ function obterUsuarioLogado() {
 function encerrarSessao() {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
-    window.location.href = "/frontend/HTML/login.html";
+    window.location.href = "/login.html";
 }
 
 function paginaPermitidaParaMotorista(caminho) {
@@ -71,7 +71,7 @@ function exigirAutenticacao() {
     const usuario = obterUsuarioLogado();
 
     const paginaAtual = window.location.pathname;
-    const paginaLogin = "/frontend/HTML/login.html";
+    const paginaLogin = "/login.html";
 
     if (!token || !usuario) {
 
@@ -86,12 +86,12 @@ function exigirAutenticacao() {
     }
 
     if (usuario.perfil === "motorista" && !paginaPermitidaParaMotorista(paginaAtual)) {
-        window.location.href = "/frontend/HTML/viagens.html";
+        window.location.href = "/viagens.html";
         return null;
     }
 
     if (usuario.perfil === "dono" && !paginaPermitidaParaDonoSistema(paginaAtual)) {
-        window.location.href = "/frontend/HTML/transportadoras.html";
+        window.location.href = "/transportadoras.html";
         return null;
     }
 
@@ -102,7 +102,7 @@ function exigirAdmin() {
     const usuario = exigirAutenticacao();
     if (!usuario) return null;
     if (usuario.perfil !== "admin" && usuario.perfil !== "dono") {
-        window.location.href = "/frontend/HTML/viagens.html";
+        window.location.href = "/viagens.html";
         return null;
     }
     return usuario;
