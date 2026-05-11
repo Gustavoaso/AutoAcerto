@@ -8,7 +8,6 @@ const banco = new Pool({
   }
 });
 
-module.exports = banco;
 const DONO_SISTEMA_NOME  = process.env.DONO_SISTEMA_NOME  || "Dono AutoAcerto";
 const DONO_SISTEMA_EMAIL = process.env.DONO_SISTEMA_EMAIL || "dono@autoacerto.com";
 const DONO_SISTEMA_SENHA = process.env.DONO_SISTEMA_SENHA || "autoacerto123";
