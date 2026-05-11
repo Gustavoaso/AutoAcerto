@@ -2,9 +2,13 @@
 // AUTOACERTO — AUTH
 // Helper de sessão compartilhado por todas as páginas do sistema.
 // =============================================================
+
 if (typeof window.montarUrlApi !== "function") {
     console.warn("⚠️ config.js não foi carregado antes do auth.js!");
 }
+
+// ==================== SESSÃO E TOKEN ====================
+
 function obterSessao() {
     try {
         const token = localStorage.getItem("token");
@@ -30,6 +34,8 @@ function obterUsuarioLogado() {
     }
 }
 
+// ==================== AUTENTICAÇÃO E PERMISSÕES ====================
+
 function encerrarSessao() {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
@@ -43,7 +49,7 @@ function paginaPermitidaParaMotorista(caminho) {
 }
 
 function paginaPermitidaParaDonoSistema(caminho) {
-    return true;
+    return true; // Dono tem acesso a tudo
 }
 
 function exigirAutenticacao() {
@@ -54,24 +60,18 @@ function exigirAutenticacao() {
     const paginaLogin = "/login.html";
 
     if (!token || !usuario) {
-
         localStorage.removeItem("token");
         localStorage.removeItem("usuario");
 
         if (paginaAtual !== paginaLogin) {
             window.location.href = paginaLogin;
         }
-
         return null;
     }
 
+    // Redirecionamentos por perfil
     if (usuario.perfil === "motorista" && !paginaPermitidaParaMotorista(paginaAtual)) {
         window.location.href = "/viagens.html";
-        return null;
-    }
-
-    if (usuario.perfil === "dono" && !paginaPermitidaParaDonoSistema(paginaAtual)) {
-        window.location.href = "/transportadoras.html";
         return null;
     }
 
@@ -92,12 +92,16 @@ function usuarioEhAdminOuDonoMaster(usuario) {
     return usuario && (usuario.perfil === "admin" || usuario.perfil === "dono");
 }
 
+// ==================== HEADERS ====================
+
 function cabecalhosAutenticados() {
     return {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + obterToken()
+        "Authorization": "Bearer " + (obterToken() || "")
     };
 }
+
+// ==================== UI E MENU ====================
 
 function preencherInfoUsuario() {
     const usuario = obterUsuarioLogado();
@@ -115,17 +119,17 @@ function preencherInfoUsuario() {
             .split(" ")
             .filter(Boolean)
             .slice(0, 2)
-            .map(function (parte) { return parte[0].toUpperCase(); })
+            .map(parte => parte[0].toUpperCase())
             .join("");
         avatarElement.textContent = iniciais;
     }
 
-    document.querySelectorAll("[data-apenas-admin]").forEach(function (elemento) {
-        elemento.style.display = usuarioEhAdminOuDonoMaster(usuario) ? "" : "none";
+    document.querySelectorAll("[data-apenas-admin]").forEach(el => {
+        el.style.display = usuarioEhAdminOuDonoMaster(usuario) ? "" : "none";
     });
 
-    document.querySelectorAll("[data-apenas-dono]").forEach(function (elemento) {
-        elemento.style.display = usuario.perfil === "dono" ? "" : "none";
+    document.querySelectorAll("[data-apenas-dono]").forEach(el => {
+        el.style.display = usuario.perfil === "dono" ? "" : "none";
     });
 
     ajustarMenuPorPerfil(usuario);
@@ -141,15 +145,12 @@ function ajustarMenuPorPerfil(usuario) {
 
     if (usuario.perfil === "admin") return;
 
-    document.querySelectorAll(".menu-lateral .item-menu").forEach(function (item) {
+    // Motorista: esconde tudo exceto Viagens
+    document.querySelectorAll(".menu-lateral .item-menu").forEach(item => {
         const destino = item.getAttribute("href") || "";
         if (!destino.endsWith("viagens.html")) {
             item.style.display = "none";
         }
-    });
-
-    document.querySelectorAll("[data-apenas-admin]").forEach(function (elemento) {
-        elemento.style.display = "none";
     });
 }
 
@@ -157,10 +158,9 @@ function marcarItemMenuLateralAtivo() {
     const caminho = window.location.pathname || "";
     const arquivo = (caminho.split("/").pop() || "").split("?")[0].split("#")[0];
 
-    document.querySelectorAll(".barra-lateral .menu-lateral .item-menu").forEach(function (link) {
+    document.querySelectorAll(".barra-lateral .menu-lateral .item-menu").forEach(link => {
         const href = (link.getAttribute("href") || "").split("?")[0].split("#")[0];
-        const ativo = href === arquivo;
-        link.classList.toggle("ativo", ativo);
+        link.classList.toggle("ativo", href === arquivo);
     });
 }
 
@@ -197,39 +197,47 @@ function inserirMenuTransportadoras() {
 function configurarBotaoSair() {
     const botaoSair = document.querySelector(".botao-sair");
     if (!botaoSair) return;
-    botaoSair.addEventListener("click", function () {
-        encerrarSessao();
-    });
+    botaoSair.addEventListener("click", encerrarSessao);
 }
+
+// ==================== FETCH INTERCEPTOR ====================
 
 function configurarFetchAutenticado() {
     if (window.fetchAutenticadoConfigurado) return;
 
     const fetchOriginal = window.fetch.bind(window);
+
     window.fetch = function (recurso, opcoes) {
         const urlOriginal = typeof recurso === "string" ? recurso : recurso.url;
-        const baseApi = obterApiBaseUrl();
+        
+        // Usa a função do config.js
+        const baseApi = typeof obterApiBaseUrl === "function" 
+            ? obterApiBaseUrl() 
+            : window.location.origin;
+
         const urlApiLocalAntiga = "http://localhost:3000";
         let recursoFinal = recurso;
         let urlFinal = urlOriginal;
 
-        // Mantém retrocompatibilidade com links antigos hardcoded.
+        // Retrocompatibilidade com localhost antigo
         if (typeof urlOriginal === "string" && urlOriginal.startsWith(urlApiLocalAntiga)) {
             const relativo = urlOriginal.slice(urlApiLocalAntiga.length);
             urlFinal = baseApi + relativo;
             recursoFinal = typeof recurso === "string" ? urlFinal : new Request(urlFinal, recurso);
         }
 
-        const deveAutenticar = urlFinal && urlFinal.startsWith(baseApi + "/") && !urlFinal.includes("/auth/login");
+        const deveAutenticar = urlFinal && 
+                              urlFinal.startsWith(baseApi + "/") && 
+                              !urlFinal.includes("/auth/login");
 
         if (!deveAutenticar) {
             return fetchOriginal(recursoFinal, opcoes);
         }
 
-        const novasOpcoes = opcoes ? Object.assign({}, opcoes) : {};
+        const novasOpcoes = opcoes ? { ...opcoes } : {};
         const headers = new Headers(novasOpcoes.headers || {});
-        const token = obterToken();
 
+        const token = obterToken();
         if (token && !headers.has("Authorization")) {
             headers.set("Authorization", "Bearer " + token);
         }
@@ -242,6 +250,8 @@ function configurarFetchAutenticado() {
 }
 
 configurarFetchAutenticado();
+
+// ==================== INICIALIZAÇÃO ====================
 
 document.addEventListener("DOMContentLoaded", function () {
     const paginaAtual = window.location.pathname;
