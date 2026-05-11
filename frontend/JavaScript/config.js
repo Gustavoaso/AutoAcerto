@@ -13,24 +13,26 @@
      * 4. window.location.origin (desenvolvimento local)
      */
     function obterApiBase() {
-        // Prioridade 1: Definida via Vercel (Environment Variable)
+        // === FORÇADO PARA PRODUÇÃO (Vercel) ===
+        if (window.location.hostname.includes("vercel.app")) {
+            return "https://autoacerto-production.up.railway.app".replace(/\/+$/, "");  // ← Cole aqui sua URL do Railway
+        }
+
+        // Prioridade normal (para desenvolvimento)
         if (window.AUTOACERTO_API_BASE_URL && String(window.AUTOACERTO_API_BASE_URL).trim()) {
             return String(window.AUTOACERTO_API_BASE_URL).trim().replace(/\/+$/, "");
         }
 
-        // Prioridade 2: Meta tag no <head> da página
         const metaApi = document.querySelector('meta[name="autoacerto-api-base"]');
         if (metaApi && metaApi.getAttribute("content")) {
             return metaApi.getAttribute("content").trim().replace(/\/+$/, "");
         }
 
-        // Prioridade 3: Salvo no localStorage (útil para testes)
         const salva = localStorage.getItem("AUTOACERTO_API_BASE_URL");
         if (salva && String(salva).trim()) {
             return String(salva).trim().replace(/\/+$/, "");
         }
 
-        // Prioridade 4: Fallback para desenvolvimento local
         return window.location.origin.replace(/\/+$/, "");
     }
 
