@@ -2,7 +2,9 @@
 // AUTOACERTO — AUTH
 // Helper de sessão compartilhado por todas as páginas do sistema.
 // =============================================================
-
+if (typeof window.montarUrlApi !== "function") {
+    console.warn("⚠️ config.js não foi carregado antes do auth.js!");
+}
 function obterSessao() {
     try {
         const token = localStorage.getItem("token");
@@ -19,28 +21,6 @@ function obterSessao() {
 function obterToken() {
     return localStorage.getItem("token");
 }
-
-function obterApiBaseUrl() {
-    const origemPadrao = window.location.origin;
-    const metaApi = document.querySelector('meta[name="autoacerto-api-base"]');
-    const configurada =
-        window.AUTOACERTO_API_BASE_URL ||
-        (metaApi ? metaApi.getAttribute("content") : "") ||
-        localStorage.getItem("AUTOACERTO_API_BASE_URL");
-    if (configurada && String(configurada).trim()) {
-        return String(configurada).trim().replace(/\/+$/, "");
-    }
-    return origemPadrao.replace(/\/+$/, "");
-}
-
-function montarUrlApi(caminho) {
-    const base = obterApiBaseUrl();
-    const sufixo = String(caminho || "").startsWith("/") ? caminho : "/" + String(caminho || "");
-    return base + sufixo;
-}
-
-window.obterApiBaseUrl = obterApiBaseUrl;
-window.montarUrlApi = montarUrlApi;
 
 function obterUsuarioLogado() {
     try {
