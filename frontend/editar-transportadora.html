@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoAcerto - Cadastro de Despesa</title>
-  <link rel="stylesheet" href="/CSS/cadastro-viagem.css" />
+  <title>AutoAcerto - Editar Transportadora</title>
+  <link rel="stylesheet" href="/CSS/editar-transportadora.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,11 +15,11 @@
   <div class="layout-principal">
     <aside class="barra-lateral">
       <div class="icone-logo">
-        <img src="/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+        <img src="/Imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
       </div>
 
       <nav class="menu-lateral">
-        <a href="index.html" class="item-menu ativo">
+        <a href="index.html" class="item-menu">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -72,6 +72,16 @@
           </svg>
           Relatórios
         </a>
+        <a href="transportadoras.html" class="item-menu ativo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="1" />
+            <path d="M16 8h4l3 5v3h-7V8z" />
+            <circle cx="5.5" cy="18.5" r="2.5" />
+            <circle cx="18.5" cy="18.5" r="2.5" />
+          </svg>
+          Transportadoras
+        </a>
         <a href="configuracoes.html" class="item-menu">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -84,7 +94,7 @@
       </nav>
 
       <div class="rodape-barra">
-        <button class="botao-sair" type="button">Sair</button>
+        <button class="botao-sair">Sair</button>
       </div>
     </aside>
 
@@ -101,55 +111,40 @@
 
       <section class="cabecalho-conteudo">
         <div>
-          <h2 class="titulo-pagina">Cadastrar Despesa</h2>
-          <p class="subtitulo-pagina">Preencha os dados abaixo para registrar uma nova despesa.</p>
+          <h2 class="titulo-pagina">Editar Transportadora</h2>
+          <p class="subtitulo-pagina">Altere os dados da transportadora e salve as modificações.</p>
         </div>
       </section>
 
       <section class="painel-formulario">
-        <div id="formularioDespesa" class="formulario-despesa">
+        <div id="formularioTransportadora">
           <div class="grade-formulario">
 
             <div class="grupo-campo">
-              <label for="viagemId">Viagem</label>
-              <select id="viagemId" name="viagemId" required>
+              <label for="campoNomeTransportadora">Nome da transportadora</label>
+              <input type="text" id="campoNomeTransportadora" name="nome" placeholder="Ex: Transportadora Silva Ltda" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="campoCnpjTransportadora">CNPJ</label>
+              <input type="text" id="campoCnpjTransportadora" name="cnpj" placeholder="00.000.000/0000-00" maxlength="18"
+                data-mascara="cnpj" autocomplete="off" />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="campoStatusTransportadora">Status</label>
+              <select id="campoStatusTransportadora" name="status" required>
                 <option value="">Selecione</option>
+                <option value="true">Ativa</option>
+                <option value="false">Inativa</option>
               </select>
-            </div>
-
-            <div class="grupo-campo">
-              <label for="descricao">Descricao</label>
-              <input type="text" id="descricao" name="descricao" placeholder="Ex: Abastecimento" required />
-            </div>
-
-            <div class="grupo-campo">
-              <label for="categoria">Categoria</label>
-              <select id="categoria" name="categoria" required>
-                <option value="">Selecione</option>
-                <option value="combustivel">Combustivel</option>
-                <option value="pedagio">Pedagio</option>
-                <option value="alimentacao">Alimentacao</option>
-                <option value="manutencao">Manutencao</option>
-                <option value="outros">Outros</option>
-              </select>
-            </div>
-
-            <div class="grupo-campo">
-              <label for="dataDespesa">Data da despesa</label>
-              <input type="date" id="dataDespesa" name="dataDespesa" required />
-            </div>
-
-            <div class="grupo-campo">
-              <label for="valor">Valor (R$)</label>
-              <input type="text" id="valor" name="valor" placeholder="0,00" maxlength="18" inputmode="decimal"
-                data-mascara="moeda" autocomplete="off" required />
             </div>
 
           </div>
 
           <div class="acoes-formulario">
-            <button type="button" class="botao-secundario" id="botaoLimpar">Limpar</button>
-            <button type="button" class="botao-primario" id="botaoSalvarDespesa">Salvar despesa</button>
+            <button type="button" class="botao-secundario" id="botaoCancelar">Cancelar</button>
+            <button type="button" class="botao-primario" id="botaoSalvarEdicao">Salvar alterações</button>
           </div>
 
           <div id="mensagemRetorno" class="mensagem-retorno"></div>
@@ -162,8 +157,8 @@
     <div class="fundo-modal-sucesso"></div>
     <div class="caixa-modal-sucesso">
       <div class="icone-sucesso">✔</div>
-      <h3>Despesa cadastrada</h3>
-      <p>A despesa foi registrada com sucesso no sistema.</p>
+      <h3>Transportadora atualizada</h3>
+      <p>As alterações foram salvas com sucesso.</p>
       <div class="acoes-modal-sucesso">
         <button type="button" class="botao-primario" id="botaoOkModal">OK</button>
       </div>
@@ -171,9 +166,9 @@
   </div>
 
    <script src="/JavaScript/config.js"></script>
-  <script src="/JavaScript/auth.js"></script>
-  <script src="/JavaScript/master-contexto.js"></script>
+<script src="/JavaScript/auth.js"></script>
   <script src="/JavaScript/mascaras.js"></script>
-  <script src="/JavaScript/cadastro-despesa.js"></script></body>
+  <script src="/JavaScript/editar-transportadora.js"></script>
+</body>
 
 </html>

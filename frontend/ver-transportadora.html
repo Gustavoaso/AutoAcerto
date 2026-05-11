@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoAcerto - Detalhes da Despesa</title>
-  <link rel="stylesheet" href="/CSS/ver-despesa.css" />
+  <title>AutoAcerto - Detalhes da Transportadora</title>
+  <link rel="stylesheet" href="/CSS/ver-transportadora.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,11 +15,11 @@
   <div class="layout-principal">
     <aside class="barra-lateral">
       <div class="icone-logo">
-        <img src="/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+        <img src="/Imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
       </div>
 
       <nav class="menu-lateral">
-        <a href="index.html" class="item-menu ativo">
+        <a href="index.html" class="item-menu">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -72,6 +72,16 @@
           </svg>
           Relatórios
         </a>
+        <a href="transportadoras.html" class="item-menu ativo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="1" />
+            <path d="M16 8h4l3 5v3h-7V8z" />
+            <circle cx="5.5" cy="18.5" r="2.5" />
+            <circle cx="18.5" cy="18.5" r="2.5" />
+          </svg>
+          Transportadoras
+        </a>
         <a href="configuracoes.html" class="item-menu">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -91,7 +101,7 @@
     <main class="conteudo-principal">
       <header class="topo-pagina">
         <div class="acoes-topo">
-          <button class="botao-icone" type="button">??</button>
+          <button class="botao-icone" type="button">🔔</button>
           <div class="perfil-usuario">
             <div class="avatar-usuario">GS</div>
             <span class="nome-usuario">Gustavo</span>
@@ -101,48 +111,43 @@
 
       <section class="cabecalho-conteudo">
         <div>
-          <h2 class="titulo-pagina">Detalhes da Despesa</h2>
-          <p class="subtitulo-pagina">Consulte as informacoes registradas para esta despesa.</p>
+          <h2 class="titulo-pagina">Detalhes da Transportadora</h2>
+          <p class="subtitulo-pagina">Informações completas da transportadora cadastrada.</p>
         </div>
-        <div class="acoes-formulario">
+        <div class="acoes-cabecalho">
           <button type="button" class="botao-secundario" id="botaoVoltar">Voltar</button>
           <button type="button" class="botao-primario" id="botaoEditar">Editar</button>
         </div>
       </section>
 
       <section class="painel-detalhes">
-        <div class="grade-detalhes">
-          <div class="item-detalhe">
-            <span>Descricao</span>
-            <strong id="detalheDescricao">-</strong>
+        <div class="cabecalho-transportadora">
+          <div class="avatar-transportadora-grande">🚚</div>
+          <div>
+            <h3 class="nome-transportadora-grande" id="detalheNome">—</h3>
+            <p class="cnpj-transportadora" id="detalheCnpjTopo">—</p>
           </div>
-          <div class="item-detalhe">
-            <span>Categoria</span>
-            <strong id="detalheCategoria">-</strong>
+        </div>
+
+        <div class="grade-detalhes-transportadoras">
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Nome</span>
+            <span class="valor-detalhe" id="detalheNomeGrid">—</span>
           </div>
-          <div class="item-detalhe">
-            <span>Viagem</span>
-            <strong id="detalheViagem">-</strong>
+
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">CNPJ</span>
+            <span class="valor-detalhe" id="detalheCnpj">—</span>
           </div>
-          <div class="item-detalhe">
-            <span>Motorista</span>
-            <strong id="detalheMotorista">-</strong>
+
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Status</span>
+            <span class="valor-detalhe" id="detalheStatus">—</span>
           </div>
-          <div class="item-detalhe">
-            <span>Veiculo</span>
-            <strong id="detalheVeiculo">-</strong>
-          </div>
-          <div class="item-detalhe">
-            <span>Data</span>
-            <strong id="detalheDataDespesa">-</strong>
-          </div>
-          <div class="item-detalhe">
-            <span>Valor</span>
-            <strong id="detalheValor">-</strong>
-          </div>
-          <div class="item-detalhe item-detalhe-largo">
-            <span>Observacoes</span>
-            <strong id="detalheObservacoes">-</strong>
+
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Data de cadastro</span>
+            <span class="valor-detalhe" id="detalheDataCadastro">—</span>
           </div>
         </div>
       </section>
@@ -151,9 +156,7 @@
 
    <script src="/JavaScript/config.js"></script>
 <script src="/JavaScript/auth.js"></script>
-
-
-  <script src="/JavaScript/ver-despesa.js"></script>
+  <script src="/JavaScript/ver-transportadora.js"></script>
 </body>
 
 </html>

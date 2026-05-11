@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoAcerto - Editar Despesa</title>
-  <link rel="stylesheet" href="/CSS/editar-despesa.css" />
+  <title>AutoAcerto - Cadastro de Viagem</title>
+  <link rel="stylesheet" href="/CSS/cadastro-viagem.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
   <div class="layout-principal">
     <aside class="barra-lateral">
       <div class="icone-logo">
-        <img src="/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+        <img src="/Imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
       </div>
 
       <nav class="menu-lateral">
@@ -91,7 +91,7 @@
     <main class="conteudo-principal">
       <header class="topo-pagina">
         <div class="acoes-topo">
-          <button class="botao-icone" type="button">??</button>
+          <button class="botao-icone" type="button">🔔</button>
           <div class="perfil-usuario">
             <div class="avatar-usuario">GS</div>
             <span class="nome-usuario">Gustavo</span>
@@ -101,58 +101,76 @@
 
       <section class="cabecalho-conteudo">
         <div>
-          <h2 class="titulo-pagina">Editar Despesa</h2>
-          <p class="subtitulo-pagina">Altere os dados da despesa e salve as modificacoes.</p>
+          <h2 class="titulo-pagina">Cadastrar Viagem</h2>
+          <p class="subtitulo-pagina">Preencha os dados abaixo para registrar uma nova viagem no sistema.</p>
         </div>
       </section>
 
       <section class="painel-formulario">
-        <div id="formularioDespesa" class="formulario-despesa">
+        <div id="formularioViagem" class="formulario-viagem">
           <div class="grade-formulario">
+
             <div class="grupo-campo">
-              <label for="viagemId">Viagem</label>
-              <select id="viagemId" name="viagemId" required>
+              <label for="origem">Origem</label>
+              <input type="text" id="origem" name="origem" placeholder="Ex: Betim - MG" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="destino">Destino</label>
+              <input type="text" id="destino" name="destino" placeholder="Ex: São Paulo - SP" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="motoristaId">Motorista</label>
+              <select id="motoristaId" name="motoristaId" required>
                 <option value="">Selecione</option>
               </select>
             </div>
 
             <div class="grupo-campo">
-              <label for="descricao">Descricao</label>
-              <input type="text" id="descricao" name="descricao" required />
-            </div>
-
-            <div class="grupo-campo">
-              <label for="categoria">Categoria</label>
-              <select id="categoria" name="categoria" required>
+              <label for="veiculoId">Veículo</label>
+              <select id="veiculoId" name="veiculoId" required>
                 <option value="">Selecione</option>
-                <option value="combustivel">Combustivel</option>
-                <option value="pedagio">Pedagio</option>
-                <option value="alimentacao">Alimentacao</option>
-                <option value="manutencao">Manutencao</option>
-                <option value="outros">Outros</option>
               </select>
             </div>
 
             <div class="grupo-campo">
-              <label for="dataDespesa">Data da despesa</label>
-              <input type="date" id="dataDespesa" name="dataDespesa" required />
+              <label for="dataSaida">Data de saída</label>
+              <input type="date" id="dataSaida" name="dataSaida" required />
             </div>
 
             <div class="grupo-campo">
-              <label for="valor">Valor (R$)</label>
-              <input type="text" id="valor" name="valor" placeholder="0,00" maxlength="18" inputmode="decimal"
+              <label for="dataChegada">Data de chegada</label>
+              <input type="date" id="dataChegada" name="dataChegada" required />
+            </div>
+
+            <div class="grupo-campo">
+              <label for="valorFrete">Valor do frete (R$)</label>
+              <input type="text" id="valorFrete" name="valorFrete" placeholder="0,00" maxlength="18" inputmode="decimal"
                 data-mascara="moeda" autocomplete="off" required />
             </div>
 
-            <div class="grupo-campo grupo-campo-largo">
-              <label for="observacoes">Observacoes</label>
-              <textarea id="observacoes" name="observacoes" rows="4"></textarea>
+            <div class="grupo-campo">
+              <label for="status">Status</label>
+              <select id="status" name="status" required>
+                <option value="">Selecione</option>
+                <option value="em andamento">Em andamento</option>
+                <option value="finalizada">Finalizada</option>
+                <option value="cancelada">Cancelada</option>
+              </select>
             </div>
+
+            <div class="grupo-campo grupo-campo-largo">
+              <label for="observacoes">Observações</label>
+              <textarea id="observacoes" name="observacoes" rows="4"
+                placeholder="Informações adicionais sobre a viagem"></textarea>
+            </div>
+
           </div>
 
           <div class="acoes-formulario">
-            <button type="button" class="botao-secundario" id="botaoCancelar">Cancelar</button>
-            <button type="button" class="botao-primario" id="botaoSalvarEdicao">Salvar alteracoes</button>
+            <button type="button" class="botao-secundario" id="botaoLimpar">Limpar</button>
+            <button type="button" class="botao-primario" id="botaoSalvarViagem">Salvar viagem</button>
           </div>
 
           <div id="mensagemRetorno" class="mensagem-retorno"></div>
@@ -164,9 +182,9 @@
   <div id="modalSucesso" class="modal-sucesso oculto">
     <div class="fundo-modal-sucesso"></div>
     <div class="caixa-modal-sucesso">
-      <div class="icone-sucesso">âœ”</div>
-      <h3>Despesa atualizada</h3>
-      <p>As alteracoes foram salvas com sucesso.</p>
+      <div class="icone-sucesso">✔</div>
+      <h3>Viagem cadastrada</h3>
+      <p>A viagem foi registrada com sucesso no sistema.</p>
       <div class="acoes-modal-sucesso">
         <button type="button" class="botao-primario" id="botaoOkModal">OK</button>
       </div>
@@ -175,8 +193,8 @@
 
    <script src="/JavaScript/config.js"></script>
 <script src="/JavaScript/auth.js"></script>
+  <script src="/JavaScript/master-contexto.js"></script>
   <script src="/JavaScript/mascaras.js"></script>
-  <script src="/JavaScript/editar-despesa.js"></script>
-</body>
+  <script src="/JavaScript/cadastro-viagem.js"></script></body>
 
 </html>

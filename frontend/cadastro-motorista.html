@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AutoAcerto - Editar Motorista</title>
-    <link rel="stylesheet" href="/CSS/editar-motorista.css" />
+    <title>AutoAcerto - Cadastro de Motorista</title>
+    <link rel="stylesheet" href="/CSS/cadastro-motorista.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
     <div class="layout-principal">
         <aside class="barra-lateral">
             <div class="icone-logo">
-                <img src="/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+                <img src="/Imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
             </div>
 
             <nav class="menu-lateral">
@@ -88,6 +88,7 @@
             </div>
         </aside>
 
+
         <main class="conteudo-principal">
             <header class="topo-pagina">
                 <div class="acoes-topo">
@@ -101,18 +102,18 @@
 
             <section class="cabecalho-conteudo">
                 <div>
-                    <h2 class="titulo-pagina">Editar Motorista</h2>
-                    <p class="subtitulo-pagina">Altere os dados do motorista e salve as modificações.</p>
+                    <h2 class="titulo-pagina">Cadastrar Motorista</h2>
+                    <p class="subtitulo-pagina">Preencha os dados abaixo para cadastrar um novo motorista no sistema.
+                    </p>
                 </div>
             </section>
 
             <section class="painel-formulario">
-                <div id="formularioMotorista" class="formulario-motorista">
+                <div id="formularioMotorista" class="formulario-motorista" onsubmit="return false;">
                     <div class="grade-formulario">
                         <div class="grupo-campo">
                             <label for="nome">Nome completo</label>
-                            <input type="text" id="nome" name="nome" placeholder="Digite o nome completo" maxlength="255"
-                                required />
+                            <input type="text" id="nome" name="nome" placeholder="Digite o nome completo" required />
                         </div>
 
                         <div class="grupo-campo">
@@ -144,13 +145,16 @@
                     </div>
 
                     <div class="acoes-formulario">
-                        <button type="button" class="botao-secundario" id="botaoCancelar">Cancelar</button>
-                        <button type="button" class="botao-primario" id="botaoSalvarEdicao">Salvar alterações</button>
+                        <button type="button" class="botao-secundario" id="botaoLimpar">Limpar</button>
+                        <button type="button" class="botao-primario" id="botaoSalvarMotorista">
+                            Salvar motorista
+                        </button>
                     </div>
 
                     <div id="mensagemRetorno" class="mensagem-retorno"></div>
                 </div>
             </section>
+
         </main>
     </div>
 
@@ -158,19 +162,21 @@
         <div class="fundo-modal-sucesso"></div>
         <div class="caixa-modal-sucesso">
             <div class="icone-sucesso">✔</div>
-            <h3>Motorista atualizado</h3>
-            <p>As alterações foram salvas com sucesso.</p>
+            <h3>Motorista cadastrado</h3>
+            <p>O motorista foi salvo com sucesso no sistema.</p>
 
             <div class="acoes-modal-sucesso">
-                <button type="button" class="botao-primario" id="botaoOkModal">OK</button>
+                <button type="button" class="botao-primario" id="botaoOkModal">
+                    OK
+                </button>
             </div>
         </div>
     </div>
 
      <script src="/JavaScript/config.js"></script>
 <script src="/JavaScript/auth.js"></script>
+    <script src="/JavaScript/master-contexto.js"></script>
     <script src="/JavaScript/mascaras.js"></script>
-    <script src="/JavaScript/editar-motorista.js"></script>
-</body>
+    <script src="/JavaScript/cadastro-motorista.js"></script></body>
 
 </html>

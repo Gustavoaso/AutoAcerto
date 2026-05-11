@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoAcerto - Novo usuário</title>
-  <link rel="stylesheet" href="/CSS/editar-motorista.css" />
+  <title>AutoAcerto - Editar Veículo</title>
+  <link rel="stylesheet" href="/CSS/editar-veiculo.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,8 +15,9 @@
   <div class="layout-principal">
     <aside class="barra-lateral">
       <div class="icone-logo">
-        <img src="/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+        <img src="/Imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
       </div>
+
       <nav class="menu-lateral">
         <a href="index.html" class="item-menu ativo">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -81,77 +82,95 @@
           Configurações
         </a>
       </nav>
+
       <div class="rodape-barra">
-        <button class="botao-sair" type="button">Sair</button>
+        <button class="botao-sair">Sair</button>
       </div>
     </aside>
 
     <main class="conteudo-principal">
       <header class="topo-pagina">
         <div class="acoes-topo">
+          <button class="botao-icone" type="button">🔔</button>
           <div class="perfil-usuario">
-            <div class="avatar-usuario">--</div>
-            <span class="nome-usuario">...</span>
+            <div class="avatar-usuario">GS</div>
+            <span class="nome-usuario">Gustavo</span>
           </div>
         </div>
       </header>
 
       <section class="cabecalho-conteudo">
         <div>
-          <h2 class="titulo-pagina">Novo usuário</h2>
-          <p class="subtitulo-pagina">Cadastre um usuário com perfil de administrador ou motorista.</p>
+          <h2 class="titulo-pagina">Editar Veículo</h2>
+          <p class="subtitulo-pagina">Altere os dados do veículo e salve as modificações.</p>
         </div>
       </section>
 
       <section class="painel-formulario">
-        <div class="formulario-motorista" id="formUsuario">
+        <div id="formularioVeiculo" class="formulario-veiculo">
           <div class="grade-formulario">
+
             <div class="grupo-campo">
-              <label for="campoNome">Nome completo</label>
-              <input type="text" id="campoNome" maxlength="255" required placeholder="Nome do usuário" />
+              <label for="modelo">Modelo</label>
+              <input type="text" id="modelo" name="modelo" placeholder="Ex: Volvo FH 540" required />
             </div>
+
             <div class="grupo-campo">
-              <label for="campoEmail">E-mail</label>
-              <input type="email" id="campoEmail" maxlength="255" required placeholder="email@exemplo.com" />
+              <label for="placa">Placa</label>
+              <input type="text" id="placa" name="placa" placeholder="AAA-0000 ou AAA0A00" maxlength="8"
+                data-mascara="placa" required />
             </div>
+
             <div class="grupo-campo">
-              <label for="campoPerfil">Perfil</label>
-              <select id="campoPerfil" required>
-                <option value="motorista">Motorista</option>
-                <option value="admin">Administrador</option>
+              <label for="status">Status</label>
+              <select id="status" name="status" required>
+                <option value="">Selecione</option>
+                <option value="ativo">Ativo</option>
+                <option value="em viagem">Em viagem</option>
+                <option value="manutenção">Manutenção</option>
+                <option value="inativo">Inativo</option>
               </select>
             </div>
-            <div class="grupo-campo" id="grupoMotoristaVinculo">
-              <label for="campoMotoristaId">Motorista vinculado</label>
-              <select id="campoMotoristaId">
-                <option value="">— Selecione —</option>
-              </select>
-            </div>
+
             <div class="grupo-campo">
-              <label for="campoSenha">Senha</label>
-              <input type="password" id="campoSenha" minlength="8" maxlength="128" required
-                placeholder="Mínimo 8 caracteres" />
+              <label for="ano">Ano de fabricação</label>
+              <input type="number" id="ano" name="ano" placeholder="Ex: 2022" min="1950" max="2030" />
             </div>
-            <div class="grupo-campo campo-checkbox-compacto">
-              <input type="checkbox" id="campoAtivo" checked />
-              <label for="campoAtivo">Usuário ativo</label>
+
+            <div class="grupo-campo grupo-campo-largo">
+              <label for="observacoes">Observações</label>
+              <textarea id="observacoes" name="observacoes" rows="4"
+                placeholder="Informações adicionais sobre o veículo"></textarea>
             </div>
+
           </div>
+
           <div class="acoes-formulario">
-            <a href="configuracoes.html?secao=usuarios" class="botao-secundario"
-              style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Cancelar</a>
-            <button type="button" class="botao-primario" id="botaoSalvar">Salvar</button>
+            <button type="button" class="botao-secundario" id="botaoCancelar">Cancelar</button>
+            <button type="button" class="botao-primario" id="botaoSalvarEdicao">Salvar alterações</button>
           </div>
-          <p id="msgErro" class="mensagem-retorno" style="display:none;"></p>
+
+          <div id="mensagemRetorno" class="mensagem-retorno"></div>
         </div>
       </section>
     </main>
   </div>
 
+  <div id="modalSucesso" class="modal-sucesso oculto">
+    <div class="fundo-modal-sucesso"></div>
+    <div class="caixa-modal-sucesso">
+      <div class="icone-sucesso">✔</div>
+      <h3>Veículo atualizado</h3>
+      <p>As alterações foram salvas com sucesso.</p>
+      <div class="acoes-modal-sucesso">
+        <button type="button" class="botao-primario" id="botaoOkModal">OK</button>
+      </div>
+    </div>
+  </div>
+
    <script src="/JavaScript/config.js"></script>
 <script src="/JavaScript/auth.js"></script>
-  <script src="/JavaScript/master-contexto.js"></script>
-  <script src="/JavaScript/novo-usuario.js"></script>
-</body>
+  <script src="/JavaScript/mascaras.js"></script>
+  <script src="/JavaScript/editar-veiculo.js"></script></body>
 
 </html>

@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoAcerto - Editar Viagem</title>
-  <link rel="stylesheet" href="/CSS/editar-viagem.css" />
+  <title>AutoAcerto - Detalhes da Viagem</title>
+  <link rel="stylesheet" href="/CSS/ver-viagem.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,8 +14,8 @@
 <body>
   <div class="layout-principal">
     <aside class="barra-lateral">
-     <div class="icone-logo">
-        <img src="/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+      <div class="icone-logo">
+        <img src="/Imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
       </div>
 
       <nav class="menu-lateral">
@@ -101,99 +101,78 @@
 
       <section class="cabecalho-conteudo">
         <div>
-          <h2 class="titulo-pagina">Editar Viagem</h2>
-          <p class="subtitulo-pagina">Altere os dados da viagem e salve as modificações.</p>
+          <h2 class="titulo-pagina">Detalhes da Viagem</h2>
+          <p class="subtitulo-pagina">Informações completas da viagem registrada.</p>
+        </div>
+        <div class="acoes-cabecalho">
+          <button type="button" class="botao-secundario" id="botaoVoltar">Voltar</button>
+          <button type="button" class="botao-primario" id="botaoEditar" data-apenas-admin>Editar</button>
         </div>
       </section>
 
-      <section class="painel-formulario">
-        <div id="formularioViagem" class="formulario-viagem">
-          <div class="grade-formulario">
+      <section class="painel-detalhes">
+        <div class="grade-detalhes">
 
-            <div class="grupo-campo">
-              <label for="origem">Origem</label>
-              <input type="text" id="origem" name="origem" placeholder="Ex: Betim - MG" required />
-            </div>
-
-            <div class="grupo-campo">
-              <label for="destino">Destino</label>
-              <input type="text" id="destino" name="destino" placeholder="Ex: São Paulo - SP" required />
-            </div>
-
-            <div class="grupo-campo">
-              <label for="motoristaId">Motorista</label>
-              <select id="motoristaId" name="motoristaId" required>
-                <option value="">Selecione</option>
-              </select>
-            </div>
-
-            <div class="grupo-campo">
-              <label for="veiculoId">Veículo</label>
-              <select id="veiculoId" name="veiculoId" required>
-                <option value="">Selecione</option>
-              </select>
-            </div>
-
-            <div class="grupo-campo">
-              <label for="dataSaida">Data de saída</label>
-              <input type="date" id="dataSaida" name="dataSaida" required />
-            </div>
-
-            <div class="grupo-campo">
-              <label for="dataChegada">Data de chegada</label>
-              <input type="date" id="dataChegada" name="dataChegada" required />
-            </div>
-
-            <div class="grupo-campo">
-              <label for="valorFrete">Valor do frete (R$)</label>
-              <input type="text" id="valorFrete" name="valorFrete" placeholder="0,00" maxlength="18" inputmode="decimal"
-                data-mascara="moeda" autocomplete="off" required />
-            </div>
-
-            <div class="grupo-campo">
-              <label for="status">Status</label>
-              <select id="status" name="status" required>
-                <option value="">Selecione</option>
-                <option value="em andamento">Em andamento</option>
-                <option value="finalizada">Finalizada</option>
-                <option value="cancelada">Cancelada</option>
-              </select>
-            </div>
-
-            <div class="grupo-campo grupo-campo-largo">
-              <label for="observacoes">Observações</label>
-              <textarea id="observacoes" name="observacoes" rows="4"
-                placeholder="Informações adicionais sobre a viagem"></textarea>
-            </div>
-
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Origem</span>
+            <span class="valor-detalhe" id="detalheOrigem">—</span>
           </div>
 
-          <div class="acoes-formulario">
-            <button type="button" class="botao-secundario" id="botaoCancelar">Cancelar</button>
-            <button type="button" class="botao-primario" id="botaoSalvarEdicao">Salvar alterações</button>
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Destino</span>
+            <span class="valor-detalhe" id="detalheDestino">—</span>
           </div>
 
-          <div id="mensagemRetorno" class="mensagem-retorno"></div>
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Motorista</span>
+            <span class="valor-detalhe" id="detalheMotorista">—</span>
+          </div>
+
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Veículo</span>
+            <span class="valor-detalhe" id="detalheVeiculo">—</span>
+          </div>
+
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Data de saída</span>
+            <span class="valor-detalhe" id="detalheDataSaida">—</span>
+          </div>
+
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Data de chegada</span>
+            <span class="valor-detalhe" id="detalheDataChegada">—</span>
+          </div>
+
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Valor do frete</span>
+            <span class="valor-detalhe" id="detalheValorFrete">—</span>
+          </div>
+
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Status</span>
+            <span class="valor-detalhe" id="detalheStatus">—</span>
+          </div>
+
+          <div class="grupo-detalhe grupo-detalhe-largo">
+            <span class="rotulo-detalhe">Observações</span>
+            <span class="valor-detalhe" id="detalheObservacoes">—</span>
+          </div>
+
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Data de cadastro</span>
+            <span class="valor-detalhe" id="detalheDataCadastro">—</span>
+          </div>
+
         </div>
       </section>
     </main>
   </div>
 
-  <div id="modalSucesso" class="modal-sucesso oculto">
-    <div class="fundo-modal-sucesso"></div>
-    <div class="caixa-modal-sucesso">
-      <div class="icone-sucesso">✔</div>
-      <h3>Viagem atualizada</h3>
-      <p>As alterações foram salvas com sucesso.</p>
-      <div class="acoes-modal-sucesso">
-        <button type="button" class="botao-primario" id="botaoOkModal">OK</button>
-      </div>
-    </div>
-  </div>
-
    <script src="/JavaScript/config.js"></script>
 <script src="/JavaScript/auth.js"></script>
-  <script src="/JavaScript/mascaras.js"></script>
-  <script src="/JavaScript/editar-viagem.js"></script></body>
+
+
+  <script src="/JavaScript/ver-viagem.js"></script>
+</body>
 
 </html>

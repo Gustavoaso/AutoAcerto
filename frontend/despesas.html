@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoAcerto - Detalhes da Transportadora</title>
-  <link rel="stylesheet" href="/CSS/ver-transportadora.css" />
+  <title>AutoAcerto - Despesas</title>
+  <link rel="stylesheet" href="/CSS/despesas.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,11 +15,11 @@
   <div class="layout-principal">
     <aside class="barra-lateral">
       <div class="icone-logo">
-        <img src="/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+        <img src="/Imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
       </div>
 
       <nav class="menu-lateral">
-        <a href="index.html" class="item-menu">
+        <a href="index.html" class="item-menu ativo">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -72,16 +72,6 @@
           </svg>
           Relatórios
         </a>
-        <a href="transportadoras.html" class="item-menu ativo">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="1" y="3" width="15" height="13" rx="1" />
-            <path d="M16 8h4l3 5v3h-7V8z" />
-            <circle cx="5.5" cy="18.5" r="2.5" />
-            <circle cx="18.5" cy="18.5" r="2.5" />
-          </svg>
-          Transportadoras
-        </a>
         <a href="configuracoes.html" class="item-menu">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -101,7 +91,7 @@
     <main class="conteudo-principal">
       <header class="topo-pagina">
         <div class="acoes-topo">
-          <button class="botao-icone" type="button">🔔</button>
+          <button class="botao-icone">🔔</button>
           <div class="perfil-usuario">
             <div class="avatar-usuario">GS</div>
             <span class="nome-usuario">Gustavo</span>
@@ -111,44 +101,79 @@
 
       <section class="cabecalho-conteudo">
         <div>
-          <h2 class="titulo-pagina">Detalhes da Transportadora</h2>
-          <p class="subtitulo-pagina">Informações completas da transportadora cadastrada.</p>
+          <h2 class="titulo-pagina">Despesas</h2>
+          <p class="subtitulo-pagina">Controle os gastos lançados nas viagens e acompanhe o impacto financeiro.</p>
         </div>
-        <div class="acoes-cabecalho">
-          <button type="button" class="botao-secundario" id="botaoVoltar">Voltar</button>
-          <button type="button" class="botao-primario" id="botaoEditar">Editar</button>
+
+        <button class="botao-primario" id="botaoNovaDespesa">+ Nova despesa</button>
+      </section>
+
+      <section class="grade-resumo">
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Total de despesas</span>
+          <strong class="valor-resumo" id="totalDespesas">0</strong>
+        </div>
+
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Valor total</span>
+          <strong class="valor-resumo valor-monetario" id="valorTotalDespesas">R$ 0,00</strong>
+        </div>
+
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Maior categoria</span>
+          <strong class="valor-resumo texto-menor" id="maiorCategoriaDespesa">-</strong>
+        </div>
+
+        <div class="card-resumo">
+          <span class="rotulo-resumo">Viagens com despesa</span>
+          <strong class="valor-resumo" id="totalViagensComDespesa">0</strong>
         </div>
       </section>
 
-      <section class="painel-detalhes">
-        <div class="cabecalho-transportadora">
-          <div class="avatar-transportadora-grande">🚚</div>
+      <section class="painel">
+        <div class="cabecalho-painel">
           <div>
-            <h3 class="nome-transportadora-grande" id="detalheNome">—</h3>
-            <p class="cnpj-transportadora" id="detalheCnpjTopo">—</p>
+            <h3>Lista de Despesas</h3>
+            <p class="texto-auxiliar">Pesquise e filtre as despesas registradas no sistema.</p>
           </div>
         </div>
 
-        <div class="grade-detalhes-transportadoras">
-          <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Nome</span>
-            <span class="valor-detalhe" id="detalheNomeGrid">—</span>
+        <div class="barra-filtros">
+          <div class="campo-filtro">
+            <label for="campoPesquisaDespesa">Pesquisar</label>
+            <input type="text" id="campoPesquisaDespesa" placeholder="Descrição, motorista, categoria ou veículo" />
           </div>
 
-          <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">CNPJ</span>
-            <span class="valor-detalhe" id="detalheCnpj">—</span>
+          <div class="campo-filtro">
+            <label for="filtroCategoriaDespesa">Categoria</label>
+            <select id="filtroCategoriaDespesa">
+              <option value="todas">Todas</option>
+              <option value="combustivel">CombustÃ­vel</option>
+              <option value="pedagio">PedÃ¡gio</option>
+              <option value="alimentacao">AlimentaÃ§Ã£o</option>
+              <option value="manutencao">ManutenÃ§Ã£o</option>
+              <option value="outros">Outros</option>
+            </select>
           </div>
+        </div>
 
-          <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Status</span>
-            <span class="valor-detalhe" id="detalheStatus">—</span>
-          </div>
-
-          <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Data de cadastro</span>
-            <span class="valor-detalhe" id="detalheDataCadastro">—</span>
-          </div>
+        <div class="tabela-responsiva">
+          <table class="tabela-despesas">
+            <thead>
+              <tr>
+                <th class="coluna-selecao"><input type="checkbox" data-selecionar-todos-despesas aria-label="Selecionar todos"></th>
+                <th>Despesa</th>
+                <th>Viagem</th>
+                <th>Motorista</th>
+                <th>Veículo</th>
+                <th>Categoria</th>
+                <th>Data</th>
+                <th>Valor</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="corpoTabelaDespesas"></tbody>
+          </table>
         </div>
       </section>
     </main>
@@ -156,7 +181,11 @@
 
    <script src="/JavaScript/config.js"></script>
 <script src="/JavaScript/auth.js"></script>
-  <script src="/JavaScript/ver-transportadora.js"></script>
+    <script src="/JavaScript/exclusao-listas.js"></script>
+
+
+  <script src="/JavaScript/despesas.js"></script>
 </body>
 
 </html>
+

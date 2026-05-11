@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AutoAcerto - Detalhes do Motorista</title>
-    <link rel="stylesheet" href="/CSS/ver-motorista.css" />
+    <title>AutoAcerto - Veículos</title>
+    <link rel="stylesheet" href="/CSS/veiculos.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
     <div class="layout-principal">
         <aside class="barra-lateral">
             <div class="icone-logo">
-                <img src="/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+                <img src="/Imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
             </div>
 
             <nav class="menu-lateral">
@@ -91,7 +91,7 @@
         <main class="conteudo-principal">
             <header class="topo-pagina">
                 <div class="acoes-topo">
-                    <button class="botao-icone" type="button">🔔</button>
+                    <button class="botao-icone">🔔</button>
                     <div class="perfil-usuario">
                         <div class="avatar-usuario">GS</div>
                         <span class="nome-usuario">Gustavo</span>
@@ -101,41 +101,70 @@
 
             <section class="cabecalho-conteudo">
                 <div>
-                    <h2 class="titulo-pagina">Detalhes do Motorista</h2>
-                    <p class="subtitulo-pagina">Informações completas do motorista cadastrado.</p>
+                    <h2 class="titulo-pagina">Veículos</h2>
+                    <p class="subtitulo-pagina">Gerencie os veículos cadastrados e acompanhe a situação da frota.</p>
                 </div>
-                <div class="acoes-cabecalho">
-                    <button type="button" class="botao-secundario" id="botaoVoltar">Voltar</button>
-                    <button type="button" class="botao-primario" id="botaoEditar">Editar</button>
+                <button class="botao-primario" id="botaoNovoVeiculo">+ Novo veículo</button>
+            </section>
+
+            <section class="grade-resumo">
+                <div class="card-resumo">
+                    <span class="rotulo-resumo">Total de veículos</span>
+                    <strong class="valor-resumo" id="totalVeiculos">0</strong>
+                </div>
+                <div class="card-resumo">
+                    <span class="rotulo-resumo">Veículos ativos</span>
+                    <strong class="valor-resumo" id="totalVeiculosAtivos">0</strong>
+                </div>
+                <div class="card-resumo">
+                    <span class="rotulo-resumo">Em viagem</span>
+                    <strong class="valor-resumo" id="totalEmViagem">0</strong>
+                </div>
+                <div class="card-resumo">
+                    <span class="rotulo-resumo">Em manutenção</span>
+                    <strong class="valor-resumo" id="totalEmManutencao">0</strong>
                 </div>
             </section>
 
-            <section class="painel-detalhes">
-                <div class="grade-detalhes">
-                    <div class="grupo-detalhe">
-                        <span class="rotulo-detalhe">Nome completo</span>
-                        <span class="valor-detalhe" id="detalheNome">—</span>
+            <section class="painel">
+                <div class="cabecalho-painel">
+                    <div>
+                        <h3>Lista de Veículos</h3>
+                        <p class="texto-auxiliar">Pesquise, filtre e acompanhe os dados da frota.</p>
                     </div>
+                </div>
 
-                    <div class="grupo-detalhe">
-                        <span class="rotulo-detalhe">CPF</span>
-                        <span class="valor-detalhe" id="detalheCpf">—</span>
+                <div class="barra-filtros">
+                    <div class="campo-filtro">
+                        <label for="campoPesquisaVeiculo">Pesquisar</label>
+                        <input type="text" id="campoPesquisaVeiculo" placeholder="Placa, modelo ou observações" />
                     </div>
+                    <div class="campo-filtro">
+                        <label for="filtroStatusVeiculo">Status</label>
+                        <select id="filtroStatusVeiculo">
+                            <option value="todos">Todos</option>
+                            <option value="ativo">Ativo</option>
+                            <option value="em viagem">Em viagem</option>
+                            <option value="manutenção">Manutenção</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </div>
+                </div>
 
-                    <div class="grupo-detalhe">
-                        <span class="rotulo-detalhe">Telefone</span>
-                        <span class="valor-detalhe" id="detalheTelefone">—</span>
-                    </div>
-
-                    <div class="grupo-detalhe">
-                        <span class="rotulo-detalhe">CNH</span>
-                        <span class="valor-detalhe" id="detalheCnh">—</span>
-                    </div>
-
-                    <div class="grupo-detalhe">
-                        <span class="rotulo-detalhe">Status</span>
-                        <span class="valor-detalhe" id="detalheStatus">—</span>
-                    </div>
+                <div class="tabela-responsiva">
+                    <table class="tabela-veiculos">
+                        <thead>
+                            <tr>
+                                <th class="coluna-selecao"><input type="checkbox" data-selecionar-todos-veiculos aria-label="Selecionar todos"></th>
+                                <th>Veículo</th>
+                                <th>Placa</th>
+                                <th>Ano</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabelaVeiculos"></tbody>
+                    </table>
                 </div>
             </section>
         </main>
@@ -143,9 +172,9 @@
 
      <script src="/JavaScript/config.js"></script>
 <script src="/JavaScript/auth.js"></script>
-
-
-    <script src="/JavaScript/ver-motorista.js"></script>
+    <script src="/JavaScript/exclusao-listas.js"></script>
+    <script src="/JavaScript/mascaras.js"></script>
+    <script src="/JavaScript/veiculos.js"></script>
 </body>
 
 </html>

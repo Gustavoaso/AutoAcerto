@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoAcerto - Detalhes da Viagem</title>
-  <link rel="stylesheet" href="/CSS/ver-viagem.css" />
+  <title>AutoAcerto - Detalhes do Veículo</title>
+  <link rel="stylesheet" href="/CSS/ver-veiculo.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
   <div class="layout-principal">
     <aside class="barra-lateral">
       <div class="icone-logo">
-        <img src="/imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+        <img src="/Imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
       </div>
 
       <nav class="menu-lateral">
@@ -101,51 +101,33 @@
 
       <section class="cabecalho-conteudo">
         <div>
-          <h2 class="titulo-pagina">Detalhes da Viagem</h2>
-          <p class="subtitulo-pagina">Informações completas da viagem registrada.</p>
+          <h2 class="titulo-pagina">Detalhes do Veículo</h2>
+          <p class="subtitulo-pagina">Informações completas do veículo cadastrado.</p>
         </div>
         <div class="acoes-cabecalho">
           <button type="button" class="botao-secundario" id="botaoVoltar">Voltar</button>
-          <button type="button" class="botao-primario" id="botaoEditar" data-apenas-admin>Editar</button>
+          <button type="button" class="botao-primario" id="botaoEditar">Editar</button>
         </div>
       </section>
 
       <section class="painel-detalhes">
+        <div class="cabecalho-veiculo">
+          <div class="avatar-veiculo-grande">🚛</div>
+          <div>
+            <h3 class="nome-veiculo-grande" id="detalheModelo">—</h3>
+            <p class="placa-veiculo" id="detalhePlacaTopo">—</p>
+          </div>
+        </div>
+
         <div class="grade-detalhes">
-
           <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Origem</span>
-            <span class="valor-detalhe" id="detalheOrigem">—</span>
+            <span class="rotulo-detalhe">Modelo</span>
+            <span class="valor-detalhe" id="detalheModeloGrid">—</span>
           </div>
 
           <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Destino</span>
-            <span class="valor-detalhe" id="detalheDestino">—</span>
-          </div>
-
-          <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Motorista</span>
-            <span class="valor-detalhe" id="detalheMotorista">—</span>
-          </div>
-
-          <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Veículo</span>
-            <span class="valor-detalhe" id="detalheVeiculo">—</span>
-          </div>
-
-          <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Data de saída</span>
-            <span class="valor-detalhe" id="detalheDataSaida">—</span>
-          </div>
-
-          <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Data de chegada</span>
-            <span class="valor-detalhe" id="detalheDataChegada">—</span>
-          </div>
-
-          <div class="grupo-detalhe">
-            <span class="rotulo-detalhe">Valor do frete</span>
-            <span class="valor-detalhe" id="detalheValorFrete">—</span>
+            <span class="rotulo-detalhe">Placa</span>
+            <span class="valor-detalhe" id="detalhePlaca">—</span>
           </div>
 
           <div class="grupo-detalhe">
@@ -153,9 +135,9 @@
             <span class="valor-detalhe" id="detalheStatus">—</span>
           </div>
 
-          <div class="grupo-detalhe grupo-detalhe-largo">
-            <span class="rotulo-detalhe">Observações</span>
-            <span class="valor-detalhe" id="detalheObservacoes">—</span>
+          <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">Ano de fabricação</span>
+            <span class="valor-detalhe" id="detalheAno">—</span>
           </div>
 
           <div class="grupo-detalhe">
@@ -163,6 +145,10 @@
             <span class="valor-detalhe" id="detalheDataCadastro">—</span>
           </div>
 
+          <div class="grupo-detalhe grupo-detalhe-largo">
+            <span class="rotulo-detalhe">Observações</span>
+            <span class="valor-detalhe" id="detalheObservacoes">—</span>
+          </div>
         </div>
       </section>
     </main>
@@ -170,9 +156,7 @@
 
    <script src="/JavaScript/config.js"></script>
 <script src="/JavaScript/auth.js"></script>
-
-
-  <script src="/JavaScript/ver-viagem.js"></script>
-</body>
+  <script src="/JavaScript/mascaras.js"></script>
+  <script src="/JavaScript/ver-veiculo.js"></script></body>
 
 </html>
