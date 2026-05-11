@@ -3,8 +3,8 @@
    Base: /frontend/CSS/global.css
    ============================================================= */
 
-@import url('/frontend/CSS/global.css');
-@import url('/frontend/CSS/configuracoes.css');
+@import url('/CSS/global.css');
+@import url('/CSS/configuracoes.css');
 
 .grade-transportadoras {
   display: grid;

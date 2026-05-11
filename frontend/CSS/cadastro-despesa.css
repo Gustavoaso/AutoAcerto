@@ -3,7 +3,7 @@
    Base: /frontend/CSS/global.css
    ============================================================= */
 
-@import url('/frontend/CSS/global.css');
+@import url('/CSS/global.css');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* Seleção visual de categoria */
