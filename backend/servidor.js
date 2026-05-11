@@ -1447,8 +1447,8 @@ app.delete(["/transportadoras", "/transportadoras/:id"], exigirDonoSistema, asyn
     cliente.release();
   }
 });
-app.listen(porta, () => {
-  console.log(`Servidor rodando em http://localhost:${porta}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
 
 
