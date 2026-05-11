@@ -1448,7 +1448,7 @@ app.delete(["/transportadoras", "/transportadoras/:id"], exigirDonoSistema, asyn
   }
 });
 app.listen(porta, '0.0.0.0', () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  console.log(`🚀 Servidor rodando na porta ${porta}`);
 });
 
 
