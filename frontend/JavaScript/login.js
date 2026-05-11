@@ -4,15 +4,7 @@
 // =============================================================
 
 function obterApiBaseLogin() {
-    const metaApi = document.querySelector('meta[name="autoacerto-api-base"]');
-    const configurada =
-        window.AUTOACERTO_API_BASE_URL ||
-        (metaApi ? metaApi.getAttribute("content") : "") ||
-        localStorage.getItem("AUTOACERTO_API_BASE_URL");
-    if (configurada && String(configurada).trim()) {
-        return String(configurada).trim().replace(/\/+$/, "");
-    }
-    return window.location.origin.replace(/\/+$/, "");
+    return window.obterApiBase ? window.obterApiBase() : window.location.origin.replace(/\/+$/, "");
 }
 
 const urlApiLogin = obterApiBaseLogin() + "/auth/login";
