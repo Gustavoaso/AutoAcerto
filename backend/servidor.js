@@ -31,7 +31,8 @@ function autenticar(requisicao, resposta, proximo) {
 
   try {
     const payload = jwt.verify(token, SEGREDO_JWT);
-    if (!payload.transportadora_id) {
+    const transportadoraOk = payload.transportadora_id != null || payload.perfil === "dono";
+    if (!transportadoraOk) {
       return resposta.status(401).json({ mensagem: "SessÃ£o invÃ¡lida. FaÃ§a login novamente." });
     }
     requisicao.usuario = payload;
@@ -43,7 +44,7 @@ function autenticar(requisicao, resposta, proximo) {
 
 function exigirAdmin(requisicao, resposta, proximo) {
   autenticar(requisicao, resposta, function () {
-    if (requisicao.usuario.perfil !== "admin") {
+    if (requisicao.usuario.perfil !== "admin" && requisicao.usuario.perfil !== "dono") {
       return resposta.status(403).json({ mensagem: "Acesso restrito a administradores." });
     }
     proximo();
@@ -74,6 +75,43 @@ function obterIdTransportadora(requisicao) {
 
 function usuarioEhDonoSistema(requisicao) {
   return requisicao.usuario.perfil === "dono";
+}
+
+const MAPA_TABELA_TRANSPORTADORA = {
+  motoristas: "motoristas",
+  veiculos: "veiculos",
+  viagens: "viagens",
+  despesas: "despesas"
+};
+
+async function transportadoraIdParaPost(requisicao, corpo) {
+  if (usuarioEhDonoSistema(requisicao)) {
+    const id = parseInt(corpo && corpo.transportadora_id, 10);
+    if (!Number.isInteger(id) || id < 1) {
+      return { erro: "Informe transportadora_id para cadastrar como dono do sistema." };
+    }
+    const ok = await banco.query("SELECT 1 FROM transportadoras WHERE id=$1", [id]);
+    if (ok.rows.length === 0) {
+      return { erro: "Transportadora nÃ£o encontrada." };
+    }
+    return { id };
+  }
+  const idJwt = obterIdTransportadora(requisicao);
+  if (idJwt == null) {
+    return { erro: "SessÃ£o sem transportadora vinculada." };
+  }
+  return { id: idJwt };
+}
+
+async function transportadoraEscopoMutacao(requisicao, chaveTabela, idRecurso) {
+  const nomeTabela = MAPA_TABELA_TRANSPORTADORA[chaveTabela];
+  if (!nomeTabela) return null;
+  if (usuarioEhDonoSistema(requisicao)) {
+    const r = await banco.query(`SELECT transportadora_id FROM ${nomeTabela} WHERE id=$1`, [idRecurso]);
+    if (r.rows.length === 0) return null;
+    return r.rows[0].transportadora_id;
+  }
+  return obterIdTransportadora(requisicao);
 }
 
 function normalizarIdsExclusao(requisicao) {
@@ -132,7 +170,8 @@ app.post("/auth/login", async (requisicao, resposta) => {
     const sql = `
       SELECT u.*, m.nome AS motorista_nome, t.nome AS transportadora_nome
       FROM usuarios u
-      LEFT JOIN motoristas m ON u.motorista_id = m.id AND m.transportadora_id = u.transportadora_id
+      LEFT JOIN motoristas m ON u.motorista_id = m.id
+        AND (u.transportadora_id IS NULL OR m.transportadora_id = u.transportadora_id)
       LEFT JOIN transportadoras t ON u.transportadora_id = t.id
       WHERE u.email = $1
     `;
@@ -319,7 +358,8 @@ app.get("/usuarios", exigirAdminOuDono, async (requisicao, resposta) => {
         m.nome AS motorista_nome,
         t.nome AS transportadora_nome
       FROM usuarios u
-      LEFT JOIN motoristas m ON u.motorista_id = m.id AND m.transportadora_id = u.transportadora_id
+      LEFT JOIN motoristas m ON u.motorista_id = m.id
+        AND (u.transportadora_id IS NULL OR m.transportadora_id = u.transportadora_id)
       LEFT JOIN transportadoras t ON u.transportadora_id = t.id
     `;
     const valores = [];
@@ -339,20 +379,27 @@ app.get("/usuarios", exigirAdminOuDono, async (requisicao, resposta) => {
   }
 });
 
-app.get("/usuarios/:id", exigirAdmin, async (requisicao, resposta) => {
+app.get("/usuarios/:id", exigirAdminOuDono, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const transportadoraId = obterIdTransportadora(requisicao);
+  const donoSistema = usuarioEhDonoSistema(requisicao);
 
   try {
-    const sql = `
+    let sql = `
       SELECT
         u.id, u.nome, u.email, u.perfil, u.ativo, u.motorista_id,
         m.nome AS motorista_nome
       FROM usuarios u
-      LEFT JOIN motoristas m ON u.motorista_id = m.id AND m.transportadora_id = u.transportadora_id
-      WHERE u.id = $1 AND u.transportadora_id = $2
+      LEFT JOIN motoristas m ON u.motorista_id = m.id
+        AND (u.transportadora_id IS NULL OR m.transportadora_id = u.transportadora_id)
+      WHERE u.id = $1
     `;
-    const resultado = await banco.query(sql, [id, transportadoraId]);
+    const valores = [id];
+    if (!donoSistema) {
+      sql += " AND u.transportadora_id = $2";
+      valores.push(transportadoraId);
+    }
+    const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
       return resposta.status(404).json({ mensagem: "UsuÃ¡rio nÃ£o encontrado." });
     }
@@ -365,7 +412,6 @@ app.get("/usuarios/:id", exigirAdmin, async (requisicao, resposta) => {
 
 app.post("/usuarios", exigirAdmin, async (requisicao, resposta) => {
   const { nome, email, senha, perfil, motorista_id, ativo } = requisicao.body;
-  const transportadoraId = obterIdTransportadora(requisicao);
 
   if (!nome || !email || !senha || !perfil) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
@@ -380,6 +426,12 @@ app.post("/usuarios", exigirAdmin, async (requisicao, resposta) => {
   }
 
   try {
+    const escopo = await transportadoraIdParaPost(requisicao, requisicao.body);
+    if (escopo.erro) {
+      return resposta.status(400).json({ mensagem: escopo.erro });
+    }
+    const transportadoraId = escopo.id;
+
     const motoristaValido = await motoristaPertenceTransportadora(motorista_id, transportadoraId);
     if (!motoristaValido) {
       return resposta.status(400).json({ mensagem: "Motorista nÃ£o encontrado para esta transportadora." });
@@ -411,39 +463,63 @@ app.post("/usuarios", exigirAdmin, async (requisicao, resposta) => {
 app.put("/usuarios/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { nome, email, motorista_id, ativo } = requisicao.body;
-  const transportadoraId = obterIdTransportadora(requisicao);
+  const donoSistema = usuarioEhDonoSistema(requisicao);
 
   if (!nome || !email) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   try {
-    const usuarioAtual = await banco.query(
-      "SELECT perfil FROM usuarios WHERE id=$1 AND transportadora_id=$2",
-      [id, transportadoraId]
-    );
+    let usuarioAtual;
+    if (donoSistema) {
+      usuarioAtual = await banco.query(
+        "SELECT perfil, transportadora_id FROM usuarios WHERE id=$1",
+        [id]
+      );
+    } else {
+      usuarioAtual = await banco.query(
+        "SELECT perfil, transportadora_id FROM usuarios WHERE id=$1 AND transportadora_id=$2",
+        [id, obterIdTransportadora(requisicao)]
+      );
+    }
 
     if (usuarioAtual.rows.length === 0) {
       return resposta.status(404).json({ mensagem: "Usuário não encontrado." });
     }
 
     const perfilAtual = usuarioAtual.rows[0].perfil;
+    const transportadoraAlvo = usuarioAtual.rows[0].transportadora_id;
+
+    if (perfilAtual === "dono") {
+      return resposta.status(400).json({ mensagem: "O perfil master não pode ser alterado por esta rota." });
+    }
+
     const motoristaIdFinal = perfilAtual === "motorista" ? motorista_id : null;
 
     if (perfilAtual === "motorista" && !motoristaIdFinal) {
       return resposta.status(400).json({ mensagem: "Vincule um motorista para usuários do perfil motorista." });
     }
 
-    const motoristaValido = await motoristaPertenceTransportadora(motoristaIdFinal, transportadoraId);
+    const motoristaValido = await motoristaPertenceTransportadora(motoristaIdFinal, transportadoraAlvo);
     if (!motoristaValido) {
       return resposta.status(400).json({ mensagem: "Motorista não encontrado para esta transportadora." });
     }
 
-    const sql = `
-      UPDATE usuarios SET nome=$1, email=$2, motorista_id=$3, ativo=$4
-      WHERE id=$5 AND transportadora_id=$6 RETURNING id
-    `;
-    const valores = [nome, email, motoristaIdFinal || null, ativo !== false, id, transportadoraId];
+    let sql;
+    let valores;
+    if (donoSistema) {
+      sql = `
+        UPDATE usuarios SET nome=$1, email=$2, motorista_id=$3, ativo=$4
+        WHERE id=$5 RETURNING id
+      `;
+      valores = [nome, email, motoristaIdFinal || null, ativo !== false, id];
+    } else {
+      sql = `
+        UPDATE usuarios SET nome=$1, email=$2, motorista_id=$3, ativo=$4
+        WHERE id=$5 AND transportadora_id=$6 RETURNING id
+      `;
+      valores = [nome, email, motoristaIdFinal || null, ativo !== false, id, transportadoraAlvo];
+    }
     const resultado = await banco.query(sql, valores);
 
     if (resultado.rows.length === 0) {
@@ -462,7 +538,6 @@ app.put("/usuarios/:id", exigirAdmin, async (requisicao, resposta) => {
 app.patch("/usuarios/senha", autenticar, async (requisicao, resposta) => {
   const { senhaAtual, novaSenha } = requisicao.body;
   const idUsuario = requisicao.usuario.id;
-  const transportadoraId = obterIdTransportadora(requisicao);
 
   if (!senhaAtual || !novaSenha) {
     return resposta.status(400).json({ mensagem: "Informe a senha atual e a nova senha." });
@@ -470,8 +545,8 @@ app.patch("/usuarios/senha", autenticar, async (requisicao, resposta) => {
 
   try {
     const resultado = await banco.query(
-      "SELECT senha_hash FROM usuarios WHERE id=$1 AND transportadora_id=$2",
-      [idUsuario, transportadoraId]
+      "SELECT senha_hash FROM usuarios WHERE id=$1",
+      [idUsuario]
     );
 
     if (resultado.rows.length === 0) {
@@ -485,8 +560,8 @@ app.patch("/usuarios/senha", autenticar, async (requisicao, resposta) => {
 
     const novaHash = await bcrypt.hash(novaSenha, 10);
     await banco.query(
-      "UPDATE usuarios SET senha_hash=$1 WHERE id=$2 AND transportadora_id=$3",
-      [novaHash, idUsuario, transportadoraId]
+      "UPDATE usuarios SET senha_hash=$1 WHERE id=$2",
+      [novaHash, idUsuario]
     );
 
     return resposta.json({ mensagem: "Senha alterada com sucesso." });
@@ -502,20 +577,25 @@ app.patch("/usuarios/senha", autenticar, async (requisicao, resposta) => {
 
 app.post("/motoristas", exigirAdmin, async (requisicao, resposta) => {
   const { nome, cpf, telefone, cnh, status } = requisicao.body;
-  const transportadoraId = obterIdTransportadora(requisicao);
 
   if (!nome || !cpf || !telefone || !cnh || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
   }
 
-  const sql = `
-    INSERT INTO motoristas (transportadora_id, nome, cpf, telefone, cnh, status)
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING id
-  `;
-  const valores = [transportadoraId, nome, cpf, telefone, cnh, status];
-
   try {
+    const escopo = await transportadoraIdParaPost(requisicao, requisicao.body);
+    if (escopo.erro) {
+      return resposta.status(400).json({ mensagem: escopo.erro });
+    }
+    const transportadoraId = escopo.id;
+
+    const sql = `
+      INSERT INTO motoristas (transportadora_id, nome, cpf, telefone, cnh, status)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id
+    `;
+    const valores = [transportadoraId, nome, cpf, telefone, cnh, status];
+
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Motorista cadastrado com sucesso.", id: resultado.rows[0].id });
   } catch (erro) {
@@ -587,21 +667,25 @@ app.get("/motoristas/:id", exigirAdminOuDono, async (requisicao, resposta) => {
 app.put("/motoristas/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { nome, cpf, telefone, cnh, status } = requisicao.body;
-  const transportadoraId = obterIdTransportadora(requisicao);
 
   if (!nome || !cpf || !telefone || !cnh || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
   }
 
-  const sql = `
-    UPDATE motoristas SET
-      nome=$1, cpf=$2, telefone=$3, cnh=$4, status=$5
-    WHERE id=$6 AND transportadora_id=$7
-    RETURNING *
-  `;
-  const valores = [nome, cpf, telefone, cnh, status, id, transportadoraId];
-
   try {
+    const transportadoraId = await transportadoraEscopoMutacao(requisicao, "motoristas", id);
+    if (transportadoraId === null) {
+      return resposta.status(404).json({ mensagem: "Motorista nÃ£o encontrado." });
+    }
+
+    const sql = `
+      UPDATE motoristas SET
+        nome=$1, cpf=$2, telefone=$3, cnh=$4, status=$5
+      WHERE id=$6 AND transportadora_id=$7
+      RETURNING *
+    `;
+    const valores = [nome, cpf, telefone, cnh, status, id, transportadoraId];
+
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
       return resposta.status(404).json({ mensagem: "Motorista nÃ£o encontrado." });
@@ -622,7 +706,6 @@ app.put("/motoristas/:id", exigirAdmin, async (requisicao, resposta) => {
 
 app.post("/veiculos", exigirAdmin, async (req, res) => {
   const { modelo, placa, status, ano, observacoes } = req.body;
-  const transportadoraId = obterIdTransportadora(req);
 
   const modeloTratado = (modelo || "").trim();
   const placaTratada = (placa || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7);
@@ -642,14 +725,20 @@ app.post("/veiculos", exigirAdmin, async (req, res) => {
     return res.status(400).json({ mensagem: "Preencha os campos obrigatorios: " + pendentes.join(", ") + "." });
   }
 
-  const sql = `
-    INSERT INTO veiculos (transportadora_id, modelo, placa, status, ano, observacoes)
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING id
-  `;
-  const valores = [transportadoraId, modeloTratado, placaTratada, statusTratado, anoTratado, observacoesTratadas];
-
   try {
+    const escopo = await transportadoraIdParaPost(req, req.body);
+    if (escopo.erro) {
+      return res.status(400).json({ mensagem: escopo.erro });
+    }
+    const transportadoraId = escopo.id;
+
+    const sql = `
+      INSERT INTO veiculos (transportadora_id, modelo, placa, status, ano, observacoes)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id
+    `;
+    const valores = [transportadoraId, modeloTratado, placaTratada, statusTratado, anoTratado, observacoesTratadas];
+
     const resultado = await banco.query(sql, valores);
     return res.status(201).json({ mensagem: "VeÃ­culo cadastrado com sucesso.", id: resultado.rows[0].id });
   } catch (erro) {
@@ -721,7 +810,6 @@ app.get("/veiculos/:id", exigirAdminOuDono, async (requisicao, resposta) => {
 app.put("/veiculos/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { modelo, placa, status, ano, observacoes } = requisicao.body;
-  const transportadoraId = obterIdTransportadora(requisicao);
 
   const modeloTratado = (modelo || "").trim();
   const placaTratada = (placa || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7);
@@ -741,15 +829,20 @@ app.put("/veiculos/:id", exigirAdmin, async (requisicao, resposta) => {
     return resposta.status(400).json({ mensagem: "Preencha os campos obrigatorios: " + pendentes.join(", ") + "." });
   }
 
-  const sql = `
-    UPDATE veiculos SET
-      modelo=$1, placa=$2, status=$3, ano=$4, observacoes=$5
-    WHERE id=$6 AND transportadora_id=$7
-    RETURNING *
-  `;
-  const valores = [modeloTratado, placaTratada, statusTratado, anoTratado, observacoesTratadas, id, transportadoraId];
-
   try {
+    const transportadoraId = await transportadoraEscopoMutacao(requisicao, "veiculos", id);
+    if (transportadoraId === null) {
+      return resposta.status(404).json({ mensagem: "VeÃ­culo nÃ£o encontrado." });
+    }
+
+    const sql = `
+      UPDATE veiculos SET
+        modelo=$1, placa=$2, status=$3, ano=$4, observacoes=$5
+      WHERE id=$6 AND transportadora_id=$7
+      RETURNING *
+    `;
+    const valores = [modeloTratado, placaTratada, statusTratado, anoTratado, observacoesTratadas, id, transportadoraId];
+
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
       return resposta.status(404).json({ mensagem: "VeÃ­culo nÃ£o encontrado." });
@@ -770,13 +863,18 @@ app.put("/veiculos/:id", exigirAdmin, async (requisicao, resposta) => {
 
 app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
   const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, status, observacoes } = requisicao.body;
-  const transportadoraId = obterIdTransportadora(requisicao);
 
   if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
   }
 
   try {
+    const escopo = await transportadoraIdParaPost(requisicao, requisicao.body);
+    if (escopo.erro) {
+      return resposta.status(400).json({ mensagem: escopo.erro });
+    }
+    const transportadoraId = escopo.id;
+
     const motoristaValido = await motoristaPertenceTransportadora(motoristaId, transportadoraId);
     const veiculoValido = await veiculoPertenceTransportadora(veiculoId, transportadoraId);
 
@@ -806,7 +904,7 @@ app.get("/viagens", autenticar, async (requisicao, resposta) => {
 
   let sql = `
     SELECT
-      v.id, v.origem, v.destino, v.data_saida, v.data_chegada,
+      v.id, v.transportadora_id, v.origem, v.destino, v.data_saida, v.data_chegada,
       v.valor_frete, v.status, v.observacoes, v.data_cadastro,
       v.motorista_id, v.veiculo_id,
       m.nome AS motorista_nome,
@@ -851,7 +949,7 @@ app.get("/viagens/:id", autenticar, async (requisicao, resposta) => {
 
   let sql = `
     SELECT
-      v.id, v.origem, v.destino, v.data_saida, v.data_chegada,
+      v.id, v.transportadora_id, v.origem, v.destino, v.data_saida, v.data_chegada,
       v.valor_frete, v.status, v.observacoes, v.data_cadastro,
       v.motorista_id, v.veiculo_id,
       m.nome AS motorista_nome,
@@ -894,13 +992,17 @@ app.get("/viagens/:id", autenticar, async (requisicao, resposta) => {
 app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, status, observacoes } = requisicao.body;
-  const transportadoraId = obterIdTransportadora(requisicao);
 
   if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
   }
 
   try {
+    const transportadoraId = await transportadoraEscopoMutacao(requisicao, "viagens", id);
+    if (transportadoraId === null) {
+      return resposta.status(404).json({ mensagem: "Viagem nÃ£o encontrada." });
+    }
+
     const motoristaValido = await motoristaPertenceTransportadora(motoristaId, transportadoraId);
     const veiculoValido = await veiculoPertenceTransportadora(veiculoId, transportadoraId);
 
@@ -934,16 +1036,22 @@ app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
 
 app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
   const { viagemId, descricao, categoria, dataDespesa, valor } = requisicao.body;
-  const transportadoraId = obterIdTransportadora(requisicao);
 
   if (!viagemId || !descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
   }
 
   try {
-    const viagemValida = await viagemPertenceTransportadora(viagemId, transportadoraId);
-    if (!viagemValida) {
-      return resposta.status(400).json({ mensagem: "Viagem nÃ£o encontrada para esta transportadora." });
+    const vr = await banco.query("SELECT transportadora_id FROM viagens WHERE id=$1", [viagemId]);
+    if (vr.rows.length === 0) {
+      return resposta.status(400).json({ mensagem: "Viagem nÃ£o encontrada." });
+    }
+    const tid = vr.rows[0].transportadora_id;
+
+    if (!usuarioEhDonoSistema(requisicao)) {
+      if (tid !== obterIdTransportadora(requisicao)) {
+        return resposta.status(400).json({ mensagem: "Viagem nÃ£o encontrada para esta transportadora." });
+      }
     }
 
     const sql = `
@@ -951,7 +1059,7 @@ app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id
     `;
-    const valores = [transportadoraId, viagemId, descricao, categoria, dataDespesa, valor];
+    const valores = [tid, viagemId, descricao, categoria, dataDespesa, valor];
 
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Despesa cadastrada com sucesso.", id: resultado.rows[0].id });
@@ -1040,16 +1148,20 @@ app.get("/despesas/:id", exigirAdminOuDono, async (requisicao, resposta) => {
 app.put("/despesas/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { viagemId, descricao, categoria, dataDespesa, valor } = requisicao.body;
-  const transportadoraId = obterIdTransportadora(requisicao);
 
   if (!viagemId || !descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
   }
 
   try {
-    const viagemValida = await viagemPertenceTransportadora(viagemId, transportadoraId);
-    if (!viagemValida) {
-      return resposta.status(400).json({ mensagem: "Viagem nÃ£o encontrada para esta transportadora." });
+    const transportadoraId = await transportadoraEscopoMutacao(requisicao, "despesas", id);
+    if (transportadoraId === null) {
+      return resposta.status(404).json({ mensagem: "Despesa nao encontrada." });
+    }
+
+    const vr = await banco.query("SELECT transportadora_id FROM viagens WHERE id=$1", [viagemId]);
+    if (vr.rows.length === 0 || vr.rows[0].transportadora_id !== transportadoraId) {
+      return resposta.status(400).json({ mensagem: "Viagem invÃ¡lida para o escopo desta despesa." });
     }
 
     const sql = `
@@ -1077,23 +1189,34 @@ app.put("/despesas/:id", exigirAdmin, async (requisicao, resposta) => {
 // ============================================================
 
 app.delete(["/usuarios", "/usuarios/:id"], exigirAdmin, async (requisicao, resposta) => {
-  const ids = normalizarIdsExclusao(requisicao);
+  let ids = normalizarIdsExclusao(requisicao);
   const transportadoraId = obterIdTransportadora(requisicao);
+  const donoSistema = usuarioEhDonoSistema(requisicao);
 
   if (ids.length === 0) {
     return resposta.status(400).json({ mensagem: "Informe ao menos um usuário para excluir." });
   }
 
-  if (ids.includes(requisicao.usuario.id)) {
+  ids = ids.filter((uid) => uid !== requisicao.usuario.id);
+
+  if (ids.length === 0) {
     return resposta.status(400).json({ mensagem: "Você não pode excluir o próprio usuário logado." });
   }
 
   try {
-    const valores = [transportadoraId, ...ids];
-    const resultado = await banco.query(
-      `DELETE FROM usuarios WHERE transportadora_id=$1 AND id IN (${placeholderIds(ids, 2)})`,
-      valores
-    );
+    let resultado;
+    if (donoSistema) {
+      resultado = await banco.query(
+        `DELETE FROM usuarios WHERE id IN (${placeholderIds(ids, 1)}) AND perfil <> 'dono'`,
+        ids
+      );
+    } else {
+      const valores = [transportadoraId, ...ids];
+      resultado = await banco.query(
+        `DELETE FROM usuarios WHERE transportadora_id=$1 AND id IN (${placeholderIds(ids, 2)}) AND perfil NOT IN ('dono')`,
+        valores
+      );
+    }
     return resposta.json({ mensagem: "Usuário(s) excluído(s) com sucesso.", total: resultado.rowCount });
   } catch (erro) {
     console.error("Erro ao excluir usuário(s):", erro.message);
@@ -1104,17 +1227,26 @@ app.delete(["/usuarios", "/usuarios/:id"], exigirAdmin, async (requisicao, respo
 app.delete(["/despesas", "/despesas/:id"], exigirAdmin, async (requisicao, resposta) => {
   const ids = normalizarIdsExclusao(requisicao);
   const transportadoraId = obterIdTransportadora(requisicao);
+  const donoSistema = usuarioEhDonoSistema(requisicao);
 
   if (ids.length === 0) {
     return resposta.status(400).json({ mensagem: "Informe ao menos uma despesa para excluir." });
   }
 
   try {
-    const valores = [transportadoraId, ...ids];
-    const resultado = await banco.query(
-      `DELETE FROM despesas WHERE transportadora_id=$1 AND id IN (${placeholderIds(ids, 2)})`,
-      valores
-    );
+    let resultado;
+    if (donoSistema) {
+      resultado = await banco.query(
+        `DELETE FROM despesas WHERE id IN (${placeholderIds(ids, 1)})`,
+        ids
+      );
+    } else {
+      const valores = [transportadoraId, ...ids];
+      resultado = await banco.query(
+        `DELETE FROM despesas WHERE transportadora_id=$1 AND id IN (${placeholderIds(ids, 2)})`,
+        valores
+      );
+    }
     return resposta.json({ mensagem: "Despesa(s) excluída(s) com sucesso.", total: resultado.rowCount });
   } catch (erro) {
     console.error("Erro ao excluir despesa(s):", erro.message);
@@ -1125,6 +1257,7 @@ app.delete(["/despesas", "/despesas/:id"], exigirAdmin, async (requisicao, respo
 app.delete(["/viagens", "/viagens/:id"], exigirAdmin, async (requisicao, resposta) => {
   const ids = normalizarIdsExclusao(requisicao);
   const transportadoraId = obterIdTransportadora(requisicao);
+  const donoSistema = usuarioEhDonoSistema(requisicao);
 
   if (ids.length === 0) {
     return resposta.status(400).json({ mensagem: "Informe ao menos uma viagem para excluir." });
@@ -1134,9 +1267,16 @@ app.delete(["/viagens", "/viagens/:id"], exigirAdmin, async (requisicao, respost
 
   try {
     await cliente.query("BEGIN");
-    const valores = [transportadoraId, ...ids];
-    const marcadores = placeholderIds(ids, 2);
+    const marcadores = placeholderIds(ids, donoSistema ? 1 : 2);
 
+    if (donoSistema) {
+      await cliente.query(`DELETE FROM despesas WHERE viagem_id IN (${marcadores})`, ids);
+      const resultado = await cliente.query(`DELETE FROM viagens WHERE id IN (${marcadores})`, ids);
+      await cliente.query("COMMIT");
+      return resposta.json({ mensagem: "Viagem(ns) excluída(s) com sucesso.", total: resultado.rowCount });
+    }
+
+    const valores = [transportadoraId, ...ids];
     await cliente.query(`DELETE FROM despesas WHERE transportadora_id=$1 AND viagem_id IN (${marcadores})`, valores);
     const resultado = await cliente.query(`DELETE FROM viagens WHERE transportadora_id=$1 AND id IN (${marcadores})`, valores);
 
@@ -1154,6 +1294,7 @@ app.delete(["/viagens", "/viagens/:id"], exigirAdmin, async (requisicao, respost
 app.delete(["/motoristas", "/motoristas/:id"], exigirAdmin, async (requisicao, resposta) => {
   const ids = normalizarIdsExclusao(requisicao);
   const transportadoraId = obterIdTransportadora(requisicao);
+  const donoSistema = usuarioEhDonoSistema(requisicao);
 
   if (ids.length === 0) {
     return resposta.status(400).json({ mensagem: "Informe ao menos um motorista para excluir." });
@@ -1163,8 +1304,26 @@ app.delete(["/motoristas", "/motoristas/:id"], exigirAdmin, async (requisicao, r
 
   try {
     await cliente.query("BEGIN");
+    const marcadores = placeholderIds(ids, donoSistema ? 1 : 2);
+
+    if (donoSistema) {
+      const viagens = await cliente.query(`SELECT id FROM viagens WHERE motorista_id IN (${marcadores})`, ids);
+      const idsViagens = viagens.rows.map((linha) => linha.id);
+
+      if (idsViagens.length > 0) {
+        const mV = placeholderIds(idsViagens, 1);
+        await cliente.query(`DELETE FROM despesas WHERE viagem_id IN (${mV})`, idsViagens);
+        await cliente.query(`DELETE FROM viagens WHERE id IN (${mV})`, idsViagens);
+      }
+
+      await cliente.query(`UPDATE usuarios SET motorista_id=NULL WHERE motorista_id IN (${marcadores})`, ids);
+      const resultado = await cliente.query(`DELETE FROM motoristas WHERE id IN (${marcadores})`, ids);
+
+      await cliente.query("COMMIT");
+      return resposta.json({ mensagem: "Motorista(s) excluído(s) com sucesso.", total: resultado.rowCount });
+    }
+
     const valores = [transportadoraId, ...ids];
-    const marcadores = placeholderIds(ids, 2);
     const viagens = await cliente.query(`SELECT id FROM viagens WHERE transportadora_id=$1 AND motorista_id IN (${marcadores})`, valores);
     const idsViagens = viagens.rows.map((linha) => linha.id);
 
@@ -1196,6 +1355,7 @@ app.delete(["/motoristas", "/motoristas/:id"], exigirAdmin, async (requisicao, r
 app.delete(["/veiculos", "/veiculos/:id"], exigirAdmin, async (requisicao, resposta) => {
   const ids = normalizarIdsExclusao(requisicao);
   const transportadoraId = obterIdTransportadora(requisicao);
+  const donoSistema = usuarioEhDonoSistema(requisicao);
 
   if (ids.length === 0) {
     return resposta.status(400).json({ mensagem: "Informe ao menos um veículo para excluir." });
@@ -1205,8 +1365,25 @@ app.delete(["/veiculos", "/veiculos/:id"], exigirAdmin, async (requisicao, respo
 
   try {
     await cliente.query("BEGIN");
+    const marcadores = placeholderIds(ids, donoSistema ? 1 : 2);
+
+    if (donoSistema) {
+      const viagens = await cliente.query(`SELECT id FROM viagens WHERE veiculo_id IN (${marcadores})`, ids);
+      const idsViagens = viagens.rows.map((linha) => linha.id);
+
+      if (idsViagens.length > 0) {
+        const mV = placeholderIds(idsViagens, 1);
+        await cliente.query(`DELETE FROM despesas WHERE viagem_id IN (${mV})`, idsViagens);
+        await cliente.query(`DELETE FROM viagens WHERE id IN (${mV})`, idsViagens);
+      }
+
+      const resultado = await cliente.query(`DELETE FROM veiculos WHERE id IN (${marcadores})`, ids);
+
+      await cliente.query("COMMIT");
+      return resposta.json({ mensagem: "Veículo(s) excluído(s) com sucesso.", total: resultado.rowCount });
+    }
+
     const valores = [transportadoraId, ...ids];
-    const marcadores = placeholderIds(ids, 2);
     const viagens = await cliente.query(`SELECT id FROM viagens WHERE transportadora_id=$1 AND veiculo_id IN (${marcadores})`, valores);
     const idsViagens = viagens.rows.map((linha) => linha.id);
 

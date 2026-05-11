@@ -79,11 +79,15 @@ function exigirAutenticacao() {
 function exigirAdmin() {
     const usuario = exigirAutenticacao();
     if (!usuario) return null;
-    if (usuario.perfil !== "admin") {
+    if (usuario.perfil !== "admin" && usuario.perfil !== "dono") {
         window.location.href = "/frontend/HTML/viagens.html";
         return null;
     }
     return usuario;
+}
+
+function usuarioEhAdminOuDonoMaster(usuario) {
+    return usuario && (usuario.perfil === "admin" || usuario.perfil === "dono");
 }
 
 function cabecalhosAutenticados() {
@@ -115,7 +119,7 @@ function preencherInfoUsuario() {
     }
 
     document.querySelectorAll("[data-apenas-admin]").forEach(function (elemento) {
-        elemento.style.display = usuario.perfil === "admin" ? "" : "none";
+        elemento.style.display = usuarioEhAdminOuDonoMaster(usuario) ? "" : "none";
     });
 
     document.querySelectorAll("[data-apenas-dono]").forEach(function (elemento) {

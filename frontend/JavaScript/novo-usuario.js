@@ -22,7 +22,10 @@ function alternarGrupoMotorista() {
 async function carregarMotoristas() {
   const resposta = await fetch(urlApiMotoristas, { headers: cabecalhosAutenticados() });
   if (!resposta.ok) return;
-  const lista = await resposta.json();
+  let lista = await resposta.json();
+  if (typeof filtrarListaPorTransportadoraMaster === "function") {
+    lista = filtrarListaPorTransportadoraMaster(lista);
+  }
   const select = document.getElementById("campoMotoristaId");
   select.innerHTML = '<option value="">— Selecione —</option>';
   lista.forEach(function (m) {
@@ -36,7 +39,7 @@ async function carregarMotoristas() {
 function iniciar() {
   const usuario = exigirAutenticacao();
   if (!usuario) return;
-  if (usuario.perfil !== "admin") {
+  if (!usuarioEhAdminOuDonoMaster(usuario)) {
     window.location.href = "viagens.html";
     return;
   }
@@ -47,6 +50,9 @@ function iniciar() {
   document.getElementById("campoPerfil").addEventListener("change", alternarGrupoMotorista);
   alternarGrupoMotorista();
 
+  document.addEventListener("autoacerto-master-transportadora", function () {
+    carregarMotoristas().catch(function () {});
+  });
   carregarMotoristas().catch(function () {});
 
   document.getElementById("botaoSalvar").addEventListener("click", async function () {
@@ -74,7 +80,21 @@ function iniciar() {
       return;
     }
 
-    const corpo = { nome, email, senha, perfil, ativo, motorista_id };
+    if (usuario.perfil === "dono") {
+      if (typeof validarTransportadoraMasterParaCadastro === "function") {
+        if (!validarTransportadoraMasterParaCadastro({ mensagemErro: "Selecione a transportadora no topo para vincular o novo usuário." })) {
+          return;
+        }
+      } else if (!obterTransportadoraIdParaCadastroMaster || !obterTransportadoraIdParaCadastroMaster()) {
+        exibirErro("Selecione a transportadora no topo para vincular o novo usuário.");
+        return;
+      }
+    }
+
+    let corpo = { nome, email, senha, perfil, ativo, motorista_id };
+    if (typeof anexarTransportadoraIdSeMaster === "function") {
+      corpo = anexarTransportadoraIdSeMaster(corpo);
+    }
 
     try {
       const resposta = await fetch(urlApiUsuarios, {

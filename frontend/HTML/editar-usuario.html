@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoAcerto - Editar usuÃ¡rio</title>
+  <title>AutoAcerto - Editar usuário</title>
   <link rel="stylesheet" href="/frontend/CSS/editar-motorista.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,7 +44,7 @@
             <circle cx="5.5" cy="18.5" r="2.5" />
             <circle cx="18.5" cy="18.5" r="2.5" />
           </svg>
-          VeÃ­culos
+          Veículos
         </a>
         <a href="viagens.html" class="item-menu">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -69,7 +69,7 @@
             <line x1="12" y1="20" x2="12" y2="4" />
             <line x1="6" y1="20" x2="6" y2="14" />
           </svg>
-          RelatÃ³rios
+          Relatórios
         </a>
         <a href="configuracoes.html" class="item-menu">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -78,7 +78,7 @@
             <path
               d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
-          ConfiguraÃ§Ãµes
+          Configurações
         </a>
       </nav>
       <div class="rodape-barra">
@@ -98,8 +98,8 @@
 
       <section class="cabecalho-conteudo">
         <div>
-          <h2 class="titulo-pagina">Editar usuÃ¡rio</h2>
-          <p class="subtitulo-pagina">Atualize dados, perfil e vÃ­nculo com motorista.</p>
+          <h2 class="titulo-pagina">Editar usuário</h2>
+          <p class="subtitulo-pagina">Atualize dados, perfil e vínculo com motorista.</p>
         </div>
       </section>
 
@@ -108,7 +108,7 @@
           <div class="grade-formulario">
             <div class="grupo-campo">
               <label for="campoNome">Nome completo</label>
-              <input type="text" id="campoNome" maxlength="255" required placeholder="Nome do usuÃ¡rio" />
+              <input type="text" id="campoNome" maxlength="255" required placeholder="Nome do usuário" />
             </div>
             <div class="grupo-campo">
               <label for="campoEmail">E-mail</label>
@@ -124,18 +124,18 @@
             <div class="grupo-campo" id="grupoMotoristaVinculo">
               <label for="campoMotoristaId">Motorista vinculado</label>
               <select id="campoMotoristaId">
-                <option value="">-- Selecione --</option>
+                <option value="">— Selecione —</option>
               </select>
             </div>
             <div class="grupo-campo campo-checkbox-compacto">
               <input type="checkbox" id="campoAtivo" checked />
-              <label for="campoAtivo">UsuÃ¡rio ativo</label>
+              <label for="campoAtivo">Usuário ativo</label>
             </div>
           </div>
           <div class="acoes-formulario">
             <a href="configuracoes.html?secao=usuarios" class="botao-secundario"
               style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Cancelar</a>
-            <button type="button" class="botao-primario" id="botaoSalvar">Salvar alteraÃ§Ãµes</button>
+            <button type="button" class="botao-primario" id="botaoSalvar">Salvar alterações</button>
           </div>
           <p id="msgErro" class="mensagem-retorno" style="display:none;"></p>
         </div>
@@ -144,8 +144,8 @@
   </div>
 
   <script src="/frontend/JavaScript/auth.js"></script>
+  <script src="/frontend/JavaScript/master-contexto.js"></script>
   <script src="/frontend/JavaScript/editar-usuario.js"></script>
 </body>
 
 </html>
-

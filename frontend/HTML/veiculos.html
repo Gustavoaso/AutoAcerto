@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AutoAcerto - VeÃ­culos</title>
+    <title>AutoAcerto - Veículos</title>
     <link rel="stylesheet" href="/frontend/CSS/veiculos.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,7 +45,7 @@
                         <circle cx="5.5" cy="18.5" r="2.5" />
                         <circle cx="18.5" cy="18.5" r="2.5" />
                     </svg>
-                    VeÃ­culos
+                    Veículos
                 </a>
                 <a href="viagens.html" class="item-menu">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -70,7 +70,7 @@
                         <line x1="12" y1="20" x2="12" y2="4" />
                         <line x1="6" y1="20" x2="6" y2="14" />
                     </svg>
-                    RelatÃ³rios
+                    Relatórios
                 </a>
                 <a href="configuracoes.html" class="item-menu">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -79,7 +79,7 @@
                         <path
                             d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                     </svg>
-                    ConfiguraÃ§Ãµes
+                    Configurações
                 </a>
             </nav>
 
@@ -91,7 +91,7 @@
         <main class="conteudo-principal">
             <header class="topo-pagina">
                 <div class="acoes-topo">
-                    <button class="botao-icone">??</button>
+                    <button class="botao-icone">🔔</button>
                     <div class="perfil-usuario">
                         <div class="avatar-usuario">GS</div>
                         <span class="nome-usuario">Gustavo</span>
@@ -101,19 +101,19 @@
 
             <section class="cabecalho-conteudo">
                 <div>
-                    <h2 class="titulo-pagina">VeÃ­culos</h2>
-                    <p class="subtitulo-pagina">Gerencie os veÃ­culos cadastrados e acompanhe a situaÃ§Ã£o da frota.</p>
+                    <h2 class="titulo-pagina">Veículos</h2>
+                    <p class="subtitulo-pagina">Gerencie os veículos cadastrados e acompanhe a situação da frota.</p>
                 </div>
-                <button class="botao-primario" id="botaoNovoVeiculo">+ Novo veÃ­culo</button>
+                <button class="botao-primario" id="botaoNovoVeiculo">+ Novo veículo</button>
             </section>
 
             <section class="grade-resumo">
                 <div class="card-resumo">
-                    <span class="rotulo-resumo">Total de veÃ­culos</span>
+                    <span class="rotulo-resumo">Total de veículos</span>
                     <strong class="valor-resumo" id="totalVeiculos">0</strong>
                 </div>
                 <div class="card-resumo">
-                    <span class="rotulo-resumo">VeÃ­culos ativos</span>
+                    <span class="rotulo-resumo">Veículos ativos</span>
                     <strong class="valor-resumo" id="totalVeiculosAtivos">0</strong>
                 </div>
                 <div class="card-resumo">
@@ -121,7 +121,7 @@
                     <strong class="valor-resumo" id="totalEmViagem">0</strong>
                 </div>
                 <div class="card-resumo">
-                    <span class="rotulo-resumo">Em manutenÃ§Ã£o</span>
+                    <span class="rotulo-resumo">Em manutenção</span>
                     <strong class="valor-resumo" id="totalEmManutencao">0</strong>
                 </div>
             </section>
@@ -129,7 +129,7 @@
             <section class="painel">
                 <div class="cabecalho-painel">
                     <div>
-                        <h3>Lista de VeÃ­culos</h3>
+                        <h3>Lista de Veículos</h3>
                         <p class="texto-auxiliar">Pesquise, filtre e acompanhe os dados da frota.</p>
                     </div>
                 </div>
@@ -137,7 +137,7 @@
                 <div class="barra-filtros">
                     <div class="campo-filtro">
                         <label for="campoPesquisaVeiculo">Pesquisar</label>
-                        <input type="text" id="campoPesquisaVeiculo" placeholder="Placa, modelo ou observaÃ§Ãµes" />
+                        <input type="text" id="campoPesquisaVeiculo" placeholder="Placa, modelo ou observações" />
                     </div>
                     <div class="campo-filtro">
                         <label for="filtroStatusVeiculo">Status</label>
@@ -145,7 +145,7 @@
                             <option value="todos">Todos</option>
                             <option value="ativo">Ativo</option>
                             <option value="em viagem">Em viagem</option>
-                            <option value="manutenÃ§Ã£o">ManutenÃ§Ã£o</option>
+                            <option value="manutenção">Manutenção</option>
                             <option value="inativo">Inativo</option>
                         </select>
                     </div>
@@ -160,7 +160,7 @@
                                 <th>Placa</th>
                                 <th>Ano</th>
                                 <th>Status</th>
-                                <th>AÃ§Ãµes</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="corpoTabelaVeiculos"></tbody>

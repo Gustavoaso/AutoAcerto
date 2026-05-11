@@ -24,9 +24,11 @@ function iniciarSessaoConfiguracoes() {
   configurarMenuLateral();
   configurarFormularioPerfil(usuario);
   configurarFormularioSenha();
-  configurarExclusaoUsuarios();
+  if (usuarioEhAdminOuDonoMaster(usuario)) {
+    configurarExclusaoUsuarios();
+  }
 
-  if (usuario.perfil === "admin") {
+  if (usuarioEhAdminOuDonoMaster(usuario)) {
     document.querySelectorAll("[data-apenas-admin]").forEach(function (el) {
       el.style.removeProperty("display");
     });
@@ -34,7 +36,7 @@ function iniciarSessaoConfiguracoes() {
   }
 
   const qs = new URLSearchParams(window.location.search);
-  if (qs.get("secao") === "usuarios" && usuario.perfil === "admin") {
+  if (qs.get("secao") === "usuarios" && usuarioEhAdminOuDonoMaster(usuario)) {
     ativarSecao("secao-usuarios");
   } else {
     ativarSecao("secao-perfil");
@@ -83,15 +85,19 @@ function configurarFormularioPerfil(usuario) {
 function preencherTransportadoraPerfil(usuario) {
   const textoTransportadora = document.getElementById("textoTransportadoraPerfil");
   if (textoTransportadora) {
-    textoTransportadora.textContent = usuario.transportadora_nome || "Transportadora nÃ£o informada";
+    if (usuario.perfil === "dono") {
+      textoTransportadora.textContent = "Acesso global (sem transportadora fixa)";
+    } else {
+      textoTransportadora.textContent = usuario.transportadora_nome || "Transportadora nÃ£o informada";
+    }
   }
 }
 
 function preencherTipoPerfil(usuario) {
   const perfilFormatado = usuario.perfil === "dono"
-    ?"Dono do sistema"
+    ? "Master"
     : usuario.perfil === "admin"
-      ?"Administrador"
+      ? "Administrador"
       : "Motorista";
   const seloPerfil = document.getElementById("seloTipoPerfil");
   const textoPerfil = document.getElementById("textoTipoPerfil");
@@ -99,7 +105,7 @@ function preencherTipoPerfil(usuario) {
 
   if (seloPerfil) {
     seloPerfil.textContent = perfilFormatado;
-    seloPerfil.classList.toggle("selo-perfil-admin", usuario.perfil === "admin");
+    seloPerfil.classList.toggle("selo-perfil-admin", usuario.perfil === "admin" || usuario.perfil === "dono");
   }
 
   if (textoPerfil) {
@@ -148,27 +154,43 @@ function renderizarTabelaUsuarios(lista) {
       ?'<span class="selo-status selo-ativo">Ativo</span>'
       : '<span class="selo-status selo-inativo">Inativo</span>';
 
-    const seloPerfil = usuario.perfil === "admin"
-      ?'<span class="selo-status selo-admin">Admin</span>'
-      : '<span class="selo-status selo-motorista-perfil">Motorista</span>';
+    let seloPerfil = '<span class="selo-status selo-motorista-perfil">Motorista</span>';
+    if (usuario.perfil === "admin") {
+      seloPerfil = '<span class="selo-status selo-admin">Admin</span>';
+    } else if (usuario.perfil === "dono") {
+      seloPerfil = '<span class="selo-status selo-admin">Master</span>';
+    }
+
+    const celulaSelecao =
+      usuario.perfil === "dono"
+        ? '<td class="coluna-selecao"></td>'
+        : exclusaoUsuarios
+          ? exclusaoUsuarios.colunaLinha(usuario.id)
+          : "";
+
+    const botoesAcao =
+      usuario.perfil === "dono"
+        ? ""
+        : `<button class="botao-acao" type="button" data-editar-usuario="${usuario.id}">Editar</button>`;
 
     linha.innerHTML = `
-            ${exclusaoUsuarios ? exclusaoUsuarios.colunaLinha(usuario.id) : ""}
+            ${celulaSelecao}
             <td>
                 <div class="bloco-usuario-nome">
                     <div class="avatar-mini">${obterIniciaisNome(usuario.nome)}</div>
                     <div>
                         <div class="nome-usuario-tabela">${usuario.nome}</div>
                         <div class="texto-secundario">${usuario.email}</div>
+                        ${usuario.transportadora_nome ? `<div class="texto-secundario">${usuario.transportadora_nome}</div>` : ""}
                     </div>
                 </div>
             </td>
             <td>${seloPerfil}</td>
-            <td>${usuario.motorista_nome || "?"}</td>
+            <td>${usuario.perfil === "dono" ? "—" : (usuario.motorista_nome || "—")}</td>
             <td>${seloAtivo}</td>
             <td>
                 <div class="grupo-acoes">
-                    <button class="botao-acao" type="button" data-editar-usuario="${usuario.id}">Editar</button>
+                    ${botoesAcao}
                 </div>
             </td>
         `;

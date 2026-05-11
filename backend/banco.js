@@ -143,26 +143,49 @@ async function garantirEstruturaMultiTransportadora() {
   await banco.query("UPDATE veiculos SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
   await banco.query("UPDATE viagens SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
   await banco.query("UPDATE despesas SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
-  await banco.query("UPDATE usuarios SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
+  await banco.query(
+    "UPDATE usuarios SET transportadora_id=$1 WHERE transportadora_id IS NULL AND perfil IS DISTINCT FROM 'dono'",
+    [idTransportadoraPadrao]
+  );
 
   await banco.query("ALTER TABLE motoristas ALTER COLUMN transportadora_id SET NOT NULL");
   await banco.query("ALTER TABLE veiculos ALTER COLUMN transportadora_id SET NOT NULL");
   await banco.query("ALTER TABLE viagens ALTER COLUMN transportadora_id SET NOT NULL");
   await banco.query("ALTER TABLE despesas ALTER COLUMN transportadora_id SET NOT NULL");
-  await banco.query("ALTER TABLE usuarios ALTER COLUMN transportadora_id SET NOT NULL");
+  await banco.query("ALTER TABLE usuarios ALTER COLUMN transportadora_id DROP NOT NULL");
 
-  await criarUsuarioDonoSistema(idTransportadoraPadrao);
+  await criarUsuarioDonoSistema();
+  await garantirConstraintUsuarioMaster();
 }
 
-async function criarUsuarioDonoSistema(idTransportadoraPadrao) {
+async function garantirConstraintUsuarioMaster() {
+  await banco.query("UPDATE usuarios SET transportadora_id = NULL WHERE perfil = 'dono'");
+  await banco.query("ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_transportadora_perfil_chk");
+  try {
+    await banco.query(`
+      ALTER TABLE usuarios ADD CONSTRAINT usuarios_transportadora_perfil_chk
+      CHECK (
+        (perfil = 'dono' AND transportadora_id IS NULL)
+        OR (perfil IS DISTINCT FROM 'dono' AND transportadora_id IS NOT NULL)
+      )
+    `);
+  } catch (erro) {
+    console.warn("Constraint usuarios_transportadora_perfil_chk:", erro.message);
+  }
+}
+
+async function criarUsuarioDonoSistema() {
   const resultado = await banco.query("SELECT id FROM usuarios WHERE perfil='dono' LIMIT 1");
-  if (resultado.rows.length > 0) return;
+  if (resultado.rows.length > 0) {
+    await banco.query("UPDATE usuarios SET transportadora_id=NULL, motorista_id=NULL WHERE perfil='dono'");
+    return;
+  }
 
   const usuarioExistente = await banco.query("SELECT id FROM usuarios WHERE email=$1", [DONO_SISTEMA_EMAIL]);
   if (usuarioExistente.rows.length > 0) {
     await banco.query(
-      "UPDATE usuarios SET perfil='dono', transportadora_id=$1, motorista_id=NULL, ativo=TRUE WHERE id=$2",
-      [idTransportadoraPadrao, usuarioExistente.rows[0].id]
+      "UPDATE usuarios SET perfil='dono', transportadora_id=NULL, motorista_id=NULL, ativo=TRUE WHERE id=$1",
+      [usuarioExistente.rows[0].id]
     );
     console.log("Usuário dono do sistema atualizado:", DONO_SISTEMA_EMAIL);
     return;
@@ -172,8 +195,8 @@ async function criarUsuarioDonoSistema(idTransportadoraPadrao) {
 
   await banco.query(`
     INSERT INTO usuarios (transportadora_id, nome, email, senha_hash, perfil, motorista_id, ativo)
-    VALUES ($1, $2, $3, $4, 'dono', NULL, TRUE)
-  `, [idTransportadoraPadrao, DONO_SISTEMA_NOME, DONO_SISTEMA_EMAIL, senhaHash]);
+    VALUES (NULL, $1, $2, $3, 'dono', NULL, TRUE)
+  `, [DONO_SISTEMA_NOME, DONO_SISTEMA_EMAIL, senhaHash]);
 
   console.log("Usuário dono do sistema criado:", DONO_SISTEMA_EMAIL);
 }

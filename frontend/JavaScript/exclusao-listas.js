@@ -21,7 +21,7 @@
       barra = document.createElement("div");
       barra.className = "barra-exclusao-lista";
       barra.innerHTML = `
-        <span data-contador-exclusao>Nenhum item selecionado</span>
+        <span data-contador-exclusao></span>
         <button type="button" class="botao-perigo" data-excluir-selecionados disabled>Excluir selecionados</button>
       `;
 
@@ -42,7 +42,7 @@
       const plural = config.plural || "itens";
 
       contador.textContent = total === 0
-        ? "Nenhum item selecionado"
+        ? ""
         : total + " " + (total === 1 ? singular : plural) + " selecionado" + (total === 1 ? "" : "s");
       botao.disabled = total === 0;
 

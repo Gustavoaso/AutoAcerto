@@ -52,7 +52,7 @@ function criarSeloStatusViagem(status) {
 function renderizarTabelaViagens(listaViagens) {
     const corpoTabelaViagens = document.getElementById("corpoTabelaViagens");
     const usuario = obterUsuarioLogado();
-    const podeEditar = usuario && usuario.perfil === "admin";
+    const podeEditar = usuario && (usuario.perfil === "admin" || usuario.perfil === "dono");
 
     corpoTabelaViagens.innerHTML = "";
     viagensVisiveis = listaViagens;
@@ -174,7 +174,7 @@ function iniciarPaginaViagens() {
 
 function configurarExclusaoViagens() {
     const usuario = obterUsuarioLogado();
-    if (!window.AutoAcertoExclusao || !usuario || usuario.perfil !== "admin") return;
+    if (!window.AutoAcertoExclusao || !usuario || (usuario.perfil !== "admin" && usuario.perfil !== "dono")) return;
 
     exclusaoViagens = window.AutoAcertoExclusao.criarGerenciadorExclusao({
         urlApi: urlApiViagens,

@@ -25,7 +25,10 @@ function alternarGrupoMotorista() {
 async function carregarMotoristas() {
   const resposta = await fetch(urlApiMotoristas, { headers: cabecalhosAutenticados() });
   if (!resposta.ok) return;
-  const lista = await resposta.json();
+  let lista = await resposta.json();
+  if (typeof filtrarListaPorTransportadoraMaster === "function") {
+    lista = filtrarListaPorTransportadoraMaster(lista);
+  }
   const select = document.getElementById("campoMotoristaId");
   const atual = select.value;
   select.innerHTML = '<option value="">— Selecione —</option>';
@@ -49,6 +52,10 @@ async function carregarUsuario() {
     return;
   }
   const u = await resposta.json();
+  if (u.perfil === "dono") {
+    window.location.href = "configuracoes.html?secao=usuarios";
+    return;
+  }
   document.getElementById("campoNome").value = u.nome || "";
   document.getElementById("campoEmail").value = u.email || "";
   document.getElementById("campoPerfil").value = u.perfil || "motorista";
@@ -60,13 +67,19 @@ async function carregarUsuario() {
 function iniciar() {
   const usuario = exigirAutenticacao();
   if (!usuario) return;
-  if (usuario.perfil !== "admin") {
+  if (!usuarioEhAdminOuDonoMaster(usuario)) {
     window.location.href = "viagens.html";
     return;
   }
   preencherInfoUsuario();
   configurarBotaoSair();
   marcarItemMenuLateralAtivo();
+
+  document.addEventListener("autoacerto-master-transportadora", function () {
+    carregarMotoristas()
+      .then(carregarUsuario)
+      .catch(function () {});
+  });
 
   carregarMotoristas()
     .then(carregarUsuario)
@@ -94,7 +107,10 @@ function iniciar() {
       return;
     }
 
-    const corpo = { nome, email, perfil, ativo, motorista_id };
+    let corpo = { nome, email, perfil, ativo, motorista_id };
+    if (typeof anexarTransportadoraIdSeMaster === "function") {
+      corpo = anexarTransportadoraIdSeMaster(corpo);
+    }
 
     try {
       const resposta = await fetch(urlApiUsuarios + "/" + idUsuario, {
