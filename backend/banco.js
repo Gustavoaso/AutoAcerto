@@ -1,14 +1,16 @@
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
 
+const { Pool } = require("pg");
+
 const banco = new Pool({
-  host: "localhost",
-  port: 5432,
-  database: "autoacerto",
-  user: "postgres",
-  password: "123456"
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
+module.exports = banco;
 const DONO_SISTEMA_NOME  = process.env.DONO_SISTEMA_NOME  || "Dono AutoAcerto";
 const DONO_SISTEMA_EMAIL = process.env.DONO_SISTEMA_EMAIL || "dono@autoacerto.com";
 const DONO_SISTEMA_SENHA = process.env.DONO_SISTEMA_SENHA || "autoacerto123";
