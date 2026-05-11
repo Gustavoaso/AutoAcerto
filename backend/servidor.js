@@ -212,7 +212,7 @@ app.post("/auth/login", async (requisicao, resposta) => {
       usuario: payload
     });
   } catch (erro) {
-    console.error("Erro no login:", erro.message);
+    console.log("Erro no login:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao processar login." });
   }
 });
