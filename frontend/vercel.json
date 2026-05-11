@@ -4,23 +4,23 @@
   "rewrites": [
     { 
       "source": "/", 
-      "destination": "/frontend/HTML/index.html" 
+      "destination": "/HTML/index.html" 
     },
     { 
       "source": "/login", 
-      "destination": "/frontend/HTML/login.html" 
-    },
-    {
-      "source": "/js/(.*)",
-      "destination": "/frontend/JavaScript/$1"
+      "destination": "/HTML/login.html" 
     },
     {
       "source": "/css/(.*)",
-      "destination": "/frontend/CSS/$1"
+      "destination": "/CSS/$1"
+    },
+    {
+      "source": "/js/(.*)",
+      "destination": "/JavaScript/$1"
     },
     {
       "source": "/img/(.*)",
-      "destination": "/frontend/Imagens/$1"
+      "destination": "/Imagens/$1"
     }
   ]
 }
