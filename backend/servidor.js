@@ -160,6 +160,8 @@ async function viagemPertenceTransportadora(viagemId, transportadoraId) {
 // ============================================================
 
 app.post("/auth/login", async (requisicao, resposta) => {
+
+  console.log("📥 Body recebido:", requisicao.body);
   const { email, senha } = requisicao.body;
 
   if (!email || !senha) {
