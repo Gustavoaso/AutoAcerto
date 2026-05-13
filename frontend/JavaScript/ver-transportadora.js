@@ -87,4 +87,12 @@ function renderizarDetalhes(t) {
     `;
 }
 
+document.getElementById("botaoVoltar").addEventListener("click", function () {
+    window.location.href = "transportadoras.html";
+});
+
+document.getElementById("botaoEditar").addEventListener("click", function () {
+    window.location.href = "editar-viagem.html?id=" + idViagem;
+});
+
 document.addEventListener("DOMContentLoaded", carregarDetalhesTransportadora);
