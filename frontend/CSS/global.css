@@ -398,6 +398,21 @@ button {
   font-size: 0.875rem;
 }
 
+.titulo-secao {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--cor-texto);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.subtitulo-secao {
+  color: var(--cor-texto-secundario);
+  font-size: 0.875rem;
+}
+
+
 /* -------------------------------------------------------
    BOTÕES
 ------------------------------------------------------- */
