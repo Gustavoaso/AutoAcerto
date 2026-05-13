@@ -35,7 +35,7 @@ async function carregarDespesa() {
     }
 
     try {
-        const response = await fetch(urlApiDespesas + "/" + idDespesa);
+        const response = await fetch(urlApiDespesas + "/" + idDespesa,{ headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
             alert("Despesa nao encontrada.");

@@ -11,7 +11,7 @@ async function carregarMotorista() {
     }
 
     try {
-        const response = await fetch(urlApi + "/" + idMotorista);
+        const response = await fetch(urlApi + "/" + idMotorista,{ headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
             alert("Motorista não encontrado.");

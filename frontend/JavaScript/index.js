@@ -4,7 +4,7 @@ const urlApiViagens = montarUrlApi("/viagens");
 const urlApiDespesas = montarUrlApi("/despesas");
 
 async function buscarDados(url) {
-  const resposta = await fetch(url);
+  const resposta = await fetch(url,{ headers: cabecalhosAutenticados() });
   if (!resposta.ok) {
     const texto = await resposta.text();
     throw new Error(texto || "HTTP " + resposta.status);

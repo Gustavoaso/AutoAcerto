@@ -9,7 +9,7 @@ const botaoOk = document.getElementById("botaoOkModal");
 
 async function carregarViagens(viagemIdSelecionada) {
     try {
-        const response = await fetch(urlApiViagens);
+        const response = await fetch(urlApiViagens,{ headers: cabecalhosAutenticados() });
 
         if (!response.ok) return;
 
@@ -49,7 +49,7 @@ async function carregarDespesa() {
     }
 
     try {
-        const response = await fetch(urlApiDespesas + "/" + idDespesa);
+        const response = await fetch(urlApiDespesas + "/" + idDespesa,{ headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
             alert("Despesa nao encontrada.");

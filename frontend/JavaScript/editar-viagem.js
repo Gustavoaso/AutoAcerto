@@ -10,7 +10,7 @@ const botaoOk = document.getElementById("botaoOkModal");
 
 async function carregarMotoristas(motoristaIdSelecionado) {
     try {
-        const response = await fetch(urlApiMotoristas);
+        const response = await fetch(urlApiMotoristas,{ headers: cabecalhosAutenticados() });
 
         if (!response.ok) return;
 
@@ -35,7 +35,7 @@ async function carregarMotoristas(motoristaIdSelecionado) {
 
 async function carregarVeiculos(veiculoIdSelecionado) {
     try {
-        const response = await fetch(urlApiVeiculos);
+        const response = await fetch(urlApiVeiculos,{ headers: cabecalhosAutenticados() });
 
         if (!response.ok) return;
 
@@ -75,7 +75,7 @@ async function carregarViagem() {
     }
 
     try {
-        const response = await fetch(urlApiViagens + "/" + idViagem);
+        const response = await fetch(urlApiViagens + "/" + idViagem,{ headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
             alert("Viagem não encontrada.");

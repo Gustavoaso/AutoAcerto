@@ -38,7 +38,7 @@ async function carregarViagem() {
     }
 
     try {
-        const response = await fetch(urlApiViagens + "/" + idViagem);
+        const response = await fetch(urlApiViagens + "/" + idViagem,{ headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
             alert("Viagem não encontrada.");

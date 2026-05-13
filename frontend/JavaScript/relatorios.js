@@ -10,9 +10,9 @@ let periodoDias = 30;
 async function carregarDadosRelatorio() {
     try {
         const respostas = await Promise.all([
-            fetch(urlApiViagens),
-            fetch(urlApiDespesas),
-            fetch(urlApiMotoristas)
+            fetch(urlApiViagens,{ headers: cabecalhosAutenticados() }),
+            fetch(urlApiDespesas,{ headers: cabecalhosAutenticados() }),
+            fetch(urlApiMotoristas,{ headers: cabecalhosAutenticados() })
         ]);
 
         viagens = await respostas[0].json();

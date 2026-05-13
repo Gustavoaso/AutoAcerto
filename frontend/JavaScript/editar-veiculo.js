@@ -20,7 +20,7 @@ async function carregarVeiculo() {
   }
 
   try {
-    const response = await fetch(urlApi + "/" + idVeiculo);
+    const response = await fetch(urlApi + "/" + idVeiculo,{ headers: cabecalhosAutenticados() });
 
     if (!response.ok) {
       alert("Veículo não encontrado.");

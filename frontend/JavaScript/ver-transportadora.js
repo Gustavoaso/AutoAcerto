@@ -40,7 +40,7 @@ async function carregarDetalhesTransportadora() {
     }
 
     try {
-        const resposta = await fetch(urlApiTransportadoras + "/" + id);
+        const resposta = await fetch(urlApiTransportadoras + "/" + id,{ headers: cabecalhosAutenticados() });
 
         if (!resposta.ok) {
             exibirToastTransportadora("Erro ao carregar transportadora.", "erro");
