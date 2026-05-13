@@ -5,3 +5,35 @@
 
 @import url('/CSS/global.css');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+
+.divisor-secao {
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 40px 0;
+}
+
+.secao-admin-transportadora {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cabecalho-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.titulo-secao {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.subtitulo-secao {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}

@@ -3,6 +3,7 @@
 // =============================================================
 
 const urlApiTransportadoras = montarUrlApi("/transportadoras");
+const urlApiUsuarios = montarUrlApi("/usuarios");
 
 function obterParametroUrl(nome) {
     const params = new URLSearchParams(window.location.search);
@@ -102,11 +103,98 @@ async function salvarEdicao(evento) {
     }
 }
 
+
+async function criarAdministradorTransportadora() {
+    const transportadoraId = obterParametroUrl("id");
+
+    const nome = document.getElementById("campoNomeAdmin").value.trim();
+    const email = document.getElementById("campoEmailAdmin").value.trim();
+    const senha = document.getElementById("campoSenhaAdmin").value.trim();
+    const ativo = document.getElementById("campoStatusAdmin").value === "true";
+
+    const mensagem = document.getElementById("mensagemRetornoAdmin");
+
+    mensagem.textContent = "";
+    mensagem.className = "mensagem-retorno";
+
+    if (!nome || !email || !senha) {
+        mensagem.textContent = "Preencha todos os campos do administrador.";
+        mensagem.classList.add("erro");
+        return;
+    }
+
+    if (senha.length < 8) {
+        mensagem.textContent = "A senha deve possuir no mínimo 8 caracteres.";
+        mensagem.classList.add("erro");
+        return;
+    }
+
+    const botao = document.getElementById("botaoCriarAdmin");
+    botao.disabled = true;
+    botao.textContent = "Criando...";
+
+    try {
+        const resposta = await fetch(urlApiUsuarios, {
+            method: "POST",
+            headers: cabecalhosAutenticados(),
+            body: JSON.stringify({
+                transportadora_id: parseInt(transportadoraId, 10),
+                nome,
+                email,
+                senha,
+                perfil: "admin",
+                ativo,
+                motorista_id: null
+            })
+        });
+
+        const retorno = await resposta.json();
+
+        if (!resposta.ok) {
+            mensagem.textContent = retorno.mensagem || "Erro ao criar administrador.";
+            mensagem.classList.add("erro");
+            return;
+        }
+
+        mensagem.textContent = "Administrador criado com sucesso.";
+        mensagem.classList.add("sucesso");
+
+        document.getElementById("campoNomeAdmin").value = "";
+        document.getElementById("campoEmailAdmin").value = "";
+        document.getElementById("campoSenhaAdmin").value = "";
+        document.getElementById("campoStatusAdmin").value = "true";
+
+    } catch (erro) {
+        console.error("Erro ao criar administrador:", erro.message);
+
+        mensagem.textContent = "Erro de conexão com o servidor.";
+        mensagem.classList.add("erro");
+    } finally {
+        botao.disabled = false;
+        botao.textContent = "Criar administrador";
+    }
+}
+
+
 function iniciarPaginaEdicao() {
     const formulario = document.getElementById("formularioEditarTransportadora");
+
     if (formulario) {
         formulario.addEventListener("submit", salvarEdicao);
     }
+
+    const botaoSalvar = document.getElementById("botaoSalvarEdicao");
+
+    if (botaoSalvar) {
+        botaoSalvar.addEventListener("click", salvarEdicao);
+    }
+
+    const botaoCriarAdmin = document.getElementById("botaoCriarAdmin");
+
+    if (botaoCriarAdmin) {
+        botaoCriarAdmin.addEventListener("click", criarAdministradorTransportadora);
+    }
+
     carregarDadosTransportadora();
 }
 

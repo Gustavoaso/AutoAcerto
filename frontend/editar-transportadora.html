@@ -147,7 +147,55 @@
             <button type="button" class="botao-primario" id="botaoSalvarEdicao">Salvar alterações</button>
           </div>
 
+          
           <div id="mensagemRetorno" class="mensagem-retorno"></div>
+
+          <hr class="divisor-secao" />
+
+          <section class="secao-admin-transportadora">
+            <div class="cabecalho-admin">
+              <h3 class="titulo-secao">Novo administrador</h3>
+              <p class="subtitulo-secao">
+                Crie um usuário administrador vinculado a esta transportadora.
+              </p>
+            </div>
+
+            <div class="grade-formulario">
+
+              <div class="grupo-campo">
+                <label for="campoNomeAdmin">Nome completo</label>
+                <input type="text" id="campoNomeAdmin" placeholder="Ex: João da Silva" />
+              </div>
+
+              <div class="grupo-campo">
+                <label for="campoEmailAdmin">E-mail</label>
+                <input type="email" id="campoEmailAdmin" placeholder="email@empresa.com" />
+              </div>
+
+              <div class="grupo-campo">
+                <label for="campoSenhaAdmin">Senha</label>
+                <input type="password" id="campoSenhaAdmin" placeholder="Mínimo 8 caracteres" />
+              </div>
+
+              <div class="grupo-campo">
+                <label for="campoStatusAdmin">Status</label>
+                <select id="campoStatusAdmin">
+                  <option value="true">Ativo</option>
+                  <option value="false">Inativo</option>
+                </select>
+              </div>
+
+            </div>
+
+            <div class="acoes-formulario">
+              <button type="button" class="botao-primario" id="botaoCriarAdmin">
+                Criar administrador
+              </button>
+            </div>
+
+            <div id="mensagemRetornoAdmin" class="mensagem-retorno"></div>
+          </section>
+
         </div>
       </section>
     </main>
