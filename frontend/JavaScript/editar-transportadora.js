@@ -198,4 +198,8 @@ function iniciarPaginaEdicao() {
     carregarDadosTransportadora();
 }
 
+document.getElementById("botaoVoltar").addEventListener("click", function () {
+    window.location.href = "despesas.html";
+});
+
 document.addEventListener("DOMContentLoaded", iniciarPaginaEdicao);

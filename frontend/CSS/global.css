@@ -410,6 +410,7 @@ button {
 .subtitulo-secao {
   color: var(--cor-texto-secundario);
   font-size: 0.875rem;
+  margin-bottom: 5px;
 }
 
 
