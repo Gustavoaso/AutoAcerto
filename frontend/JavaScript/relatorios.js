@@ -77,6 +77,20 @@ function obterDespesasDaViagem(idViagem) {
     });
 }
 
+function filtrarDespesasForaDeViagemPorPeriodo(dias, valorMotorista, valorStatus) {
+    if (valorMotorista !== "todos" || valorStatus !== "todos") return [];
+
+    const dataLimite = obterDataLimite(dias);
+
+    return despesas.filter(function (despesa) {
+        if (despesa.viagem_id) return false;
+        if (!dataLimite) return true;
+        if (!despesa.data_despesa) return false;
+        const dataDespesa = new Date(despesa.data_despesa);
+        return dataDespesa >= dataLimite;
+    });
+}
+
 function somarDespesasDaViagem(idViagem) {
     return obterDespesasDaViagem(idViagem).reduce(function (acumulador, despesa) {
         return acumulador + Number(despesa.valor);
@@ -95,11 +109,11 @@ function criarSeloStatusViagem(status) {
     return '<span class="selo-status selo-cancelada">Cancelada</span>';
 }
 
-function renderizarTabelaRelatorio(listaViagens) {
+function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
     const corpoTabela = document.getElementById("corpoTabelaRelatorio");
     corpoTabela.innerHTML = "";
 
-    if (listaViagens.length === 0) {
+    if (listaViagens.length === 0 && despesasForaDeViagem.length === 0) {
         corpoTabela.innerHTML = `
             <tr>
                 <td colspan="8" style="text-align: center; padding: 40px; color: #6b7280;">
@@ -152,6 +166,36 @@ function renderizarTabelaRelatorio(listaViagens) {
         corpoTabela.appendChild(linha);
     });
 
+    if (despesasForaDeViagem.length > 0) {
+        const totalDespesasForaViagem = despesasForaDeViagem.reduce(function (acumulador, despesa) {
+            return acumulador + Number(despesa.valor);
+        }, 0);
+
+        totalDespesasGeral += totalDespesasForaViagem;
+
+        const linhaForaViagem = document.createElement("tr");
+        linhaForaViagem.classList.add("linha-tabela");
+        linhaForaViagem.innerHTML = `
+            <td>
+                <div class="bloco-viagem">
+                    <div class="avatar-viagem">OF</div>
+                    <div>
+                        <div class="nome-rota">Fora de viagem</div>
+                        <div class="texto-secundario">Despesas de pátio, oficina e manutenção</div>
+                    </div>
+                </div>
+            </td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>${formatarMoeda(0)}</td>
+            <td>${formatarMoeda(totalDespesasForaViagem)}</td>
+            <td style="font-weight: 600; color: var(--cor-perigo);">${formatarMoeda(totalDespesasForaViagem * -1)}</td>
+            <td><span class="selo-status selo-cancelada">Fora de viagem</span></td>
+        `;
+        corpoTabela.appendChild(linhaForaViagem);
+    }
+
     atualizarRodapeTabela(totalReceita, totalDespesasGeral);
 }
 
@@ -166,7 +210,7 @@ function atualizarRodapeTabela(totalReceita, totalDespesas) {
     document.getElementById("rodapeLucro").textContent = formatarMoeda(lucroTotal);
 }
 
-function renderizarTabelaCategorias(listaViagens) {
+function renderizarTabelaCategorias(listaViagens, despesasForaDeViagem) {
     const corpoTabela = document.getElementById("corpoTabelaCategorias");
     corpoTabela.innerHTML = "";
 
@@ -176,7 +220,7 @@ function renderizarTabelaCategorias(listaViagens) {
 
     const despesasFiltradas = despesas.filter(function (despesa) {
         return idsViagens.includes(String(despesa.viagem_id));
-    });
+    }).concat(despesasForaDeViagem);
 
     const totalGeral = despesasFiltradas.reduce(function (acumulador, despesa) {
         return acumulador + Number(despesa.valor);
@@ -241,14 +285,14 @@ function formatarNomeCategoria(categoria) {
     return "Outros";
 }
 
-function atualizarMetricas(listaViagens) {
+function atualizarMetricas(listaViagens, despesasForaDeViagem) {
     const idsViagens = listaViagens.map(function (viagem) {
         return String(viagem.id);
     });
 
     const despesasFiltradas = despesas.filter(function (despesa) {
         return idsViagens.includes(String(despesa.viagem_id));
-    });
+    }).concat(despesasForaDeViagem);
 
     const totalReceita = listaViagens.reduce(function (acumulador, viagem) {
         return acumulador + Number(viagem.valor_frete || 0);
@@ -286,9 +330,11 @@ function aplicarFiltrosRelatorio() {
         });
     }
 
-    atualizarMetricas(listaFiltrada);
-    renderizarTabelaRelatorio(listaFiltrada);
-    renderizarTabelaCategorias(listaFiltrada);
+    const despesasForaDeViagem = filtrarDespesasForaDeViagemPorPeriodo(periodoDias, valorMotorista, valorStatus);
+
+    atualizarMetricas(listaFiltrada, despesasForaDeViagem);
+    renderizarTabelaRelatorio(listaFiltrada, despesasForaDeViagem);
+    renderizarTabelaCategorias(listaFiltrada, despesasForaDeViagem);
 }
 
 function exportarCSV() {
@@ -308,6 +354,8 @@ function exportarCSV() {
             return viagem.status === valorStatus;
         });
     }
+
+    const despesasForaDeViagem = filtrarDespesasForaDeViagemPorPeriodo(periodoDias, valorMotorista, valorStatus);
 
     const linhasCSV = [
         ["Origem", "Destino", "Motorista", "Veiculo", "Placa", "Data Saida", "Frete", "Despesas", "Lucro", "Status"]
@@ -331,6 +379,25 @@ function exportarCSV() {
             viagem.status || "-"
         ]);
     });
+
+    if (despesasForaDeViagem.length > 0) {
+        const totalDespesasForaViagem = despesasForaDeViagem.reduce(function (acumulador, despesa) {
+            return acumulador + Number(despesa.valor);
+        }, 0);
+
+        linhasCSV.push([
+            "Fora de viagem",
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "0,00",
+            totalDespesasForaViagem.toFixed(2).replace(".", ","),
+            (totalDespesasForaViagem * -1).toFixed(2).replace(".", ","),
+            "Fora de viagem"
+        ]);
+    }
 
     const conteudoCSV = linhasCSV.map(function (linha) {
         return linha.map(function (celula) {

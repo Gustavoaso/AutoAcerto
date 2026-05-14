@@ -8,6 +8,10 @@ const idViagem = params.get("id");
 const modal = document.getElementById("modalSucesso");
 const botaoOk = document.getElementById("botaoOkModal");
 
+if (window.AutoAcertoCidades) {
+    window.AutoAcertoCidades.configurar(["origem", "destino"]);
+}
+
 async function carregarMotoristas(motoristaIdSelecionado) {
     try {
         const response = await fetch(urlApiMotoristas,{ headers: cabecalhosAutenticados() });

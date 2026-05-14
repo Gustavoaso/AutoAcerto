@@ -88,4 +88,11 @@ if (botaoEditar) {
     });
 }
 
+const botaoLancarDespesa = document.getElementById("botaoLancarDespesa");
+if (botaoLancarDespesa) {
+    botaoLancarDespesa.addEventListener("click", function () {
+        window.location.href = "cadastro-despesa.html?viagemId=" + idViagem;
+    });
+}
+
 carregarViagem();

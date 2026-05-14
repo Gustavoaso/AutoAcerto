@@ -7,6 +7,8 @@ const botaoLimpar = document.getElementById("botaoLimpar");
 const modal = document.getElementById("modalSucesso");
 const botaoOk = document.getElementById("botaoOkModal");
 let tipoDespesaSelecionado = "viagem";
+const paramsDespesa = new URLSearchParams(window.location.search);
+const viagemPreSelecionada = paramsDespesa.get("viagemId");
 
 async function carregarViagens() {
   try {
@@ -30,6 +32,10 @@ async function carregarViagens() {
       opcao.textContent = viagem.origem + " -> " + viagem.destino;
       selectViagem.appendChild(opcao);
     });
+
+    if (viagemPreSelecionada) {
+      selectViagem.value = viagemPreSelecionada;
+    }
   } catch (erro) {
     console.error("Erro ao carregar viagens:", erro);
   }
@@ -169,6 +175,9 @@ function iniciarPaginaCadastroDespesa() {
   });
 
   configurarTipoDespesa();
+  if (viagemPreSelecionada) {
+    alternarTipoDespesa("viagem");
+  }
   configurarFormularioDespesa();
   carregarViagens();
   carregarVeiculos();

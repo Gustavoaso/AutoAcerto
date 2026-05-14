@@ -151,6 +151,9 @@ function iniciarPaginaCadastroViagem() {
   });
 
   configurarFormularioViagem();
+  if (window.AutoAcertoCidades) {
+    window.AutoAcertoCidades.configurar(["origem", "destino"]);
+  }
   carregarMotoristas();
   carregarVeiculos();
 }
