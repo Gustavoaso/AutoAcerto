@@ -105,7 +105,6 @@ function renderizarTabelaDespesas(listaDespesas) {
                     <div class="avatar-despesa">${criarIconeCategoria(despesa.categoria)}</div>
                     <div>
                         <div class="nome-despesa">${despesa.descricao}</div>
-                        <div class="texto-secundario">Registro #${despesa.id}</div>
                     </div>
                 </div>
             </td>

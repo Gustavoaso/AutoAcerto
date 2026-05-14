@@ -53,6 +53,31 @@ function formatarData(dataISO) {
     return dia + "/" + mes + "/" + ano;
 }
 
+function obterResumoVeiculosDespesas(listaDespesas) {
+    const mapaVeiculos = {};
+
+    listaDespesas.forEach(function (despesa) {
+        const modelo = despesa.veiculo_modelo || "-";
+        const placa = despesa.veiculo_placa || "";
+        const chave = modelo + "|" + placa;
+        mapaVeiculos[chave] = { modelo: modelo, placa: placa };
+    });
+
+    const veiculos = Object.keys(mapaVeiculos).map(function (chave) {
+        return mapaVeiculos[chave];
+    });
+
+    if (veiculos.length === 0) {
+        return { modelo: "-", placa: "" };
+    }
+
+    if (veiculos.length === 1) {
+        return veiculos[0];
+    }
+
+    return { modelo: "Diversos veículos", placa: veiculos.length + " veículos" };
+}
+
 function obterDataLimite(dias) {
     if (dias === 0) return null;
     const dataLimite = new Date();
@@ -77,7 +102,8 @@ function obterDespesasDaViagem(idViagem) {
     });
 }
 
-function filtrarDespesasForaDeViagemPorPeriodo(dias, valorMotorista, valorStatus) {
+function filtrarDespesasForaDeViagemPorPeriodo(dias, valorMotorista, valorStatus, valorTipoLancamento) {
+    if (valorTipoLancamento === "viagens") return [];
     if (valorMotorista !== "todos" || valorStatus !== "todos") return [];
 
     const dataLimite = obterDataLimite(dias);
@@ -117,7 +143,7 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
         corpoTabela.innerHTML = `
             <tr>
                 <td colspan="8" style="text-align: center; padding: 40px; color: #6b7280;">
-                    Nenhuma viagem encontrada no período selecionado.
+                    Nenhum lançamento encontrado no período selecionado.
                 </td>
             </tr>
         `;
@@ -147,7 +173,6 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
                     <div class="avatar-viagem">📍</div>
                     <div>
                         <div class="nome-rota">${viagem.origem} → ${viagem.destino}</div>
-                        <div class="texto-secundario">Registro #${viagem.id}</div>
                     </div>
                 </div>
             </td>
@@ -172,6 +197,7 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
         }, 0);
 
         totalDespesasGeral += totalDespesasForaViagem;
+        const veiculoForaViagem = obterResumoVeiculosDespesas(despesasForaDeViagem);
 
         const linhaForaViagem = document.createElement("tr");
         linhaForaViagem.classList.add("linha-tabela");
@@ -186,7 +212,11 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
                 </div>
             </td>
             <td>-</td>
-            <td>-</td>
+            <td>
+                ${veiculoForaViagem.modelo}
+                <br>
+                <span class="texto-secundario">${veiculoForaViagem.placa}</span>
+            </td>
             <td>-</td>
             <td>${formatarMoeda(0)}</td>
             <td>${formatarMoeda(totalDespesasForaViagem)}</td>
@@ -315,6 +345,7 @@ function atualizarMetricas(listaViagens, despesasForaDeViagem) {
 function aplicarFiltrosRelatorio() {
     const valorMotorista = document.getElementById("filtroMotoristaRelatorio").value;
     const valorStatus = document.getElementById("filtroStatusRelatorio").value;
+    const valorTipoLancamento = document.getElementById("filtroTipoLancamentoRelatorio").value;
 
     let listaFiltrada = filtrarViagensPorPeriodo(viagens, periodoDias);
 
@@ -330,7 +361,11 @@ function aplicarFiltrosRelatorio() {
         });
     }
 
-    const despesasForaDeViagem = filtrarDespesasForaDeViagemPorPeriodo(periodoDias, valorMotorista, valorStatus);
+    if (valorTipoLancamento === "fora") {
+        listaFiltrada = [];
+    }
+
+    const despesasForaDeViagem = filtrarDespesasForaDeViagemPorPeriodo(periodoDias, valorMotorista, valorStatus, valorTipoLancamento);
 
     atualizarMetricas(listaFiltrada, despesasForaDeViagem);
     renderizarTabelaRelatorio(listaFiltrada, despesasForaDeViagem);
@@ -340,6 +375,7 @@ function aplicarFiltrosRelatorio() {
 function exportarCSV() {
     const valorMotorista = document.getElementById("filtroMotoristaRelatorio").value;
     const valorStatus = document.getElementById("filtroStatusRelatorio").value;
+    const valorTipoLancamento = document.getElementById("filtroTipoLancamentoRelatorio").value;
 
     let listaFiltrada = filtrarViagensPorPeriodo(viagens, periodoDias);
 
@@ -355,7 +391,11 @@ function exportarCSV() {
         });
     }
 
-    const despesasForaDeViagem = filtrarDespesasForaDeViagemPorPeriodo(periodoDias, valorMotorista, valorStatus);
+    if (valorTipoLancamento === "fora") {
+        listaFiltrada = [];
+    }
+
+    const despesasForaDeViagem = filtrarDespesasForaDeViagemPorPeriodo(periodoDias, valorMotorista, valorStatus, valorTipoLancamento);
 
     const linhasCSV = [
         ["Origem", "Destino", "Motorista", "Veiculo", "Placa", "Data Saida", "Frete", "Despesas", "Lucro", "Status"]
@@ -384,13 +424,14 @@ function exportarCSV() {
         const totalDespesasForaViagem = despesasForaDeViagem.reduce(function (acumulador, despesa) {
             return acumulador + Number(despesa.valor);
         }, 0);
+        const veiculoForaViagem = obterResumoVeiculosDespesas(despesasForaDeViagem);
 
         linhasCSV.push([
             "Fora de viagem",
             "-",
             "-",
-            "-",
-            "-",
+            veiculoForaViagem.modelo,
+            veiculoForaViagem.placa,
             "-",
             "0,00",
             totalDespesasForaViagem.toFixed(2).replace(".", ","),
@@ -433,6 +474,10 @@ function configurarEventosRelatorio() {
 
     document
         .getElementById("filtroStatusRelatorio")
+        .addEventListener("change", aplicarFiltrosRelatorio);
+
+    document
+        .getElementById("filtroTipoLancamentoRelatorio")
         .addEventListener("change", aplicarFiltrosRelatorio);
 
     document

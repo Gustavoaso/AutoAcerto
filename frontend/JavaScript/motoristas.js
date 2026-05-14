@@ -56,7 +56,6 @@ function renderizarTabela(listaMotoristas) {
                     <div class="avatar-motorista">${obterIniciais(motorista.nome)}</div>
                     <div>
                         <div class="nome-motorista">${motorista.nome}</div>
-                        <div class="texto-secundario">Registro #${motorista.id}</div>
                     </div>
                 </div>
             </td>

@@ -43,7 +43,6 @@ function renderizarTabelaVeiculos(lista) {
           '<div class="avatar-veiculo">🚛</div>' +
           '<div>' +
             '<div class="nome-veiculo">' + veiculo.modelo + '</div>' +
-            '<div class="texto-secundario">Registro #' + veiculo.id + '</div>' +
           '</div>' +
         '</div>' +
       '</td>' +

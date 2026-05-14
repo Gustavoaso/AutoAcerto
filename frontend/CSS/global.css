@@ -929,6 +929,67 @@ tbody td {
   background: var(--cor-superficie);
 }
 
+.campo-autocomplete-cidade {
+  position: relative;
+}
+
+.campo-autocomplete-cidade input {
+  padding-right: 44px;
+}
+
+.botao-autocomplete-cidade {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--cor-texto);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.lista-autocomplete-cidade {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-media);
+  padding: 6px;
+}
+
+.item-autocomplete-cidade {
+  width: 100%;
+  border: none;
+  border-radius: calc(var(--raio) - 2px);
+  background: transparent;
+  color: var(--cor-texto);
+  cursor: pointer;
+  display: block;
+  font-family: var(--fonte);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 9px 10px;
+  text-align: left;
+}
+
+.item-autocomplete-cidade:hover {
+  background: var(--cor-superficie-3);
+}
+
+.oculto {
+  display: none !important;
+}
+
 .acoes-formulario {
   display: flex;
   justify-content: flex-end;

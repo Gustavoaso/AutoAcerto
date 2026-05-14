@@ -76,54 +76,116 @@
     }
   }
 
-  function criarDatalist(id) {
-    let datalist = document.getElementById(id);
-    if (datalist) return datalist;
+  function prepararCampo(input) {
+    if (!input || input.parentElement.classList.contains("campo-autocomplete-cidade")) {
+      return input ? input.parentElement : null;
+    }
 
-    datalist = document.createElement("datalist");
-    datalist.id = id;
-    document.body.appendChild(datalist);
-    return datalist;
+    const wrapper = document.createElement("div");
+    wrapper.className = "campo-autocomplete-cidade";
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+
+    const botao = document.createElement("button");
+    botao.type = "button";
+    botao.className = "botao-autocomplete-cidade";
+    botao.setAttribute("aria-label", "Mostrar cidades");
+    botao.textContent = "▾";
+    wrapper.appendChild(botao);
+
+    const lista = document.createElement("div");
+    lista.className = "lista-autocomplete-cidade oculto";
+    wrapper.appendChild(lista);
+
+    return wrapper;
   }
 
-  function configurarCampo(input, listaCidades, idDatalist) {
-    if (!input) return;
+  function normalizarTexto(texto) {
+    return String(texto || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  }
 
-    const datalist = criarDatalist(idDatalist);
-    input.setAttribute("list", idDatalist);
+  function obterCidadesFiltradas(listaCidades, termo, mostrarTudo) {
+    const termoNormalizado = normalizarTexto(termo);
 
-    input.addEventListener("input", function () {
-      const termo = input.value.trim().toLowerCase();
-      datalist.innerHTML = "";
+    if (!mostrarTudo && termoNormalizado.length < 2) return [];
 
-      if (termo.length < 2) return;
+    const cidades = listaCidades.filter(function (cidade) {
+        if (mostrarTudo && termoNormalizado.length < 2) return true;
+        return normalizarTexto(cidade).includes(termoNormalizado);
+      });
 
-      listaCidades
-        .filter(function (cidade) {
-          return cidade.toLowerCase().includes(termo);
-        })
-        .slice(0, 12)
-        .forEach(function (cidade) {
-          const opcao = document.createElement("option");
-          opcao.value = cidade;
-          datalist.appendChild(opcao);
-        });
+    return mostrarTudo && termoNormalizado.length < 2 ? cidades : cidades.slice(0, 12);
+  }
+
+  function esconderLista(wrapper) {
+    const lista = wrapper.querySelector(".lista-autocomplete-cidade");
+    if (lista) lista.classList.add("oculto");
+  }
+
+  function renderizarLista(wrapper, input, listaCidades, mostrarTudo) {
+    const lista = wrapper.querySelector(".lista-autocomplete-cidade");
+    const cidades = obterCidadesFiltradas(listaCidades, input.value, mostrarTudo);
+    lista.innerHTML = "";
+
+    if (cidades.length === 0) {
+      esconderLista(wrapper);
+      return;
+    }
+
+    cidades.forEach(function (cidade) {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "item-autocomplete-cidade";
+      item.textContent = cidade;
+      item.addEventListener("mousedown", function (evento) {
+        evento.preventDefault();
+        input.value = cidade;
+        esconderLista(wrapper);
+      });
+      lista.appendChild(item);
     });
 
-    if (input.value.trim().length >= 2) {
-      input.dispatchEvent(new Event("input"));
-    }
+    lista.classList.remove("oculto");
   }
+
+  function configurarCampo(input, listaCidades) {
+    const wrapper = prepararCampo(input);
+    if (!wrapper) return;
+
+    const botao = wrapper.querySelector(".botao-autocomplete-cidade");
+
+    input.addEventListener("input", function () {
+      renderizarLista(wrapper, input, listaCidades, false);
+    });
+
+    input.addEventListener("blur", function () {
+      setTimeout(function () {
+        esconderLista(wrapper);
+      }, 120);
+    });
+
+    botao.addEventListener("click", function () {
+      input.focus();
+      renderizarLista(wrapper, input, listaCidades, true);
+    });
+  }
+
+  document.addEventListener("click", function (evento) {
+    document.querySelectorAll(".campo-autocomplete-cidade").forEach(function (wrapper) {
+      if (!wrapper.contains(evento.target)) {
+        esconderLista(wrapper);
+      }
+    });
+  });
 
   window.AutoAcertoCidades = {
     configurar: async function (idsCampos) {
       const listaCidades = await buscarCidades();
       idsCampos.forEach(function (idCampo) {
-        configurarCampo(
-          document.getElementById(idCampo),
-          listaCidades,
-          "listaCidades" + idCampo.charAt(0).toUpperCase() + idCampo.slice(1)
-        );
+        configurarCampo(document.getElementById(idCampo), listaCidades);
       });
     }
   };

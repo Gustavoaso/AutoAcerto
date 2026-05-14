@@ -80,7 +80,6 @@ function renderizarTabelaViagens(listaViagens) {
                     <div class="avatar-viagem">📍</div>
                     <div>
                         <div class="nome-rota">${viagem.origem} → ${viagem.destino}</div>
-                        <div class="texto-secundario">Registro #${viagem.id}</div>
                     </div>
                 </div>
             </td>
