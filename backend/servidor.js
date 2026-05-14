@@ -864,10 +864,21 @@ app.put("/veiculos/:id", exigirAdmin, async (requisicao, resposta) => {
 // ============================================================
 
 app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
-  const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, status, observacoes } = requisicao.body;
+  const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
 
-  if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || !status) {
+  if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || kmInicial == null || kmFinal == null || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
+  }
+
+  const kmInicialNum = parseInt(kmInicial, 10);
+  const kmFinalNum = parseInt(kmFinal, 10);
+
+  if (!Number.isInteger(kmInicialNum) || !Number.isInteger(kmFinalNum) || kmInicialNum < 0 || kmFinalNum < 0) {
+    return resposta.status(400).json({ mensagem: "Informe os KM da viagem corretamente." });
+  }
+
+  if (kmFinalNum < kmInicialNum) {
+    return resposta.status(400).json({ mensagem: "O KM final nÃƒÂ£o pode ser menor que o KM inicial." });
   }
 
   try {
@@ -885,11 +896,11 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
     }
 
     const sql = `
-      INSERT INTO viagens (transportadora_id, origem, destino, motorista_id, veiculo_id, data_saida, data_chegada, valor_frete, status, observacoes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO viagens (transportadora_id, origem, destino, motorista_id, veiculo_id, data_saida, data_chegada, valor_frete, km_inicial, km_final, status, observacoes)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING id
     `;
-    const valores = [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, status, observacoes || ""];
+    const valores = [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, status, observacoes || ""];
 
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Viagem cadastrada com sucesso.", id: resultado.rows[0].id });
@@ -907,7 +918,7 @@ app.get("/viagens", autenticar, async (requisicao, resposta) => {
   let sql = `
     SELECT
       v.id, v.transportadora_id, v.origem, v.destino, v.data_saida, v.data_chegada,
-      v.valor_frete, v.status, v.observacoes, v.data_cadastro,
+      v.valor_frete, v.km_inicial, v.km_final, v.status, v.observacoes, v.data_cadastro,
       v.motorista_id, v.veiculo_id,
       m.nome AS motorista_nome,
       ve.modelo AS veiculo_modelo,
@@ -952,7 +963,7 @@ app.get("/viagens/:id", autenticar, async (requisicao, resposta) => {
   let sql = `
     SELECT
       v.id, v.transportadora_id, v.origem, v.destino, v.data_saida, v.data_chegada,
-      v.valor_frete, v.status, v.observacoes, v.data_cadastro,
+      v.valor_frete, v.km_inicial, v.km_final, v.status, v.observacoes, v.data_cadastro,
       v.motorista_id, v.veiculo_id,
       m.nome AS motorista_nome,
       ve.modelo AS veiculo_modelo,
@@ -1037,18 +1048,41 @@ app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
 // ============================================================
 
 app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
-  const { viagemId, descricao, categoria, dataDespesa, valor } = requisicao.body;
+  const { tipoDespesa, viagemId, veiculoId, descricao, categoria, dataDespesa, valor } = requisicao.body;
+  const tipoDespesaFinal = tipoDespesa === "veiculo" ? "veiculo" : "viagem";
 
-  if (!viagemId || !descricao || !categoria || !dataDespesa || !valor) {
+  if (!descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
   }
 
+  if (tipoDespesaFinal === "viagem" && !viagemId) {
+    return resposta.status(400).json({ mensagem: "Informe a viagem da despesa." });
+  }
+
+  if (tipoDespesaFinal === "veiculo" && !veiculoId) {
+    return resposta.status(400).json({ mensagem: "Informe o veiculo da despesa." });
+  }
+
   try {
-    const vr = await banco.query("SELECT transportadora_id FROM viagens WHERE id=$1", [viagemId]);
-    if (vr.rows.length === 0) {
-      return resposta.status(400).json({ mensagem: "Viagem nÃ£o encontrada." });
+    let tid;
+    let viagemIdFinal = null;
+    let veiculoIdFinal = null;
+
+    if (tipoDespesaFinal === "viagem") {
+      const vr = await banco.query("SELECT transportadora_id FROM viagens WHERE id=$1", [viagemId]);
+      if (vr.rows.length === 0) {
+        return resposta.status(400).json({ mensagem: "Viagem nÃ£o encontrada." });
+      }
+      tid = vr.rows[0].transportadora_id;
+      viagemIdFinal = viagemId;
+    } else {
+      const veiculo = await banco.query("SELECT transportadora_id FROM veiculos WHERE id=$1", [veiculoId]);
+      if (veiculo.rows.length === 0) {
+        return resposta.status(400).json({ mensagem: "Veiculo nÃƒÂ£o encontrado." });
+      }
+      tid = veiculo.rows[0].transportadora_id;
+      veiculoIdFinal = veiculoId;
     }
-    const tid = vr.rows[0].transportadora_id;
 
     if (!usuarioEhDonoSistema(requisicao)) {
       if (tid !== obterIdTransportadora(requisicao)) {
@@ -1057,11 +1091,11 @@ app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
     }
 
     const sql = `
-      INSERT INTO despesas (transportadora_id, viagem_id, descricao, categoria, data_despesa, valor)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO despesas (transportadora_id, viagem_id, veiculo_id, tipo_despesa, descricao, categoria, data_despesa, valor)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id
     `;
-    const valores = [tid, viagemId, descricao, categoria, dataDespesa, valor];
+    const valores = [tid, viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoria, dataDespesa, valor];
 
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Despesa cadastrada com sucesso.", id: resultado.rows[0].id });
@@ -1077,17 +1111,18 @@ app.get("/despesas", exigirAdminOuDono, async (requisicao, resposta) => {
 
   let sql = `
     SELECT
-      d.id, d.viagem_id, d.descricao, d.categoria,
+      d.id, d.viagem_id, d.veiculo_id, d.tipo_despesa, d.descricao, d.categoria,
       d.data_despesa, d.valor, d.data_cadastro,
       v.origem, v.destino,
       m.nome AS motorista_nome,
-      ve.modelo AS veiculo_modelo,
-      ve.placa AS veiculo_placa,
+      COALESCE(ve_despesa.modelo, ve_viagem.modelo) AS veiculo_modelo,
+      COALESCE(ve_despesa.placa, ve_viagem.placa) AS veiculo_placa,
       t.nome AS transportadora_nome
     FROM despesas d
     LEFT JOIN viagens v ON d.viagem_id = v.id AND v.transportadora_id = d.transportadora_id
     LEFT JOIN motoristas m ON v.motorista_id = m.id AND m.transportadora_id = d.transportadora_id
-    LEFT JOIN veiculos ve ON v.veiculo_id = ve.id AND ve.transportadora_id = d.transportadora_id
+    LEFT JOIN veiculos ve_viagem ON v.veiculo_id = ve_viagem.id AND ve_viagem.transportadora_id = d.transportadora_id
+    LEFT JOIN veiculos ve_despesa ON d.veiculo_id = ve_despesa.id AND ve_despesa.transportadora_id = d.transportadora_id
     LEFT JOIN transportadoras t ON d.transportadora_id = t.id
   `;
   const valores = [];
@@ -1115,17 +1150,18 @@ app.get("/despesas/:id", exigirAdminOuDono, async (requisicao, resposta) => {
 
   let sql = `
     SELECT
-      d.id, d.viagem_id, d.descricao, d.categoria,
+      d.id, d.viagem_id, d.veiculo_id, d.tipo_despesa, d.descricao, d.categoria,
       d.data_despesa, d.valor, d.data_cadastro,
       v.origem, v.destino,
       m.nome AS motorista_nome,
-      ve.modelo AS veiculo_modelo,
-      ve.placa AS veiculo_placa,
+      COALESCE(ve_despesa.modelo, ve_viagem.modelo) AS veiculo_modelo,
+      COALESCE(ve_despesa.placa, ve_viagem.placa) AS veiculo_placa,
       t.nome AS transportadora_nome
     FROM despesas d
     LEFT JOIN viagens v ON d.viagem_id = v.id AND v.transportadora_id = d.transportadora_id
     LEFT JOIN motoristas m ON v.motorista_id = m.id AND m.transportadora_id = d.transportadora_id
-    LEFT JOIN veiculos ve ON v.veiculo_id = ve.id AND ve.transportadora_id = d.transportadora_id
+    LEFT JOIN veiculos ve_viagem ON v.veiculo_id = ve_viagem.id AND ve_viagem.transportadora_id = d.transportadora_id
+    LEFT JOIN veiculos ve_despesa ON d.veiculo_id = ve_despesa.id AND ve_despesa.transportadora_id = d.transportadora_id
     LEFT JOIN transportadoras t ON d.transportadora_id = t.id
     WHERE d.id = $1
   `;
@@ -1452,5 +1488,3 @@ app.delete(["/transportadoras", "/transportadoras/:id"], exigirDonoSistema, asyn
 app.listen(porta, '0.0.0.0', () => {
   console.log(`🚀 Servidor rodando na porta ${porta}`);
 });
-
-

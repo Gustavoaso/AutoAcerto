@@ -96,7 +96,7 @@ function renderizarTabelaDespesas(listaDespesas) {
 
         const nomeViagem = despesa.origem && despesa.destino
             ? despesa.origem + " -> " + despesa.destino
-            : "-";
+            : "Fora de viagem";
 
         linha.innerHTML = `
             ${exclusaoDespesas ? exclusaoDespesas.colunaLinha(despesa.id) : ""}
@@ -162,7 +162,9 @@ function atualizarResumoDespesas() {
     const valorTotalDespesas = despesas.reduce(function (acumulador, despesa) {
         return acumulador + Number(despesa.valor);
     }, 0);
-    const viagensUnicas = new Set(despesas.map(function (despesa) {
+    const viagensUnicas = new Set(despesas.filter(function (despesa) {
+        return despesa.viagem_id;
+    }).map(function (despesa) {
         return despesa.viagem_id;
     }));
 

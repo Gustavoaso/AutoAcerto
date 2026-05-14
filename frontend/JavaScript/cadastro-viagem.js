@@ -77,6 +77,19 @@ function configurarFormularioViagem() {
       return;
     }
 
+    const kmInicialNum = parseInt(document.getElementById("kmInicial").value, 10);
+    const kmFinalNum = parseInt(document.getElementById("kmFinal").value, 10);
+
+    if (isNaN(kmInicialNum) || kmInicialNum < 0 || isNaN(kmFinalNum) || kmFinalNum < 0) {
+      alert("Informe os KM da viagem corretamente.");
+      return;
+    }
+
+    if (kmFinalNum < kmInicialNum) {
+      alert("O KM final não pode ser menor que o KM inicial.");
+      return;
+    }
+
     let dados = {
       origem: document.getElementById("origem").value,
       destino: document.getElementById("destino").value,
@@ -85,6 +98,8 @@ function configurarFormularioViagem() {
       dataSaida: document.getElementById("dataSaida").value,
       dataChegada: document.getElementById("dataChegada").value,
       valorFrete: valorFreteNum,
+      kmInicial: kmInicialNum,
+      kmFinal: kmFinalNum,
       status: document.getElementById("status").value,
       observacoes: document.getElementById("observacoes").value
     };

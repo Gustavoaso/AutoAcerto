@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AutoAcerto - Cadastro de Despesa</title>
   <link rel="stylesheet" href="/CSS/cadastro-viagem.css" />
+  <link rel="stylesheet" href="/CSS/cadastro-despesa.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -108,11 +109,26 @@
 
       <section class="painel-formulario">
         <div id="formularioDespesa" class="formulario-despesa">
+          <div class="grupo-campo grupo-campo-largo">
+            <label>Tipo de despesa</label>
+            <div class="grupo-tipo-despesa">
+              <button type="button" class="botao-tipo-despesa ativo" data-tipo-despesa="viagem">Despesa de viagem</button>
+              <button type="button" class="botao-tipo-despesa" data-tipo-despesa="veiculo">Despesa do veículo</button>
+            </div>
+          </div>
+
           <div class="grade-formulario">
 
-            <div class="grupo-campo">
+            <div class="grupo-campo" id="grupoViagemDespesa">
               <label for="viagemId">Viagem</label>
               <select id="viagemId" name="viagemId" required>
+                <option value="">Selecione</option>
+              </select>
+            </div>
+
+            <div class="grupo-campo oculto" id="grupoVeiculoDespesa">
+              <label for="veiculoId">Veículo</label>
+              <select id="veiculoId" name="veiculoId">
                 <option value="">Selecione</option>
               </select>
             </div>

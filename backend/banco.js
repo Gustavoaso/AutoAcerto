@@ -64,6 +64,8 @@ async function criarTabelas() {
       data_saida DATE NOT NULL,
       data_chegada DATE NOT NULL,
       valor_frete NUMERIC(10,2) NOT NULL,
+      km_inicial INTEGER,
+      km_final INTEGER,
       status VARCHAR(30) NOT NULL,
       observacoes TEXT,
       data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -75,6 +77,8 @@ async function criarTabelas() {
       id SERIAL PRIMARY KEY,
       transportadora_id INTEGER REFERENCES transportadoras(id),
       viagem_id INTEGER REFERENCES viagens(id),
+      veiculo_id INTEGER REFERENCES veiculos(id),
+      tipo_despesa VARCHAR(20) NOT NULL DEFAULT 'viagem',
       descricao VARCHAR(255) NOT NULL,
       categoria VARCHAR(30) NOT NULL,
       data_despesa DATE NOT NULL,
@@ -99,12 +103,24 @@ async function criarTabelas() {
 
   await garantirEstruturaMultiTransportadora();
   await garantirEstruturaVeiculos();
+  await garantirEstruturaViagens();
+  await garantirEstruturaDespesas();
 }
 
 async function garantirEstruturaVeiculos() {
   await banco.query("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS ano INTEGER");
   await banco.query("ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS observacoes TEXT");
   await banco.query("ALTER TABLE veiculos DROP COLUMN IF EXISTS proprietario");
+}
+
+async function garantirEstruturaViagens() {
+  await banco.query("ALTER TABLE viagens ADD COLUMN IF NOT EXISTS km_inicial INTEGER");
+  await banco.query("ALTER TABLE viagens ADD COLUMN IF NOT EXISTS km_final INTEGER");
+}
+
+async function garantirEstruturaDespesas() {
+  await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS veiculo_id INTEGER REFERENCES veiculos(id)");
+  await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS tipo_despesa VARCHAR(20) NOT NULL DEFAULT 'viagem'");
 }
 
 async function adicionarColunaTransportadora(nomeTabela) {

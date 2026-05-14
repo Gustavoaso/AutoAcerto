@@ -7,6 +7,36 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* Seleção visual de categoria */
+.grupo-tipo-despesa {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie-2);
+}
+
+.botao-tipo-despesa {
+  border: none;
+  border-radius: calc(var(--raio) - 2px);
+  padding: 10px 14px;
+  background: transparent;
+  color: var(--cor-texto-secundario);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transicao), color var(--transicao);
+}
+
+.botao-tipo-despesa.ativo {
+  background: var(--cor-primaria);
+  color: #fff;
+}
+
+.oculto {
+  display: none !important;
+}
+
 .grade-categorias {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -73,6 +103,12 @@
 }
 
 @media (max-width: 640px) {
+  .grupo-tipo-despesa {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
   .grade-categorias {
     grid-template-columns: repeat(3, 1fr);
   }

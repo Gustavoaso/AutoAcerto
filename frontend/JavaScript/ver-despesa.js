@@ -46,7 +46,7 @@ async function carregarDespesa() {
         const despesa = await response.json();
         const viagem = despesa.origem && despesa.destino
             ? despesa.origem + " -> " + despesa.destino
-            : "-";
+            : "Fora de viagem";
         const veiculo = despesa.veiculo_modelo
             ? despesa.veiculo_modelo + " - " + (despesa.veiculo_placa || "")
             : "-";
