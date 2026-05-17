@@ -9,38 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    .item-menu {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .item-menu svg {
-      flex-shrink: 0;
-      opacity: 0.75;
-    }
-
-    .item-menu.ativo svg {
-      opacity: 1;
-    }
-
-    .item-menu:hover svg {
-      opacity: 1;
-    }
-
-    .icone-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: none;
-    }
-  </style>
 </head>
 
 <body>
   <div class="layout-principal">
-
     <aside class="barra-lateral">
       <div class="icone-logo">
         <img src="/Imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
@@ -48,8 +20,7 @@
 
       <nav class="menu-lateral">
         <a href="index.html" class="item-menu ativo">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24">
             <rect x="3" y="3" width="7" height="7" rx="1" />
             <rect x="14" y="3" width="7" height="7" rx="1" />
             <rect x="3" y="14" width="7" height="7" rx="1" />
@@ -58,54 +29,47 @@
           Dashboard
         </a>
         <a href="motoristas.html" class="item-menu">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <svg viewBox="0 0 24 24">
+            <path d="M20 21a8 8 0 0 0-16 0" />
             <circle cx="12" cy="7" r="4" />
           </svg>
           Motoristas
         </a>
         <a href="veiculos.html" class="item-menu">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="1" y="3" width="15" height="13" rx="1" />
-            <path d="M16 8h4l3 5v3h-7V8z" />
-            <circle cx="5.5" cy="18.5" r="2.5" />
-            <circle cx="18.5" cy="18.5" r="2.5" />
+          <svg viewBox="0 0 24 24">
+            <path d="M10 17h4V5H2v12h3" />
+            <path d="M14 8h4l4 4v5h-3" />
+            <circle cx="7.5" cy="17.5" r="2.5" />
+            <circle cx="16.5" cy="17.5" r="2.5" />
           </svg>
           Veículos
         </a>
         <a href="viagens.html" class="item-menu">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
+          <svg viewBox="0 0 24 24">
+            <path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" />
+            <circle cx="12" cy="9" r="2.5" />
           </svg>
           Viagens
         </a>
         <a href="despesas.html" class="item-menu">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="1" x2="12" y2="23" />
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          <svg viewBox="0 0 24 24">
+            <path d="M4 7h16v12H4z" />
+            <path d="M16 7V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2" />
+            <path d="M8 13h8" />
           </svg>
           Despesas
         </a>
         <a href="relatorios.html" class="item-menu">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10" />
-            <line x1="12" y1="20" x2="12" y2="4" />
-            <line x1="6" y1="20" x2="6" y2="14" />
+          <svg viewBox="0 0 24 24">
+            <path d="M3 17l6-6 4 4 8-8" />
+            <path d="M14 7h7v7" />
           </svg>
           Relatórios
         </a>
         <a href="configuracoes.html" class="item-menu">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="3" />
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V22a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H2a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3 1.7 1.7 0 0 0 1-1.5V2a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8 1.7 1.7 0 0 0 1.5 1H22a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
           </svg>
           Configurações
         </a>
@@ -119,7 +83,12 @@
     <main class="conteudo-principal">
       <header class="topo-pagina">
         <div class="acoes-topo">
-          <button class="botao-icone">🔔</button>
+          <button class="botao-icone" type="button" aria-label="Notificações">
+            <svg viewBox="0 0 24 24">
+              <path d="M10.3 21a2 2 0 0 0 3.4 0" />
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+            </svg>
+          </button>
           <div class="perfil-usuario">
             <div class="avatar-usuario">GS</div>
             <span class="nome-usuario">Gustavo</span>
@@ -128,113 +97,162 @@
       </header>
 
       <section class="secao-boas-vindas">
-        <div>
-          <h2 class="titulo-pagina">Dashboard Financeiro</h2>
-          <p class="subtitulo-pagina">Acompanhe os acertos, despesas e resultados das viagens.</p>
+        <div class="cabecalho-boas-vindas">
+          <div>
+            <h2 class="titulo-pagina">Dashboard Financeiro</h2>
+            <p class="subtitulo-pagina">Acompanhe acertos, despesas, viagens e resultado operacional.</p>
+          </div>
+          <button class="seletor-periodo" type="button">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <path d="M16 2v4" />
+              <path d="M8 2v4" />
+              <path d="M3 10h18" />
+            </svg>
+            30 dias
+          </button>
         </div>
       </section>
 
       <section class="grade-cards-resumo">
-        <div class="card-resumo card-azul">
+        <div class="card-resumo">
           <div class="topo-card">
-            <span class="icone-card">👨‍✈️</span>
+            <span class="icone-card-wrapper roxo">
+              <svg viewBox="0 0 24 24">
+                <path d="M20 21a8 8 0 0 0-16 0" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </span>
             <span class="titulo-card">Motoristas</span>
           </div>
           <div class="valor-card" id="quantidadeMotoristas">0</div>
-          <div class="descricao-card">Cadastrados no sistema</div>
-          <button class="botao-card" id="botaoVerMotoristas">Ver motoristas</button>
+          <div class="descricao-card">Cadastrados</div>
+          <button class="botao-card" id="botaoVerMotoristas">Ver motoristas <span>→</span></button>
         </div>
 
-        <div class="card-resumo card-verde">
+        <div class="card-resumo">
           <div class="topo-card">
-            <span class="icone-card">🚚</span>
+            <span class="icone-card-wrapper azul">
+              <svg viewBox="0 0 24 24">
+                <path d="M10 17h4V5H2v12h3" />
+                <path d="M14 8h4l4 4v5h-3" />
+                <circle cx="7.5" cy="17.5" r="2.5" />
+                <circle cx="16.5" cy="17.5" r="2.5" />
+              </svg>
+            </span>
             <span class="titulo-card">Veículos</span>
           </div>
           <div class="valor-card" id="quantidadeVeiculos">0</div>
-          <div class="descricao-card">Ativos no momento</div>
-          <button class="botao-card" id="botaoVerVeiculos">Ver veículos</button>
+          <div class="descricao-card">Ativos</div>
+          <button class="botao-card" id="botaoVerVeiculos">Ver veículos <span>→</span></button>
         </div>
 
-        <div class="card-resumo card-laranja">
+        <div class="card-resumo">
           <div class="topo-card">
-            <span class="icone-card">📍</span>
+            <span class="icone-card-wrapper verde">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+            </span>
             <span class="titulo-card">Viagens</span>
           </div>
           <div class="valor-card" id="quantidadeViagens">0</div>
-          <div class="descricao-card">Cadastradas no sistema</div>
-          <button class="botao-card" id="botaoLancarViagem">Lançar viagem</button>
+          <div class="descricao-card">Realizadas</div>
+          <button class="botao-card" id="botaoLancarViagem">Ver viagens <span>→</span></button>
         </div>
 
-        <div class="card-resumo card-vermelho">
+        <div class="card-resumo">
           <div class="topo-card">
-            <span class="icone-card">💸</span>
+            <span class="icone-card-wrapper vermelho">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 7h16v12H4z" />
+                <path d="M16 7V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2" />
+                <path d="M8 13h8" />
+              </svg>
+            </span>
             <span class="titulo-card">Despesas</span>
           </div>
           <div class="valor-card" id="valorDespesas">R$ 0,00</div>
-          <div class="descricao-card">Total no mês atual</div>
-          <button class="botao-card" id="botaoLancarDespesa">Lançar despesa</button>
+          <div class="descricao-card">Total no período</div>
+          <button class="botao-card" id="botaoLancarDespesa">Ver despesas <span>→</span></button>
+        </div>
+
+        <div class="card-resumo">
+          <div class="topo-card">
+            <span class="icone-card-wrapper lucro">
+              <svg viewBox="0 0 24 24">
+                <path d="M3 17l6-6 4 4 8-8" />
+                <path d="M14 7h7v7" />
+              </svg>
+            </span>
+            <span class="titulo-card">Lucro líquido</span>
+          </div>
+          <div class="valor-card" id="valorLucroCard">R$ 0,00</div>
+          <div class="descricao-card">No período</div>
+          <button class="botao-card" id="botaoVerRelatorio">Ver relatório <span>→</span></button>
         </div>
       </section>
 
-      <section class="grade-informacoes">
-        <div class="painel painel-grande">
+      <section class="grade-dashboard">
+        <div class="painel painel-financeiro">
           <div class="cabecalho-painel">
             <h3>Resumo Financeiro</h3>
+            <button class="botao-filtro-painel" type="button">Últimos 30 dias</button>
           </div>
+
           <div class="linha-resumo-financeiro">
             <div class="mini-card mini-card-verde">
               <span class="rotulo-mini-card">Receita</span>
               <strong id="valorReceita">R$ 0,00</strong>
+              <span class="variacao-mini-card positiva">↗ Resultado bruto</span>
             </div>
             <div class="mini-card mini-card-vermelho">
               <span class="rotulo-mini-card">Despesas</span>
               <strong id="valorResumoDespesas">R$ 0,00</strong>
+              <span class="variacao-mini-card negativa">↘ Custos lançados</span>
             </div>
             <div class="mini-card mini-card-azul">
               <span class="rotulo-mini-card">Lucro Líquido</span>
               <strong id="valorLucro">R$ 0,00</strong>
+              <span class="variacao-mini-card positiva">↗ Saldo operacional</span>
+            </div>
+          </div>
+
+          <div class="grafico-linha-financeiro">
+            <svg id="graficoLinhaFinanceiro" viewBox="0 0 720 260" preserveAspectRatio="none" aria-label="Gráfico financeiro">
+              <g class="linhas-grade">
+                <line x1="44" y1="30" x2="700" y2="30" />
+                <line x1="44" y1="80" x2="700" y2="80" />
+                <line x1="44" y1="130" x2="700" y2="130" />
+                <line x1="44" y1="180" x2="700" y2="180" />
+                <line x1="44" y1="230" x2="700" y2="230" />
+              </g>
+              <g id="rotulosGraficoFinanceiro"></g>
+              <path id="linhaReceita" class="linha-grafico linha-receita" d="" />
+              <path id="linhaLucro" class="linha-grafico linha-lucro" d="" />
+              <path id="linhaDespesas" class="linha-grafico linha-despesas" d="" />
+              <g id="pontosGraficoFinanceiro"></g>
+            </svg>
+            <div class="legenda-linhas">
+              <span><i class="legenda-receita"></i>Receita</span>
+              <span><i class="legenda-lucro"></i>Lucro líquido</span>
+              <span><i class="legenda-despesas"></i>Despesas</span>
             </div>
           </div>
         </div>
 
-        <div class="painel painel-pequeno">
+        <div class="painel painel-viagens">
           <div class="cabecalho-painel">
             <h3>Viagens em Andamento</h3>
-            <a href="viagens.html" class="link-painel">Ver todas</a>
+            <a href="viagens.html" class="link-painel">Ver todas →</a>
           </div>
           <div class="lista-viagens" id="listaViagens"></div>
         </div>
       </section>
-
-      <section class="grade-graficos">
-        <div class="painel">
-          <div class="cabecalho-painel">
-            <h3>Despesas por Categoria</h3>
-          </div>
-          <div class="grafico-pizza-falso">
-            <div class="circulo-pizza" id="graficoCategorias"></div>
-            <div class="legenda-grafico">
-              <div class="item-legenda"><span class="cor-legenda azul"></span><span
-                  id="legendaCombustivel">Combustível</span></div>
-              <div class="item-legenda"><span class="cor-legenda vermelho"></span><span
-                  id="legendaPedagio">Pedágio</span></div>
-              <div class="item-legenda"><span class="cor-legenda verde"></span><span
-                  id="legendaAlimentacao">Alimentação</span></div>
-              <div class="item-legenda"><span class="cor-legenda amarelo"></span><span id="legendaOutros">Outros</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="painel">
-          <div class="cabecalho-painel">
-            <h3>Lucro Mensal</h3>
-          </div>
-          <div class="grafico-barras" id="graficoBarras"></div>
-        </div>
-      </section>
     </main>
   </div>
+
   <script src="/JavaScript/config.js"></script>
   <script src="/JavaScript/auth.js"></script>
   <script src="/JavaScript/index.js"></script>

@@ -34,8 +34,7 @@ async function carregarDadosDashboard() {
     atualizarCardsResumo();
     atualizarResumoFinanceiro();
     carregarViagensEmAndamento();
-    carregarGraficoCategorias();
-    carregarGraficoBarras();
+    carregarGraficoFinanceiro();
 
     respostas.forEach(function (resposta, indice) {
       if (resposta.status === "rejected") {
@@ -95,6 +94,15 @@ function obterRotuloMes(chaveMes) {
   return nomesMeses[mes - 1] || chaveMes;
 }
 
+function formatarData(dataISO) {
+  if (!dataISO) return "-";
+  const data = new Date(dataISO);
+  const dia = String(data.getUTCDate()).padStart(2, "0");
+  const mes = String(data.getUTCMonth() + 1).padStart(2, "0");
+  const ano = data.getUTCFullYear();
+  return dia + "/" + mes + "/" + ano;
+}
+
 function atualizarCardsResumo() {
   const totalMotoristas = motoristas.length;
   const totalVeiculosAtivos = veiculos.filter(function (veiculo) {
@@ -131,6 +139,7 @@ function atualizarResumoFinanceiro() {
   document.getElementById("valorReceita").textContent = formatarMoeda(receitaTotal);
   document.getElementById("valorResumoDespesas").textContent = formatarMoeda(despesasTotal);
   document.getElementById("valorLucro").textContent = formatarMoeda(lucroLiquido);
+  document.getElementById("valorLucroCard").textContent = formatarMoeda(lucroLiquido);
 }
 
 function carregarViagensEmAndamento() {
@@ -160,14 +169,139 @@ function carregarViagensEmAndamento() {
     itemViagem.classList.add("item-viagem");
 
     itemViagem.innerHTML = `
+      <div class="icone-viagem-andamento">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" />
+          <circle cx="12" cy="9" r="2.5" />
+        </svg>
+      </div>
       <div>
         <div class="rota-viagem">${viagem.origem} -> ${viagem.destino}</div>
         <div class="nome-motorista">${viagem.motorista_nome || "-"}</div>
       </div>
-      <div>🚛</div>
+      <div class="meta-viagem">
+        <span class="data-viagem">${formatarData(viagem.data_saida)}</span>
+        <span class="selo-status selo-andamento">Em andamento</span>
+      </div>
     `;
 
     listaViagens.appendChild(itemViagem);
+  });
+}
+
+function montarFinanceiroMensal() {
+  const mapaMeses = {};
+
+  viagens.forEach(function (viagem) {
+    if (viagem.status === "cancelada") return;
+
+    const chaveMes = obterMesAno(viagem.data_saida);
+    if (!chaveMes) return;
+
+    if (!mapaMeses[chaveMes]) {
+      mapaMeses[chaveMes] = { receita: 0, despesas: 0, lucro: 0 };
+    }
+
+    mapaMeses[chaveMes].receita += obterValorFrete(viagem);
+  });
+
+  despesas.forEach(function (despesa) {
+    const chaveMes = obterMesAno(despesa.data_despesa);
+    if (!chaveMes) return;
+
+    if (!mapaMeses[chaveMes]) {
+      mapaMeses[chaveMes] = { receita: 0, despesas: 0, lucro: 0 };
+    }
+
+    mapaMeses[chaveMes].despesas += obterValorDespesa(despesa);
+  });
+
+  return Object.keys(mapaMeses)
+    .sort()
+    .slice(-7)
+    .map(function (chaveMes) {
+      const item = mapaMeses[chaveMes];
+      item.lucro = item.receita - item.despesas;
+      return {
+        mes: obterRotuloMes(chaveMes),
+        receita: item.receita,
+        despesas: item.despesas,
+        lucro: item.lucro
+      };
+    });
+}
+
+function criarPathLinha(dados, chave, escalaY, inicioX, espacamento) {
+  return dados.map(function (item, indice) {
+    const x = inicioX + indice * espacamento;
+    const y = escalaY(item[chave]);
+    return (indice === 0 ? "M" : "L") + x + " " + y;
+  }).join(" ");
+}
+
+function carregarGraficoFinanceiro() {
+  const svg = document.getElementById("graficoLinhaFinanceiro");
+  if (!svg) return;
+
+  const dados = montarFinanceiroMensal();
+  const rotulos = document.getElementById("rotulosGraficoFinanceiro");
+  const pontos = document.getElementById("pontosGraficoFinanceiro");
+  rotulos.innerHTML = "";
+  pontos.innerHTML = "";
+
+  if (dados.length === 0) {
+    document.getElementById("linhaReceita").setAttribute("d", "");
+    document.getElementById("linhaLucro").setAttribute("d", "");
+    document.getElementById("linhaDespesas").setAttribute("d", "");
+    return;
+  }
+
+  const inicioX = 44;
+  const largura = 656;
+  const topo = 30;
+  const base = 230;
+  const espacamento = dados.length === 1 ? 0 : largura / (dados.length - 1);
+  const valores = [];
+
+  dados.forEach(function (item) {
+    valores.push(item.receita, item.despesas, item.lucro);
+  });
+
+  const maior = Math.max(...valores, 1);
+  const menor = Math.min(...valores, 0);
+  const amplitude = maior - menor || 1;
+
+  function escalaY(valor) {
+    return base - ((valor - menor) / amplitude) * (base - topo);
+  }
+
+  document.getElementById("linhaReceita").setAttribute("d", criarPathLinha(dados, "receita", escalaY, inicioX, espacamento));
+  document.getElementById("linhaLucro").setAttribute("d", criarPathLinha(dados, "lucro", escalaY, inicioX, espacamento));
+  document.getElementById("linhaDespesas").setAttribute("d", criarPathLinha(dados, "despesas", escalaY, inicioX, espacamento));
+
+  dados.forEach(function (item, indice) {
+    const x = inicioX + indice * espacamento;
+    const texto = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    texto.setAttribute("x", x);
+    texto.setAttribute("y", 252);
+    texto.setAttribute("text-anchor", "middle");
+    texto.setAttribute("class", "rotulo-grafico");
+    texto.textContent = item.mes;
+    rotulos.appendChild(texto);
+
+    [
+      { chave: "receita", cor: "#22c55e" },
+      { chave: "lucro", cor: "#2563eb" },
+      { chave: "despesas", cor: "#f43f5e" }
+    ].forEach(function (serie) {
+      const circulo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circulo.setAttribute("cx", x);
+      circulo.setAttribute("cy", escalaY(item[serie.chave]));
+      circulo.setAttribute("r", 4);
+      circulo.setAttribute("fill", serie.cor);
+      circulo.setAttribute("class", "ponto-grafico");
+      pontos.appendChild(circulo);
+    });
   });
 }
 
@@ -335,11 +469,15 @@ function adicionarEventosBotoes() {
   });
 
   document.getElementById("botaoLancarViagem").addEventListener("click", function () {
-    window.location.href = "cadastro-viagem.html";
+    window.location.href = "viagens.html";
   });
 
   document.getElementById("botaoLancarDespesa").addEventListener("click", function () {
-    window.location.href = "cadastro-despesa.html";
+    window.location.href = "despesas.html";
+  });
+
+  document.getElementById("botaoVerRelatorio").addEventListener("click", function () {
+    window.location.href = "relatorios.html";
   });
 }
 

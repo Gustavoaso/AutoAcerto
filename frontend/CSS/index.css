@@ -6,9 +6,8 @@
 @import url('/CSS/global.css');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Seção de boas-vindas */
 .secao-boas-vindas {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .cabecalho-boas-vindas {
@@ -18,55 +17,55 @@
   gap: 16px;
 }
 
-.texto-boas-vindas .titulo-pagina {
-  margin-bottom: 2px;
-}
-
-.seletor-periodo {
-  display: flex;
+.seletor-periodo,
+.botao-filtro-painel {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   border: 1px solid var(--cor-borda);
   background: var(--cor-superficie);
-  padding: 7px 12px;
-  border-radius: var(--raio);
-  font-size: 0.82rem;
-  font-weight: 500;
   color: var(--cor-texto-secundario);
-  cursor: pointer;
+  border-radius: var(--raio);
   box-shadow: var(--sombra-suave);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 8px 12px;
   white-space: nowrap;
 }
 
 .seletor-periodo svg {
-  width: 14px;
-  height: 14px;
-  stroke: var(--cor-texto-secundario);
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
   fill: none;
-  stroke-width: 1.75;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-/* Cards de resumo do Dashboard */
 .grade-cards-resumo {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
 .card-resumo {
   background: var(--cor-superficie);
-  border-radius: var(--raio);
   border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
   box-shadow: var(--sombra-suave);
-  padding: 18px 20px;
+  min-height: 150px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 10px;
-  transition: box-shadow var(--transicao), transform var(--transicao);
+  transition: border-color var(--transicao), box-shadow var(--transicao), transform var(--transicao);
 }
 
 .card-resumo:hover {
+  border-color: var(--cor-borda-forte);
   box-shadow: var(--sombra-media);
   transform: translateY(-1px);
 }
@@ -74,303 +73,293 @@
 .topo-card {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
 }
 
 .titulo-card {
-  font-size: 0.8rem;
-  font-weight: 500;
   color: var(--cor-texto-secundario);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .icone-card-wrapper {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--raio-sm);
-  display: flex;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--raio);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.icone-card-wrapper.azul   { background: var(--cor-primaria-clara); color: var(--cor-primaria); }
-.icone-card-wrapper.verde  { background: var(--cor-sucesso-clara);   color: var(--cor-sucesso); }
-.icone-card-wrapper.laranja{ background: var(--cor-alerta-clara);   color: var(--cor-alerta); }
-.icone-card-wrapper.vermelho{ background: var(--cor-perigo-clara);  color: var(--cor-perigo); }
-
 .icone-card-wrapper svg {
-  width: 17px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
   stroke: currentColor;
   fill: none;
-  stroke-width: 1.75;
+  stroke-width: 1.85;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
+.icone-card-wrapper.roxo { background: var(--cor-roxo-clara); color: var(--cor-roxo); }
+.icone-card-wrapper.azul { background: var(--cor-info-clara); color: var(--cor-info); }
+.icone-card-wrapper.verde { background: var(--cor-sucesso-clara); color: var(--cor-sucesso); }
+.icone-card-wrapper.vermelho { background: var(--cor-perigo-clara); color: var(--cor-perigo); }
+.icone-card-wrapper.lucro { background: #dcfce7; color: #16a34a; }
+
 .valor-card {
-  font-size: 1.75rem;
-  font-weight: 700;
   color: var(--cor-texto);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.05;
 }
 
 .descricao-card {
-  font-size: 0.8rem;
   color: var(--cor-texto-secundario);
+  font-size: 0.76rem;
+  font-weight: 500;
 }
 
 .botao-card {
-  border: 1px solid var(--cor-borda);
-  background: var(--cor-superficie-3);
-  color: var(--cor-texto-secundario);
-  padding: 7px 12px;
-  border-radius: var(--raio-sm);
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background var(--transicao), color var(--transicao);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   align-self: flex-start;
-}
-
-.botao-card:hover {
-  background: var(--cor-primaria-clara);
+  border: none;
+  background: transparent;
   color: var(--cor-primaria);
-  border-color: transparent;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0;
 }
 
-/* Grade de informações do dashboard */
-.grade-informacoes {
+.grade-dashboard {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: minmax(0, 1.25fr) minmax(360px, 0.75fr);
   gap: 16px;
-  margin-bottom: 16px;
+  align-items: stretch;
 }
 
-/* Grade de gráficos */
-.grade-graficos {
-  display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: 16px;
+.painel-financeiro,
+.painel-viagens {
+  min-height: 430px;
 }
 
-/* Resumo financeiro */
 .linha-resumo-financeiro {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+  margin-bottom: 18px;
 }
 
 .mini-card {
   border-radius: var(--raio);
-  padding: 14px 16px;
   border: 1px solid transparent;
+  padding: 14px;
 }
 
-.mini-card-verde  { background: var(--cor-sucesso-clara);   border-color: #a7f3d0; }
-.mini-card-vermelho{ background: var(--cor-perigo-clara);   border-color: #fca5a5; }
-.mini-card-azul   { background: var(--cor-primaria-clara);  border-color: #bfdbfe; }
+.mini-card-verde { background: #ecfdf5; border-color: #bbf7d0; }
+.mini-card-vermelho { background: #fff1f2; border-color: #fecdd3; }
+.mini-card-azul { background: #eff6ff; border-color: #bfdbfe; }
 
 .rotulo-mini-card {
   display: block;
-  font-size: 0.78rem;
-  font-weight: 600;
   color: var(--cor-texto-secundario);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 6px;
 }
 
 .mini-card strong {
-  font-size: 1.4rem;
-  font-weight: 700;
+  display: block;
   color: var(--cor-texto);
-  letter-spacing: -0.02em;
+  font-size: 1.18rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.15;
+  margin-bottom: 7px;
 }
 
-/* Lista de viagens em andamento */
+.variacao-mini-card {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.variacao-mini-card.positiva { color: var(--cor-sucesso); }
+.variacao-mini-card.negativa { color: var(--cor-perigo); }
+
+.grafico-linha-financeiro {
+  height: 250px;
+  position: relative;
+}
+
+.grafico-linha-financeiro svg {
+  width: 100%;
+  height: 220px;
+  overflow: visible;
+}
+
+.linhas-grade line {
+  stroke: #e5e9f0;
+  stroke-width: 1;
+}
+
+.linha-grafico {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.linha-receita { stroke: #22c55e; }
+.linha-lucro { stroke: #2563eb; }
+.linha-despesas { stroke: #f43f5e; }
+
+.ponto-grafico {
+  stroke: var(--cor-superficie);
+  stroke-width: 2;
+}
+
+.rotulo-grafico {
+  fill: var(--cor-texto-secundario);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.legenda-linhas {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  color: var(--cor-texto-secundario);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.legenda-linhas span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legenda-linhas i {
+  width: 20px;
+  height: 3px;
+  border-radius: var(--raio-full);
+  display: inline-block;
+}
+
+.legenda-receita { background: #22c55e; }
+.legenda-lucro { background: #2563eb; }
+.legenda-despesas { background: #f43f5e; }
+
 .lista-viagens {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .item-viagem {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: 12px;
   align-items: center;
-  padding: 11px 14px;
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio);
   background: var(--cor-superficie-2);
-  transition: background var(--transicao), border-color var(--transicao);
+  padding: 12px;
+  transition: background var(--transicao), border-color var(--transicao), transform var(--transicao);
 }
 
 .item-viagem:hover {
-  background: var(--cor-superficie-3);
+  background: var(--cor-superficie);
   border-color: var(--cor-borda-forte);
+  transform: translateY(-1px);
+}
+
+.icone-viagem-andamento {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--raio);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cor-sucesso-clara);
+  color: var(--cor-sucesso);
+}
+
+.icone-viagem-andamento svg {
+  width: 19px;
+  height: 19px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.85;
 }
 
 .rota-viagem {
-  font-size: 0.875rem;
-  font-weight: 600;
   color: var(--cor-texto);
-  margin-bottom: 2px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .nome-motorista {
-  font-size: 0.8rem;
   color: var(--cor-texto-secundario);
+  font-size: 0.76rem;
+  font-weight: 600;
+  margin-top: 3px;
 }
 
-.valor-viagem {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--cor-texto);
-  white-space: nowrap;
-}
-
-/* Gráfico de pizza (CSS puro / Chart.js) */
-.grafico-pizza-falso {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  min-height: 200px;
-  flex-wrap: wrap;
-}
-
-.circulo-pizza {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.circulo-pizza::after {
-  content: '';
-  position: absolute;
-  width: 65px;
-  height: 65px;
-  background: var(--cor-superficie);
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.legenda-grafico {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.item-legenda {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--cor-texto);
-}
-
-.cor-legenda {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  flex-shrink: 0;
-}
-
-.cor-legenda.azul     { background: var(--cor-primaria); }
-.cor-legenda.vermelho { background: var(--cor-perigo); }
-.cor-legenda.verde    { background: var(--cor-sucesso); }
-.cor-legenda.amarelo  { background: var(--cor-alerta); }
-
-/* Gráfico de barras */
-.grafico-barras {
-  height: 220px;
+.meta-viagem {
   display: flex;
   align-items: flex-end;
-  gap: 10px;
-  padding-top: 16px;
-}
-
-.coluna-grafico {
-  flex: 1;
-  display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 6px;
-  height: 100%;
+  gap: 8px;
 }
 
-.barra-grafico {
-  width: 100%;
-  max-width: 36px;
-  background: var(--cor-primaria-clara);
-  border-radius: 4px 4px 2px 2px;
-  transition: background var(--transicao);
-  position: relative;
-}
-
-.barra-grafico.receita  { background: var(--cor-sucesso-clara); }
-.barra-grafico.despesa  { background: var(--cor-perigo-clara); }
-.barra-grafico.lucro    { background: var(--cor-primaria-clara); }
-
-.barra-grafico:hover {
-  filter: brightness(0.92);
-}
-
-.rotulo-coluna {
-  font-size: 0.75rem;
+.data-viagem {
   color: var(--cor-texto-secundario);
-  font-weight: 500;
+  font-size: 0.72rem;
+  font-weight: 700;
   white-space: nowrap;
 }
 
-.legenda-barras {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 12px;
-  flex-wrap: wrap;
-}
-
-.legenda-barras .item-legenda {
-  gap: 6px;
-}
-
-/* Responsivo */
-@media (max-width: 1200px) {
-  .grade-cards-resumo,
-  .grade-graficos {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .grade-informacoes {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
+@media (max-width: 1280px) {
   .grade-cards-resumo {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .grade-graficos {
+  .grade-dashboard {
     grid-template-columns: 1fr;
   }
+}
 
+@media (max-width: 800px) {
+  .grade-cards-resumo,
   .linha-resumo-financeiro {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .cabecalho-boas-vindas {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .grade-cards-resumo,
+  .linha-resumo-financeiro {
+    grid-template-columns: 1fr;
+  }
+
+  .item-viagem {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .meta-viagem {
+    grid-column: 1 / -1;
     align-items: flex-start;
   }
 }
