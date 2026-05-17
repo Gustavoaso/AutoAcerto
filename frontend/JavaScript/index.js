@@ -16,6 +16,11 @@ let motoristas = [];
 let veiculos = [];
 let viagens = [];
 let despesas = [];
+let periodoDashboard = {
+  tipo: "0",
+  dataInicio: "",
+  dataFim: ""
+};
 
 async function carregarDadosDashboard() {
   try {
@@ -31,10 +36,7 @@ async function carregarDadosDashboard() {
     viagens = respostas[2].status === "fulfilled" ? respostas[2].value : [];
     despesas = respostas[3].status === "fulfilled" ? respostas[3].value : [];
 
-    atualizarCardsResumo();
-    atualizarResumoFinanceiro();
-    carregarViagensEmAndamento();
-    carregarGraficoFinanceiro();
+    atualizarDashboard();
 
     respostas.forEach(function (resposta, indice) {
       if (resposta.status === "rejected") {
@@ -103,26 +105,149 @@ function formatarData(dataISO) {
   return dia + "/" + mes + "/" + ano;
 }
 
+function obterDataLocal(dataISO) {
+  if (!dataISO) return null;
+
+  const dataTexto = String(dataISO).slice(0, 10);
+  const partes = dataTexto.split("-");
+
+  if (partes.length !== 3) return null;
+
+  return new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
+}
+
+function formatarDataCampo(data) {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const dia = String(data.getDate()).padStart(2, "0");
+
+  return ano + "-" + mes + "-" + dia;
+}
+
+function obterChaveDia(data) {
+  return formatarDataCampo(data);
+}
+
+function obterRotuloDia(chaveDia) {
+  const data = obterDataLocal(chaveDia);
+  if (!data) return chaveDia;
+
+  const dia = String(data.getDate()).padStart(2, "0");
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+
+  return dia + "/" + mes;
+}
+
+function obterIntervaloDashboard() {
+  if (periodoDashboard.tipo === "0") return null;
+
+  if (periodoDashboard.tipo === "customizado") {
+    let inicioCustomizado = obterDataLocal(periodoDashboard.dataInicio);
+    let fimCustomizado = obterDataLocal(periodoDashboard.dataFim);
+
+    if (inicioCustomizado && fimCustomizado && inicioCustomizado > fimCustomizado) {
+      const dataTemporaria = inicioCustomizado;
+      inicioCustomizado = fimCustomizado;
+      fimCustomizado = dataTemporaria;
+    }
+
+    return {
+      inicio: inicioCustomizado,
+      fim: fimCustomizado
+    };
+  }
+
+  const dias = Number(periodoDashboard.tipo);
+  const fim = new Date();
+  const inicio = new Date();
+  inicio.setDate(fim.getDate() - (dias - 1));
+
+  return {
+    inicio: inicio,
+    fim: fim
+  };
+}
+
+function dataEstaNoPeriodo(dataISO) {
+  const intervalo = obterIntervaloDashboard();
+  if (!intervalo) return true;
+
+  const data = obterDataLocal(dataISO);
+  if (!data) return false;
+
+  if (intervalo.inicio && data < intervalo.inicio) return false;
+  if (intervalo.fim && data > intervalo.fim) return false;
+
+  return true;
+}
+
+function obterViagensPeriodo() {
+  return viagens.filter(function (viagem) {
+    return dataEstaNoPeriodo(viagem.data_saida);
+  });
+}
+
+function obterDespesasPeriodo() {
+  return despesas.filter(function (despesa) {
+    return dataEstaNoPeriodo(despesa.data_despesa);
+  });
+}
+
+function atualizarRotuloPeriodoDashboard() {
+  const rotuloPeriodoPainel = document.getElementById("rotuloPeriodoPainel");
+  if (!rotuloPeriodoPainel) return;
+
+  if (periodoDashboard.tipo === "0") {
+    rotuloPeriodoPainel.textContent = "Tudo";
+    return;
+  }
+
+  if (periodoDashboard.tipo === "customizado") {
+    const inicio = periodoDashboard.dataInicio ? obterRotuloDia(periodoDashboard.dataInicio) : "Início";
+    const fim = periodoDashboard.dataFim ? obterRotuloDia(periodoDashboard.dataFim) : "Fim";
+    rotuloPeriodoPainel.textContent = inicio + " até " + fim;
+    return;
+  }
+
+  if (periodoDashboard.tipo === "365") {
+    rotuloPeriodoPainel.textContent = "Últimos 12 meses";
+    return;
+  }
+
+  rotuloPeriodoPainel.textContent = "Últimos " + periodoDashboard.tipo + " dias";
+}
+
+function atualizarDashboard() {
+  atualizarRotuloPeriodoDashboard();
+  atualizarCardsResumo();
+  atualizarResumoFinanceiro();
+  carregarViagensEmAndamento();
+  carregarGraficoFinanceiro();
+}
+
 function atualizarCardsResumo() {
   const totalMotoristas = motoristas.length;
   const totalVeiculosAtivos = veiculos.filter(function (veiculo) {
     return veiculo.status === "ativo";
   }).length;
-  const totalViagens = viagens.length;
-  const chaveMesAtual = obterMesAno(new Date().toISOString());
-  const valorTotalDespesasMes = despesas.reduce(function (acumulador, despesa) {
-    if (obterMesAno(despesa.data_despesa) !== chaveMesAtual) return acumulador;
+  const viagensPeriodo = obterViagensPeriodo();
+  const despesasPeriodo = obterDespesasPeriodo();
+  const totalViagens = viagensPeriodo.length;
+  const valorTotalDespesasPeriodo = despesasPeriodo.reduce(function (acumulador, despesa) {
     return acumulador + obterValorDespesa(despesa);
   }, 0);
 
   document.getElementById("quantidadeMotoristas").textContent = totalMotoristas;
   document.getElementById("quantidadeVeiculos").textContent = totalVeiculosAtivos;
   document.getElementById("quantidadeViagens").textContent = totalViagens;
-  document.getElementById("valorDespesas").textContent = formatarMoeda(valorTotalDespesasMes);
+  document.getElementById("valorDespesas").textContent = formatarMoeda(valorTotalDespesasPeriodo);
 }
 
 function atualizarResumoFinanceiro() {
-  const receitaTotal = viagens
+  const viagensPeriodo = obterViagensPeriodo();
+  const despesasPeriodo = obterDespesasPeriodo();
+
+  const receitaTotal = viagensPeriodo
     .filter(function (viagem) {
       return viagem.status !== "cancelada";
     })
@@ -130,7 +255,7 @@ function atualizarResumoFinanceiro() {
       return acumulador + obterValorFrete(viagem);
     }, 0);
 
-  const despesasTotal = despesas.reduce(function (acumulador, despesa) {
+  const despesasTotal = despesasPeriodo.reduce(function (acumulador, despesa) {
     return acumulador + obterValorDespesa(despesa);
   }, 0);
 
@@ -146,7 +271,7 @@ function carregarViagensEmAndamento() {
   const listaViagens = document.getElementById("listaViagens");
   listaViagens.innerHTML = "";
 
-  const viagensEmAndamento = viagens
+  const viagensEmAndamento = obterViagensPeriodo()
     .filter(function (viagem) {
       return viagem.status === "em andamento";
     })
@@ -191,44 +316,82 @@ function carregarViagensEmAndamento() {
 
 function montarFinanceiroMensal() {
   const mapaMeses = {};
+  const intervalo = obterIntervaloDashboard();
+  const viagensPeriodo = obterViagensPeriodo();
+  const despesasPeriodo = obterDespesasPeriodo();
+  const datasLancamentos = [];
 
-  viagens.forEach(function (viagem) {
-    if (viagem.status === "cancelada") return;
-
-    const chaveMes = obterMesAno(viagem.data_saida);
-    if (!chaveMes) return;
-
-    if (!mapaMeses[chaveMes]) {
-      mapaMeses[chaveMes] = { receita: 0, despesas: 0, lucro: 0 };
-    }
-
-    mapaMeses[chaveMes].receita += obterValorFrete(viagem);
+  viagensPeriodo.forEach(function (viagem) {
+    const dataViagem = obterDataLocal(viagem.data_saida);
+    if (dataViagem) datasLancamentos.push(dataViagem);
   });
 
-  despesas.forEach(function (despesa) {
-    const chaveMes = obterMesAno(despesa.data_despesa);
-    if (!chaveMes) return;
+  despesasPeriodo.forEach(function (despesa) {
+    const dataDespesa = obterDataLocal(despesa.data_despesa);
+    if (dataDespesa) datasLancamentos.push(dataDespesa);
+  });
 
-    if (!mapaMeses[chaveMes]) {
-      mapaMeses[chaveMes] = { receita: 0, despesas: 0, lucro: 0 };
+  const menorData = datasLancamentos.length ? new Date(Math.min.apply(null, datasLancamentos)) : null;
+  const maiorData = datasLancamentos.length ? new Date(Math.max.apply(null, datasLancamentos)) : null;
+  const diferencaDias = menorData && maiorData ? Math.round((maiorData - menorData) / 86400000) : 0;
+  const usarPeriodoDiario = periodoDashboard.tipo !== "365" && (Boolean(intervalo) || diferencaDias <= 90);
+
+  viagensPeriodo.forEach(function (viagem) {
+    if (viagem.status === "cancelada") return;
+
+    const dataViagem = obterDataLocal(viagem.data_saida);
+    const chave = usarPeriodoDiario && dataViagem ? obterChaveDia(dataViagem) : obterMesAno(viagem.data_saida);
+    if (!chave) return;
+
+    if (!mapaMeses[chave]) {
+      mapaMeses[chave] = { receita: 0, despesas: 0, lucro: 0 };
     }
 
-    mapaMeses[chaveMes].despesas += obterValorDespesa(despesa);
+    mapaMeses[chave].receita += obterValorFrete(viagem);
+  });
+
+  despesasPeriodo.forEach(function (despesa) {
+    const dataDespesa = obterDataLocal(despesa.data_despesa);
+    const chave = usarPeriodoDiario && dataDespesa ? obterChaveDia(dataDespesa) : obterMesAno(despesa.data_despesa);
+    if (!chave) return;
+
+    if (!mapaMeses[chave]) {
+      mapaMeses[chave] = { receita: 0, despesas: 0, lucro: 0 };
+    }
+
+    mapaMeses[chave].despesas += obterValorDespesa(despesa);
   });
 
   return Object.keys(mapaMeses)
     .sort()
-    .slice(-7)
-    .map(function (chaveMes) {
-      const item = mapaMeses[chaveMes];
+    .slice(-12)
+    .map(function (chave) {
+      const item = mapaMeses[chave];
       item.lucro = item.receita - item.despesas;
       return {
-        mes: obterRotuloMes(chaveMes),
+        mes: usarPeriodoDiario ? obterRotuloDia(chave) : obterRotuloMes(chave),
         receita: item.receita,
         despesas: item.despesas,
         lucro: item.lucro
       };
-    });
+    })
+    .reduce(function (lista, item, indice, origem) {
+      if (origem.length === 1 && usarPeriodoDiario) {
+        const dataPonto = obterDataLocal(Object.keys(mapaMeses).sort()[0]);
+        if (dataPonto) {
+          dataPonto.setDate(dataPonto.getDate() - 1);
+          lista.push({
+            mes: obterRotuloDia(formatarDataCampo(dataPonto)),
+            receita: 0,
+            despesas: 0,
+            lucro: 0
+          });
+        }
+      }
+
+      lista.push(item);
+      return lista;
+    }, []);
 }
 
 function criarPathLinha(dados, chave, escalaY, inicioX, espacamento) {
@@ -237,6 +400,32 @@ function criarPathLinha(dados, chave, escalaY, inicioX, espacamento) {
     const y = escalaY(item[chave]);
     return (indice === 0 ? "M" : "L") + x + " " + y;
   }).join(" ");
+}
+
+function mostrarTooltipGrafico(evento, item, serie) {
+  const tooltip = document.getElementById("tooltipGraficoFinanceiro");
+  const areaGrafico = document.querySelector(".grafico-linha-financeiro");
+
+  if (!tooltip || !areaGrafico) return;
+
+  const nomesSeries = {
+    receita: "Receita",
+    despesas: "Despesas",
+    lucro: "Lucro líquido"
+  };
+  const limites = areaGrafico.getBoundingClientRect();
+
+  tooltip.innerHTML = "<span>" + item.mes + " - " + nomesSeries[serie] + "</span>" + formatarMoeda(item[serie]);
+  tooltip.style.left = (evento.clientX - limites.left) + "px";
+  tooltip.style.top = (evento.clientY - limites.top) + "px";
+  tooltip.classList.remove("oculto");
+}
+
+function esconderTooltipGrafico() {
+  const tooltip = document.getElementById("tooltipGraficoFinanceiro");
+  if (tooltip) {
+    tooltip.classList.add("oculto");
+  }
 }
 
 function carregarGraficoFinanceiro() {
@@ -300,6 +489,13 @@ function carregarGraficoFinanceiro() {
       circulo.setAttribute("r", 4);
       circulo.setAttribute("fill", serie.cor);
       circulo.setAttribute("class", "ponto-grafico");
+      circulo.addEventListener("mouseenter", function (evento) {
+        mostrarTooltipGrafico(evento, item, serie.chave);
+      });
+      circulo.addEventListener("mousemove", function (evento) {
+        mostrarTooltipGrafico(evento, item, serie.chave);
+      });
+      circulo.addEventListener("mouseleave", esconderTooltipGrafico);
       pontos.appendChild(circulo);
     });
   });
@@ -481,8 +677,58 @@ function adicionarEventosBotoes() {
   });
 }
 
+function configurarPeriodoDashboard() {
+  const filtroPeriodo = document.getElementById("filtroPeriodoDashboard");
+  const datasPeriodo = document.getElementById("datasPeriodoDashboard");
+  const dataInicio = document.getElementById("dataInicioDashboard");
+  const dataFim = document.getElementById("dataFimDashboard");
+
+  if (!filtroPeriodo) return;
+
+  filtroPeriodo.value = periodoDashboard.tipo;
+
+  filtroPeriodo.addEventListener("change", function () {
+    periodoDashboard.tipo = filtroPeriodo.value;
+
+    if (datasPeriodo) {
+      datasPeriodo.classList.toggle("oculto", periodoDashboard.tipo !== "customizado");
+    }
+
+    if (periodoDashboard.tipo === "customizado") {
+      if (!periodoDashboard.dataInicio || !periodoDashboard.dataFim) {
+        const fim = new Date();
+        const inicio = new Date();
+        inicio.setDate(fim.getDate() - 29);
+
+        periodoDashboard.dataInicio = formatarDataCampo(inicio);
+        periodoDashboard.dataFim = formatarDataCampo(fim);
+
+        if (dataInicio) dataInicio.value = periodoDashboard.dataInicio;
+        if (dataFim) dataFim.value = periodoDashboard.dataFim;
+      }
+    }
+
+    atualizarDashboard();
+  });
+
+  if (dataInicio) {
+    dataInicio.addEventListener("change", function () {
+      periodoDashboard.dataInicio = dataInicio.value;
+      atualizarDashboard();
+    });
+  }
+
+  if (dataFim) {
+    dataFim.addEventListener("change", function () {
+      periodoDashboard.dataFim = dataFim.value;
+      atualizarDashboard();
+    });
+  }
+}
+
 function iniciarTela() {
   adicionarEventosBotoes();
+  configurarPeriodoDashboard();
   carregarDadosDashboard();
 }
 

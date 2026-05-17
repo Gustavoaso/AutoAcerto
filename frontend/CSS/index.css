@@ -17,7 +17,6 @@
   gap: 16px;
 }
 
-.seletor-periodo,
 .botao-filtro-painel {
   display: inline-flex;
   align-items: center;
@@ -33,14 +32,56 @@
   white-space: nowrap;
 }
 
-.seletor-periodo svg {
-  width: 15px;
-  height: 15px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.controle-periodo-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.controle-periodo-dashboard label {
+  color: var(--cor-texto-secundario);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.linha-periodo-dashboard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.linha-periodo-dashboard select,
+.datas-periodo-dashboard input {
+  min-height: 38px;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra-suave);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.linha-periodo-dashboard select:focus,
+.datas-periodo-dashboard input:focus {
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  outline: none;
+}
+
+.datas-periodo-dashboard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.datas-periodo-dashboard.oculto {
+  display: none;
 }
 
 .grade-cards-resumo {
@@ -221,6 +262,42 @@
 .ponto-grafico {
   stroke: var(--cor-superficie);
   stroke-width: 2;
+  cursor: pointer;
+  transition: r var(--transicao), stroke-width var(--transicao);
+}
+
+.ponto-grafico:hover {
+  r: 6;
+  stroke-width: 3;
+}
+
+.tooltip-grafico {
+  position: absolute;
+  z-index: 5;
+  min-width: 150px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-media);
+  color: var(--cor-texto);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 9px 10px;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 12px));
+}
+
+.tooltip-grafico.oculto {
+  display: none;
+}
+
+.tooltip-grafico span {
+  display: block;
+  color: var(--cor-texto-secundario);
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-bottom: 3px;
 }
 
 .rotulo-grafico {
@@ -345,6 +422,15 @@
 
   .cabecalho-boas-vindas {
     flex-direction: column;
+  }
+
+  .controle-periodo-dashboard {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .linha-periodo-dashboard {
+    justify-content: flex-start;
   }
 }
 
