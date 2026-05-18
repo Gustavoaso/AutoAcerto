@@ -4,6 +4,21 @@ let viagens = [];
 let viagensVisiveis = [];
 let exclusaoViagens = null;
 
+function criarIconeViagemLista() {
+    return '<svg viewBox="0 0 24 24">' +
+        '<path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" />' +
+        '<circle cx="12" cy="9" r="2.5" />' +
+    '</svg>';
+}
+
+function criarIconeVer() {
+    return '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>';
+}
+
+function criarIconeEditar() {
+    return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
+}
+
 async function carregarViagens() {
     try {
         const response = await fetch(urlApiViagens, { headers: cabecalhosAutenticados() });
@@ -77,7 +92,7 @@ function renderizarTabelaViagens(listaViagens) {
             ${exclusaoViagens ? exclusaoViagens.colunaLinha(viagem.id) : ""}
             <td>
                 <div class="bloco-viagem">
-                    <div class="avatar-viagem">📍</div>
+                    <div class="avatar-viagem">${criarIconeViagemLista()}</div>
                     <div>
                         <div class="nome-rota">${viagem.origem} → ${viagem.destino}</div>
                     </div>
@@ -95,8 +110,8 @@ function renderizarTabelaViagens(listaViagens) {
             <td>${criarSeloStatusViagem(viagem.status)}</td>
             <td>
                 <div class="grupo-acoes">
-                    <button class="botao-acao" onclick="window.location.href='ver-viagem.html?id=${viagem.id}'">Ver</button>
-                    ${podeEditar ? `<button class="botao-acao" onclick="window.location.href='editar-viagem.html?id=${viagem.id}'">Editar</button>` : ""}
+                    <button class="botao-acao" onclick="window.location.href='ver-viagem.html?id=${viagem.id}'">${criarIconeVer()}Ver</button>
+                    ${podeEditar ? `<button class="botao-acao" onclick="window.location.href='editar-viagem.html?id=${viagem.id}'">${criarIconeEditar()}Editar</button>` : ""}
                 </div>
             </td>
         `;

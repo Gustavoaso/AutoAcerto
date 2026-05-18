@@ -17,6 +17,12 @@
   border-radius: var(--raio);
   box-shadow: var(--sombra-suave);
   padding: 24px;
+  transition: border-color var(--transicao), box-shadow var(--transicao);
+}
+
+.painel-detalhes:hover {
+  border-color: var(--cor-borda-forte);
+  box-shadow: var(--sombra-media);
 }
 
 .grade-detalhes {
@@ -26,13 +32,20 @@
 }
 
 .grupo-detalhe {
-  background: var(--cor-superficie-2);
+  background: #fbfcfe;
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio);
-  padding: 12px 14px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  transition: background var(--transicao), border-color var(--transicao), transform var(--transicao);
+}
+
+.grupo-detalhe:hover {
+  background: var(--cor-superficie);
+  border-color: var(--cor-borda-forte);
+  transform: translateY(-1px);
 }
 
 .grupo-detalhe-largo {
@@ -41,10 +54,10 @@
 
 .rotulo-detalhe {
   font-size: 0.76rem;
-  font-weight: 600;
+  font-weight: 800;
   color: var(--cor-texto-secundario);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
 }
 
 .valor-detalhe {

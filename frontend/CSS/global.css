@@ -56,6 +56,7 @@
   --sombra-suave:         0 1px 3px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.04);
   --sombra-media:         0 4px 16px rgba(16, 24, 40, 0.08), 0 1px 4px rgba(16, 24, 40, 0.04);
   --sombra-forte:         0 8px 32px rgba(16, 24, 40, 0.12), 0 2px 8px rgba(16, 24, 40, 0.06);
+  --sombra-card-hover:    0 12px 28px rgba(16, 24, 40, 0.10), 0 3px 8px rgba(16, 24, 40, 0.04);
 
   /* Raios de borda */
   --raio-sm:    6px;
@@ -132,7 +133,8 @@ button {
 .barra-lateral {
   width: var(--sidebar-largura);
   flex-shrink: 0;
-  background: var(--sidebar-fundo);
+  background:
+    linear-gradient(180deg, rgba(15, 35, 61, 0.96) 0%, rgba(13, 27, 42, 1) 42%, rgba(8, 19, 34, 1) 100%);
   color: var(--sidebar-texto);
   padding: 24px 16px;
   display: flex;
@@ -170,7 +172,7 @@ button {
   border-radius: var(--raio);
   font-size: 0.875rem;
   font-weight: 500;
-  transition: background var(--transicao), color var(--transicao);
+  transition: background var(--transicao), color var(--transicao), transform var(--transicao);
   position: relative;
 }
 
@@ -188,12 +190,14 @@ button {
 .item-menu:hover {
   background: var(--sidebar-fundo-hover);
   color: #cbd5e1;
+  transform: translateX(2px);
 }
 
 .item-menu.ativo {
-  background: var(--sidebar-fundo-ativo);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(29, 88, 232, 0.10));
   color: var(--sidebar-texto-ativo);
   font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(147, 197, 253, 0.08);
 }
 
 .item-menu.ativo::before {
@@ -285,7 +289,9 @@ button {
   flex: 1;
   min-width: 0;
   padding: 28px 32px;
-  background: var(--cor-fundo);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(219, 234, 254, 0.72) 0%, transparent 32%),
+    linear-gradient(180deg, #f8fafc 0%, var(--cor-fundo) 42%, #eef2f7 100%);
   overflow-y: auto;
 }
 
@@ -306,6 +312,46 @@ button {
   gap: 10px;
 }
 
+.campo-busca-topo {
+  flex: 1;
+  max-width: 360px;
+  position: relative;
+}
+
+.campo-busca-topo input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-full);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-suave);
+  color: var(--cor-texto);
+  font-size: 0.86rem;
+  font-weight: 500;
+  outline: none;
+  padding: 9px 14px 9px 38px;
+  transition: border-color var(--transicao), box-shadow var(--transicao), background var(--transicao);
+}
+
+.campo-busca-topo::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  background: var(--cor-texto-secundario);
+  transform: translateY(-50%);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='8' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='m21 21-4.3-4.3' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='8' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='m21 21-4.3-4.3' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.campo-busca-topo input:focus {
+  border-color: var(--cor-primaria);
+  box-shadow: 0 0 0 3px rgba(29, 88, 232, 0.12), var(--sombra-suave);
+  background: #ffffff;
+}
+
 .botao-icone {
   width: 38px;
   height: 38px;
@@ -319,6 +365,7 @@ button {
   box-shadow: var(--sombra-suave);
   transition: background var(--transicao), border-color var(--transicao);
   flex-shrink: 0;
+  font-size: 0;
 }
 
 .botao-icone:hover {
@@ -334,6 +381,19 @@ button {
   stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.botao-icone::before {
+  content: "";
+  width: 17px;
+  height: 17px;
+  background: var(--cor-texto-secundario);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10.3 21a2 2 0 0 0 3.4 0' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10.3 21a2 2 0 0 0 3.4 0' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.botao-icone:has(svg)::before {
+  display: none;
 }
 
 .perfil-usuario {
@@ -385,10 +445,10 @@ button {
 }
 
 .titulo-pagina {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.58rem;
+  font-weight: 800;
   color: var(--cor-texto);
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   margin-bottom: 4px;
   line-height: 1.2;
 }
@@ -419,14 +479,15 @@ button {
 ------------------------------------------------------- */
 .botao-primario {
   border: none;
-  background: var(--cor-primaria);
+  background: linear-gradient(135deg, var(--cor-primaria), #2563eb);
   color: #ffffff;
   padding: 9px 16px;
   border-radius: var(--raio);
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: background var(--transicao), transform var(--transicao);
+  box-shadow: 0 10px 22px rgba(29, 88, 232, 0.18);
+  transition: background var(--transicao), transform var(--transicao), box-shadow var(--transicao);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -436,6 +497,7 @@ button {
 .botao-primario:hover {
   background: var(--cor-primaria-escura);
   transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(29, 88, 232, 0.24);
 }
 
 .botao-secundario {
@@ -447,12 +509,14 @@ button {
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: background var(--transicao), border-color var(--transicao);
+  box-shadow: var(--sombra-suave);
+  transition: background var(--transicao), border-color var(--transicao), transform var(--transicao);
 }
 
 .botao-secundario:hover {
   background: var(--cor-superficie-3);
   border-color: var(--cor-borda-forte);
+  transform: translateY(-1px);
 }
 
 .botao-perigo {
@@ -498,19 +562,124 @@ button {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--transicao), box-shadow var(--transicao), transform var(--transicao);
+}
+
+.grade-resumo .card-resumo,
+.grade-resumo-motoristas .card-resumo,
+.grade-resumo-veiculos .card-resumo,
+.grade-resumo-viagens .card-resumo,
+.grade-resumo-despesas .card-resumo,
+.grade-metricas .card-resumo {
+  min-height: 126px;
+  padding-right: 76px;
+}
+
+.card-resumo:hover {
+  border-color: var(--cor-borda-forte);
+  box-shadow: var(--sombra-card-hover);
+  transform: translateY(-2px);
+}
+
+.grade-resumo .card-resumo::before,
+.grade-resumo-motoristas .card-resumo::before,
+.grade-resumo-veiculos .card-resumo::before,
+.grade-resumo-viagens .card-resumo::before,
+.grade-resumo-despesas .card-resumo::before,
+.grade-metricas .card-resumo::before {
+  content: "";
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--raio);
+  background: var(--cor-info-clara);
+}
+
+.grade-resumo .card-resumo::after,
+.grade-resumo-motoristas .card-resumo::after,
+.grade-resumo-veiculos .card-resumo::after,
+.grade-resumo-viagens .card-resumo::after,
+.grade-resumo-despesas .card-resumo::after,
+.grade-metricas .card-resumo::after {
+  content: "";
+  position: absolute;
+  right: 29px;
+  top: 29px;
+  width: 20px;
+  height: 20px;
+  background: var(--cor-info);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 17l6-6 4 4 8-8' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14 7h7v7' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 17l6-6 4 4 8-8' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14 7h7v7' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.grade-resumo .card-resumo:nth-child(1)::before,
+.grade-resumo-motoristas .card-resumo:nth-child(1)::before,
+.grade-metricas .card-resumo:nth-child(1)::before { background: var(--cor-roxo-clara); }
+
+.grade-resumo .card-resumo:nth-child(1)::after,
+.grade-resumo-motoristas .card-resumo:nth-child(1)::after,
+.grade-metricas .card-resumo:nth-child(1)::after { background: var(--cor-roxo); }
+
+.grade-resumo .card-resumo:nth-child(2)::before,
+.grade-resumo-veiculos .card-resumo:nth-child(2)::before,
+.grade-metricas .card-resumo:nth-child(2)::before { background: var(--cor-info-clara); }
+
+.grade-resumo .card-resumo:nth-child(2)::after,
+.grade-resumo-veiculos .card-resumo:nth-child(2)::after,
+.grade-metricas .card-resumo:nth-child(2)::after { background: var(--cor-info); }
+
+.grade-resumo .card-resumo:nth-child(3)::before,
+.grade-resumo-viagens .card-resumo:nth-child(3)::before,
+.grade-metricas .card-resumo:nth-child(3)::before { background: var(--cor-sucesso-clara); }
+
+.grade-resumo .card-resumo:nth-child(3)::after,
+.grade-resumo-viagens .card-resumo:nth-child(3)::after,
+.grade-metricas .card-resumo:nth-child(3)::after { background: var(--cor-sucesso); }
+
+.grade-resumo .card-resumo:nth-child(4)::before,
+.grade-resumo-despesas .card-resumo:nth-child(4)::before,
+.grade-metricas .card-resumo:nth-child(4)::before { background: var(--cor-perigo-clara); }
+
+.grade-resumo .card-resumo:nth-child(4)::after,
+.grade-resumo-despesas .card-resumo:nth-child(4)::after,
+.grade-metricas .card-resumo:nth-child(4)::after { background: var(--cor-perigo); }
+
+.grade-resumo-motoristas .card-resumo::after {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 21a8 8 0 0 0-16 0' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='7' r='4' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 21a8 8 0 0 0-16 0' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='7' r='4' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.grade-resumo-veiculos .card-resumo::after {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 17h4V5H2v12h3' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14 8h4l4 4v5h-3' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='7.5' cy='17.5' r='2.5' fill='none' stroke='black' stroke-width='2'/%3E%3Ccircle cx='16.5' cy='17.5' r='2.5' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 17h4V5H2v12h3' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14 8h4l4 4v5h-3' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='7.5' cy='17.5' r='2.5' fill='none' stroke='black' stroke-width='2'/%3E%3Ccircle cx='16.5' cy='17.5' r='2.5' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.grade-resumo-viagens .card-resumo::after {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='9' r='2.5' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='9' r='2.5' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.grade-resumo-despesas .card-resumo::after {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 7h16v12H4z' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M16 7V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M8 13h8' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 7h16v12H4z' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M16 7V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M8 13h8' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 }
 
 .rotulo-resumo {
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 800;
   color: var(--cor-texto-secundario);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
 }
 
 .valor-resumo {
   font-size: 1.75rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--cor-texto);
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -529,6 +698,15 @@ button {
   border: 1px solid var(--cor-borda);
   box-shadow: var(--sombra-suave);
   padding: 22px 24px;
+  overflow: hidden;
+  transition: border-color var(--transicao), box-shadow var(--transicao);
+}
+
+.painel:hover,
+.painel-formulario:hover,
+.painel-dados:hover {
+  border-color: var(--cor-borda-forte);
+  box-shadow: var(--sombra-media);
 }
 
 .cabecalho-painel {
@@ -592,7 +770,7 @@ button {
 .campo-filtro input,
 .campo-filtro select {
   border: 1px solid var(--cor-borda);
-  background: var(--cor-superficie-2);
+  background: var(--cor-superficie);
   padding: 9px 12px;
   border-radius: var(--raio);
   outline: none;
@@ -614,6 +792,8 @@ button {
 .tabela-responsiva {
   overflow-x: auto;
   border-radius: var(--raio);
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
 }
 
 table {
@@ -623,7 +803,7 @@ table {
 
 thead th {
   text-align: left;
-  padding: 10px 14px;
+  padding: 12px 14px;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--cor-texto-secundario);
@@ -631,11 +811,11 @@ thead th {
   letter-spacing: 0.04em;
   border-bottom: 1px solid var(--cor-borda);
   white-space: nowrap;
-  background: var(--cor-superficie-2);
+  background: #f8fafc;
 }
 
 tbody td {
-  padding: 14px 14px;
+  padding: 15px 14px;
   border-bottom: 1px solid var(--cor-borda);
   vertical-align: middle;
   font-size: 0.875rem;
@@ -650,7 +830,7 @@ tbody td {
 }
 
 .linha-tabela:hover {
-  background: var(--cor-superficie-2);
+  background: #f8fafc;
 }
 
 /* -------------------------------------------------------
@@ -672,8 +852,8 @@ tbody td {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--cor-primaria-clara);
-  color: var(--cor-primaria);
+  background: var(--cor-info-clara);
+  color: var(--cor-info);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -691,6 +871,21 @@ tbody td {
 .avatar-despesa {
   border-radius: var(--raio);
   font-size: 1rem;
+  background: var(--cor-perigo-clara);
+  color: var(--cor-perigo);
+}
+
+.avatar-motorista svg,
+.avatar-veiculo svg,
+.avatar-viagem svg,
+.avatar-despesa svg {
+  width: 19px;
+  height: 19px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .nome-motorista,
@@ -843,12 +1038,15 @@ tbody td {
   border: 1px solid var(--cor-borda);
   background: var(--cor-superficie);
   padding: 7px 9px;
-  border-radius: var(--raio-sm);
+  border-radius: var(--raio);
   cursor: pointer;
   transition: background var(--transicao), border-color var(--transicao);
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  color: var(--cor-texto);
+  font-weight: 600;
 }
 
 .botao-acao:hover {
@@ -879,7 +1077,8 @@ tbody td {
   border-radius: var(--raio);
   border: 1px solid var(--cor-borda);
   box-shadow: var(--sombra-suave);
-  padding: 24px 28px;
+  padding: 26px 30px;
+  transition: border-color var(--transicao), box-shadow var(--transicao);
 }
 
 .grade-formulario {
@@ -911,8 +1110,8 @@ tbody td {
 .grupo-campo textarea {
   width: 100%;
   border: 1px solid var(--cor-borda);
-  background: var(--cor-superficie-2);
-  padding: 10px 14px;
+  background: #fbfcfe;
+  padding: 12px 14px;
   border-radius: var(--raio);
   outline: none;
   font-size: 0.9rem;
@@ -925,7 +1124,7 @@ tbody td {
 .grupo-campo select:focus,
 .grupo-campo textarea:focus {
   border-color: var(--cor-primaria);
-  box-shadow: 0 0 0 3px rgba(29, 88, 232, 0.1);
+  box-shadow: 0 0 0 3px rgba(29, 88, 232, 0.13);
   background: var(--cor-superficie);
 }
 
@@ -1165,6 +1364,7 @@ tbody td {
   border: 1px solid var(--cor-borda);
   box-shadow: var(--sombra-suave);
   padding: 24px;
+  transition: border-color var(--transicao), box-shadow var(--transicao);
 }
 
 .grade-campos-info {

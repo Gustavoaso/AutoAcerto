@@ -43,6 +43,31 @@
   flex-shrink: 0;
 }
 
+.avatar-despesa.combustivel {
+  background: var(--cor-info-clara);
+  color: var(--cor-info);
+}
+
+.avatar-despesa.pedagio {
+  background: var(--cor-alerta-clara);
+  color: var(--cor-alerta);
+}
+
+.avatar-despesa.alimentacao {
+  background: var(--cor-sucesso-clara);
+  color: var(--cor-sucesso);
+}
+
+.avatar-despesa.manutencao {
+  background: var(--cor-perigo-clara);
+  color: var(--cor-perigo);
+}
+
+.avatar-despesa.outros {
+  background: var(--cor-roxo-clara);
+  color: var(--cor-roxo);
+}
+
 .nome-despesa {
   font-size: 0.875rem;
   font-weight: 600;

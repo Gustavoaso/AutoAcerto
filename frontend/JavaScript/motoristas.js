@@ -3,6 +3,21 @@ let motoristas = [];
 let motoristasVisiveis = [];
 let exclusaoMotoristas = null;
 
+function criarIconeMotoristaLista() {
+    return '<svg viewBox="0 0 24 24">' +
+        '<path d="M20 21a8 8 0 0 0-16 0" />' +
+        '<circle cx="12" cy="7" r="4" />' +
+    '</svg>';
+}
+
+function criarIconeVer() {
+    return '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>';
+}
+
+function criarIconeEditar() {
+    return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
+}
+
 async function carregarMotoristas() {
     try {
         const response = await fetch(urlApi, { headers: cabecalhosAutenticados() });
@@ -53,7 +68,7 @@ function renderizarTabela(listaMotoristas) {
             ${exclusaoMotoristas ? exclusaoMotoristas.colunaLinha(motorista.id) : ""}
             <td>
                 <div class="bloco-motorista">
-                    <div class="avatar-motorista">${obterIniciais(motorista.nome)}</div>
+                    <div class="avatar-motorista">${criarIconeMotoristaLista()}</div>
                     <div>
                         <div class="nome-motorista">${motorista.nome}</div>
                     </div>
@@ -65,8 +80,8 @@ function renderizarTabela(listaMotoristas) {
             <td>${criarSeloStatus(motorista.status)}</td>
             <td>
                 <div class="grupo-acoes">
-                    <button class="botao-acao" onclick="window.location.href='ver-motorista.html?id=${motorista.id}'">Ver</button>
-                    <button class="botao-acao" onclick="window.location.href='editar-motorista.html?id=${motorista.id}'">Editar</button>
+                    <button class="botao-acao" onclick="window.location.href='ver-motorista.html?id=${motorista.id}'">${criarIconeVer()}Ver</button>
+                    <button class="botao-acao" onclick="window.location.href='editar-motorista.html?id=${motorista.id}'">${criarIconeEditar()}Editar</button>
                 </div>
             </td>
         `;

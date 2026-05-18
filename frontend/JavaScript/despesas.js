@@ -4,6 +4,14 @@ let despesas = [];
 let despesasVisiveis = [];
 let exclusaoDespesas = null;
 
+function criarIconeVer() {
+    return '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>';
+}
+
+function criarIconeEditar() {
+    return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
+}
+
 async function carregarDespesas() {
     try {
         const response = await fetch(urlApiDespesas, { headers: cabecalhosAutenticados() });
@@ -38,11 +46,31 @@ function formatarData(dataISO) {
 }
 
 function criarIconeCategoria(categoria) {
-    if (categoria === "combustivel") return "C";
-    if (categoria === "pedagio") return "P";
-    if (categoria === "alimentacao") return "A";
-    if (categoria === "manutencao") return "M";
-    return "O";
+    if (categoria === "combustivel") {
+        return '<svg viewBox="0 0 24 24"><path d="M3 22V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v17" /><path d="M14 9h2.5a2.5 2.5 0 0 1 2.5 2.5V18a2 2 0 0 0 4 0v-7l-3-3" /><path d="M5 9h7" /></svg>';
+    }
+
+    if (categoria === "pedagio") {
+        return '<svg viewBox="0 0 24 24"><path d="M4 7h16" /><path d="M6 7v13" /><path d="M18 7v13" /><path d="M8 11h8" /><path d="M10 15h4" /><path d="M9 4h6" /></svg>';
+    }
+
+    if (categoria === "alimentacao") {
+        return '<svg viewBox="0 0 24 24"><path d="M4 3v7a4 4 0 0 0 4 4v7" /><path d="M8 3v18" /><path d="M12 3v18" /><path d="M20 3v18" /><path d="M16 3v7a4 4 0 0 0 4 4" /></svg>';
+    }
+
+    if (categoria === "manutencao") {
+        return '<svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5 5L3 18l3 3 6.7-6.7a4 4 0 0 0 5-5l-2.4 2.4-3-3Z" /></svg>';
+    }
+
+    return '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01" /><path d="M11 12h1v5h1" /></svg>';
+}
+
+function obterClasseCategoria(categoria) {
+    if (categoria === "combustivel") return "combustivel";
+    if (categoria === "pedagio") return "pedagio";
+    if (categoria === "alimentacao") return "alimentacao";
+    if (categoria === "manutencao") return "manutencao";
+    return "outros";
 }
 
 function formatarCategoria(categoria) {
@@ -102,7 +130,7 @@ function renderizarTabelaDespesas(listaDespesas) {
             ${exclusaoDespesas ? exclusaoDespesas.colunaLinha(despesa.id) : ""}
             <td>
                 <div class="bloco-despesa">
-                    <div class="avatar-despesa">${criarIconeCategoria(despesa.categoria)}</div>
+                    <div class="avatar-despesa ${obterClasseCategoria(despesa.categoria)}">${criarIconeCategoria(despesa.categoria)}</div>
                     <div>
                         <div class="nome-despesa">${despesa.descricao}</div>
                     </div>
@@ -120,8 +148,8 @@ function renderizarTabelaDespesas(listaDespesas) {
             <td class="valor-despesa">${formatarMoeda(despesa.valor)}</td>
             <td>
                 <div class="grupo-acoes">
-                    <button class="botao-acao" onclick="window.location.href='ver-despesa.html?id=${despesa.id}'">Ver</button>
-                    <button class="botao-acao" onclick="window.location.href='editar-despesa.html?id=${despesa.id}'">Editar</button>
+                    <button class="botao-acao" onclick="window.location.href='ver-despesa.html?id=${despesa.id}'">${criarIconeVer()}Ver</button>
+                    <button class="botao-acao" onclick="window.location.href='editar-despesa.html?id=${despesa.id}'">${criarIconeEditar()}Editar</button>
                 </div>
             </td>
         `;

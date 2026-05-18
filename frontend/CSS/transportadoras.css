@@ -33,14 +33,24 @@
   width: 36px;
   height: 36px;
   border-radius: var(--raio-sm);
-  background: var(--cor-primaria-clara);
-  color: var(--cor-primaria);
+  background: var(--cor-info-clara);
+  color: var(--cor-info);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 800;
   flex-shrink: 0;
+}
+
+.avatar-transportadora svg {
+  width: 19px;
+  height: 19px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .nome-transportadora {

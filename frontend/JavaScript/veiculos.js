@@ -4,6 +4,23 @@ let veiculosTodos = [];
 let veiculosVisiveis = [];
 let exclusaoVeiculos = null;
 
+function criarIconeVeiculoLista() {
+  return '<svg viewBox="0 0 24 24">' +
+    '<path d="M10 17h4V5H2v12h3" />' +
+    '<path d="M14 8h4l4 4v5h-3" />' +
+    '<circle cx="7.5" cy="17.5" r="2.5" />' +
+    '<circle cx="16.5" cy="17.5" r="2.5" />' +
+  '</svg>';
+}
+
+function criarIconeVer() {
+  return '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>';
+}
+
+function criarIconeEditar() {
+  return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
+}
+
 function criarSeloStatusVeiculo(status) {
   if (status === "ativo")       return '<span class="selo-status selo-ativo">Ativo</span>';
   if (status === "em viagem")   return '<span class="selo-status selo-em-viagem">Em viagem</span>';
@@ -40,7 +57,7 @@ function renderizarTabelaVeiculos(lista) {
       (exclusaoVeiculos ? exclusaoVeiculos.colunaLinha(veiculo.id) : "") +
       '<td>' +
         '<div class="bloco-veiculo">' +
-          '<div class="avatar-veiculo">🚛</div>' +
+          '<div class="avatar-veiculo">' + criarIconeVeiculoLista() + '</div>' +
           '<div>' +
             '<div class="nome-veiculo">' + veiculo.modelo + '</div>' +
           '</div>' +
@@ -51,8 +68,8 @@ function renderizarTabelaVeiculos(lista) {
       '<td>' + criarSeloStatusVeiculo(veiculo.status) + '</td>' +
       '<td>' +
         '<div class="grupo-acoes">' +
-          '<button class="botao-acao" onclick="irParaVerVeiculo(' + veiculo.id + ')">Ver</button>' +
-          '<button class="botao-acao" onclick="irParaEditarVeiculo(' + veiculo.id + ')">Editar</button>' +
+          '<button class="botao-acao" onclick="irParaVerVeiculo(' + veiculo.id + ')">' + criarIconeVer() + 'Ver</button>' +
+          '<button class="botao-acao" onclick="irParaEditarVeiculo(' + veiculo.id + ')">' + criarIconeEditar() + 'Editar</button>' +
         '</div>' +
       '</td>';
 
