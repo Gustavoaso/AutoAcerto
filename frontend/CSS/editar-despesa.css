@@ -9,3 +9,37 @@
 .formulario-despesa {
   width: 100%;
 }
+
+.grupo-tipo-despesa {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie-2);
+}
+
+.botao-tipo-despesa {
+  border: none;
+  border-radius: calc(var(--raio) - 2px);
+  padding: 10px 14px;
+  background: transparent;
+  color: var(--cor-texto-secundario);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transicao), color var(--transicao);
+}
+
+.botao-tipo-despesa.ativo {
+  background: var(--cor-primaria);
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .grupo-tipo-despesa {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

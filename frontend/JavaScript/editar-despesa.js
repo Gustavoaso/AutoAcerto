@@ -1,11 +1,13 @@
 const urlApiDespesas = montarUrlApi("/despesas");
 const urlApiViagens = montarUrlApi("/viagens");
+const urlApiVeiculos = montarUrlApi("/veiculos");
 
 const params = new URLSearchParams(window.location.search);
 const idDespesa = params.get("id");
 
 const modal = document.getElementById("modalSucesso");
 const botaoOk = document.getElementById("botaoOkModal");
+let tipoDespesaSelecionado = "viagem";
 
 async function carregarViagens(viagemIdSelecionada) {
     try {
@@ -30,6 +32,61 @@ async function carregarViagens(viagemIdSelecionada) {
     } catch (erro) {
         console.error("Erro ao carregar viagens:", erro);
     }
+}
+
+async function carregarVeiculos(veiculoIdSelecionado) {
+    try {
+        const response = await fetch(urlApiVeiculos,{ headers: cabecalhosAutenticados() });
+
+        if (!response.ok) return;
+
+        const veiculos = await response.json();
+        const selectVeiculo = document.getElementById("veiculoId");
+
+        veiculos.forEach(function (veiculo) {
+            const opcao = document.createElement("option");
+            opcao.value = veiculo.id;
+            opcao.textContent = veiculo.modelo + " - " + veiculo.placa;
+
+            if (String(veiculo.id) === String(veiculoIdSelecionado)) {
+                opcao.selected = true;
+            }
+
+            selectVeiculo.appendChild(opcao);
+        });
+    } catch (erro) {
+        console.error("Erro ao carregar veiculos:", erro);
+    }
+}
+
+function alternarTipoDespesa(tipo, limparCampos) {
+    tipoDespesaSelecionado = tipo;
+
+    const despesaViagem = tipo === "viagem";
+    document.getElementById("grupoViagemDespesa").classList.toggle("oculto", !despesaViagem);
+    document.getElementById("grupoVeiculoDespesa").classList.toggle("oculto", despesaViagem);
+    document.getElementById("viagemId").required = despesaViagem;
+    document.getElementById("veiculoId").required = !despesaViagem;
+
+    if (limparCampos !== false) {
+        if (despesaViagem) {
+            document.getElementById("veiculoId").value = "";
+        } else {
+            document.getElementById("viagemId").value = "";
+        }
+    }
+
+    document.querySelectorAll("[data-tipo-despesa]").forEach(function (botao) {
+        botao.classList.toggle("ativo", botao.dataset.tipoDespesa === tipo);
+    });
+}
+
+function configurarTipoDespesa() {
+    document.querySelectorAll("[data-tipo-despesa]").forEach(function (botao) {
+        botao.addEventListener("click", function () {
+            alternarTipoDespesa(botao.dataset.tipoDespesa);
+        });
+    });
 }
 
 function formatarDataParaInput(dataISO) {
@@ -70,6 +127,8 @@ async function carregarDespesa() {
         document.getElementById("observacoes").value = despesa.observacoes || "";
 
         await carregarViagens(despesa.viagem_id);
+        await carregarVeiculos(despesa.veiculo_id);
+        alternarTipoDespesa(despesa.tipo_despesa === "veiculo" ? "veiculo" : "viagem", false);
     } catch (erro) {
         console.error("Erro ao carregar despesa:", erro);
         alert("Erro de conexao com a API.");
@@ -88,7 +147,9 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
     }
 
     const dados = {
-        viagemId: document.getElementById("viagemId").value,
+        tipoDespesa: tipoDespesaSelecionado,
+        viagemId: tipoDespesaSelecionado === "viagem" ? document.getElementById("viagemId").value : null,
+        veiculoId: tipoDespesaSelecionado === "veiculo" ? document.getElementById("veiculoId").value : null,
         descricao: document.getElementById("descricao").value,
         categoria: document.getElementById("categoria").value,
         dataDespesa: document.getElementById("dataDespesa").value,
@@ -99,9 +160,7 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
     try {
         const response = await fetch(urlApiDespesas + "/" + idDespesa, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: cabecalhosAutenticados(),
             body: JSON.stringify(dados)
         });
 
@@ -126,8 +185,9 @@ document.getElementById("botaoCancelar").addEventListener("click", function () {
     window.location.href = "despesas.html";
 });
 
-document.querySelector(".botao-sair").addEventListener("click", function () {
-    alert("Saindo do sistema...");
-});
+if (typeof preencherInfoUsuario === "function") preencherInfoUsuario();
+if (typeof configurarBotaoSair === "function") configurarBotaoSair();
+if (typeof marcarItemMenuLateralAtivo === "function") marcarItemMenuLateralAtivo();
 
+configurarTipoDespesa();
 carregarDespesa();

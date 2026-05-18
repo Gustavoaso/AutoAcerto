@@ -91,7 +91,7 @@
     <main class="conteudo-principal">
       <header class="topo-pagina">
         <div class="acoes-topo">
-          <button class="botao-icone" type="button">??</button>
+          <button class="botao-icone" type="button">🔔</button>
           <div class="perfil-usuario">
             <div class="avatar-usuario">GS</div>
             <span class="nome-usuario">Gustavo</span>
@@ -108,10 +108,25 @@
 
       <section class="painel-formulario">
         <div id="formularioDespesa" class="formulario-despesa">
+          <div class="grupo-campo grupo-campo-largo">
+            <label>Tipo de despesa</label>
+            <div class="grupo-tipo-despesa">
+              <button type="button" class="botao-tipo-despesa ativo" data-tipo-despesa="viagem">Despesa de viagem</button>
+              <button type="button" class="botao-tipo-despesa" data-tipo-despesa="veiculo">Despesa do veículo</button>
+            </div>
+          </div>
+
           <div class="grade-formulario">
-            <div class="grupo-campo">
+            <div class="grupo-campo" id="grupoViagemDespesa">
               <label for="viagemId">Viagem</label>
               <select id="viagemId" name="viagemId" required>
+                <option value="">Selecione</option>
+              </select>
+            </div>
+
+            <div class="grupo-campo oculto" id="grupoVeiculoDespesa">
+              <label for="veiculoId">Veículo</label>
+              <select id="veiculoId" name="veiculoId">
                 <option value="">Selecione</option>
               </select>
             </div>
@@ -164,7 +179,7 @@
   <div id="modalSucesso" class="modal-sucesso oculto">
     <div class="fundo-modal-sucesso"></div>
     <div class="caixa-modal-sucesso">
-      <div class="icone-sucesso">âœ”</div>
+      <div class="icone-sucesso">✔</div>
       <h3>Despesa atualizada</h3>
       <p>As alteracoes foram salvas com sucesso.</p>
       <div class="acoes-modal-sucesso">

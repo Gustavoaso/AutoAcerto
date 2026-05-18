@@ -2,10 +2,10 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "banco.js",
+  "main": "servidor.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node servidor.js,",
+    "start": "node servidor.js",
     "dev": "node servidor.js"
   },
   "keywords": [],

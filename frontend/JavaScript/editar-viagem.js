@@ -98,6 +98,8 @@ async function carregarViagem() {
         document.getElementById("valorFrete").value = window.AutoAcertoMascaras
             ? window.AutoAcertoMascaras.aplicarMoeda(String(cent))
             : String(vf);
+        document.getElementById("kmInicial").value = viagem.km_inicial || "";
+        document.getElementById("kmFinal").value = viagem.km_final || "";
         document.getElementById("status").value = viagem.status;
         document.getElementById("observacoes").value = viagem.observacoes || "";
 
@@ -121,6 +123,19 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         return;
     }
 
+    const kmInicialNum = parseInt(document.getElementById("kmInicial").value, 10);
+    const kmFinalNum = parseInt(document.getElementById("kmFinal").value, 10);
+
+    if (isNaN(kmInicialNum) || kmInicialNum < 0 || isNaN(kmFinalNum) || kmFinalNum < 0) {
+        alert("Informe KM inicial e KM final validos.");
+        return;
+    }
+
+    if (kmFinalNum < kmInicialNum) {
+        alert("O KM final nao pode ser menor que o KM inicial.");
+        return;
+    }
+
     const dados = {
         origem: document.getElementById("origem").value,
         destino: document.getElementById("destino").value,
@@ -129,6 +144,8 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         dataSaida: document.getElementById("dataSaida").value,
         dataChegada: document.getElementById("dataChegada").value,
         valorFrete: valorFreteNum,
+        kmInicial: kmInicialNum,
+        kmFinal: kmFinalNum,
         status: document.getElementById("status").value,
         observacoes: document.getElementById("observacoes").value
     };
@@ -136,9 +153,7 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
     try {
         const response = await fetch(urlApiViagens + "/" + idViagem, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: cabecalhosAutenticados(),
             body: JSON.stringify(dados)
         });
 
@@ -162,5 +177,9 @@ botaoOk.addEventListener("click", function () {
 document.getElementById("botaoCancelar").addEventListener("click", function () {
     window.location.href = "viagens.html";
 });
+
+if (typeof preencherInfoUsuario === "function") preencherInfoUsuario();
+if (typeof configurarBotaoSair === "function") configurarBotaoSair();
+if (typeof marcarItemMenuLateralAtivo === "function") marcarItemMenuLateralAtivo();
 
 carregarViagem();

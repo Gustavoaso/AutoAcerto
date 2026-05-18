@@ -12,6 +12,10 @@ const DONO_SISTEMA_NOME  = process.env.DONO_SISTEMA_NOME  || "Dono AutoAcerto";
 const DONO_SISTEMA_EMAIL = process.env.DONO_SISTEMA_EMAIL || "dono@autoacerto.com";
 const DONO_SISTEMA_SENHA = process.env.DONO_SISTEMA_SENHA || "autoacerto123";
 
+if (!process.env.DONO_SISTEMA_SENHA && process.env.NODE_ENV === "production") {
+  console.warn("DONO_SISTEMA_SENHA nao configurada. Configure esta variavel no Railway antes de criar o usuario dono.");
+}
+
 banco.connect()
   .then(() => console.log("Banco de dados PostgreSQL conectado com sucesso."))
   .catch((erro) => console.error("Erro ao conectar no banco de dados:", erro.message));
@@ -137,31 +141,42 @@ async function garantirEstruturaMultiTransportadora() {
   await adicionarColunaTransportadora("despesas");
   await adicionarColunaTransportadora("usuarios");
 
-  // let resultadoTransportadora = await banco.query(`
-  //   SELECT id FROM transportadoras
-  //   WHERE nome = 'Transportadora Principal'
-  //   ORDER BY id
-  //   LIMIT 1
-  // `);
+  const registrosSemTransportadora = await banco.query(`
+    SELECT
+      (SELECT COUNT(*) FROM motoristas WHERE transportadora_id IS NULL) +
+      (SELECT COUNT(*) FROM veiculos WHERE transportadora_id IS NULL) +
+      (SELECT COUNT(*) FROM viagens WHERE transportadora_id IS NULL) +
+      (SELECT COUNT(*) FROM despesas WHERE transportadora_id IS NULL) +
+      (SELECT COUNT(*) FROM usuarios WHERE transportadora_id IS NULL AND perfil IS DISTINCT FROM 'dono') AS total
+  `);
 
-  // if (resultadoTransportadora.rows.length === 0) {
-  //   resultadoTransportadora = await banco.query(`
-  //     INSERT INTO transportadoras (nome, cnpj, ativo)
-  //     VALUES ('Transportadora Principal', NULL, TRUE)
-  //     RETURNING id
-  //   `);
-  // }
+  if (Number(registrosSemTransportadora.rows[0].total) > 0) {
+    let resultadoTransportadora = await banco.query(`
+      SELECT id FROM transportadoras
+      WHERE nome = 'Transportadora Principal'
+      ORDER BY id
+      LIMIT 1
+    `);
 
-  // const idTransportadoraPadrao = resultadoTransportadora.rows[0].id;
+    if (resultadoTransportadora.rows.length === 0) {
+      resultadoTransportadora = await banco.query(`
+        INSERT INTO transportadoras (nome, cnpj, ativo)
+        VALUES ('Transportadora Principal', NULL, TRUE)
+        RETURNING id
+      `);
+    }
 
-  // await banco.query("UPDATE motoristas SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
-  // await banco.query("UPDATE veiculos SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
-  // await banco.query("UPDATE viagens SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
-  // await banco.query("UPDATE despesas SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
-  // await banco.query(
-  //   "UPDATE usuarios SET transportadora_id=$1 WHERE transportadora_id IS NULL AND perfil IS DISTINCT FROM 'dono'",
-  //   [idTransportadoraPadrao]
-  // );
+    const idTransportadoraPadrao = resultadoTransportadora.rows[0].id;
+
+    await banco.query("UPDATE motoristas SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
+    await banco.query("UPDATE veiculos SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
+    await banco.query("UPDATE viagens SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
+    await banco.query("UPDATE despesas SET transportadora_id=$1 WHERE transportadora_id IS NULL", [idTransportadoraPadrao]);
+    await banco.query(
+      "UPDATE usuarios SET transportadora_id=$1 WHERE transportadora_id IS NULL AND perfil IS DISTINCT FROM 'dono'",
+      [idTransportadoraPadrao]
+    );
+  }
 
   await banco.query("ALTER TABLE motoristas ALTER COLUMN transportadora_id SET NOT NULL");
   await banco.query("ALTER TABLE veiculos ALTER COLUMN transportadora_id SET NOT NULL");

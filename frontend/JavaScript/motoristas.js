@@ -33,15 +33,6 @@ async function carregarMotoristas() {
     }
 }
 
-function obterIniciais(nomeCompleto) {
-    return nomeCompleto
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map(parte => parte[0].toUpperCase())
-        .join("");
-}
-
 function criarSeloStatus(status) {
     if (status === "ativo") {
         return '<span class="selo-status selo-ativo">Ativo</span>';

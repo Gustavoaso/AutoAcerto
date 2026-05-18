@@ -3,11 +3,20 @@ const express = require("express");
 const cors    = require("cors");
 const bcrypt  = require("bcryptjs");
 const jwt     = require("jsonwebtoken");
+const crypto  = require("crypto");
 const banco   = require("./banco");
 
 const app   = express();
 const porta = process.env.PORT || 3000;
-const SEGREDO_JWT = process.env.JWT_SECRET || "autoacerto_segredo_dev";
+const SEGREDO_JWT = process.env.JWT_SECRET || (
+  process.env.NODE_ENV === "production"
+    ? crypto.randomBytes(32).toString("hex")
+    : "autoacerto_segredo_dev"
+);
+
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === "production") {
+  console.warn("JWT_SECRET nao configurado. Tokens serao invalidados a cada reinicio.");
+}
 
 app.use(cors());
 app.use(express.json());
@@ -160,8 +169,6 @@ async function viagemPertenceTransportadora(viagemId, transportadoraId) {
 // ============================================================
 
 app.post("/auth/login", async (requisicao, resposta) => {
-
-  console.log("📥 Body recebido:", requisicao.body);
   const { email, senha } = requisicao.body;
 
   if (!email || !senha) {
@@ -1004,10 +1011,32 @@ app.get("/viagens/:id", autenticar, async (requisicao, resposta) => {
 
 app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
-  const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, status, observacoes } = requisicao.body;
+  const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
 
   if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || !status) {
-    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
+    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
+  }
+
+  let kmInicialNum = null;
+  let kmFinalNum = null;
+
+  if (kmInicial !== undefined && kmInicial !== null && kmInicial !== "") {
+    kmInicialNum = parseInt(kmInicial, 10);
+  }
+
+  if (kmFinal !== undefined && kmFinal !== null && kmFinal !== "") {
+    kmFinalNum = parseInt(kmFinal, 10);
+  }
+
+  if (
+    (kmInicialNum !== null && (!Number.isInteger(kmInicialNum) || kmInicialNum < 0)) ||
+    (kmFinalNum !== null && (!Number.isInteger(kmFinalNum) || kmFinalNum < 0))
+  ) {
+    return resposta.status(400).json({ mensagem: "Informe KM inicial e KM final validos." });
+  }
+
+  if (kmInicialNum !== null && kmFinalNum !== null && kmFinalNum < kmInicialNum) {
+    return resposta.status(400).json({ mensagem: "O KM final nao pode ser menor que o KM inicial." });
   }
 
   try {
@@ -1026,11 +1055,13 @@ app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
     const sql = `
       UPDATE viagens SET
         origem=$1, destino=$2, motorista_id=$3, veiculo_id=$4,
-        data_saida=$5, data_chegada=$6, valor_frete=$7, status=$8, observacoes=$9
-      WHERE id=$10 AND transportadora_id=$11
+        data_saida=$5, data_chegada=$6, valor_frete=$7,
+        km_inicial=COALESCE($8, km_inicial), km_final=COALESCE($9, km_final),
+        status=$10, observacoes=$11
+      WHERE id=$12 AND transportadora_id=$13
       RETURNING *
     `;
-    const valores = [origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, status, observacoes || "", id, transportadoraId];
+    const valores = [origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, status, observacoes || "", id, transportadoraId];
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
@@ -1185,10 +1216,19 @@ app.get("/despesas/:id", exigirAdminOuDono, async (requisicao, resposta) => {
 
 app.put("/despesas/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
-  const { viagemId, descricao, categoria, dataDespesa, valor } = requisicao.body;
+  const { tipoDespesa, viagemId, veiculoId, descricao, categoria, dataDespesa, valor } = requisicao.body;
+  const tipoDespesaFinal = tipoDespesa === "veiculo" ? "veiculo" : "viagem";
 
-  if (!viagemId || !descricao || !categoria || !dataDespesa || !valor) {
+  if (!descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
+  }
+
+  if (tipoDespesaFinal === "viagem" && !viagemId) {
+    return resposta.status(400).json({ mensagem: "Informe a viagem da despesa." });
+  }
+
+  if (tipoDespesaFinal === "veiculo" && !veiculoId) {
+    return resposta.status(400).json({ mensagem: "Informe o veiculo da despesa." });
   }
 
   try {
@@ -1197,19 +1237,31 @@ app.put("/despesas/:id", exigirAdmin, async (requisicao, resposta) => {
       return resposta.status(404).json({ mensagem: "Despesa nao encontrada." });
     }
 
-    const vr = await banco.query("SELECT transportadora_id FROM viagens WHERE id=$1", [viagemId]);
-    if (vr.rows.length === 0 || vr.rows[0].transportadora_id !== transportadoraId) {
-      return resposta.status(400).json({ mensagem: "Viagem invÃ¡lida para o escopo desta despesa." });
+    let viagemIdFinal = null;
+    let veiculoIdFinal = null;
+
+    if (tipoDespesaFinal === "viagem") {
+      const vr = await banco.query("SELECT transportadora_id FROM viagens WHERE id=$1", [viagemId]);
+      if (vr.rows.length === 0 || vr.rows[0].transportadora_id !== transportadoraId) {
+        return resposta.status(400).json({ mensagem: "Viagem invalida para o escopo desta despesa." });
+      }
+      viagemIdFinal = viagemId;
+    } else {
+      const veiculo = await banco.query("SELECT transportadora_id FROM veiculos WHERE id=$1", [veiculoId]);
+      if (veiculo.rows.length === 0 || veiculo.rows[0].transportadora_id !== transportadoraId) {
+        return resposta.status(400).json({ mensagem: "Veiculo invalido para o escopo desta despesa." });
+      }
+      veiculoIdFinal = veiculoId;
     }
 
     const sql = `
       UPDATE despesas SET
-        viagem_id=$1, descricao=$2, categoria=$3,
-        data_despesa=$4, valor=$5
-      WHERE id=$6 AND transportadora_id=$7
+        viagem_id=$1, veiculo_id=$2, tipo_despesa=$3,
+        descricao=$4, categoria=$5, data_despesa=$6, valor=$7
+      WHERE id=$8 AND transportadora_id=$9
       RETURNING *
     `;
-    const valores = [viagemId, descricao, categoria, dataDespesa, valor, id, transportadoraId];
+    const valores = [viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoria, dataDespesa, valor, id, transportadoraId];
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
