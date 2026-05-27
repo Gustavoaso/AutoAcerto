@@ -15,7 +15,7 @@
     function obterApiBase() {
         // === FORÇADO PARA PRODUÇÃO (Vercel) ===
         if (window.location.hostname.includes("vercel.app")) {
-            return "https://autoacerto-production.up.railway.app".replace(/\/+$/, "");  // ← Cole aqui sua URL do Railway
+            return "https://autoacerto-production-4174.up.railway.app".replace(/\/+$/, "");
         }
 
         // Prioridade normal (para desenvolvimento)
