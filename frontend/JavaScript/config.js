@@ -1,24 +1,25 @@
 // =============================================================
-// AUTOACERTO — CONFIGURAÇÃO GLOBAL (Vercel + Produção)
+// AUTOACERTO - CONFIGURACAO GLOBAL
 // =============================================================
 
 (function () {
     "use strict";
 
+    const API_BASE_DEPLOY = "https://autoacerto-production-4174.up.railway.app";
+    const HOSTS_FRONTEND_DEPLOY = [
+        "autoacerto.com.br",
+        "www.autoacerto.com.br"
+    ];
+
     /**
-     * Retorna a URL base da API respeitando prioridades
-     * 1. Variável global (Vercel / Produção)
+     * Retorna a URL base da API respeitando prioridades:
+     * 1. Variavel global
      * 2. Meta tag no HTML
-     * 3. localStorage (teste rápido)
-     * 4. window.location.origin (desenvolvimento local)
+     * 3. localStorage (teste rapido)
+     * 4. Dominios publicados do frontend
+     * 5. window.location.origin (desenvolvimento local)
      */
     function obterApiBase() {
-        // === FORÇADO PARA PRODUÇÃO (Vercel) ===
-        if (window.location.hostname.includes("vercel.app")) {
-            return "https://autoacerto-production-4174.up.railway.app".replace(/\/+$/, "");
-        }
-
-        // Prioridade normal (para desenvolvimento)
         if (window.AUTOACERTO_API_BASE_URL && String(window.AUTOACERTO_API_BASE_URL).trim()) {
             return String(window.AUTOACERTO_API_BASE_URL).trim().replace(/\/+$/, "");
         }
@@ -33,25 +34,26 @@
             return String(salva).trim().replace(/\/+$/, "");
         }
 
+        const hostname = window.location.hostname;
+        const estaNoDeploy = hostname.includes("vercel.app") || HOSTS_FRONTEND_DEPLOY.includes(hostname);
+        if (estaNoDeploy) {
+            return API_BASE_DEPLOY.replace(/\/+$/, "");
+        }
+
         return window.location.origin.replace(/\/+$/, "");
     }
 
-    /**
-     * Função principal usada em TODO o sistema
-     * Substitui todas as implementações anteriores de montarUrlApi
-     */
     window.montarUrlApi = function (endpoint) {
         const base = obterApiBase();
         const path = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
         return base + path;
     };
 
-    // Expõe também a função base caso precise em algum lugar específico
     window.obterApiBase = obterApiBase;
+    window.obterApiBaseUrl = obterApiBase;
 
-    // Log informativo (útil para debug)
     console.log(
-        "%c✅ AutoAcerto Config carregado → API Base: " + obterApiBase(),
+        "%cAutoAcerto Config carregado -> API Base: " + obterApiBase(),
         "color: #10b981; font-weight: 600;"
     );
 })();
