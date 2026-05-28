@@ -52,24 +52,28 @@ function renderizarTabelaVeiculos(lista) {
   lista.forEach(function (veiculo) {
     const linha = document.createElement("tr");
     linha.classList.add("linha-tabela");
+    const idVeiculo = Number(veiculo.id);
+    const modeloVeiculo = window.AutoAcertoHtml.texto(veiculo.modelo, "-");
+    const placaVeiculo = window.AutoAcertoHtml.texto(formatarPlacaExibicao(veiculo.placa), "-");
+    const anoVeiculo = window.AutoAcertoHtml.texto(veiculo.ano, "—");
 
     linha.innerHTML =
-      (exclusaoVeiculos ? exclusaoVeiculos.colunaLinha(veiculo.id) : "") +
+      (exclusaoVeiculos ? exclusaoVeiculos.colunaLinha(idVeiculo) : "") +
       '<td>' +
         '<div class="bloco-veiculo">' +
           '<div class="avatar-veiculo">' + criarIconeVeiculoLista() + '</div>' +
           '<div>' +
-            '<div class="nome-veiculo">' + veiculo.modelo + '</div>' +
+            '<div class="nome-veiculo">' + modeloVeiculo + '</div>' +
           '</div>' +
         '</div>' +
       '</td>' +
-      '<td>' + formatarPlacaExibicao(veiculo.placa) + '</td>' +
-      '<td>' + (veiculo.ano || '—') + '</td>' +
+      '<td>' + placaVeiculo + '</td>' +
+      '<td>' + anoVeiculo + '</td>' +
       '<td>' + criarSeloStatusVeiculo(veiculo.status) + '</td>' +
       '<td>' +
         '<div class="grupo-acoes">' +
-          '<button class="botao-acao" onclick="irParaVerVeiculo(' + veiculo.id + ')">' + criarIconeVer() + 'Ver</button>' +
-          '<button class="botao-acao" onclick="irParaEditarVeiculo(' + veiculo.id + ')">' + criarIconeEditar() + 'Editar</button>' +
+          '<button class="botao-acao" onclick="irParaVerVeiculo(' + idVeiculo + ')">' + criarIconeVer() + 'Ver</button>' +
+          '<button class="botao-acao" onclick="irParaEditarVeiculo(' + idVeiculo + ')">' + criarIconeEditar() + 'Editar</button>' +
         '</div>' +
       '</td>';
 

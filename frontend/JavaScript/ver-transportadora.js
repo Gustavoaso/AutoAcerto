@@ -1,5 +1,5 @@
-// =============================================================
-// AUTOACERTO — VER TRANSPORTADORA
+﻿// =============================================================
+// AUTOACERTO â€” VER TRANSPORTADORA
 // =============================================================
 
 const urlApiTransportadoras = montarUrlApi("/transportadoras");
@@ -10,7 +10,7 @@ function obterParametroUrl(nome) {
 }
 
 function formatarDataTransportadora(dataISO) {
-    if (!dataISO) return "—";
+    if (!dataISO) return "â€”";
     const data = new Date(dataISO);
     const dia = String(data.getDate()).padStart(2, "0");
     const mes = String(data.getMonth() + 1).padStart(2, "0");
@@ -34,7 +34,7 @@ function exibirToastTransportadora(mensagem, tipo) {
 async function carregarDetalhesTransportadora() {
     const id = obterParametroUrl("id");
     if (!id) {
-        exibirToastTransportadora("ID da transportadora não informado.", "erro");
+        exibirToastTransportadora("ID da transportadora nÃ£o informado.", "erro");
         setTimeout(() => window.location.href = "transportadoras.html", 2000);
         return;
     }
@@ -51,13 +51,16 @@ async function carregarDetalhesTransportadora() {
         renderizarDetalhes(transportadora);
     } catch (erro) {
         console.error("Erro ao carregar detalhes:", erro.message);
-        exibirToastTransportadora("Erro de conexão com o servidor.", "erro");
+        exibirToastTransportadora("Erro de conexÃ£o com o servidor.", "erro");
     }
 }
 
 function renderizarDetalhes(t) {
     const container = document.getElementById("containerDetalhes");
     if (!container) return;
+    const nomeTransportadora = window.AutoAcertoHtml.texto(t.nome, "-");
+    const cnpjTransportadora = window.AutoAcertoHtml.texto(t.cnpj, "Não informado");
+    const totalAdmins = Number(t.total_admins || 0);
 
     const seloStatus = t.ativo
         ? '<span class="selo-status selo-ativo">Ativa</span>'
@@ -66,11 +69,11 @@ function renderizarDetalhes(t) {
     container.innerHTML = `
         <div class="linha-info">
             <span class="rotulo-info">Nome:</span>
-            <span class="valor-info">${t.nome}</span>
+            <span class="valor-info">${nomeTransportadora}</span>
         </div>
         <div class="linha-info">
             <span class="rotulo-info">CNPJ:</span>
-            <span class="valor-info">${t.cnpj || "Não informado"}</span>
+            <span class="valor-info">${cnpjTransportadora}</span>
         </div>
         <div class="linha-info">
             <span class="rotulo-info">Status:</span>
@@ -82,7 +85,7 @@ function renderizarDetalhes(t) {
         </div>
         <div class="linha-info">
             <span class="rotulo-info">Total de administradores:</span>
-            <span class="valor-info">${t.total_admins || 0}</span>
+            <span class="valor-info">${totalAdmins}</span>
         </div>
     `;
 }
@@ -92,7 +95,9 @@ document.getElementById("botaoVoltar").addEventListener("click", function () {
 });
 
 document.getElementById("botaoEditar").addEventListener("click", function () {
-    window.location.href = "editar-viagem.html?id=" + idViagem;
+    const id = obterParametroUrl("id");
+    window.location.href = "editar-transportadora.html?id=" + id;
 });
 
 document.addEventListener("DOMContentLoaded", carregarDetalhesTransportadora);
+

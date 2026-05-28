@@ -101,6 +101,28 @@ function cabecalhosAutenticados() {
     };
 }
 
+function escaparHtml(valor) {
+    return String(valor ?? "").replace(/[&<>"']/g, function (caractere) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        }[caractere];
+    });
+}
+
+function textoHtmlSeguro(valor, fallback) {
+    const texto = valor === undefined || valor === null || valor === "" ? fallback : valor;
+    return escaparHtml(texto === undefined || texto === null ? "" : texto);
+}
+
+window.AutoAcertoHtml = {
+    escapar: escaparHtml,
+    texto: textoHtmlSeguro
+};
+
 // ==================== UI E MENU ====================
 
 function preencherInfoUsuario() {

@@ -10,10 +10,12 @@ const banco = new Pool({
 
 const DONO_SISTEMA_NOME  = process.env.DONO_SISTEMA_NOME  || "Dono AutoAcerto";
 const DONO_SISTEMA_EMAIL = process.env.DONO_SISTEMA_EMAIL || "dono@autoacerto.com";
-const DONO_SISTEMA_SENHA = process.env.DONO_SISTEMA_SENHA || "autoacerto123";
+const DONO_SISTEMA_SENHA = process.env.DONO_SISTEMA_SENHA || (
+  process.env.NODE_ENV === "production" ? null : "autoacerto123"
+);
 
 if (!process.env.DONO_SISTEMA_SENHA && process.env.NODE_ENV === "production") {
-  console.warn("DONO_SISTEMA_SENHA nao configurada. Configure esta variavel no Railway antes de criar o usuario dono.");
+  console.warn("DONO_SISTEMA_SENHA nao configurada. O usuario dono nao sera criado automaticamente em producao.");
 }
 
 banco.connect()
@@ -109,6 +111,20 @@ async function criarTabelas() {
   await garantirEstruturaVeiculos();
   await garantirEstruturaViagens();
   await garantirEstruturaDespesas();
+  await criarIndices();
+}
+
+async function criarIndices() {
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_motoristas_transportadora ON motoristas(transportadora_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_veiculos_transportadora ON veiculos(transportadora_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_viagens_transportadora ON viagens(transportadora_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_viagens_motorista ON viagens(motorista_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_viagens_veiculo ON viagens(veiculo_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_despesas_transportadora ON despesas(transportadora_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_despesas_viagem ON despesas(viagem_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_despesas_veiculo ON despesas(veiculo_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_usuarios_transportadora ON usuarios(transportadora_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_usuarios_motorista ON usuarios(motorista_id)");
 }
 
 async function garantirEstruturaVeiculos() {
@@ -208,6 +224,11 @@ async function criarUsuarioDonoSistema() {
   const resultado = await banco.query("SELECT id FROM usuarios WHERE perfil='dono' LIMIT 1");
   if (resultado.rows.length > 0) {
     await banco.query("UPDATE usuarios SET transportadora_id=NULL, motorista_id=NULL WHERE perfil='dono'");
+    return;
+  }
+
+  if (!DONO_SISTEMA_SENHA) {
+    console.warn("Usuario dono nao criado: configure DONO_SISTEMA_SENHA no ambiente.");
     return;
   }
 

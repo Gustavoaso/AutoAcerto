@@ -121,35 +121,41 @@ function renderizarTabelaDespesas(listaDespesas) {
     listaDespesas.forEach(function (despesa) {
         const linha = document.createElement("tr");
         linha.classList.add("linha-tabela");
+        const idDespesa = Number(despesa.id);
 
         const nomeViagem = despesa.origem && despesa.destino
             ? despesa.origem + " -> " + despesa.destino
             : "Fora de viagem";
+        const descricaoDespesa = window.AutoAcertoHtml.texto(despesa.descricao, "-");
+        const nomeViagemSeguro = window.AutoAcertoHtml.texto(nomeViagem, "-");
+        const motoristaDespesa = window.AutoAcertoHtml.texto(despesa.motorista_nome, "-");
+        const modeloVeiculo = window.AutoAcertoHtml.texto(despesa.veiculo_modelo, "-");
+        const placaVeiculo = window.AutoAcertoHtml.texto(despesa.veiculo_placa, "");
 
         linha.innerHTML = `
-            ${exclusaoDespesas ? exclusaoDespesas.colunaLinha(despesa.id) : ""}
+            ${exclusaoDespesas ? exclusaoDespesas.colunaLinha(idDespesa) : ""}
             <td>
                 <div class="bloco-despesa">
                     <div class="avatar-despesa ${obterClasseCategoria(despesa.categoria)}">${criarIconeCategoria(despesa.categoria)}</div>
                     <div>
-                        <div class="nome-despesa">${despesa.descricao}</div>
+                        <div class="nome-despesa">${descricaoDespesa}</div>
                     </div>
                 </div>
             </td>
-            <td>${nomeViagem}</td>
-            <td>${despesa.motorista_nome || "-"}</td>
+            <td>${nomeViagemSeguro}</td>
+            <td>${motoristaDespesa}</td>
             <td>
-                ${despesa.veiculo_modelo || "-"}
+                ${modeloVeiculo}
                 <br>
-                <span class="texto-secundario">${despesa.veiculo_placa || ""}</span>
+                <span class="texto-secundario">${placaVeiculo}</span>
             </td>
             <td>${criarSeloCategoria(despesa.categoria)}</td>
             <td>${formatarData(despesa.data_despesa)}</td>
             <td class="valor-despesa">${formatarMoeda(despesa.valor)}</td>
             <td>
                 <div class="grupo-acoes">
-                    <button class="botao-acao" onclick="window.location.href='ver-despesa.html?id=${despesa.id}'">${criarIconeVer()}Ver</button>
-                    <button class="botao-acao" onclick="window.location.href='editar-despesa.html?id=${despesa.id}'">${criarIconeEditar()}Editar</button>
+                    <button class="botao-acao" onclick="window.location.href='ver-despesa.html?id=${idDespesa}'">${criarIconeVer()}Ver</button>
+                    <button class="botao-acao" onclick="window.location.href='editar-despesa.html?id=${idDespesa}'">${criarIconeEditar()}Editar</button>
                 </div>
             </td>
         `;

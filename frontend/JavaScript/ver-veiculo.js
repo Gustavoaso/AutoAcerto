@@ -58,7 +58,7 @@ async function carregarVeiculo() {
       "manutenção": ["selo-manutencao", "Manutenção"],
       "inativo":    ["selo-inativo",    "Inativo"]
     };
-    const [classe, texto] = statusMap[veiculo.status] || ["selo-inativo", veiculo.status];
+    const [classe, texto] = statusMap[veiculo.status] || ["selo-inativo", "Inativo"];
     statusEl.innerHTML = '<span class="selo-status ' + classe + '">' + texto + '</span>';
 
   } catch (error) {

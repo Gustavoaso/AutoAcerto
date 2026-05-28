@@ -292,6 +292,9 @@ function carregarViagensEmAndamento() {
   viagensEmAndamento.forEach(function (viagem) {
     const itemViagem = document.createElement("div");
     itemViagem.classList.add("item-viagem");
+    const origemViagem = window.AutoAcertoHtml.texto(viagem.origem, "-");
+    const destinoViagem = window.AutoAcertoHtml.texto(viagem.destino, "-");
+    const motoristaViagem = window.AutoAcertoHtml.texto(viagem.motorista_nome, "-");
 
     itemViagem.innerHTML = `
       <div class="icone-viagem-andamento">
@@ -301,8 +304,8 @@ function carregarViagensEmAndamento() {
         </svg>
       </div>
       <div>
-        <div class="rota-viagem">${viagem.origem} -> ${viagem.destino}</div>
-        <div class="nome-motorista">${viagem.motorista_nome || "-"}</div>
+        <div class="rota-viagem">${origemViagem} -> ${destinoViagem}</div>
+        <div class="nome-motorista">${motoristaViagem}</div>
       </div>
       <div class="meta-viagem">
         <span class="data-viagem">${formatarData(viagem.data_saida)}</span>

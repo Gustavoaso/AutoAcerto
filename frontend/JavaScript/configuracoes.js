@@ -1,6 +1,6 @@
-// =============================================================
-// AUTOACERTO ? CONFIGURAÃ‡Ã•ES
-// Gerenciamento de perfil, usuÃ¡rios (admin) e seguranÃ§a.
+﻿// =============================================================
+// AUTOACERTO ? CONFIGURAÃƒâ€¡Ãƒâ€¢ES
+// Gerenciamento de perfil, usuÃƒÂ¡rios (admin) e seguranÃƒÂ§a.
 // =============================================================
 
 const urlApiUsuarios = montarUrlApi("/usuarios");
@@ -11,7 +11,7 @@ let usuariosVisiveis = [];
 let exclusaoUsuarios = null;
 
 // -------------------------------------------------------
-// SESSÃƒO
+// SESSÃƒÆ’O
 // -------------------------------------------------------
 
 function iniciarSessaoConfiguracoes() {
@@ -78,7 +78,7 @@ function configurarFormularioPerfil(usuario) {
 
   document.getElementById("formularioPerfil").addEventListener("submit", function (evento) {
     evento.preventDefault();
-    exibirToast("Funcionalidade disponÃ­vel em breve.", "info");
+    exibirToast("Funcionalidade disponÃƒÂ­vel em breve.", "info");
   });
 }
 
@@ -88,7 +88,7 @@ function preencherTransportadoraPerfil(usuario) {
     if (usuario.perfil === "dono") {
       textoTransportadora.textContent = "Acesso global (sem transportadora fixa)";
     } else {
-      textoTransportadora.textContent = usuario.transportadora_nome || "Transportadora nÃ£o informada";
+      textoTransportadora.textContent = usuario.transportadora_nome || "Transportadora nÃƒÂ£o informada";
     }
   }
 }
@@ -118,18 +118,18 @@ function preencherTipoPerfil(usuario) {
 }
 
 // -------------------------------------------------------
-// GERENCIAR USUÃRIOS (apenas admin)
+// GERENCIAR USUÃƒÂRIOS (apenas admin)
 // -------------------------------------------------------
 
 async function carregarUsuarios() {
   try {
     const resposta = await fetch(urlApiUsuarios, { headers: cabecalhosAutenticados() });
-    if (!resposta.ok) throw new Error("Erro ao buscar usuÃ¡rios.");
+    if (!resposta.ok) throw new Error("Erro ao buscar usuÃƒÂ¡rios.");
     listaUsuarios = await resposta.json();
     usuariosVisiveis = listaUsuarios;
     renderizarTabelaUsuarios(listaUsuarios);
   } catch (erro) {
-    console.error("Erro ao carregar usuÃ¡rios:", erro.message);
+    console.error("Erro ao carregar usuÃƒÂ¡rios:", erro.message);
   }
 }
 
@@ -140,7 +140,7 @@ function renderizarTabelaUsuarios(lista) {
   corpo.innerHTML = "";
 
   if (lista.length === 0) {
-    corpo.innerHTML = '<tr><td colspan="6" class="celula-vazia">Nenhum usuário cadastrado.</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="6" class="celula-vazia">Nenhum usuÃ¡rio cadastrado.</td></tr>';
     if (exclusaoUsuarios) exclusaoUsuarios.aposRender([]);
     return;
   }
@@ -149,6 +149,11 @@ function renderizarTabelaUsuarios(lista) {
   lista.forEach(function (usuario) {
     const linha = document.createElement("tr");
     linha.classList.add("linha-tabela");
+    const idUsuario = Number(usuario.id);
+    const nomeUsuario = window.AutoAcertoHtml.texto(usuario.nome, "-");
+    const emailUsuario = window.AutoAcertoHtml.texto(usuario.email, "-");
+    const transportadoraUsuario = window.AutoAcertoHtml.texto(usuario.transportadora_nome, "");
+    const motoristaUsuario = window.AutoAcertoHtml.texto(usuario.motorista_nome, "-");
 
     const seloAtivo = usuario.ativo
       ?'<span class="selo-status selo-ativo">Ativo</span>'
@@ -165,28 +170,28 @@ function renderizarTabelaUsuarios(lista) {
       usuario.perfil === "dono"
         ? '<td class="coluna-selecao"></td>'
         : exclusaoUsuarios
-          ? exclusaoUsuarios.colunaLinha(usuario.id)
+          ? exclusaoUsuarios.colunaLinha(idUsuario)
           : "";
 
     const botoesAcao =
       usuario.perfil === "dono"
         ? ""
-        : `<button class="botao-acao" type="button" data-editar-usuario="${usuario.id}">Editar</button>`;
+        : `<button class="botao-acao" type="button" data-editar-usuario="${idUsuario}">Editar</button>`;
 
     linha.innerHTML = `
             ${celulaSelecao}
             <td>
                 <div class="bloco-usuario-nome">
-                    <div class="avatar-mini">${obterIniciaisNome(usuario.nome)}</div>
+                    <div class="avatar-mini">${obterIniciaisNome(nomeUsuario)}</div>
                     <div>
-                        <div class="nome-usuario-tabela">${usuario.nome}</div>
-                        <div class="texto-secundario">${usuario.email}</div>
-                        ${usuario.transportadora_nome ? `<div class="texto-secundario">${usuario.transportadora_nome}</div>` : ""}
+                        <div class="nome-usuario-tabela">${nomeUsuario}</div>
+                        <div class="texto-secundario">${emailUsuario}</div>
+                        ${transportadoraUsuario ? `<div class="texto-secundario">${transportadoraUsuario}</div>` : ""}
                     </div>
                 </div>
             </td>
             <td>${seloPerfil}</td>
-            <td>${usuario.perfil === "dono" ? "—" : (usuario.motorista_nome || "—")}</td>
+            <td>${usuario.perfil === "dono" ? "-" : motoristaUsuario}</td>
             <td>${seloAtivo}</td>
             <td>
                 <div class="grupo-acoes">
@@ -225,15 +230,15 @@ function configurarExclusaoUsuarios() {
     seletorTabela: ".tabela",
     seletorLinhas: "[data-selecionar-id]",
     seletorSelecionarTodos: "[data-selecionar-todos-usuarios]",
-    singular: "usuário",
-    plural: "usuários",
+    singular: "usuÃ¡rio",
+    plural: "usuÃ¡rios",
     renderizarAtual: function () { renderizarTabelaUsuarios(usuariosVisiveis); },
     aoExcluir: carregarUsuarios
   });
 }
 
 // -------------------------------------------------------
-// SEGURANÃ‡A
+// SEGURANÃƒâ€¡A
 // -------------------------------------------------------
 
 function configurarFormularioSenha() {
@@ -255,7 +260,7 @@ function configurarFormularioSenha() {
     }
 
     if (novaSenha !== confirmar) {
-      exibirToast("As senhas nÃ£o conferem.", "erro");
+      exibirToast("As senhas nÃƒÂ£o conferem.", "erro");
       return;
     }
 
@@ -277,7 +282,7 @@ function configurarFormularioSenha() {
       document.getElementById("formularioSenha").reset();
     } catch (erro) {
       console.error("Erro ao alterar senha:", erro.message);
-      exibirToast("Erro de conexÃ£o com o servidor.", "erro");
+      exibirToast("Erro de conexÃƒÂ£o com o servidor.", "erro");
     }
   });
 }
@@ -300,8 +305,9 @@ function exibirToast(mensagem, tipo) {
 }
 
 // -------------------------------------------------------
-// INICIALIZAÃ‡ÃƒO
+// INICIALIZAÃƒâ€¡ÃƒÆ’O
 // -------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", iniciarSessaoConfiguracoes);
+
 

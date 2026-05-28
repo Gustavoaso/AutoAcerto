@@ -1,4 +1,4 @@
-const urlApiViagens = montarUrlApi("/viagens");
+﻿const urlApiViagens = montarUrlApi("/viagens");
 
 let viagens = [];
 let viagensVisiveis = [];
@@ -32,7 +32,7 @@ async function carregarViagens() {
         atualizarResumoViagens();
         renderizarTabelaViagens(viagens);
     } catch (erro) {
-        console.error("Erro de conexão com a API:", erro);
+        console.error("Erro de conexÃ£o com a API:", erro);
     }
 }
 
@@ -44,7 +44,7 @@ function formatarMoeda(valor) {
 }
 
 function formatarData(dataISO) {
-    if (!dataISO) return "—";
+    if (!dataISO) return "â€”";
     const data = new Date(dataISO);
     const dia = String(data.getUTCDate()).padStart(2, "0");
     const mes = String(data.getUTCMonth() + 1).padStart(2, "0");
@@ -87,22 +87,28 @@ function renderizarTabelaViagens(listaViagens) {
     listaViagens.forEach(function (viagem) {
         const linha = document.createElement("tr");
         linha.classList.add("linha-tabela");
+        const idViagem = Number(viagem.id);
+        const origemViagem = window.AutoAcertoHtml.texto(viagem.origem, "-");
+        const destinoViagem = window.AutoAcertoHtml.texto(viagem.destino, "-");
+        const motoristaViagem = window.AutoAcertoHtml.texto(viagem.motorista_nome, "—");
+        const modeloVeiculo = window.AutoAcertoHtml.texto(viagem.veiculo_modelo, "—");
+        const placaVeiculo = window.AutoAcertoHtml.texto(viagem.veiculo_placa, "");
 
         linha.innerHTML = `
-            ${exclusaoViagens ? exclusaoViagens.colunaLinha(viagem.id) : ""}
+            ${exclusaoViagens ? exclusaoViagens.colunaLinha(idViagem) : ""}
             <td>
                 <div class="bloco-viagem">
                     <div class="avatar-viagem">${criarIconeViagemLista()}</div>
                     <div>
-                        <div class="nome-rota">${viagem.origem} → ${viagem.destino}</div>
+                        <div class="nome-rota">${origemViagem} &rarr; ${destinoViagem}</div>
                     </div>
                 </div>
             </td>
-            <td>${viagem.motorista_nome || "—"}</td>
+            <td>${motoristaViagem}</td>
             <td>
-                ${viagem.veiculo_modelo || "—"}
+                ${modeloVeiculo}
                 <br>
-                <span class="texto-secundario">${viagem.veiculo_placa || ""}</span>
+                <span class="texto-secundario">${placaVeiculo}</span>
             </td>
             <td>${formatarData(viagem.data_saida)}</td>
             <td>${formatarData(viagem.data_chegada)}</td>
@@ -110,8 +116,8 @@ function renderizarTabelaViagens(listaViagens) {
             <td>${criarSeloStatusViagem(viagem.status)}</td>
             <td>
                 <div class="grupo-acoes">
-                    <button class="botao-acao" onclick="window.location.href='ver-viagem.html?id=${viagem.id}'">${criarIconeVer()}Ver</button>
-                    ${podeEditar ? `<button class="botao-acao" onclick="window.location.href='editar-viagem.html?id=${viagem.id}'">${criarIconeEditar()}Editar</button>` : ""}
+                    <button class="botao-acao" onclick="window.location.href='ver-viagem.html?id=${idViagem}'">${criarIconeVer()}Ver</button>
+                    ${podeEditar ? `<button class="botao-acao" onclick="window.location.href='editar-viagem.html?id=${idViagem}'">${criarIconeEditar()}Editar</button>` : ""}
                 </div>
             </td>
         `;

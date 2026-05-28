@@ -54,25 +54,30 @@ function renderizarTabela(listaMotoristas) {
     listaMotoristas.forEach(function (motorista) {
         const linha = document.createElement("tr");
         linha.classList.add("linha-tabela");
+        const idMotorista = Number(motorista.id);
+        const nomeMotorista = window.AutoAcertoHtml.texto(motorista.nome, "-");
+        const cpfMotorista = window.AutoAcertoHtml.texto(motorista.cpf, "-");
+        const telefoneMotorista = window.AutoAcertoHtml.texto(motorista.telefone, "-");
+        const cnhMotorista = window.AutoAcertoHtml.texto(motorista.cnh, "-");
 
         linha.innerHTML = `
-            ${exclusaoMotoristas ? exclusaoMotoristas.colunaLinha(motorista.id) : ""}
+            ${exclusaoMotoristas ? exclusaoMotoristas.colunaLinha(idMotorista) : ""}
             <td>
                 <div class="bloco-motorista">
                     <div class="avatar-motorista">${criarIconeMotoristaLista()}</div>
                     <div>
-                        <div class="nome-motorista">${motorista.nome}</div>
+                        <div class="nome-motorista">${nomeMotorista}</div>
                     </div>
                 </div>
             </td>
-            <td>${motorista.cpf}</td>
-            <td>${motorista.telefone}</td>
-            <td>${motorista.cnh}</td>
+            <td>${cpfMotorista}</td>
+            <td>${telefoneMotorista}</td>
+            <td>${cnhMotorista}</td>
             <td>${criarSeloStatus(motorista.status)}</td>
             <td>
                 <div class="grupo-acoes">
-                    <button class="botao-acao" onclick="window.location.href='ver-motorista.html?id=${motorista.id}'">${criarIconeVer()}Ver</button>
-                    <button class="botao-acao" onclick="window.location.href='editar-motorista.html?id=${motorista.id}'">${criarIconeEditar()}Editar</button>
+                    <button class="botao-acao" onclick="window.location.href='ver-motorista.html?id=${idMotorista}'">${criarIconeVer()}Ver</button>
+                    <button class="botao-acao" onclick="window.location.href='editar-motorista.html?id=${idMotorista}'">${criarIconeEditar()}Editar</button>
                 </div>
             </td>
         `;

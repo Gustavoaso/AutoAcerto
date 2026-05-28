@@ -8,6 +8,29 @@ const banco   = require("./banco");
 
 const app   = express();
 const porta = process.env.PORT || 3000;
+const corsOriginsConfigurado = Boolean(process.env.CORS_ORIGINS);
+const origensPermitidas = (process.env.CORS_ORIGINS || [
+  "https://autoacerto.com.br",
+  "https://www.autoacerto.com.br",
+  "http://localhost:3000",
+  "http://localhost:5500",
+  "http://127.0.0.1:5500"
+].join(","))
+  .split(",")
+  .map((origem) => origem.trim())
+  .filter(Boolean);
+
+function origemCorsPermitida(origem) {
+  if (origensPermitidas.includes(origem)) return true;
+  if (corsOriginsConfigurado) return false;
+
+  try {
+    const host = new URL(origem).hostname;
+    return host.endsWith(".vercel.app");
+  } catch (erro) {
+    return false;
+  }
+}
 const SEGREDO_JWT = process.env.JWT_SECRET || (
   process.env.NODE_ENV === "production"
     ? crypto.randomBytes(32).toString("hex")
@@ -18,8 +41,21 @@ if (!process.env.JWT_SECRET && process.env.NODE_ENV === "production") {
   console.warn("JWT_SECRET nao configurado. Tokens serao invalidados a cada reinicio.");
 }
 
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: function (origem, callback) {
+    if (!origem || origemCorsPermitida(origem)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Origem nao permitida pelo CORS."));
+  }
+}));
+app.use(express.json({ limit: "1mb" }));
+app.use(function normalizarEntrada(requisicao, resposta, proximo) {
+  if (requisicao.body && typeof requisicao.body === "object") {
+    requisicao.body = normalizarCorpoEntrada(requisicao.body);
+  }
+  proximo();
+});
 app.use("/frontend", express.static(path.join(__dirname, "..", "frontend")));
 
 app.get("/", (requisicao, resposta) => {
@@ -139,6 +175,38 @@ function placeholderIds(ids, inicio) {
   return ids.map((_, indice) => "$" + (inicio + indice)).join(", ");
 }
 
+function normalizarCorpoEntrada(valor, chave) {
+  if (Array.isArray(valor)) {
+    return valor.map((item) => normalizarCorpoEntrada(item, chave));
+  }
+
+  if (valor && typeof valor === "object") {
+    return Object.fromEntries(
+      Object.entries(valor).map(([nomeCampo, conteudo]) => [
+        nomeCampo,
+        normalizarCorpoEntrada(conteudo, nomeCampo)
+      ])
+    );
+  }
+
+  if (typeof valor === "string") {
+    if (String(chave || "").toLowerCase().includes("senha")) {
+      return valor;
+    }
+    return valor.trim().slice(0, 5000);
+  }
+
+  return valor;
+}
+
+function normalizarEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function emailValido(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || ""));
+}
+
 async function motoristaPertenceTransportadora(motoristaId, transportadoraId) {
   if (!motoristaId) return true;
   const resultado = await banco.query(
@@ -170,9 +238,14 @@ async function viagemPertenceTransportadora(viagemId, transportadoraId) {
 
 app.post("/auth/login", async (requisicao, resposta) => {
   const { email, senha } = requisicao.body;
+  const emailNormalizado = normalizarEmail(email);
 
-  if (!email || !senha) {
+  if (!emailNormalizado || !senha) {
     return resposta.status(400).json({ mensagem: "Informe e-mail e senha." });
+  }
+
+  if (!emailValido(emailNormalizado)) {
+    return resposta.status(400).json({ mensagem: "Informe um e-mail valido." });
   }
 
   try {
@@ -184,7 +257,7 @@ app.post("/auth/login", async (requisicao, resposta) => {
       LEFT JOIN transportadoras t ON u.transportadora_id = t.id
       WHERE u.email = $1
     `;
-    const resultado = await banco.query(sql, [email]);
+    const resultado = await banco.query(sql, [emailNormalizado]);
 
     if (resultado.rows.length === 0) {
       return resposta.status(401).json({ mensagem: "E-mail ou senha invÃ¡lidos." });
@@ -219,7 +292,7 @@ app.post("/auth/login", async (requisicao, resposta) => {
       usuario: payload
     });
   } catch (erro) {
-    console.log("Erro no login:", erro.message);
+    console.error("Erro no login:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao processar login." });
   }
 });
@@ -421,9 +494,18 @@ app.get("/usuarios/:id", exigirAdminOuDono, async (requisicao, resposta) => {
 
 app.post("/usuarios", exigirAdmin, async (requisicao, resposta) => {
   const { nome, email, senha, perfil, motorista_id, ativo } = requisicao.body;
+  const emailNormalizado = normalizarEmail(email);
 
-  if (!nome || !email || !senha || !perfil) {
+  if (!nome || !emailNormalizado || !senha || !perfil) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
+  }
+
+  if (!emailValido(emailNormalizado)) {
+    return resposta.status(400).json({ mensagem: "Informe um e-mail valido." });
+  }
+
+  if (String(senha).length < 8) {
+    return resposta.status(400).json({ mensagem: "A senha deve ter pelo menos 8 caracteres." });
   }
 
   if (perfil !== "admin" && perfil !== "motorista") {
@@ -453,7 +535,7 @@ app.post("/usuarios", exigirAdmin, async (requisicao, resposta) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING id
     `;
-    const valores = [transportadoraId, nome, email, senhaHash, perfil, motorista_id || null, ativo !== false];
+    const valores = [transportadoraId, nome, emailNormalizado, senhaHash, perfil, motorista_id || null, ativo !== false];
     const resultado = await banco.query(sql, valores);
 
     return resposta.status(201).json({
@@ -472,13 +554,18 @@ app.post("/usuarios", exigirAdmin, async (requisicao, resposta) => {
 app.put("/usuarios/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { nome, email, motorista_id, ativo } = requisicao.body;
+  const emailNormalizado = normalizarEmail(email);
   const donoSistema = usuarioEhDonoSistema(requisicao);
 
-  if (!nome || !email) {
+  if (!nome || !emailNormalizado) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   try {
+    if (!emailValido(emailNormalizado)) {
+      return resposta.status(400).json({ mensagem: "Informe um e-mail valido." });
+    }
+
     let usuarioAtual;
     if (donoSistema) {
       usuarioAtual = await banco.query(
@@ -521,13 +608,13 @@ app.put("/usuarios/:id", exigirAdmin, async (requisicao, resposta) => {
         UPDATE usuarios SET nome=$1, email=$2, motorista_id=$3, ativo=$4
         WHERE id=$5 RETURNING id
       `;
-      valores = [nome, email, motoristaIdFinal || null, ativo !== false, id];
+      valores = [nome, emailNormalizado, motoristaIdFinal || null, ativo !== false, id];
     } else {
       sql = `
         UPDATE usuarios SET nome=$1, email=$2, motorista_id=$3, ativo=$4
         WHERE id=$5 AND transportadora_id=$6 RETURNING id
       `;
-      valores = [nome, email, motoristaIdFinal || null, ativo !== false, id, transportadoraAlvo];
+      valores = [nome, emailNormalizado, motoristaIdFinal || null, ativo !== false, id, transportadoraAlvo];
     }
     const resultado = await banco.query(sql, valores);
 
@@ -550,6 +637,10 @@ app.patch("/usuarios/senha", autenticar, async (requisicao, resposta) => {
 
   if (!senhaAtual || !novaSenha) {
     return resposta.status(400).json({ mensagem: "Informe a senha atual e a nova senha." });
+  }
+
+  if (String(novaSenha).length < 8) {
+    return resposta.status(400).json({ mensagem: "A nova senha deve ter pelo menos 8 caracteres." });
   }
 
   try {

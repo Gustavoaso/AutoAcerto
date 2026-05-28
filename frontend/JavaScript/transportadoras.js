@@ -80,29 +80,33 @@ function renderizarTabelaTransportadoras(lista) {
     lista.forEach(function (transportadora) {
         const linha = document.createElement("tr");
         linha.classList.add("linha-tabela");
+        const idTransportadora = Number(transportadora.id);
+        const nomeTransportadora = window.AutoAcertoHtml.texto(transportadora.nome, "-");
+        const cnpjTransportadora = window.AutoAcertoHtml.texto(transportadora.cnpj, "—");
+        const totalAdmins = Number(transportadora.total_admins || 0);
 
         const seloStatus = transportadora.ativo
             ?'<span class="selo-status selo-ativo">Ativa</span>'
             : '<span class="selo-status selo-inativo">Inativa</span>';
 
         linha.innerHTML = `
-            ${exclusaoTransportadoras ? exclusaoTransportadoras.colunaLinha(transportadora.id) : ""}
+            ${exclusaoTransportadoras ? exclusaoTransportadoras.colunaLinha(idTransportadora) : ""}
             <td>
                 <div class="bloco-transportadora">
                     <div class="avatar-transportadora">${criarIconeTransportadoraLista()}</div>
                     <div>
-                        <div class="nome-transportadora">${transportadora.nome}</div>
+                        <div class="nome-transportadora">${nomeTransportadora}</div>
                         <div class="texto-secundario">Criada em ${formatarDataTransportadora(transportadora.data_cadastro)}</div>
                     </div>
                 </div>
             </td>
-            <td>${transportadora.cnpj || "—"}</td>
-            <td>${transportadora.total_admins || 0}</td>
+            <td>${cnpjTransportadora}</td>
+            <td>${totalAdmins}</td>
             <td>${seloStatus}</td>
             <td>
                 <div class="grupo-acoes">
-                    <button class="botao-acao" onclick="window.location.href='ver-transportadora.html?id=${transportadora.id}'">${criarIconeVer()}Ver</button>
-                    <button class="botao-acao" onclick="window.location.href='editar-transportadora.html?id=${transportadora.id}'">${criarIconeEditar()}Editar</button>
+                    <button class="botao-acao" onclick="window.location.href='ver-transportadora.html?id=${idTransportadora}'">${criarIconeVer()}Ver</button>
+                    <button class="botao-acao" onclick="window.location.href='editar-transportadora.html?id=${idTransportadora}'">${criarIconeEditar()}Editar</button>
                 </div>
             </td>
         `;

@@ -173,6 +173,11 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
         const frete = Number(viagem.valor_frete || 0);
         const totalDespesasViagem = somarDespesasDaViagem(viagem.id);
         const lucro = frete - totalDespesasViagem;
+        const origemViagem = window.AutoAcertoHtml.texto(viagem.origem, "-");
+        const destinoViagem = window.AutoAcertoHtml.texto(viagem.destino, "-");
+        const motoristaViagem = window.AutoAcertoHtml.texto(viagem.motorista_nome, "-");
+        const modeloVeiculo = window.AutoAcertoHtml.texto(viagem.veiculo_modelo, "-");
+        const placaVeiculo = window.AutoAcertoHtml.texto(viagem.veiculo_placa, "");
 
         totalReceita += frete;
         totalDespesasGeral += totalDespesasViagem;
@@ -187,14 +192,14 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
                 <div class="bloco-viagem">
                     <div class="avatar-viagem">${criarIconeViagemLista()}</div>
                     <div>
-                        <div class="nome-rota">${viagem.origem} → ${viagem.destino}</div>
+                        <div class="nome-rota">${origemViagem} &rarr; ${destinoViagem}</div>
                     </div>
                 </div>
             </td>
-            <td>${viagem.motorista_nome || "-"}</td>
+            <td>${motoristaViagem}</td>
             <td>
-                ${viagem.veiculo_modelo || "-"}<br>
-                <span class="texto-secundario">${viagem.veiculo_placa || ""}</span>
+                ${modeloVeiculo}<br>
+                <span class="texto-secundario">${placaVeiculo}</span>
             </td>
             <td>${formatarData(viagem.data_saida)}</td>
             <td>${formatarMoeda(frete)}</td>
@@ -213,6 +218,8 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
 
         totalDespesasGeral += totalDespesasForaViagem;
         const veiculoForaViagem = obterResumoVeiculosDespesas(despesasForaDeViagem);
+        const modeloForaViagem = window.AutoAcertoHtml.texto(veiculoForaViagem.modelo, "-");
+        const placaForaViagem = window.AutoAcertoHtml.texto(veiculoForaViagem.placa, "");
 
         const linhaForaViagem = document.createElement("tr");
         linhaForaViagem.classList.add("linha-tabela");
@@ -228,9 +235,9 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
             </td>
             <td>-</td>
             <td>
-                ${veiculoForaViagem.modelo}
+                ${modeloForaViagem}
                 <br>
-                <span class="texto-secundario">${veiculoForaViagem.placa}</span>
+                <span class="texto-secundario">${placaForaViagem}</span>
             </td>
             <td>-</td>
             <td>${formatarMoeda(0)}</td>
@@ -307,12 +314,13 @@ function renderizarTabelaCategorias(listaViagens, despesasForaDeViagem) {
         const percentual = totalGeral > 0
             ? ((valorCategoria / totalGeral) * 100).toFixed(1)
             : "0.0";
+        const nomeCategoria = window.AutoAcertoHtml.texto(formatarNomeCategoria(categoria), "-");
 
         const linha = document.createElement("tr");
         linha.classList.add("linha-tabela");
 
         linha.innerHTML = `
-            <td style="font-weight: 500;">${formatarNomeCategoria(categoria)}</td>
+            <td style="font-weight: 500;">${nomeCategoria}</td>
             <td>${qtd}</td>
             <td>${formatarMoeda(valorCategoria)}</td>
             <td>${percentual}%</td>
