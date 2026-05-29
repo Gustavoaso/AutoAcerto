@@ -3,7 +3,8 @@ const express = require("express");
 const cors    = require("cors");
 const bcrypt  = require("bcryptjs");
 const jwt     = require("jsonwebtoken");
-const crypto  = require("crypto");
+const helmet  = require("helmet");
+const rateLimit = require("express-rate-limit");
 const banco   = require("./banco");
 const {
   STATUS_MOTORISTA,
@@ -21,7 +22,7 @@ const {
 
 const app   = express();
 const porta = process.env.PORT || 3000;
-const corsOriginsConfigurado = Boolean(process.env.CORS_ORIGINS);
+const ambienteProducao = process.env.NODE_ENV === "production";
 const origensPermitidas = (process.env.CORS_ORIGINS || [
   "https://autoacerto.com.br",
   "https://www.autoacerto.com.br",
@@ -35,24 +36,36 @@ const origensPermitidas = (process.env.CORS_ORIGINS || [
 
 function origemCorsPermitida(origem) {
   if (origensPermitidas.includes(origem)) return true;
-  if (corsOriginsConfigurado) return false;
-
-  try {
-    const host = new URL(origem).hostname;
-    return host.endsWith(".vercel.app");
-  } catch (erro) {
-    return false;
-  }
+  return false;
 }
-const SEGREDO_JWT = process.env.JWT_SECRET || (
-  process.env.NODE_ENV === "production"
-    ? crypto.randomBytes(32).toString("hex")
-    : "autoacerto_segredo_dev"
-);
 
-if (!process.env.JWT_SECRET && process.env.NODE_ENV === "production") {
-  console.warn("JWT_SECRET nao configurado. Tokens serao invalidados a cada reinicio.");
+if (!process.env.JWT_SECRET && ambienteProducao) {
+  throw new Error("JWT_SECRET precisa estar configurado em producao.");
 }
+
+const SEGREDO_JWT = process.env.JWT_SECRET || "autoacerto_segredo_dev";
+
+app.set("trust proxy", 1);
+app.disable("x-powered-by");
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
+
+const limitadorLogin = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { mensagem: "Muitas tentativas de login. Aguarde alguns minutos e tente novamente." }
+});
+
+const limitadorSenha = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { mensagem: "Muitas tentativas de alteracao de senha. Aguarde alguns minutos e tente novamente." }
+});
 
 app.use(cors({
   origin: function (origem, callback) {
@@ -229,7 +242,7 @@ async function viagemPertenceTransportadora(viagemId, transportadoraId) {
 // AUTH - LOGIN
 // ============================================================
 
-app.post("/auth/login", async (requisicao, resposta) => {
+app.post("/auth/login", limitadorLogin, async (requisicao, resposta) => {
   const { email, senha } = requisicao.body;
   const emailNormalizado = normalizarEmail(email);
 
@@ -346,9 +359,21 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
     emailUsuario,
     senhaUsuario
   } = requisicao.body;
+  const nomeTransportadoraTratado = String(nomeTransportadora || "").trim();
+  const nomeUsuarioTratado = String(nomeUsuario || "").trim();
+  const emailUsuarioNormalizado = normalizarEmail(emailUsuario);
+  const cnpjTratado = cnpj ? String(cnpj).trim() : null;
 
-  if (!nomeTransportadora || !nomeUsuario || !emailUsuario || !senhaUsuario) {
+  if (!nomeTransportadoraTratado || !nomeUsuarioTratado || !emailUsuarioNormalizado) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
+  }
+
+  if (!emailValido(emailUsuarioNormalizado)) {
+    return resposta.status(400).json({ mensagem: "Informe um e-mail valido para o administrador." });
+  }
+
+  if (String(senhaUsuario).length < 8) {
+    return resposta.status(400).json({ mensagem: "A senha do administrador deve ter pelo menos 8 caracteres." });
   }
 
   const cliente = await banco.connect();
@@ -360,7 +385,7 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
       INSERT INTO transportadoras (nome, cnpj, ativo)
       VALUES ($1, $2, TRUE)
       RETURNING id
-    `, [nomeTransportadora, cnpj || null]);
+    `, [nomeTransportadoraTratado, cnpjTratado]);
 
     const transportadoraId = resultadoTransportadora.rows[0].id;
     const senhaHash = await bcrypt.hash(senhaUsuario, 10);
@@ -369,7 +394,7 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
       INSERT INTO usuarios (transportadora_id, nome, email, senha_hash, perfil, motorista_id, ativo)
       VALUES ($1, $2, $3, $4, 'admin', NULL, TRUE)
       RETURNING id
-    `, [transportadoraId, nomeUsuario, emailUsuario, senhaHash]);
+    `, [transportadoraId, nomeUsuarioTratado, emailUsuarioNormalizado, senhaHash]);
 
     await cliente.query("COMMIT");
 
@@ -624,7 +649,7 @@ app.put("/usuarios/:id", exigirAdmin, async (requisicao, resposta) => {
     return resposta.status(500).json({ mensagem: "Erro ao atualizar usuário." });
   }
 });
-app.patch("/usuarios/senha", autenticar, async (requisicao, resposta) => {
+app.patch("/usuarios/senha", limitadorSenha, autenticar, async (requisicao, resposta) => {
   const { senhaAtual, novaSenha } = requisicao.body;
   const idUsuario = requisicao.usuario.id;
 
