@@ -11,13 +11,20 @@ const banco = new Pool({
 const DONO_SISTEMA_NOME  = process.env.DONO_SISTEMA_NOME  || "Dono AutoAcerto";
 const DONO_SISTEMA_EMAIL = process.env.DONO_SISTEMA_EMAIL || "dono@autoacerto.com";
 
-// A senha do dono do sistema é obrigatória. Sem ela, o servidor não sobe para evitar credenciais fracas ou indefinidas.
-if (!process.env.DONO_SISTEMA_SENHA) {
-  throw new Error(
-    "DONO_SISTEMA_SENHA não configurada. Defina a variável de ambiente no arquivo .env antes de iniciar o servidor."
-  );
+// No desenvolvimento, exigimos a senha do dono para garantir que o ambiente seja configurado de forma segura.
+// Em produção, se o banco já estiver seeded (com o usuário dono criado), a senha não é necessária no startup.
+// Portanto, se não for produção e não estiver configurada, lançamos um erro. Se for produção, apenas emitimos um alerta.
+const DONO_SISTEMA_SENHA = process.env.DONO_SISTEMA_SENHA || null;
+
+if (!DONO_SISTEMA_SENHA) {
+  if (process.env.NODE_ENV === "production") {
+    console.warn("⚠️ AVISO: DONO_SISTEMA_SENHA não configurada. O usuário dono não será criado automaticamente se não existir.");
+  } else {
+    throw new Error(
+      "DONO_SISTEMA_SENHA não configurada no .env. Configure esta variável de ambiente para que o sistema possa subir de forma segura no desenvolvimento."
+    );
+  }
 }
-const DONO_SISTEMA_SENHA = process.env.DONO_SISTEMA_SENHA;
 
 banco.connect()
   .then(() => console.log("Banco de dados PostgreSQL conectado com sucesso."))
