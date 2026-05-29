@@ -32,7 +32,7 @@ async function carregarViagens() {
         atualizarResumoViagens();
         renderizarTabelaViagens(viagens);
     } catch (erro) {
-        console.error("Erro de conexÃ£o com a API:", erro);
+        console.error("Erro de conexão com a API:", erro);
     }
 }
 
@@ -44,7 +44,7 @@ function formatarMoeda(valor) {
 }
 
 function formatarData(dataISO) {
-    if (!dataISO) return "â€”";
+    if (!dataISO) return "-";
     const data = new Date(dataISO);
     const dia = String(data.getUTCDate()).padStart(2, "0");
     const mes = String(data.getUTCMonth() + 1).padStart(2, "0");

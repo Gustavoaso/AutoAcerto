@@ -1,5 +1,5 @@
 ﻿// =============================================================
-// AUTOACERTO â€” VER TRANSPORTADORA
+// AUTOACERTO - VER TRANSPORTADORA
 // =============================================================
 
 const urlApiTransportadoras = montarUrlApi("/transportadoras");
@@ -10,7 +10,7 @@ function obterParametroUrl(nome) {
 }
 
 function formatarDataTransportadora(dataISO) {
-    if (!dataISO) return "â€”";
+    if (!dataISO) return "-";
     const data = new Date(dataISO);
     const dia = String(data.getDate()).padStart(2, "0");
     const mes = String(data.getMonth() + 1).padStart(2, "0");
@@ -34,7 +34,7 @@ function exibirToastTransportadora(mensagem, tipo) {
 async function carregarDetalhesTransportadora() {
     const id = obterParametroUrl("id");
     if (!id) {
-        exibirToastTransportadora("ID da transportadora nÃ£o informado.", "erro");
+        exibirToastTransportadora("ID da transportadora não informado.", "erro");
         setTimeout(() => window.location.href = "transportadoras.html", 2000);
         return;
     }
@@ -51,7 +51,7 @@ async function carregarDetalhesTransportadora() {
         renderizarDetalhes(transportadora);
     } catch (erro) {
         console.error("Erro ao carregar detalhes:", erro.message);
-        exibirToastTransportadora("Erro de conexÃ£o com o servidor.", "erro");
+        exibirToastTransportadora("Erro de conexão com o servidor.", "erro");
     }
 }
 

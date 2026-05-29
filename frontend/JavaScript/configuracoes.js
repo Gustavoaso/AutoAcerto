@@ -1,6 +1,6 @@
 ﻿// =============================================================
-// AUTOACERTO ? CONFIGURAÃƒâ€¡Ãƒâ€¢ES
-// Gerenciamento de perfil, usuÃƒÂ¡rios (admin) e seguranÃƒÂ§a.
+// AUTOACERTO - CONFIGURAÇÕES
+// Gerenciamento de perfil, usuários (admin) e segurança.
 // =============================================================
 
 const urlApiUsuarios = montarUrlApi("/usuarios");
@@ -11,7 +11,7 @@ let usuariosVisiveis = [];
 let exclusaoUsuarios = null;
 
 // -------------------------------------------------------
-// SESSÃƒÆ’O
+// SESSÃO
 // -------------------------------------------------------
 
 function iniciarSessaoConfiguracoes() {
@@ -78,7 +78,7 @@ function configurarFormularioPerfil(usuario) {
 
   document.getElementById("formularioPerfil").addEventListener("submit", function (evento) {
     evento.preventDefault();
-    exibirToast("Funcionalidade disponÃƒÂ­vel em breve.", "info");
+    exibirToast("Funcionalidade disponível em breve.", "info");
   });
 }
 
@@ -88,7 +88,7 @@ function preencherTransportadoraPerfil(usuario) {
     if (usuario.perfil === "dono") {
       textoTransportadora.textContent = "Acesso global (sem transportadora fixa)";
     } else {
-      textoTransportadora.textContent = usuario.transportadora_nome || "Transportadora nÃƒÂ£o informada";
+      textoTransportadora.textContent = usuario.transportadora_nome || "Transportadora não informada";
     }
   }
 }
@@ -118,18 +118,18 @@ function preencherTipoPerfil(usuario) {
 }
 
 // -------------------------------------------------------
-// GERENCIAR USUÃƒÂRIOS (apenas admin)
+// GERENCIAR USUÁRIOS (apenas admin)
 // -------------------------------------------------------
 
 async function carregarUsuarios() {
   try {
     const resposta = await fetch(urlApiUsuarios, { headers: cabecalhosAutenticados() });
-    if (!resposta.ok) throw new Error("Erro ao buscar usuÃƒÂ¡rios.");
+    if (!resposta.ok) throw new Error("Erro ao buscar usuários.");
     listaUsuarios = await resposta.json();
     usuariosVisiveis = listaUsuarios;
     renderizarTabelaUsuarios(listaUsuarios);
   } catch (erro) {
-    console.error("Erro ao carregar usuÃƒÂ¡rios:", erro.message);
+    console.error("Erro ao carregar usuários:", erro.message);
   }
 }
 
@@ -140,7 +140,7 @@ function renderizarTabelaUsuarios(lista) {
   corpo.innerHTML = "";
 
   if (lista.length === 0) {
-    corpo.innerHTML = '<tr><td colspan="6" class="celula-vazia">Nenhum usuÃ¡rio cadastrado.</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="6" class="celula-vazia">Nenhum usuário cadastrado.</td></tr>';
     if (exclusaoUsuarios) exclusaoUsuarios.aposRender([]);
     return;
   }
@@ -230,15 +230,15 @@ function configurarExclusaoUsuarios() {
     seletorTabela: ".tabela",
     seletorLinhas: "[data-selecionar-id]",
     seletorSelecionarTodos: "[data-selecionar-todos-usuarios]",
-    singular: "usuÃ¡rio",
-    plural: "usuÃ¡rios",
+    singular: "usuário",
+    plural: "usuários",
     renderizarAtual: function () { renderizarTabelaUsuarios(usuariosVisiveis); },
     aoExcluir: carregarUsuarios
   });
 }
 
 // -------------------------------------------------------
-// SEGURANÃƒâ€¡A
+// SEGURANÇA
 // -------------------------------------------------------
 
 function configurarFormularioSenha() {
@@ -260,7 +260,7 @@ function configurarFormularioSenha() {
     }
 
     if (novaSenha !== confirmar) {
-      exibirToast("As senhas nÃƒÂ£o conferem.", "erro");
+      exibirToast("As senhas não conferem.", "erro");
       return;
     }
 
@@ -282,7 +282,7 @@ function configurarFormularioSenha() {
       document.getElementById("formularioSenha").reset();
     } catch (erro) {
       console.error("Erro ao alterar senha:", erro.message);
-      exibirToast("Erro de conexÃƒÂ£o com o servidor.", "erro");
+      exibirToast("Erro de conexão com o servidor.", "erro");
     }
   });
 }
@@ -305,7 +305,7 @@ function exibirToast(mensagem, tipo) {
 }
 
 // -------------------------------------------------------
-// INICIALIZAÃƒâ€¡ÃƒÆ’O
+// INICIALIZAÇÃO
 // -------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", iniciarSessaoConfiguracoes);
