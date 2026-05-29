@@ -62,8 +62,12 @@ app.get("/", (requisicao, resposta) => {
   resposta.json({ mensagem: "API AutoAcerto funcionando." });
 });
 
+app.get("/health", (requisicao, resposta) => {
+  resposta.json({ status: "ok" });
+});
+
 // ============================================================
-// MIDDLEWARE ? AUTENTICAÃ‡ÃƒO
+// MIDDLEWARE - AUTENTICACAO
 // ============================================================
 
 function autenticar(requisicao, resposta, proximo) {
@@ -205,6 +209,27 @@ function normalizarEmail(email) {
 
 function emailValido(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || ""));
+}
+
+const STATUS_MOTORISTA = new Set(["ativo", "inativo"]);
+const STATUS_VEICULO = new Set(["ativo", "inativo", "em viagem", "manutencao", "manutenção"]);
+const STATUS_VIAGEM = new Set(["em andamento", "finalizada", "cancelada"]);
+const CATEGORIAS_DESPESA = new Set(["combustivel", "pedagio", "alimentacao", "manutencao", "outros"]);
+const TIPOS_DESPESA = new Set(["viagem", "veiculo"]);
+
+function normalizarStatus(status) {
+  return String(status || "").trim().toLowerCase();
+}
+
+function valorMonetarioValido(valor) {
+  const numero = Number(valor);
+  return Number.isFinite(numero) && numero > 0;
+}
+
+function dataValida(data) {
+  if (!data) return false;
+  const timestamp = Date.parse(data);
+  return Number.isFinite(timestamp);
 }
 
 async function motoristaPertenceTransportadora(motoristaId, transportadoraId) {
@@ -355,7 +380,7 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
   } = requisicao.body;
 
   if (!nomeTransportadora || !nomeUsuario || !emailUsuario || !senhaUsuario) {
-    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
+    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   const cliente = await banco.connect();
@@ -483,7 +508,7 @@ app.get("/usuarios/:id", exigirAdminOuDono, async (requisicao, resposta) => {
     }
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "UsuÃ¡rio nÃ£o encontrado." });
+      return resposta.status(404).json({ mensagem: "Usuário não encontrado." });
     }
     return resposta.json(resultado.rows[0]);
   } catch (erro) {
@@ -558,7 +583,7 @@ app.put("/usuarios/:id", exigirAdmin, async (requisicao, resposta) => {
   const donoSistema = usuarioEhDonoSistema(requisicao);
 
   if (!nome || !emailNormalizado) {
-    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
+    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
   }
 
   try {
@@ -580,7 +605,7 @@ app.put("/usuarios/:id", exigirAdmin, async (requisicao, resposta) => {
     }
 
     if (usuarioAtual.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "Usuário não encontrado." });
+      return resposta.status(404).json({ mensagem: "UsuÃ¡rio nÃ£o encontrado." });
     }
 
     const perfilAtual = usuarioAtual.rows[0].perfil;
@@ -677,9 +702,14 @@ app.patch("/usuarios/senha", autenticar, async (requisicao, resposta) => {
 
 app.post("/motoristas", exigirAdmin, async (requisicao, resposta) => {
   const { nome, cpf, telefone, cnh, status } = requisicao.body;
+  const statusTratado = normalizarStatus(status);
 
   if (!nome || !cpf || !telefone || !cnh || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
+  }
+
+  if (!STATUS_MOTORISTA.has(statusTratado)) {
+    return resposta.status(400).json({ mensagem: "Status de motorista invalido." });
   }
 
   try {
@@ -694,7 +724,7 @@ app.post("/motoristas", exigirAdmin, async (requisicao, resposta) => {
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id
     `;
-    const valores = [transportadoraId, nome, cpf, telefone, cnh, status];
+    const valores = [transportadoraId, nome, cpf, telefone, cnh, statusTratado];
 
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Motorista cadastrado com sucesso.", id: resultado.rows[0].id });
@@ -767,9 +797,14 @@ app.get("/motoristas/:id", exigirAdminOuDono, async (requisicao, resposta) => {
 app.put("/motoristas/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { nome, cpf, telefone, cnh, status } = requisicao.body;
+  const statusTratado = normalizarStatus(status);
 
   if (!nome || !cpf || !telefone || !cnh || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
+  }
+
+  if (!STATUS_MOTORISTA.has(statusTratado)) {
+    return resposta.status(400).json({ mensagem: "Status de motorista invalido." });
   }
 
   try {
@@ -784,7 +819,7 @@ app.put("/motoristas/:id", exigirAdmin, async (requisicao, resposta) => {
       WHERE id=$6 AND transportadora_id=$7
       RETURNING *
     `;
-    const valores = [nome, cpf, telefone, cnh, status, id, transportadoraId];
+    const valores = [nome, cpf, telefone, cnh, statusTratado, id, transportadoraId];
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
@@ -809,7 +844,7 @@ app.post("/veiculos", exigirAdmin, async (req, res) => {
 
   const modeloTratado = (modelo || "").trim();
   const placaTratada = (placa || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7);
-  const statusTratado = (status || "").trim();
+  const statusTratado = normalizarStatus(status);
   let anoTratado = null;
   if (ano !== undefined && ano !== null && String(ano).trim() !== "") {
     const n = parseInt(String(ano), 10);
@@ -823,6 +858,18 @@ app.post("/veiculos", exigirAdmin, async (req, res) => {
     if (!placaTratada) pendentes.push("placa");
     if (!statusTratado) pendentes.push("status");
     return res.status(400).json({ mensagem: "Preencha os campos obrigatorios: " + pendentes.join(", ") + "." });
+  }
+
+  if (placaTratada.length !== 7) {
+    return res.status(400).json({ mensagem: "Informe uma placa valida com 7 caracteres." });
+  }
+
+  if (!STATUS_VEICULO.has(statusTratado)) {
+    return res.status(400).json({ mensagem: "Status de veiculo invalido." });
+  }
+
+  if (anoTratado !== null && (anoTratado < 1950 || anoTratado > 2100)) {
+    return res.status(400).json({ mensagem: "Ano do veiculo invalido." });
   }
 
   try {
@@ -845,8 +892,8 @@ app.post("/veiculos", exigirAdmin, async (req, res) => {
     if (erro.code === "23505") {
       return res.status(400).json({ mensagem: "JÃ¡ existe um veÃ­culo cadastrado com essa placa." });
     }
-    console.error("ERRO SQL VEICULOS:", erro);
-    return res.status(500).json({ mensagem: "Erro ao salvar veÃ­culo no banco de dados.", detalhe: erro.message });
+    console.error("Erro ao salvar veiculo:", erro.message);
+    return res.status(500).json({ mensagem: "Erro ao salvar veiculo no banco de dados." });
   }
 });
 
@@ -913,7 +960,7 @@ app.put("/veiculos/:id", exigirAdmin, async (requisicao, resposta) => {
 
   const modeloTratado = (modelo || "").trim();
   const placaTratada = (placa || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7);
-  const statusTratado = (status || "").trim();
+  const statusTratado = normalizarStatus(status);
   let anoTratado = null;
   if (ano !== undefined && ano !== null && String(ano).trim() !== "") {
     const n = parseInt(String(ano), 10);
@@ -927,6 +974,18 @@ app.put("/veiculos/:id", exigirAdmin, async (requisicao, resposta) => {
     if (!placaTratada) pendentes.push("placa");
     if (!statusTratado) pendentes.push("status");
     return resposta.status(400).json({ mensagem: "Preencha os campos obrigatorios: " + pendentes.join(", ") + "." });
+  }
+
+  if (placaTratada.length !== 7) {
+    return resposta.status(400).json({ mensagem: "Informe uma placa valida com 7 caracteres." });
+  }
+
+  if (!STATUS_VEICULO.has(statusTratado)) {
+    return resposta.status(400).json({ mensagem: "Status de veiculo invalido." });
+  }
+
+  if (anoTratado !== null && (anoTratado < 1950 || anoTratado > 2100)) {
+    return resposta.status(400).json({ mensagem: "Ano do veiculo invalido." });
   }
 
   try {
@@ -963,6 +1022,7 @@ app.put("/veiculos/:id", exigirAdmin, async (requisicao, resposta) => {
 
 app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
   const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
+  const statusTratado = normalizarStatus(status);
 
   if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || kmInicial == null || kmFinal == null || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
@@ -976,7 +1036,19 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
   }
 
   if (kmFinalNum < kmInicialNum) {
-    return resposta.status(400).json({ mensagem: "O KM final nÃƒÂ£o pode ser menor que o KM inicial." });
+    return resposta.status(400).json({ mensagem: "O KM final nÃƒÆ’Ã‚Â£o pode ser menor que o KM inicial." });
+  }
+
+  if (!STATUS_VIAGEM.has(statusTratado)) {
+    return resposta.status(400).json({ mensagem: "Status de viagem invalido." });
+  }
+
+  if (!valorMonetarioValido(valorFrete)) {
+    return resposta.status(400).json({ mensagem: "Informe um valor de frete valido." });
+  }
+
+  if (!dataValida(dataSaida) || !dataValida(dataChegada)) {
+    return resposta.status(400).json({ mensagem: "Informe datas validas para a viagem." });
   }
 
   try {
@@ -998,7 +1070,7 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING id
     `;
-    const valores = [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, status, observacoes || ""];
+    const valores = [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, statusTratado, observacoes || ""];
 
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Viagem cadastrada com sucesso.", id: resultado.rows[0].id });
@@ -1103,6 +1175,7 @@ app.get("/viagens/:id", autenticar, async (requisicao, resposta) => {
 app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
+  const statusTratado = normalizarStatus(status);
 
   if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
@@ -1130,6 +1203,18 @@ app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
     return resposta.status(400).json({ mensagem: "O KM final nao pode ser menor que o KM inicial." });
   }
 
+  if (!STATUS_VIAGEM.has(statusTratado)) {
+    return resposta.status(400).json({ mensagem: "Status de viagem invalido." });
+  }
+
+  if (!valorMonetarioValido(valorFrete)) {
+    return resposta.status(400).json({ mensagem: "Informe um valor de frete valido." });
+  }
+
+  if (!dataValida(dataSaida) || !dataValida(dataChegada)) {
+    return resposta.status(400).json({ mensagem: "Informe datas validas para a viagem." });
+  }
+
   try {
     const transportadoraId = await transportadoraEscopoMutacao(requisicao, "viagens", id);
     if (transportadoraId === null) {
@@ -1152,7 +1237,7 @@ app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
       WHERE id=$12 AND transportadora_id=$13
       RETURNING *
     `;
-    const valores = [origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, status, observacoes || "", id, transportadoraId];
+    const valores = [origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, statusTratado, observacoes || "", id, transportadoraId];
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
@@ -1171,10 +1256,27 @@ app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
 
 app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
   const { tipoDespesa, viagemId, veiculoId, descricao, categoria, dataDespesa, valor } = requisicao.body;
-  const tipoDespesaFinal = tipoDespesa === "veiculo" ? "veiculo" : "viagem";
+  const tipoDespesaFinal = String(tipoDespesa || "").trim().toLowerCase();
+  const categoriaTratada = String(categoria || "").trim().toLowerCase();
 
   if (!descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
+  }
+
+  if (!TIPOS_DESPESA.has(tipoDespesaFinal)) {
+    return resposta.status(400).json({ mensagem: "Tipo de despesa invalido." });
+  }
+
+  if (!CATEGORIAS_DESPESA.has(categoriaTratada)) {
+    return resposta.status(400).json({ mensagem: "Categoria de despesa invalida." });
+  }
+
+  if (!valorMonetarioValido(valor)) {
+    return resposta.status(400).json({ mensagem: "Informe um valor de despesa valido." });
+  }
+
+  if (!dataValida(dataDespesa)) {
+    return resposta.status(400).json({ mensagem: "Informe uma data valida para a despesa." });
   }
 
   if (tipoDespesaFinal === "viagem" && !viagemId) {
@@ -1200,7 +1302,7 @@ app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
     } else {
       const veiculo = await banco.query("SELECT transportadora_id FROM veiculos WHERE id=$1", [veiculoId]);
       if (veiculo.rows.length === 0) {
-        return resposta.status(400).json({ mensagem: "Veiculo nÃƒÂ£o encontrado." });
+        return resposta.status(400).json({ mensagem: "Veiculo nÃƒÆ’Ã‚Â£o encontrado." });
       }
       tid = veiculo.rows[0].transportadora_id;
       veiculoIdFinal = veiculoId;
@@ -1217,7 +1319,7 @@ app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id
     `;
-    const valores = [tid, viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoria, dataDespesa, valor];
+    const valores = [tid, viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoriaTratada, dataDespesa, valor];
 
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Despesa cadastrada com sucesso.", id: resultado.rows[0].id });
@@ -1308,10 +1410,27 @@ app.get("/despesas/:id", exigirAdminOuDono, async (requisicao, resposta) => {
 app.put("/despesas/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { tipoDespesa, viagemId, veiculoId, descricao, categoria, dataDespesa, valor } = requisicao.body;
-  const tipoDespesaFinal = tipoDespesa === "veiculo" ? "veiculo" : "viagem";
+  const tipoDespesaFinal = String(tipoDespesa || "").trim().toLowerCase();
+  const categoriaTratada = String(categoria || "").trim().toLowerCase();
 
   if (!descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
+  }
+
+  if (!TIPOS_DESPESA.has(tipoDespesaFinal)) {
+    return resposta.status(400).json({ mensagem: "Tipo de despesa invalido." });
+  }
+
+  if (!CATEGORIAS_DESPESA.has(categoriaTratada)) {
+    return resposta.status(400).json({ mensagem: "Categoria de despesa invalida." });
+  }
+
+  if (!valorMonetarioValido(valor)) {
+    return resposta.status(400).json({ mensagem: "Informe um valor de despesa valido." });
+  }
+
+  if (!dataValida(dataDespesa)) {
+    return resposta.status(400).json({ mensagem: "Informe uma data valida para a despesa." });
   }
 
   if (tipoDespesaFinal === "viagem" && !viagemId) {
@@ -1352,7 +1471,7 @@ app.put("/despesas/:id", exigirAdmin, async (requisicao, resposta) => {
       WHERE id=$8 AND transportadora_id=$9
       RETURNING *
     `;
-    const valores = [viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoria, dataDespesa, valor, id, transportadoraId];
+    const valores = [viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoriaTratada, dataDespesa, valor, id, transportadoraId];
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
@@ -1366,7 +1485,7 @@ app.put("/despesas/:id", exigirAdmin, async (requisicao, resposta) => {
 });
 
 // ============================================================
-// EXCLUSÕES
+// EXCLUSÃ•ES
 // ============================================================
 
 app.delete(["/usuarios", "/usuarios/:id"], exigirAdmin, async (requisicao, resposta) => {
@@ -1375,13 +1494,13 @@ app.delete(["/usuarios", "/usuarios/:id"], exigirAdmin, async (requisicao, respo
   const donoSistema = usuarioEhDonoSistema(requisicao);
 
   if (ids.length === 0) {
-    return resposta.status(400).json({ mensagem: "Informe ao menos um usuário para excluir." });
+    return resposta.status(400).json({ mensagem: "Informe ao menos um usuÃ¡rio para excluir." });
   }
 
   ids = ids.filter((uid) => uid !== requisicao.usuario.id);
 
   if (ids.length === 0) {
-    return resposta.status(400).json({ mensagem: "Você não pode excluir o próprio usuário logado." });
+    return resposta.status(400).json({ mensagem: "VocÃª nÃ£o pode excluir o prÃ³prio usuÃ¡rio logado." });
   }
 
   try {
@@ -1398,10 +1517,10 @@ app.delete(["/usuarios", "/usuarios/:id"], exigirAdmin, async (requisicao, respo
         valores
       );
     }
-    return resposta.json({ mensagem: "Usuário(s) excluído(s) com sucesso.", total: resultado.rowCount });
+    return resposta.json({ mensagem: "UsuÃ¡rio(s) excluÃ­do(s) com sucesso.", total: resultado.rowCount });
   } catch (erro) {
-    console.error("Erro ao excluir usuário(s):", erro.message);
-    return resposta.status(500).json({ mensagem: "Erro ao excluir usuário(s)." });
+    console.error("Erro ao excluir usuÃ¡rio(s):", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao excluir usuÃ¡rio(s)." });
   }
 });
 
@@ -1428,7 +1547,7 @@ app.delete(["/despesas", "/despesas/:id"], exigirAdmin, async (requisicao, respo
         valores
       );
     }
-    return resposta.json({ mensagem: "Despesa(s) excluída(s) com sucesso.", total: resultado.rowCount });
+    return resposta.json({ mensagem: "Despesa(s) excluÃ­da(s) com sucesso.", total: resultado.rowCount });
   } catch (erro) {
     console.error("Erro ao excluir despesa(s):", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao excluir despesa(s)." });
@@ -1454,7 +1573,7 @@ app.delete(["/viagens", "/viagens/:id"], exigirAdmin, async (requisicao, respost
       await cliente.query(`DELETE FROM despesas WHERE viagem_id IN (${marcadores})`, ids);
       const resultado = await cliente.query(`DELETE FROM viagens WHERE id IN (${marcadores})`, ids);
       await cliente.query("COMMIT");
-      return resposta.json({ mensagem: "Viagem(ns) excluída(s) com sucesso.", total: resultado.rowCount });
+      return resposta.json({ mensagem: "Viagem(ns) excluÃ­da(s) com sucesso.", total: resultado.rowCount });
     }
 
     const valores = [transportadoraId, ...ids];
@@ -1462,7 +1581,7 @@ app.delete(["/viagens", "/viagens/:id"], exigirAdmin, async (requisicao, respost
     const resultado = await cliente.query(`DELETE FROM viagens WHERE transportadora_id=$1 AND id IN (${marcadores})`, valores);
 
     await cliente.query("COMMIT");
-    return resposta.json({ mensagem: "Viagem(ns) excluída(s) com sucesso.", total: resultado.rowCount });
+    return resposta.json({ mensagem: "Viagem(ns) excluÃ­da(s) com sucesso.", total: resultado.rowCount });
   } catch (erro) {
     await cliente.query("ROLLBACK");
     console.error("Erro ao excluir viagem(ns):", erro.message);
@@ -1501,7 +1620,7 @@ app.delete(["/motoristas", "/motoristas/:id"], exigirAdmin, async (requisicao, r
       const resultado = await cliente.query(`DELETE FROM motoristas WHERE id IN (${marcadores})`, ids);
 
       await cliente.query("COMMIT");
-      return resposta.json({ mensagem: "Motorista(s) excluído(s) com sucesso.", total: resultado.rowCount });
+      return resposta.json({ mensagem: "Motorista(s) excluÃ­do(s) com sucesso.", total: resultado.rowCount });
     }
 
     const valores = [transportadoraId, ...ids];
@@ -1523,7 +1642,7 @@ app.delete(["/motoristas", "/motoristas/:id"], exigirAdmin, async (requisicao, r
     const resultado = await cliente.query(`DELETE FROM motoristas WHERE transportadora_id=$1 AND id IN (${marcadores})`, valores);
 
     await cliente.query("COMMIT");
-    return resposta.json({ mensagem: "Motorista(s) excluído(s) com sucesso.", total: resultado.rowCount });
+    return resposta.json({ mensagem: "Motorista(s) excluÃ­do(s) com sucesso.", total: resultado.rowCount });
   } catch (erro) {
     await cliente.query("ROLLBACK");
     console.error("Erro ao excluir motorista(s):", erro.message);
@@ -1539,7 +1658,7 @@ app.delete(["/veiculos", "/veiculos/:id"], exigirAdmin, async (requisicao, respo
   const donoSistema = usuarioEhDonoSistema(requisicao);
 
   if (ids.length === 0) {
-    return resposta.status(400).json({ mensagem: "Informe ao menos um veículo para excluir." });
+    return resposta.status(400).json({ mensagem: "Informe ao menos um veÃ­culo para excluir." });
   }
 
   const cliente = await banco.connect();
@@ -1561,7 +1680,7 @@ app.delete(["/veiculos", "/veiculos/:id"], exigirAdmin, async (requisicao, respo
       const resultado = await cliente.query(`DELETE FROM veiculos WHERE id IN (${marcadores})`, ids);
 
       await cliente.query("COMMIT");
-      return resposta.json({ mensagem: "Veículo(s) excluído(s) com sucesso.", total: resultado.rowCount });
+      return resposta.json({ mensagem: "VeÃ­culo(s) excluÃ­do(s) com sucesso.", total: resultado.rowCount });
     }
 
     const valores = [transportadoraId, ...ids];
@@ -1582,11 +1701,11 @@ app.delete(["/veiculos", "/veiculos/:id"], exigirAdmin, async (requisicao, respo
     const resultado = await cliente.query(`DELETE FROM veiculos WHERE transportadora_id=$1 AND id IN (${marcadores})`, valores);
 
     await cliente.query("COMMIT");
-    return resposta.json({ mensagem: "Veículo(s) excluído(s) com sucesso.", total: resultado.rowCount });
+    return resposta.json({ mensagem: "VeÃ­culo(s) excluÃ­do(s) com sucesso.", total: resultado.rowCount });
   } catch (erro) {
     await cliente.query("ROLLBACK");
-    console.error("Erro ao excluir veículo(s):", erro.message);
-    return resposta.status(500).json({ mensagem: "Erro ao excluir veículo(s)." });
+    console.error("Erro ao excluir veÃ­culo(s):", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao excluir veÃ­culo(s)." });
   } finally {
     cliente.release();
   }
@@ -1619,7 +1738,7 @@ app.delete(["/transportadoras", "/transportadoras/:id"], exigirDonoSistema, asyn
     const resultado = await cliente.query(`DELETE FROM transportadoras WHERE id IN (${marcadores})`, ids);
 
     await cliente.query("COMMIT");
-    return resposta.json({ mensagem: "Transportadora(s) excluída(s) com sucesso.", total: resultado.rowCount });
+    return resposta.json({ mensagem: "Transportadora(s) excluÃ­da(s) com sucesso.", total: resultado.rowCount });
   } catch (erro) {
     await cliente.query("ROLLBACK");
     console.error("Erro ao excluir transportadora(s):", erro.message);
@@ -1628,6 +1747,16 @@ app.delete(["/transportadoras", "/transportadoras/:id"], exigirDonoSistema, asyn
     cliente.release();
   }
 });
+
+app.use((erro, requisicao, resposta, proximo) => {
+  if (erro.message === "Origem nao permitida pelo CORS.") {
+    return resposta.status(403).json({ mensagem: "Origem nao permitida." });
+  }
+
+  console.error("Erro nao tratado:", erro.message);
+  return resposta.status(500).json({ mensagem: "Erro interno do servidor." });
+});
+
 app.listen(porta, '0.0.0.0', () => {
-  console.log(`🚀 Servidor rodando na porta ${porta}`);
+  console.log(`ðŸš€ Servidor rodando na porta ${porta}`);
 });
