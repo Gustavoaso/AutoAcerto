@@ -49,12 +49,6 @@ async function carregarDadosDashboard() {
   }
 }
 
-function formatarMoeda(valor) {
-  return Number(valor).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL"
-  });
-}
 
 function obterValorDespesa(despesa) {
   return Number(despesa.valor || 0);
@@ -96,14 +90,7 @@ function obterRotuloMes(chaveMes) {
   return nomesMeses[mes - 1] || chaveMes;
 }
 
-function formatarData(dataISO) {
-  if (!dataISO) return "-";
-  const data = new Date(dataISO);
-  const dia = String(data.getUTCDate()).padStart(2, "0");
-  const mes = String(data.getUTCMonth() + 1).padStart(2, "0");
-  const ano = data.getUTCFullYear();
-  return dia + "/" + mes + "/" + ano;
-}
+
 
 function obterDataLocal(dataISO) {
   if (!dataISO) return null;

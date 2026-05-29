@@ -29,21 +29,7 @@ async function carregarDespesas() {
     }
 }
 
-function formatarMoeda(valor) {
-    return Number(valor).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-    });
-}
 
-function formatarData(dataISO) {
-    if (!dataISO) return "-";
-    const data = new Date(dataISO);
-    const dia = String(data.getUTCDate()).padStart(2, "0");
-    const mes = String(data.getUTCMonth() + 1).padStart(2, "0");
-    const ano = data.getUTCFullYear();
-    return dia + "/" + mes + "/" + ano;
-}
 
 function criarIconeCategoria(categoria) {
     if (categoria === "combustivel") {

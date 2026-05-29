@@ -5,20 +5,6 @@
 (function () {
     "use strict";
 
-    const API_BASE_DEPLOY = "https://autoacerto-production-4174.up.railway.app";
-    const HOSTS_FRONTEND_DEPLOY = [
-        "autoacerto.com.br",
-        "www.autoacerto.com.br"
-    ];
-
-    /**
-     * Retorna a URL base da API respeitando prioridades:
-     * 1. Variavel global
-     * 2. Meta tag no HTML
-     * 3. localStorage (teste rapido)
-     * 4. Dominios publicados do frontend
-     * 5. window.location.origin (desenvolvimento local)
-     */
     function obterApiBase() {
         if (window.AUTOACERTO_API_BASE_URL && String(window.AUTOACERTO_API_BASE_URL).trim()) {
             return String(window.AUTOACERTO_API_BASE_URL).trim().replace(/\/+$/, "");
@@ -32,12 +18,6 @@
         const salva = localStorage.getItem("AUTOACERTO_API_BASE_URL");
         if (salva && String(salva).trim()) {
             return String(salva).trim().replace(/\/+$/, "");
-        }
-
-        const hostname = window.location.hostname;
-        const estaNoDeploy = hostname.includes("vercel.app") || HOSTS_FRONTEND_DEPLOY.includes(hostname);
-        if (estaNoDeploy) {
-            return API_BASE_DEPLOY.replace(/\/+$/, "");
         }
 
         return window.location.origin.replace(/\/+$/, "");
