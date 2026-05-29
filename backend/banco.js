@@ -333,6 +333,6 @@ async function criarUsuarioDonoSistema() {
   console.log("Usuário dono do sistema criado:", DONO_SISTEMA_EMAIL);
 }
 
-criarTabelas().catch((erro) => console.error("Erro ao criar tabelas:", erro.message));
+banco.inicializar = criarTabelas;
 
 module.exports = banco;

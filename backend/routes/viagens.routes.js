@@ -1,0 +1,278 @@
+const express = require("express");
+const banco = require("../banco");
+const { STATUS_VIAGEM, normalizarStatus, valorMonetarioValido, dataValida } = require("../validacoes");
+const { autenticar, exigirAdmin } = require("../middlewares/autenticacao");
+const { obterIdTransportadora, usuarioEhDonoSistema, transportadoraIdParaPost, transportadoraEscopoMutacao } = require("../helpers/escopo");
+const { motoristaPertenceTransportadora, veiculoPertenceTransportadora } = require("../helpers/validacoes-db");
+const { normalizarIdsExclusao, placeholderIds, responderExclusao } = require("../helpers/exclusao");
+
+const router = express.Router();
+
+router.post("/", exigirAdmin, async (requisicao, resposta) => {
+  const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
+  const statusTratado = normalizarStatus(status);
+
+  if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || kmInicial == null || kmFinal == null || !status) {
+    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
+  }
+
+  const kmInicialNum = parseInt(kmInicial, 10);
+  const kmFinalNum = parseInt(kmFinal, 10);
+
+  if (!Number.isInteger(kmInicialNum) || !Number.isInteger(kmFinalNum) || kmInicialNum < 0 || kmFinalNum < 0) {
+    return resposta.status(400).json({ mensagem: "Informe os KM da viagem corretamente." });
+  }
+
+  if (kmFinalNum < kmInicialNum) {
+    return resposta.status(400).json({ mensagem: "O KM final não pode ser menor que o KM inicial." });
+  }
+
+  if (!STATUS_VIAGEM.has(statusTratado)) {
+    return resposta.status(400).json({ mensagem: "Status de viagem invalido." });
+  }
+
+  if (!valorMonetarioValido(valorFrete)) {
+    return resposta.status(400).json({ mensagem: "Informe um valor de frete valido." });
+  }
+
+  if (!dataValida(dataSaida) || !dataValida(dataChegada)) {
+    return resposta.status(400).json({ mensagem: "Informe datas validas para a viagem." });
+  }
+
+  try {
+    const escopo = await transportadoraIdParaPost(requisicao, requisicao.body);
+    if (escopo.erro) {
+      return resposta.status(400).json({ mensagem: escopo.erro });
+    }
+    const transportadoraId = escopo.id;
+
+    const motoristaValido = await motoristaPertenceTransportadora(motoristaId, transportadoraId);
+    const veiculoValido = await veiculoPertenceTransportadora(veiculoId, transportadoraId);
+
+    if (!motoristaValido || !veiculoValido) {
+      return resposta.status(400).json({ mensagem: "Motorista ou veículo não encontrado para esta transportadora." });
+    }
+
+    const sql = `
+      INSERT INTO viagens (transportadora_id, origem, destino, motorista_id, veiculo_id, data_saida, data_chegada, valor_frete, km_inicial, km_final, status, observacoes)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      RETURNING id
+    `;
+    const valores = [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, statusTratado, observacoes || ""];
+
+    const resultado = await banco.query(sql, valores);
+    return resposta.status(201).json({ mensagem: "Viagem cadastrada com sucesso.", id: resultado.rows[0].id });
+  } catch (erro) {
+    console.error("Erro ao salvar viagem:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao salvar viagem no banco de dados." });
+  }
+});
+
+router.get("/", autenticar, async (requisicao, resposta) => {
+  const usuario = requisicao.usuario;
+  const transportadoraId = obterIdTransportadora(requisicao);
+  const donoSistema = usuarioEhDonoSistema(requisicao);
+
+  let sql = `
+    SELECT
+      v.id, v.transportadora_id, v.origem, v.destino, v.data_saida, v.data_chegada,
+      v.valor_frete, v.km_inicial, v.km_final, v.status, v.observacoes, v.data_cadastro,
+      v.motorista_id, v.veiculo_id,
+      m.nome AS motorista_nome,
+      ve.modelo AS veiculo_modelo,
+      ve.placa AS veiculo_placa,
+      t.nome AS transportadora_nome
+    FROM viagens v
+    LEFT JOIN motoristas m ON v.motorista_id = m.id AND m.transportadora_id = v.transportadora_id
+    LEFT JOIN veiculos ve ON v.veiculo_id = ve.id AND ve.transportadora_id = v.transportadora_id
+    LEFT JOIN transportadoras t ON v.transportadora_id = t.id
+  `;
+  const valores = [];
+
+  if (!donoSistema) {
+    sql += " WHERE v.transportadora_id = $1";
+    valores.push(transportadoraId);
+  }
+
+  if (usuario.perfil === "motorista" && usuario.motorista_id) {
+    sql += (valores.length > 0 ? " AND " : " WHERE ") + "v.motorista_id = $" + (valores.length + 1);
+    valores.push(usuario.motorista_id);
+  } else if (usuario.perfil === "motorista") {
+    return resposta.json([]);
+  }
+
+  sql += " ORDER BY v.id DESC";
+
+  try {
+    const resultado = await banco.query(sql, valores);
+    return resposta.json(resultado.rows);
+  } catch (erro) {
+    console.error("Erro ao buscar viagens:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao buscar viagens." });
+  }
+});
+
+router.get("/:id", autenticar, async (requisicao, resposta) => {
+  const { id } = requisicao.params;
+  const usuario = requisicao.usuario;
+  const transportadoraId = obterIdTransportadora(requisicao);
+  const donoSistema = usuarioEhDonoSistema(requisicao);
+
+  let sql = `
+    SELECT
+      v.id, v.transportadora_id, v.origem, v.destino, v.data_saida, v.data_chegada,
+      v.valor_frete, v.km_inicial, v.km_final, v.status, v.observacoes, v.data_cadastro,
+      v.motorista_id, v.veiculo_id,
+      m.nome AS motorista_nome,
+      ve.modelo AS veiculo_modelo,
+      ve.placa AS veiculo_placa,
+      t.nome AS transportadora_nome
+    FROM viagens v
+    LEFT JOIN motoristas m ON v.motorista_id = m.id AND m.transportadora_id = v.transportadora_id
+    LEFT JOIN veiculos ve ON v.veiculo_id = ve.id AND ve.transportadora_id = v.transportadora_id
+    LEFT JOIN transportadoras t ON v.transportadora_id = t.id
+    WHERE v.id = $1
+  `;
+  const valores = [id];
+
+  if (!donoSistema) {
+    sql += " AND v.transportadora_id = $2";
+    valores.push(transportadoraId);
+  }
+
+  if (usuario.perfil === "motorista") {
+    if (!usuario.motorista_id) {
+      return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
+    }
+    sql += " AND v.motorista_id = $" + (valores.length + 1);
+    valores.push(usuario.motorista_id);
+  }
+
+  try {
+    const resultado = await banco.query(sql, valores);
+    if (resultado.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
+    }
+    return resposta.json(resultado.rows[0]);
+  } catch (erro) {
+    console.error("Erro ao buscar viagem:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao buscar viagem." });
+  }
+});
+
+router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
+  const { id } = requisicao.params;
+  const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
+  const statusTratado = normalizarStatus(status);
+
+  if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || !status) {
+    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
+  }
+
+  let kmInicialNum = null;
+  let kmFinalNum = null;
+
+  if (kmInicial !== undefined && kmInicial !== null && kmInicial !== "") {
+    kmInicialNum = parseInt(kmInicial, 10);
+  }
+
+  if (kmFinal !== undefined && kmFinal !== null && kmFinal !== "") {
+    kmFinalNum = parseInt(kmFinal, 10);
+  }
+
+  if (
+    (kmInicialNum !== null && (!Number.isInteger(kmInicialNum) || kmInicialNum < 0)) ||
+    (kmFinalNum !== null && (!Number.isInteger(kmFinalNum) || kmFinalNum < 0))
+  ) {
+    return resposta.status(400).json({ mensagem: "Informe KM inicial e KM final validos." });
+  }
+
+  if (kmInicialNum !== null && kmFinalNum !== null && kmFinalNum < kmInicialNum) {
+    return resposta.status(400).json({ mensagem: "O KM final nao pode ser menor que o KM inicial." });
+  }
+
+  if (!STATUS_VIAGEM.has(statusTratado)) {
+    return resposta.status(400).json({ mensagem: "Status de viagem invalido." });
+  }
+
+  if (!valorMonetarioValido(valorFrete)) {
+    return resposta.status(400).json({ mensagem: "Informe um valor de frete valido." });
+  }
+
+  if (!dataValida(dataSaida) || !dataValida(dataChegada)) {
+    return resposta.status(400).json({ mensagem: "Informe datas validas para a viagem." });
+  }
+
+  try {
+    const transportadoraId = await transportadoraEscopoMutacao(requisicao, "viagens", id);
+    if (transportadoraId === null) {
+      return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
+    }
+
+    const motoristaValido = await motoristaPertenceTransportadora(motoristaId, transportadoraId);
+    const veiculoValido = await veiculoPertenceTransportadora(veiculoId, transportadoraId);
+
+    if (!motoristaValido || !veiculoValido) {
+      return resposta.status(400).json({ mensagem: "Motorista ou veículo não encontrado para esta transportadora." });
+    }
+
+    const sql = `
+      UPDATE viagens SET
+        origem=$1, destino=$2, motorista_id=$3, veiculo_id=$4,
+        data_saida=$5, data_chegada=$6, valor_frete=$7,
+        km_inicial=COALESCE($8, km_inicial), km_final=COALESCE($9, km_final),
+        status=$10, observacoes=$11
+      WHERE id=$12 AND transportadora_id=$13
+      RETURNING *
+    `;
+    const valores = [origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, statusTratado, observacoes || "", id, transportadoraId];
+
+    const resultado = await banco.query(sql, valores);
+    if (resultado.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
+    }
+    return resposta.json({ mensagem: "Viagem atualizada com sucesso.", viagem: resultado.rows[0] });
+  } catch (erro) {
+    console.error("Erro ao atualizar viagem:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao atualizar viagem no banco de dados." });
+  }
+});
+
+router.delete(["/", "/:id"], exigirAdmin, async (requisicao, resposta) => {
+  const ids = normalizarIdsExclusao(requisicao);
+  const transportadoraId = obterIdTransportadora(requisicao);
+  const donoSistema = usuarioEhDonoSistema(requisicao);
+
+  if (ids.length === 0) {
+    return resposta.status(400).json({ mensagem: "Informe ao menos uma viagem para excluir." });
+  }
+
+  const cliente = await banco.connect();
+
+  try {
+    await cliente.query("BEGIN");
+    const marcadores = placeholderIds(ids, donoSistema ? 1 : 2);
+
+    if (donoSistema) {
+      await cliente.query(`DELETE FROM despesas WHERE viagem_id IN (${marcadores})`, ids);
+      const resultado = await cliente.query(`DELETE FROM viagens WHERE id IN (${marcadores})`, ids);
+      await cliente.query("COMMIT");
+      return responderExclusao(resposta, resultado, "Viagem(ns) excluida(s) com sucesso.", "Nenhuma viagem encontrada para exclusao.");
+    }
+
+    const valores = [transportadoraId, ...ids];
+    await cliente.query(`DELETE FROM despesas WHERE transportadora_id=$1 AND viagem_id IN (${marcadores})`, valores);
+    const resultado = await cliente.query(`DELETE FROM viagens WHERE transportadora_id=$1 AND id IN (${marcadores})`, valores);
+
+    await cliente.query("COMMIT");
+    return responderExclusao(resposta, resultado, "Viagem(ns) excluida(s) com sucesso.", "Nenhuma viagem encontrada para exclusao.");
+  } catch (erro) {
+    await cliente.query("ROLLBACK");
+    console.error("Erro ao excluir viagem(ns):", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao excluir viagem(ns)." });
+  } finally {
+    cliente.release();
+  }
+});
+
+module.exports = router;
