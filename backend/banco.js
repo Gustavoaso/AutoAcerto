@@ -112,6 +112,7 @@ async function criarTabelas() {
   await garantirEstruturaViagens();
   await garantirEstruturaDespesas();
   await criarIndices();
+  await garantirConstraintsDominio();
 }
 
 async function criarIndices() {
@@ -125,6 +126,64 @@ async function criarIndices() {
   await banco.query("CREATE INDEX IF NOT EXISTS idx_despesas_veiculo ON despesas(veiculo_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_usuarios_transportadora ON usuarios(transportadora_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_usuarios_motorista ON usuarios(motorista_id)");
+}
+
+async function adicionarConstraint(nome, sql) {
+  const existente = await banco.query("SELECT 1 FROM pg_constraint WHERE conname = $1", [nome]);
+  if (existente.rows.length > 0) return;
+
+  try {
+    await banco.query(`ALTER TABLE ${sql.tabela} ADD CONSTRAINT ${nome} CHECK (${sql.check})`);
+  } catch (erro) {
+    console.warn("Constraint " + nome + ":", erro.message);
+  }
+}
+
+async function garantirConstraintsDominio() {
+  await adicionarConstraint("motoristas_status_chk", {
+    tabela: "motoristas",
+    check: "status IN ('ativo', 'inativo')"
+  });
+
+  await adicionarConstraint("veiculos_status_chk", {
+    tabela: "veiculos",
+    check: "status IN ('ativo', 'inativo', 'em viagem', 'manutencao', 'manutenção')"
+  });
+
+  await adicionarConstraint("veiculos_ano_chk", {
+    tabela: "veiculos",
+    check: "ano IS NULL OR (ano >= 1950 AND ano <= 2100)"
+  });
+
+  await adicionarConstraint("viagens_status_chk", {
+    tabela: "viagens",
+    check: "status IN ('em andamento', 'finalizada', 'cancelada')"
+  });
+
+  await adicionarConstraint("viagens_valor_frete_chk", {
+    tabela: "viagens",
+    check: "valor_frete > 0"
+  });
+
+  await adicionarConstraint("viagens_km_chk", {
+    tabela: "viagens",
+    check: "(km_inicial IS NULL OR km_inicial >= 0) AND (km_final IS NULL OR km_final >= 0) AND (km_inicial IS NULL OR km_final IS NULL OR km_final >= km_inicial)"
+  });
+
+  await adicionarConstraint("despesas_tipo_chk", {
+    tabela: "despesas",
+    check: "tipo_despesa IN ('viagem', 'veiculo')"
+  });
+
+  await adicionarConstraint("despesas_categoria_chk", {
+    tabela: "despesas",
+    check: "categoria IN ('combustivel', 'pedagio', 'alimentacao', 'manutencao', 'outros')"
+  });
+
+  await adicionarConstraint("despesas_valor_chk", {
+    tabela: "despesas",
+    check: "valor > 0"
+  });
 }
 
 async function garantirEstruturaVeiculos() {

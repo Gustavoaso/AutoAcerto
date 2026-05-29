@@ -179,6 +179,14 @@ function placeholderIds(ids, inicio) {
   return ids.map((_, indice) => "$" + (inicio + indice)).join(", ");
 }
 
+function responderExclusao(resposta, resultado, mensagemSucesso, mensagemNaoEncontrado) {
+  if (resultado.rowCount === 0) {
+    return resposta.status(404).json({ mensagem: mensagemNaoEncontrado });
+  }
+
+  return resposta.json({ mensagem: mensagemSucesso, total: resultado.rowCount });
+}
+
 function normalizarCorpoEntrada(valor, chave) {
   if (Array.isArray(valor)) {
     return valor.map((item) => normalizarCorpoEntrada(item, chave));
@@ -1517,7 +1525,7 @@ app.delete(["/usuarios", "/usuarios/:id"], exigirAdmin, async (requisicao, respo
         valores
       );
     }
-    return resposta.json({ mensagem: "UsuÃ¡rio(s) excluÃ­do(s) com sucesso.", total: resultado.rowCount });
+    return responderExclusao(resposta, resultado, "Usuario(s) excluido(s) com sucesso.", "Nenhum usuario encontrado para exclusao.");
   } catch (erro) {
     console.error("Erro ao excluir usuÃ¡rio(s):", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao excluir usuÃ¡rio(s)." });
@@ -1547,7 +1555,7 @@ app.delete(["/despesas", "/despesas/:id"], exigirAdmin, async (requisicao, respo
         valores
       );
     }
-    return resposta.json({ mensagem: "Despesa(s) excluÃ­da(s) com sucesso.", total: resultado.rowCount });
+    return responderExclusao(resposta, resultado, "Despesa(s) excluida(s) com sucesso.", "Nenhuma despesa encontrada para exclusao.");
   } catch (erro) {
     console.error("Erro ao excluir despesa(s):", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao excluir despesa(s)." });
@@ -1573,7 +1581,7 @@ app.delete(["/viagens", "/viagens/:id"], exigirAdmin, async (requisicao, respost
       await cliente.query(`DELETE FROM despesas WHERE viagem_id IN (${marcadores})`, ids);
       const resultado = await cliente.query(`DELETE FROM viagens WHERE id IN (${marcadores})`, ids);
       await cliente.query("COMMIT");
-      return resposta.json({ mensagem: "Viagem(ns) excluÃ­da(s) com sucesso.", total: resultado.rowCount });
+      return responderExclusao(resposta, resultado, "Viagem(ns) excluida(s) com sucesso.", "Nenhuma viagem encontrada para exclusao.");
     }
 
     const valores = [transportadoraId, ...ids];
@@ -1581,7 +1589,7 @@ app.delete(["/viagens", "/viagens/:id"], exigirAdmin, async (requisicao, respost
     const resultado = await cliente.query(`DELETE FROM viagens WHERE transportadora_id=$1 AND id IN (${marcadores})`, valores);
 
     await cliente.query("COMMIT");
-    return resposta.json({ mensagem: "Viagem(ns) excluÃ­da(s) com sucesso.", total: resultado.rowCount });
+    return responderExclusao(resposta, resultado, "Viagem(ns) excluida(s) com sucesso.", "Nenhuma viagem encontrada para exclusao.");
   } catch (erro) {
     await cliente.query("ROLLBACK");
     console.error("Erro ao excluir viagem(ns):", erro.message);
@@ -1620,7 +1628,7 @@ app.delete(["/motoristas", "/motoristas/:id"], exigirAdmin, async (requisicao, r
       const resultado = await cliente.query(`DELETE FROM motoristas WHERE id IN (${marcadores})`, ids);
 
       await cliente.query("COMMIT");
-      return resposta.json({ mensagem: "Motorista(s) excluÃ­do(s) com sucesso.", total: resultado.rowCount });
+      return responderExclusao(resposta, resultado, "Motorista(s) excluido(s) com sucesso.", "Nenhum motorista encontrado para exclusao.");
     }
 
     const valores = [transportadoraId, ...ids];
@@ -1642,7 +1650,7 @@ app.delete(["/motoristas", "/motoristas/:id"], exigirAdmin, async (requisicao, r
     const resultado = await cliente.query(`DELETE FROM motoristas WHERE transportadora_id=$1 AND id IN (${marcadores})`, valores);
 
     await cliente.query("COMMIT");
-    return resposta.json({ mensagem: "Motorista(s) excluÃ­do(s) com sucesso.", total: resultado.rowCount });
+    return responderExclusao(resposta, resultado, "Motorista(s) excluido(s) com sucesso.", "Nenhum motorista encontrado para exclusao.");
   } catch (erro) {
     await cliente.query("ROLLBACK");
     console.error("Erro ao excluir motorista(s):", erro.message);
@@ -1680,7 +1688,7 @@ app.delete(["/veiculos", "/veiculos/:id"], exigirAdmin, async (requisicao, respo
       const resultado = await cliente.query(`DELETE FROM veiculos WHERE id IN (${marcadores})`, ids);
 
       await cliente.query("COMMIT");
-      return resposta.json({ mensagem: "VeÃ­culo(s) excluÃ­do(s) com sucesso.", total: resultado.rowCount });
+      return responderExclusao(resposta, resultado, "Veiculo(s) excluido(s) com sucesso.", "Nenhum veiculo encontrado para exclusao.");
     }
 
     const valores = [transportadoraId, ...ids];
@@ -1701,7 +1709,7 @@ app.delete(["/veiculos", "/veiculos/:id"], exigirAdmin, async (requisicao, respo
     const resultado = await cliente.query(`DELETE FROM veiculos WHERE transportadora_id=$1 AND id IN (${marcadores})`, valores);
 
     await cliente.query("COMMIT");
-    return resposta.json({ mensagem: "VeÃ­culo(s) excluÃ­do(s) com sucesso.", total: resultado.rowCount });
+    return responderExclusao(resposta, resultado, "Veiculo(s) excluido(s) com sucesso.", "Nenhum veiculo encontrado para exclusao.");
   } catch (erro) {
     await cliente.query("ROLLBACK");
     console.error("Erro ao excluir veÃ­culo(s):", erro.message);
@@ -1738,7 +1746,7 @@ app.delete(["/transportadoras", "/transportadoras/:id"], exigirDonoSistema, asyn
     const resultado = await cliente.query(`DELETE FROM transportadoras WHERE id IN (${marcadores})`, ids);
 
     await cliente.query("COMMIT");
-    return resposta.json({ mensagem: "Transportadora(s) excluÃ­da(s) com sucesso.", total: resultado.rowCount });
+    return responderExclusao(resposta, resultado, "Transportadora(s) excluida(s) com sucesso.", "Nenhuma transportadora encontrada para exclusao.");
   } catch (erro) {
     await cliente.query("ROLLBACK");
     console.error("Erro ao excluir transportadora(s):", erro.message);
