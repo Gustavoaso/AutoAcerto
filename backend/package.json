@@ -5,8 +5,8 @@
   "main": "servidor.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node servidor.js",
-    "dev": "nodemon servidor.js"
+    "start": "node --env-file=.env servidor.js",
+    "dev": "nodemon --env-file=.env servidor.js"
   },
   "keywords": [],
   "author": "",
