@@ -24,20 +24,41 @@ function criarIconeForaViagem() {
 
 async function carregarDadosRelatorio() {
     try {
-        const respostas = await Promise.all([
-            fetch(urlApiViagens,{ headers: cabecalhosAutenticados() }),
-            fetch(urlApiDespesas,{ headers: cabecalhosAutenticados() }),
-            fetch(urlApiMotoristas,{ headers: cabecalhosAutenticados() })
+        const resultados = await Promise.allSettled([
+            fetch(urlApiViagens, { headers: cabecalhosAutenticados() }),
+            fetch(urlApiDespesas, { headers: cabecalhosAutenticados() }),
+            fetch(urlApiMotoristas, { headers: cabecalhosAutenticados() })
         ]);
 
-        viagens = await respostas[0].json();
-        despesas = await respostas[1].json();
-        motoristas = await respostas[2].json();
+        const viagensResultado = resultados[0];
+        const despesasResultado = resultados[1];
+        const motoristasResultado = resultados[2];
+
+        if (viagensResultado.status === "fulfilled" && viagensResultado.value.ok) {
+            viagens = await viagensResultado.value.json();
+        } else {
+            console.error("Erro ao carregar viagens no relatório:", viagensResultado.reason || "status HTTP inválido");
+            viagens = [];
+        }
+
+        if (despesasResultado.status === "fulfilled" && despesasResultado.value.ok) {
+            despesas = await despesasResultado.value.json();
+        } else {
+            console.error("Erro ao carregar despesas no relatório:", despesasResultado.reason || "status HTTP inválido");
+            despesas = [];
+        }
+
+        if (motoristasResultado.status === "fulfilled" && motoristasResultado.value.ok) {
+            motoristas = await motoristasResultado.value.json();
+        } else {
+            console.error("Erro ao carregar motoristas no relatório:", motoristasResultado.reason || "status HTTP inválido");
+            motoristas = [];
+        }
 
         popularFiltroMotorista();
         aplicarFiltrosRelatorio();
     } catch (erro) {
-        console.error("Erro ao carregar dados do relatorio:", erro);
+        console.error("Erro inesperado ao carregar dados do relatorio:", erro);
     }
 }
 
@@ -506,12 +527,6 @@ function configurarEventosRelatorio() {
     document
         .getElementById("botaoExportarCSV")
         .addEventListener("click", exportarCSV);
-
-    document
-        .querySelector(".botao-sair")
-        .addEventListener("click", function () {
-            alert("Saindo do sistema...");
-        });
 }
 
 function iniciarPaginaRelatorio() {

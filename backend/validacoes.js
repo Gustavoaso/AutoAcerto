@@ -1,5 +1,5 @@
-﻿const STATUS_MOTORISTA = new Set(["ativo", "inativo"]);
-const STATUS_VEICULO = new Set(["ativo", "inativo", "em viagem", "manutencao", "manuten\u00e7\u00e3o"]);
+const STATUS_MOTORISTA = new Set(["ativo", "inativo"]);
+const STATUS_VEICULO = new Set(["ativo", "inativo", "em viagem", "manutencao"]);
 const STATUS_VIAGEM = new Set(["em andamento", "finalizada", "cancelada"]);
 const CATEGORIAS_DESPESA = new Set(["combustivel", "pedagio", "alimentacao", "manutencao", "outros"]);
 const TIPOS_DESPESA = new Set(["viagem", "veiculo"]);
@@ -51,6 +51,60 @@ function dataValida(data) {
   return Number.isFinite(timestamp);
 }
 
+function cpfValido(cpf) {
+  const limpo = String(cpf || "").replace(/\D/g, "");
+  if (limpo.length !== 11 || /^(\d)\1+$/.test(limpo)) return false;
+
+  let soma = 0;
+  for (let i = 0; i < 9; i++) {
+    soma += parseInt(limpo.charAt(i), 10) * (10 - i);
+  }
+  let resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== parseInt(limpo.charAt(9), 10)) return false;
+
+  soma = 0;
+  for (let i = 0; i < 10; i++) {
+    soma += parseInt(limpo.charAt(i), 10) * (11 - i);
+  }
+  resto = (soma * 10) % 11;
+  if (resto === 10 || resto === 11) resto = 0;
+  if (resto !== parseInt(limpo.charAt(10), 10)) return false;
+
+  return true;
+}
+
+function cnpjValido(cnpj) {
+  const limpo = String(cnpj || "").replace(/\D/g, "");
+  if (limpo.length !== 14 || /^(\d)\1+$/.test(limpo)) return false;
+
+  let tamanho = limpo.length - 2;
+  let numeros = limpo.substring(0, tamanho);
+  const digitos = limpo.substring(tamanho);
+
+  let soma = 0;
+  let pos = tamanho - 7;
+  for (let i = tamanho; i >= 1; i--) {
+    soma += parseInt(numeros.charAt(tamanho - i), 10) * pos--;
+    if (pos < 2) pos = 9;
+  }
+  let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+  if (resultado !== parseInt(digitos.charAt(0), 10)) return false;
+
+  tamanho = tamanho + 1;
+  numeros = limpo.substring(0, tamanho);
+  soma = 0;
+  pos = tamanho - 7;
+  for (let i = tamanho; i >= 1; i--) {
+    soma += parseInt(numeros.charAt(tamanho - i), 10) * pos--;
+    if (pos < 2) pos = 9;
+  }
+  resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+  if (resultado !== parseInt(digitos.charAt(1), 10)) return false;
+
+  return true;
+}
+
 module.exports = {
   STATUS_MOTORISTA,
   STATUS_VEICULO,
@@ -62,6 +116,8 @@ module.exports = {
   emailValido,
   normalizarStatus,
   valorMonetarioValido,
-  dataValida
+  dataValida,
+  cpfValido,
+  cnpjValido
 };
 

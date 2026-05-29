@@ -17,7 +17,9 @@ const {
   emailValido,
   normalizarStatus,
   valorMonetarioValido,
-  dataValida
+  dataValida,
+  cpfValido,
+  cnpjValido
 } = require("./validacoes");
 
 const app   = express();
@@ -39,16 +41,34 @@ function origemCorsPermitida(origem) {
   return false;
 }
 
-if (!process.env.JWT_SECRET && ambienteProducao) {
-  throw new Error("JWT_SECRET precisa estar configurado em producao.");
+// JWT_SECRET é obrigatório independente do ambiente.
+// Sem ele o servidor não sobe — evita uso acidental de segredo fraco.
+if (!process.env.JWT_SECRET) {
+  throw new Error(
+    "JWT_SECRET não configurado. Defina a variável de ambiente antes de iniciar o servidor.\n" +
+    "Gere um valor seguro com: node -e \"console.log(require('crypto').randomBytes(64).toString('hex'))\""
+  );
 }
 
-const SEGREDO_JWT = process.env.JWT_SECRET || "autoacerto_segredo_dev";
+const SEGREDO_JWT = process.env.JWT_SECRET;
 
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use(helmet({
-  contentSecurityPolicy: false
+  // CSP configurada explicitamente — bloqueia scripts e estilos não autorizados,
+  // reduzindo a superfície de ataques XSS.
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:  ["'self'"],
+      scriptSrc:   ["'self'"],
+      styleSrc:    ["'self'", "https://fonts.googleapis.com", "'unsafe-inline'"],
+      fontSrc:     ["'self'", "https://fonts.gstatic.com"],
+      imgSrc:      ["'self'", "data:"],
+      connectSrc:  ["'self'"],
+      objectSrc:   ["'none'"],
+      upgradeInsecureRequests: []
+    }
+  }
 }));
 
 const limitadorLogin = rateLimit({
@@ -126,14 +146,7 @@ function exigirAdmin(requisicao, resposta, proximo) {
   });
 }
 
-function exigirAdminOuDono(requisicao, resposta, proximo) {
-  autenticar(requisicao, resposta, function () {
-    if (requisicao.usuario.perfil !== "admin" && requisicao.usuario.perfil !== "dono") {
-      return resposta.status(403).json({ mensagem: "Acesso restrito a administradores." });
-    }
-    proximo();
-  });
-}
+const exigirAdminOuDono = exigirAdmin;
 
 function exigirDonoSistema(requisicao, resposta, proximo) {
   autenticar(requisicao, resposta, function () {
@@ -372,6 +385,10 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
     return resposta.status(400).json({ mensagem: "Informe um e-mail valido para o administrador." });
   }
 
+  if (cnpjTratado && !cnpjValido(cnpjTratado)) {
+    return resposta.status(400).json({ mensagem: "CNPJ informado é inválido." });
+  }
+
   if (String(senhaUsuario).length < 8) {
     return resposta.status(400).json({ mensagem: "A senha do administrador deve ter pelo menos 8 caracteres." });
   }
@@ -418,10 +435,9 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
 app.put("/transportadoras/:id", exigirDonoSistema, async (requisicao, resposta) => {
   try {
     const { id } = requisicao.params;
-    const { nome, cnpj, ativo } = requisicao.body;
-
-    if (!nome) {
-      return resposta.status(400).json({ mensagem: "O nome da transportadora é obrigatório." });
+    const cnpjTratado = cnpj ? String(cnpj).trim() : null;
+    if (cnpjTratado && !cnpjValido(cnpjTratado)) {
+      return resposta.status(400).json({ mensagem: "CNPJ informado é inválido." });
     }
 
     const sql = `
@@ -430,7 +446,7 @@ app.put("/transportadoras/:id", exigirDonoSistema, async (requisicao, resposta) 
       WHERE id = $4
       RETURNING id
     `;
-    const resultado = await banco.query(sql, [nome, cnpj || null, ativo, id]);
+    const resultado = await banco.query(sql, [nome, cnpjTratado, ativo, id]);
 
     if (resultado.rows.length === 0) {
       return resposta.status(404).json({ mensagem: "Transportadora não encontrada." });
@@ -705,6 +721,10 @@ app.post("/motoristas", exigirAdmin, async (requisicao, resposta) => {
     return resposta.status(400).json({ mensagem: "Status de motorista invalido." });
   }
 
+  if (!cpfValido(cpf)) {
+    return resposta.status(400).json({ mensagem: "CPF informado é inválido." });
+  }
+
   try {
     const escopo = await transportadoraIdParaPost(requisicao, requisicao.body);
     if (escopo.erro) {
@@ -798,6 +818,10 @@ app.put("/motoristas/:id", exigirAdmin, async (requisicao, resposta) => {
 
   if (!STATUS_MOTORISTA.has(statusTratado)) {
     return resposta.status(400).json({ mensagem: "Status de motorista invalido." });
+  }
+
+  if (!cpfValido(cpf)) {
+    return resposta.status(400).json({ mensagem: "CPF informado é inválido." });
   }
 
   try {
@@ -1750,6 +1774,6 @@ app.use((erro, requisicao, resposta, proximo) => {
   return resposta.status(500).json({ mensagem: "Erro interno do servidor." });
 });
 
-app.listen(porta, '0.0.0.0', () => {
-  console.log(`ðŸš€ Servidor rodando na porta ${porta}`);
+app.listen(porta, "0.0.0.0", () => {
+  console.log(`🚀 Servidor rodando na porta ${porta}`);
 });

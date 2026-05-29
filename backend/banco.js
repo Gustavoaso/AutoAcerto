@@ -10,13 +10,14 @@ const banco = new Pool({
 
 const DONO_SISTEMA_NOME  = process.env.DONO_SISTEMA_NOME  || "Dono AutoAcerto";
 const DONO_SISTEMA_EMAIL = process.env.DONO_SISTEMA_EMAIL || "dono@autoacerto.com";
-const DONO_SISTEMA_SENHA = process.env.DONO_SISTEMA_SENHA || (
-  process.env.NODE_ENV === "production" ? null : "autoacerto123"
-);
 
-if (!process.env.DONO_SISTEMA_SENHA && process.env.NODE_ENV === "production") {
-  console.warn("DONO_SISTEMA_SENHA nao configurada. O usuario dono nao sera criado automaticamente em producao.");
+// A senha do dono do sistema é obrigatória. Sem ela, o servidor não sobe para evitar credenciais fracas ou indefinidas.
+if (!process.env.DONO_SISTEMA_SENHA) {
+  throw new Error(
+    "DONO_SISTEMA_SENHA não configurada. Defina a variável de ambiente no arquivo .env antes de iniciar o servidor."
+  );
 }
+const DONO_SISTEMA_SENHA = process.env.DONO_SISTEMA_SENHA;
 
 banco.connect()
   .then(() => console.log("Banco de dados PostgreSQL conectado com sucesso."))
@@ -140,6 +141,20 @@ async function adicionarConstraint(nome, sql) {
 }
 
 async function garantirConstraintsDominio() {
+  // Normalizar registros legados com acento para evitar violação da constraint atualizada
+  try {
+    await banco.query("UPDATE veiculos SET status = 'manutencao' WHERE status = 'manutenção'");
+  } catch (erro) {
+    console.error("Erro ao migrar status de veículos legados:", erro.message);
+  }
+
+  // Dropar a constraint antiga para garantir que seja recriada com as novas regras
+  try {
+    await banco.query("ALTER TABLE veiculos DROP CONSTRAINT IF EXISTS veiculos_status_chk");
+  } catch (erro) {
+    console.warn("Erro ao dropar constraint veiculos_status_chk:", erro.message);
+  }
+
   await adicionarConstraint("motoristas_status_chk", {
     tabela: "motoristas",
     check: "status IN ('ativo', 'inativo')"
@@ -147,7 +162,7 @@ async function garantirConstraintsDominio() {
 
   await adicionarConstraint("veiculos_status_chk", {
     tabela: "veiculos",
-    check: "status IN ('ativo', 'inativo', 'em viagem', 'manutencao', 'manutenção')"
+    check: "status IN ('ativo', 'inativo', 'em viagem', 'manutencao')"
   });
 
   await adicionarConstraint("veiculos_ano_chk", {
