@@ -7,20 +7,9 @@
 
     function obterApiBase() {
         if (window.AUTOACERTO_API_BASE_URL && String(window.AUTOACERTO_API_BASE_URL).trim()) {
-            return String(window.AUTOACERTO_API_BASE_URL).trim().replace(/\/+$/, "");
-        }
-
-        const metaApi = document.querySelector('meta[name="autoacerto-api-base"]');
-        if (metaApi && metaApi.getAttribute("content")) {
-            return metaApi.getAttribute("content").trim().replace(/\/+$/, "");
-        }
-
-        const salva = localStorage.getItem("AUTOACERTO_API_BASE_URL");
-        if (salva && String(salva).trim()) {
-            return String(salva).trim().replace(/\/+$/, "");
-        }
-
-        return window.location.origin.replace(/\/+$/, "");
+            return String(window.AUTOACERTO_API_BASE_URL).trim();
+        } 
+        else{ return window.location.origin;}
     }
 
     window.montarUrlApi = function (endpoint) {
