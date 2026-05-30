@@ -5,11 +5,25 @@
 (function () {
     "use strict";
 
+    // Substitua esta URL pela base do seu backend Railway em produção.
+    const API_BASE_URL = "autoacerto-production-4174.up.railway.app";
+
     function obterApiBase() {
-        if (window.AUTOACERTO_API_BASE_URL && String(window.AUTOACERTO_API_BASE_URL).trim()) {
-            return String(window.AUTOACERTO_API_BASE_URL).trim();
-        } 
-        else{ return window.location.origin;}
+        if (window.API_BASE_URL && String(window.API_BASE_URL).trim()) {
+            return String(window.API_BASE_URL).trim().replace(/\/+$/, "");
+        }
+
+        const metaApi = document.querySelector('meta[name="autoacerto-api-base"]');
+        if (metaApi && metaApi.getAttribute("content")) {
+            return metaApi.getAttribute("content").trim().replace(/\/+$/, "");
+        }
+
+        const salva = localStorage.getItem("API_BASE_URL");
+        if (salva && String(salva).trim()) {
+            return String(salva).trim().replace(/\/+$/, "");
+        }
+
+        return window.location.origin;
     }
 
     window.montarUrlApi = function (endpoint) {
