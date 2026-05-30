@@ -6,11 +6,11 @@
     "use strict";
 
     // Substitua esta URL pela base do seu backend Railway em produção.
-    const AUTOACERTO_API_BASE_URL_DEFAULT = "https://autoacerto-production-4174.up.railway.app";
+    const AUTOACERTO_API_BASE_URL_DEFAULT_DEFAULT = "https://autoacerto-production-4174.up.railway.app";
 
     function obterApiBase() {
-        if (window.AUTOACERTO_API_BASE_URL && String(window.AUTOACERTO_API_BASE_URL).trim()) {
-            return String(window.AUTOACERTO_API_BASE_URL).trim().replace(/\/+$/, "");
+        if (window.AUTOACERTO_API_BASE_URL_DEFAULT && String(window.AUTOACERTO_API_BASE_URL_DEFAULT).trim()) {
+            return String(window.AUTOACERTO_API_BASE_URL_DEFAULT).trim().replace(/\/+$/, "");
         }
 
         const metaApi = document.querySelector('meta[name="autoacerto-api-base"]');
@@ -18,12 +18,12 @@
             return metaApi.getAttribute("content").trim().replace(/\/+$/, "");
         }
 
-        const salva = localStorage.getItem("AUTOACERTO_API_BASE_URL");
+        const salva = localStorage.getItem("AUTOACERTO_API_BASE_URL_DEFAULT");
         if (salva && String(salva).trim()) {
             return String(salva).trim().replace(/\/+$/, "");
         }
 
-        return AUTOACERTO_API_BASE_URL_DEFAULT;
+        return 'deu ruim';
     }
 
     window.montarUrlApi = function (endpoint) {
