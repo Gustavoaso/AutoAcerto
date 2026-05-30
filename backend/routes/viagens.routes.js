@@ -6,6 +6,7 @@ const { autorizarAcessoViagem } = require("../middlewares/autorizacao");
 const { obterIdTransportadora, usuarioEhDonoSistema, transportadoraIdParaPost, transportadoraEscopoMutacao } = require("../helpers/escopo");
 const { motoristaPertenceTransportadora, veiculoPertenceTransportadora } = require("../helpers/validacoes-db");
 const { normalizarIdsExclusao, placeholderIds, responderExclusao } = require("../helpers/exclusao");
+const { obterParametrosPaginacao, montarRespostaPaginada } = require("../helpers/paginacao");
 
 const router = express.Router();
 
@@ -73,7 +74,27 @@ router.get("/", autenticar, async (requisicao, resposta) => {
   const usuario = requisicao.usuario;
   const transportadoraId = obterIdTransportadora(requisicao);
   const donoSistema = usuarioEhDonoSistema(requisicao);
+  
+  // ✅ PAGINAÇÃO
+  const { pagina, limite, offset } = obterParametrosPaginacao(requisicao.query);
 
+  // Query para contar total de registros
+  let sqlCount = "SELECT COUNT(*) as total FROM viagens v";
+  const valoresCount = [];
+
+  if (!donoSistema) {
+    sqlCount += " WHERE v.transportadora_id = $1";
+    valoresCount.push(transportadoraId);
+  }
+
+  if (usuario.perfil === "motorista" && usuario.motorista_id) {
+    sqlCount += (valoresCount.length > 0 ? " AND " : " WHERE ") + "v.motorista_id = $" + (valoresCount.length + 1);
+    valoresCount.push(usuario.motorista_id);
+  } else if (usuario.perfil === "motorista") {
+    return resposta.json(montarRespostaPaginada([], 0, pagina, limite));
+  }
+
+  // Query para buscar dados paginados
   let sql = `
     SELECT
       v.id, v.transportadora_id, v.origem, v.destino, v.data_saida, v.data_chegada,
@@ -98,15 +119,25 @@ router.get("/", autenticar, async (requisicao, resposta) => {
   if (usuario.perfil === "motorista" && usuario.motorista_id) {
     sql += (valores.length > 0 ? " AND " : " WHERE ") + "v.motorista_id = $" + (valores.length + 1);
     valores.push(usuario.motorista_id);
-  } else if (usuario.perfil === "motorista") {
-    return resposta.json([]);
   }
 
   sql += " ORDER BY v.id DESC";
+  
+  // Adicionar LIMIT e OFFSET
+  const proximoIndice = valores.length + 1;
+  sql += ` LIMIT $${proximoIndice} OFFSET $${proximoIndice + 1}`;
+  valores.push(limite, offset);
 
   try {
-    const resultado = await banco.query(sql, valores);
-    return resposta.json(resultado.rows);
+    // Executar ambas as queries
+    const [resultadoCount, resultadoDados] = await Promise.all([
+      banco.query(sqlCount, valoresCount),
+      banco.query(sql, valores)
+    ]);
+
+    const totalRegistros = parseInt(resultadoCount.rows[0].total, 10);
+    
+    return resposta.json(montarRespostaPaginada(resultadoDados.rows, totalRegistros, pagina, limite));
   } catch (erro) {
     console.error("Erro ao buscar viagens:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao buscar viagens." });

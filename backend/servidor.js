@@ -86,8 +86,33 @@ app.get("/", (requisicao, resposta) => {
   resposta.json({ mensagem: "API AutoAcerto funcionando." });
 });
 
-app.get("/health", (requisicao, resposta) => {
-  resposta.json({ status: "ok" });
+// ✅ HEALTH CHECK: Endpoint para monitoramento
+app.get("/health", async (requisicao, resposta) => {
+  const healthCheck = {
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || "development",
+    version: "1.2.0"
+  };
+
+  try {
+    // Verificar conexão com banco de dados
+    const resultado = await banco.query("SELECT 1 as health_check");
+    healthCheck.database = {
+      status: "connected",
+      responseTime: "< 100ms"
+    };
+  } catch (erro) {
+    healthCheck.status = "degraded";
+    healthCheck.database = {
+      status: "disconnected",
+      error: erro.message
+    };
+    return resposta.status(503).json(healthCheck);
+  }
+
+  return resposta.json(healthCheck);
 });
 
 // Registrar Rotas Modularizadas

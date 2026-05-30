@@ -5,6 +5,7 @@ const { exigirAdmin, exigirAdminOuDono } = require("../middlewares/autenticacao"
 const { autorizarAcessoDespesa } = require("../middlewares/autorizacao");
 const { obterIdTransportadora, usuarioEhDonoSistema, transportadoraEscopoMutacao } = require("../helpers/escopo");
 const { normalizarIdsExclusao, placeholderIds, responderExclusao } = require("../helpers/exclusao");
+const { obterParametrosPaginacao, montarRespostaPaginada } = require("../helpers/paginacao");
 
 const router = express.Router();
 
@@ -86,7 +87,20 @@ router.post("/", exigirAdmin, async (requisicao, resposta) => {
 router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
   const transportadoraId = obterIdTransportadora(requisicao);
   const donoSistema = usuarioEhDonoSistema(requisicao);
+  
+  // ✅ PAGINAÇÃO
+  const { pagina, limite, offset } = obterParametrosPaginacao(requisicao.query);
 
+  // Query para contar total de registros
+  let sqlCount = "SELECT COUNT(*) as total FROM despesas d";
+  const valoresCount = [];
+
+  if (!donoSistema) {
+    sqlCount += " WHERE d.transportadora_id = $1";
+    valoresCount.push(transportadoraId);
+  }
+
+  // Query para buscar dados paginados
   let sql = `
     SELECT
       d.id, d.viagem_id, d.veiculo_id, d.tipo_despesa, d.descricao, d.categoria,
@@ -111,10 +125,22 @@ router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
   }
 
   sql += " ORDER BY d.id DESC";
+  
+  // Adicionar LIMIT e OFFSET
+  const proximoIndice = valores.length + 1;
+  sql += ` LIMIT $${proximoIndice} OFFSET $${proximoIndice + 1}`;
+  valores.push(limite, offset);
 
   try {
-    const resultado = await banco.query(sql, valores);
-    return resposta.json(resultado.rows);
+    // Executar ambas as queries
+    const [resultadoCount, resultadoDados] = await Promise.all([
+      banco.query(sqlCount, valoresCount),
+      banco.query(sql, valores)
+    ]);
+
+    const totalRegistros = parseInt(resultadoCount.rows[0].total, 10);
+    
+    return resposta.json(montarRespostaPaginada(resultadoDados.rows, totalRegistros, pagina, limite));
   } catch (erro) {
     console.error("Erro ao buscar despesas:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao buscar despesas." });
