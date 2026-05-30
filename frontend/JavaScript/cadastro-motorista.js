@@ -35,7 +35,12 @@ function configurarFormularioMotorista() {
       if (!response.ok) {
         const texto = await response.text();
         console.error("Erro da API:", texto);
-        alert("Erro ao cadastrar motorista");
+        let mensagem = texto;
+        try {
+          const j = JSON.parse(texto);
+          if (j && j.mensagem) mensagem = j.mensagem;
+        } catch (e) {}
+        alert(mensagem);
         return;
       }
 

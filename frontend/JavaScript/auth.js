@@ -95,10 +95,12 @@ function usuarioEhAdminOuDonoMaster(usuario) {
 // ==================== HEADERS ====================
 
 function cabecalhosAutenticados() {
-    return {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + (obterToken() || "")
+    const headers = {
+        "Content-Type": "application/json"
     };
+    const token = obterToken();
+    if (token) headers["Authorization"] = "Bearer " + token;
+    return headers;
 }
 
 // ==================== UI E MENU ====================
@@ -211,9 +213,7 @@ function configurarFetchAutenticado() {
         const urlOriginal = typeof recurso === "string" ? recurso : recurso.url;
         
         // Usa a função do config.js
-        const baseApi = typeof obterApiBaseUrl === "function" 
-            ? obterApiBaseUrl() 
-            : window.location.origin;
+        const baseApi = typeof obterApiBase === "function" ? obterApiBase() : window.location.origin;
 
         const urlApiLocalAntiga = "http://localhost:3000";
         let recursoFinal = recurso;
