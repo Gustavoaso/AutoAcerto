@@ -35,7 +35,9 @@
         if (!r.ok) throw new Error("transportadoras");
         return r.json();
       })
-      .then(function (lista) {
+      .then(function (resultado) {
+        // Suporta resposta paginada ou array direto
+        const lista = resultado.dados || resultado;
         select.innerHTML = "";
         if (!lista || lista.length === 0) {
           select.innerHTML = '<option value="">Nenhuma transportadora</option>';
