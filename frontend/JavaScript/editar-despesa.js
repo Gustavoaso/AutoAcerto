@@ -15,7 +15,9 @@ async function carregarViagens(viagemIdSelecionada) {
 
         if (!response.ok) return;
 
-        const viagens = await response.json();
+        const resultado = await response.json();
+        // Suporta resposta paginada ou array direto
+        const viagens = resultado.dados || resultado;
         const selectViagem = document.getElementById("viagemId");
 
         viagens.forEach(function (viagem) {
@@ -40,7 +42,9 @@ async function carregarVeiculos(veiculoIdSelecionado) {
 
         if (!response.ok) return;
 
-        const veiculos = await response.json();
+        const resultado = await response.json();
+        // Suporta resposta paginada ou array direto
+        const veiculos = resultado.dados || resultado;
         const selectVeiculo = document.getElementById("veiculoId");
 
         veiculos.forEach(function (veiculo) {

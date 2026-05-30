@@ -57,7 +57,9 @@ async function carregarTransportadoras() {
             return;
         }
 
-        transportadoras = await resposta.json();
+        const resultado = await resposta.json();
+        // Suporta resposta paginada ou array direto
+        transportadoras = resultado.dados || resultado;
         renderizarTabelaTransportadoras(transportadoras);
     } catch (erro) {
         console.error("Erro ao carregar transportadoras:", erro.message);

@@ -35,21 +35,27 @@ async function carregarDadosRelatorio() {
         const motoristasResultado = resultados[2];
 
         if (viagensResultado.status === "fulfilled" && viagensResultado.value.ok) {
-            viagens = await viagensResultado.value.json();
+            const resultadoViagens = await viagensResultado.value.json();
+            // Suporta resposta paginada ou array direto
+            viagens = resultadoViagens.dados || resultadoViagens;
         } else {
             console.error("Erro ao carregar viagens no relatório:", viagensResultado.reason || "status HTTP inválido");
             viagens = [];
         }
 
         if (despesasResultado.status === "fulfilled" && despesasResultado.value.ok) {
-            despesas = await despesasResultado.value.json();
+            const resultadoDespesas = await despesasResultado.value.json();
+            // Suporta resposta paginada ou array direto
+            despesas = resultadoDespesas.dados || resultadoDespesas;
         } else {
             console.error("Erro ao carregar despesas no relatório:", despesasResultado.reason || "status HTTP inválido");
             despesas = [];
         }
 
         if (motoristasResultado.status === "fulfilled" && motoristasResultado.value.ok) {
-            motoristas = await motoristasResultado.value.json();
+            const resultadoMotoristas = await motoristasResultado.value.json();
+            // Suporta resposta paginada ou array direto
+            motoristas = resultadoMotoristas.dados || resultadoMotoristas;
         } else {
             console.error("Erro ao carregar motoristas no relatório:", motoristasResultado.reason || "status HTTP inválido");
             motoristas = [];

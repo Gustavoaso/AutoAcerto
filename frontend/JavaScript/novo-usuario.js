@@ -22,7 +22,9 @@ function alternarGrupoMotorista() {
 async function carregarMotoristas() {
   const resposta = await fetch(urlApiMotoristas, { headers: cabecalhosAutenticados() });
   if (!resposta.ok) return;
-  let lista = await resposta.json();
+  const resultado = await resposta.json();
+  // Suporta resposta paginada ou array direto
+  let lista = resultado.dados || resultado;
   if (typeof filtrarListaPorTransportadoraMaster === "function") {
     lista = filtrarListaPorTransportadoraMaster(lista);
   }

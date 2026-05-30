@@ -31,10 +31,22 @@ async function carregarDadosDashboard() {
       buscarDados(urlApiDespesas)
     ]);
 
-    motoristas = respostas[0].status === "fulfilled" ? respostas[0].value : [];
-    veiculos = respostas[1].status === "fulfilled" ? respostas[1].value : [];
-    viagens = respostas[2].status === "fulfilled" ? respostas[2].value : [];
-    despesas = respostas[3].status === "fulfilled" ? respostas[3].value : [];
+    // Extrair dados considerando resposta paginada ou array direto
+    motoristas = respostas[0].status === "fulfilled" 
+      ? (respostas[0].value.dados || respostas[0].value) 
+      : [];
+    
+    veiculos = respostas[1].status === "fulfilled" 
+      ? (respostas[1].value.dados || respostas[1].value) 
+      : [];
+    
+    viagens = respostas[2].status === "fulfilled" 
+      ? (respostas[2].value.dados || respostas[2].value) 
+      : [];
+    
+    despesas = respostas[3].status === "fulfilled" 
+      ? (respostas[3].value.dados || respostas[3].value) 
+      : [];
 
     atualizarDashboard();
 

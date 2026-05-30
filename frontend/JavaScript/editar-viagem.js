@@ -18,7 +18,9 @@ async function carregarMotoristas(motoristaIdSelecionado) {
 
         if (!response.ok) return;
 
-        const motoristas = await response.json();
+        const resultado = await response.json();
+        // Suporta resposta paginada ou array direto
+        const motoristas = resultado.dados || resultado;
         const selectMotorista = document.getElementById("motoristaId");
 
         motoristas.forEach(function (motorista) {
@@ -43,7 +45,9 @@ async function carregarVeiculos(veiculoIdSelecionado) {
 
         if (!response.ok) return;
 
-        const veiculos = await response.json();
+        const resultado = await response.json();
+        // Suporta resposta paginada ou array direto
+        const veiculos = resultado.dados || resultado;
         const selectVeiculo = document.getElementById("veiculoId");
 
         veiculos.forEach(function (veiculo) {

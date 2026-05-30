@@ -125,7 +125,9 @@ async function carregarUsuarios() {
   try {
     const resposta = await fetch(urlApiUsuarios, { headers: cabecalhosAutenticados() });
     if (!resposta.ok) throw new Error("Erro ao buscar usuários.");
-    listaUsuarios = await resposta.json();
+    const resultado = await resposta.json();
+    // Suporta resposta paginada ou array direto
+    listaUsuarios = resultado.dados || resultado;
     usuariosVisiveis = listaUsuarios;
     renderizarTabelaUsuarios(listaUsuarios);
   } catch (erro) {

@@ -18,7 +18,9 @@ async function carregarViagens() {
 
     if (!response.ok) return;
 
-    let viagens = await response.json();
+    const resultado = await response.json();
+    // Suporta resposta paginada ou array direto
+    let viagens = resultado.dados || resultado;
     if (typeof filtrarListaPorTransportadoraMaster === "function") {
       viagens = filtrarListaPorTransportadoraMaster(viagens);
     }
@@ -49,7 +51,9 @@ async function carregarVeiculos() {
 
     if (!response.ok) return;
 
-    let veiculos = await response.json();
+    const resultado = await response.json();
+    // Suporta resposta paginada ou array direto
+    let veiculos = resultado.dados || resultado;
     if (typeof filtrarListaPorTransportadoraMaster === "function") {
       veiculos = filtrarListaPorTransportadoraMaster(veiculos);
     }
