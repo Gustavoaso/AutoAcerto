@@ -2,6 +2,7 @@ const express = require("express");
 const banco = require("../banco");
 const { TIPOS_DESPESA, CATEGORIAS_DESPESA, valorMonetarioValido, dataValida } = require("../validacoes");
 const { exigirAdmin, exigirAdminOuDono } = require("../middlewares/autenticacao");
+const { autorizarAcessoDespesa } = require("../middlewares/autorizacao");
 const { obterIdTransportadora, usuarioEhDonoSistema, transportadoraEscopoMutacao } = require("../helpers/escopo");
 const { normalizarIdsExclusao, placeholderIds, responderExclusao } = require("../helpers/exclusao");
 
@@ -120,7 +121,7 @@ router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
   }
 });
 
-router.get("/:id", exigirAdminOuDono, async (requisicao, resposta) => {
+router.get("/:id", exigirAdminOuDono, autorizarAcessoDespesa, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const transportadoraId = obterIdTransportadora(requisicao);
   const donoSistema = usuarioEhDonoSistema(requisicao);

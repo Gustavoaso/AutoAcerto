@@ -2,6 +2,7 @@ const express = require("express");
 const banco = require("../banco");
 const { STATUS_VIAGEM, normalizarStatus, valorMonetarioValido, dataValida } = require("../validacoes");
 const { autenticar, exigirAdmin } = require("../middlewares/autenticacao");
+const { autorizarAcessoViagem } = require("../middlewares/autorizacao");
 const { obterIdTransportadora, usuarioEhDonoSistema, transportadoraIdParaPost, transportadoraEscopoMutacao } = require("../helpers/escopo");
 const { motoristaPertenceTransportadora, veiculoPertenceTransportadora } = require("../helpers/validacoes-db");
 const { normalizarIdsExclusao, placeholderIds, responderExclusao } = require("../helpers/exclusao");
@@ -112,12 +113,10 @@ router.get("/", autenticar, async (requisicao, resposta) => {
   }
 });
 
-router.get("/:id", autenticar, async (requisicao, resposta) => {
+router.get("/:id", autenticar, autorizarAcessoViagem, async (requisicao, resposta) => {
   const { id } = requisicao.params;
-  const usuario = requisicao.usuario;
-  const transportadoraId = obterIdTransportadora(requisicao);
-  const donoSistema = usuarioEhDonoSistema(requisicao);
 
+  // ✅ SEGURANÇA: Usuário já foi autorizado pelo middleware
   let sql = `
     SELECT
       v.id, v.transportadora_id, v.origem, v.destino, v.data_saida, v.data_chegada,
@@ -134,19 +133,6 @@ router.get("/:id", autenticar, async (requisicao, resposta) => {
     WHERE v.id = $1
   `;
   const valores = [id];
-
-  if (!donoSistema) {
-    sql += " AND v.transportadora_id = $2";
-    valores.push(transportadoraId);
-  }
-
-  if (usuario.perfil === "motorista") {
-    if (!usuario.motorista_id) {
-      return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
-    }
-    sql += " AND v.motorista_id = $" + (valores.length + 1);
-    valores.push(usuario.motorista_id);
-  }
 
   try {
     const resultado = await banco.query(sql, valores);

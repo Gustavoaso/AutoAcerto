@@ -5,6 +5,7 @@ const helmet  = require("helmet");
 const rateLimit = require("express-rate-limit");
 const banco   = require("./banco");
 const { normalizarCorpoEntrada } = require("./validacoes");
+const { detectarSqlInjection, detectarXss } = require("./middlewares/waf");
 
 // Importando Rotas
 const authRoutes = require("./routes/auth.routes");
@@ -67,6 +68,11 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: "1mb" }));
+
+// ✅ SEGURANÇA: WAF para detectar SQL Injection e XSS
+app.use(detectarSqlInjection);
+app.use(detectarXss);
+
 app.use(function normalizarEntrada(requisicao, resposta, proximo) {
   if (requisicao.body && typeof requisicao.body === "object") {
     requisicao.body = normalizarCorpoEntrada(requisicao.body);
