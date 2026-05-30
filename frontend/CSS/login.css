@@ -54,11 +54,23 @@ body {
   max-width: 380px;
 }
 
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
 .logo-login {
   height: 40px;
   width: auto;
-  margin-bottom: 32px;
-  filter: brightness(0) invert(1);
+}
+
+.logo-texto {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.5px;
 }
 
 .slogan {
