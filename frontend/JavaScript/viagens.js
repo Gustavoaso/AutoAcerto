@@ -3,6 +3,12 @@ const urlApiViagens = montarUrlApi("/viagens");
 let viagens = [];
 let viagensVisiveis = [];
 let exclusaoViagens = null;
+let paginacaoAtual = {
+    paginaAtual: 1,
+    totalPaginas: 1,
+    totalItens: 0,
+    itensPorPagina: 50
+};
 
 function criarIconeViagemLista() {
     return '<svg viewBox="0 0 24 24">' +
@@ -19,21 +25,92 @@ function criarIconeEditar() {
     return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
 }
 
-async function carregarViagens() {
+async function carregarViagens(pagina = 1) {
     try {
-        const response = await fetch(urlApiViagens, { headers: cabecalhosAutenticados() });
+        mostrarLoading(true);
+        const url = `${urlApiViagens}?pagina=${pagina}&limite=50`;
+        const response = await fetch(url, { headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
             console.error("Erro ao buscar viagens");
+            mostrarLoading(false);
             return;
         }
 
-        viagens = await response.json();
+        const resultado = await response.json();
+        
+        // Suporte para resposta paginada (novo) e array direto (legado)
+        if (resultado.dados && resultado.paginacao) {
+            viagens = resultado.dados;
+            paginacaoAtual = resultado.paginacao;
+            renderizarPaginacao();
+        } else {
+            viagens = resultado;
+        }
+        
         atualizarResumoViagens();
         renderizarTabelaViagens(viagens);
+        mostrarLoading(false);
     } catch (erro) {
         console.error("Erro de conexão com a API:", erro);
+        mostrarLoading(false);
     }
+}
+
+function mostrarLoading(exibir) {
+    const corpoTabela = document.getElementById("corpoTabelaViagens");
+    if (exibir) {
+        corpoTabela.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 40px;">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 10px; color: #6b7280;">Carregando viagens...</p>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+function renderizarPaginacao() {
+    let containerPaginacao = document.getElementById("paginacaoViagens");
+    
+    if (!containerPaginacao) {
+        const tabelaContainer = document.querySelector(".tabela-viagens")?.parentElement;
+        if (tabelaContainer) {
+            containerPaginacao = document.createElement("div");
+            containerPaginacao.id = "paginacaoViagens";
+            containerPaginacao.className = "paginacao-container";
+            tabelaContainer.appendChild(containerPaginacao);
+        }
+    }
+    
+    if (!containerPaginacao) return;
+    
+    const { paginaAtual, totalPaginas, totalItens, temProxima, temAnterior } = paginacaoAtual;
+    
+    if (totalPaginas <= 1) {
+        containerPaginacao.style.display = 'none';
+        return;
+    }
+    
+    containerPaginacao.style.display = 'flex';
+    containerPaginacao.innerHTML = `
+        <button 
+            class="botao-paginacao" 
+            ${!temAnterior ? 'disabled' : ''} 
+            onclick="carregarViagens(${paginaAtual - 1})">
+            ← Anterior
+        </button>
+        <span class="info-paginacao">
+            Página ${paginaAtual} de ${totalPaginas} (${totalItens} viagens)
+        </span>
+        <button 
+            class="botao-paginacao" 
+            ${!temProxima ? 'disabled' : ''} 
+            onclick="carregarViagens(${paginaAtual + 1})">
+            Próxima →
+        </button>
+    `;
 }
 
 

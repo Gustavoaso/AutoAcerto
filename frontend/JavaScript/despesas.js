@@ -3,6 +3,12 @@ const urlApiDespesas = montarUrlApi("/despesas");
 let despesas = [];
 let despesasVisiveis = [];
 let exclusaoDespesas = null;
+let paginacaoAtual = {
+    paginaAtual: 1,
+    totalPaginas: 1,
+    totalItens: 0,
+    itensPorPagina: 50
+};
 
 function criarIconeVer() {
     return '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>';
@@ -12,21 +18,92 @@ function criarIconeEditar() {
     return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
 }
 
-async function carregarDespesas() {
+async function carregarDespesas(pagina = 1) {
     try {
-        const response = await fetch(urlApiDespesas, { headers: cabecalhosAutenticados() });
+        mostrarLoading(true);
+        const url = `${urlApiDespesas}?pagina=${pagina}&limite=50`;
+        const response = await fetch(url, { headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
             console.error("Erro ao buscar despesas");
+            mostrarLoading(false);
             return;
         }
 
-        despesas = await response.json();
+        const resultado = await response.json();
+        
+        // Suporte para resposta paginada (novo) e array direto (legado)
+        if (resultado.dados && resultado.paginacao) {
+            despesas = resultado.dados;
+            paginacaoAtual = resultado.paginacao;
+            renderizarPaginacao();
+        } else {
+            despesas = resultado;
+        }
+        
         atualizarResumoDespesas();
         renderizarTabelaDespesas(despesas);
+        mostrarLoading(false);
     } catch (erro) {
         console.error("Erro de conexao com a API:", erro);
+        mostrarLoading(false);
     }
+}
+
+function mostrarLoading(exibir) {
+    const corpoTabela = document.getElementById("corpoTabelaDespesas");
+    if (exibir) {
+        corpoTabela.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 40px;">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 10px; color: #6b7280;">Carregando despesas...</p>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+function renderizarPaginacao() {
+    let containerPaginacao = document.getElementById("paginacaoDespesas");
+    
+    if (!containerPaginacao) {
+        const tabelaContainer = document.querySelector(".tabela-despesas")?.parentElement;
+        if (tabelaContainer) {
+            containerPaginacao = document.createElement("div");
+            containerPaginacao.id = "paginacaoDespesas";
+            containerPaginacao.className = "paginacao-container";
+            tabelaContainer.appendChild(containerPaginacao);
+        }
+    }
+    
+    if (!containerPaginacao) return;
+    
+    const { paginaAtual, totalPaginas, totalItens, temProxima, temAnterior } = paginacaoAtual;
+    
+    if (totalPaginas <= 1) {
+        containerPaginacao.style.display = 'none';
+        return;
+    }
+    
+    containerPaginacao.style.display = 'flex';
+    containerPaginacao.innerHTML = `
+        <button 
+            class="botao-paginacao" 
+            ${!temAnterior ? 'disabled' : ''} 
+            onclick="carregarDespesas(${paginaAtual - 1})">
+            ← Anterior
+        </button>
+        <span class="info-paginacao">
+            Página ${paginaAtual} de ${totalPaginas} (${totalItens} despesas)
+        </span>
+        <button 
+            class="botao-paginacao" 
+            ${!temProxima ? 'disabled' : ''} 
+            onclick="carregarDespesas(${paginaAtual + 1})">
+            Próxima →
+        </button>
+    `;
 }
 
 

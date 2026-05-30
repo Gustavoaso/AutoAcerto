@@ -2,6 +2,7 @@ const urlApi = montarUrlApi("/motoristas");
 let motoristas = [];
 let motoristasVisiveis = [];
 let exclusaoMotoristas = null;
+let paginacaoAtual = { paginaAtual: 1, totalPaginas: 1, totalItens: 0 };
 
 function criarIconeMotoristaLista() {
     return '<svg viewBox="0 0 24 24">' +
@@ -18,14 +19,23 @@ function criarIconeEditar() {
     return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
 }
 
-async function carregarMotoristas() {
+async function carregarMotoristas(pagina = 1) {
     try {
-        const response = await fetch(urlApi, { headers: cabecalhosAutenticados() });
+        const url = `${urlApi}?pagina=${pagina}&limite=50`;
+        const response = await fetch(url, { headers: cabecalhosAutenticados() });
         if (!response.ok) {
             console.error("Erro ao buscar motoristas");
             return;
         }
-        motoristas = await response.json();
+        const resultado = await response.json();
+        
+        if (resultado.dados && resultado.paginacao) {
+            motoristas = resultado.dados;
+            paginacaoAtual = resultado.paginacao;
+        } else {
+            motoristas = resultado;
+        }
+        
         atualizarResumo();
         renderizarTabela(motoristas);
     } catch (error) {

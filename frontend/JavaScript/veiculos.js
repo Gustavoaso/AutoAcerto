@@ -3,6 +3,7 @@ const urlApi = montarUrlApi("/veiculos");
 let veiculosTodos = [];
 let veiculosVisiveis = [];
 let exclusaoVeiculos = null;
+let paginacaoAtual = { paginaAtual: 1, totalPaginas: 1, totalItens: 0 };
 
 function criarIconeVeiculoLista() {
   return '<svg viewBox="0 0 24 24">' +
@@ -120,11 +121,21 @@ function irParaEditarVeiculo(id) {
   window.location.href = "editar-veiculo.html?id=" + id;
 }
 
-async function carregarVeiculos() {
+async function carregarVeiculos(pagina = 1) {
   try {
-    var response = await fetch(urlApi, { headers: cabecalhosAutenticados() });
+    const url = `${urlApi}?pagina=${pagina}&limite=50`;
+    var response = await fetch(url, { headers: cabecalhosAutenticados() });
     if (!response.ok) throw new Error("Erro na API");
-    veiculosTodos = await response.json();
+    
+    const resultado = await response.json();
+    
+    if (resultado.dados && resultado.paginacao) {
+      veiculosTodos = resultado.dados;
+      paginacaoAtual = resultado.paginacao;
+    } else {
+      veiculosTodos = resultado;
+    }
+    
     atualizarResumoVeiculos(veiculosTodos);
     renderizarTabelaVeiculos(veiculosTodos);
   } catch (erro) {
