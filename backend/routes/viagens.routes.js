@@ -3,7 +3,7 @@ const banco = require("../banco");
 const { STATUS_VIAGEM, normalizarStatus, valorMonetarioValido, dataValida } = require("../validacoes");
 const { autenticar, exigirAdmin } = require("../middlewares/autenticacao");
 const { autorizarAcessoViagem } = require("../middlewares/autorizacao");
-const { obterIdTransportadora, usuarioEhDonoSistema, transportadoraIdParaPost, transportadoraEscopoMutacao } = require("../helpers/escopo");
+const { obterIdTransportadora, usuarioEhDonoSistema, obterFiltroTransportadora, transportadoraIdParaPost, transportadoraEscopoMutacao } = require("../helpers/escopo");
 const { motoristaPertenceTransportadora, veiculoPertenceTransportadora } = require("../helpers/validacoes-db");
 const { normalizarIdsExclusao, placeholderIds, responderExclusao } = require("../helpers/exclusao");
 const { obterParametrosPaginacao, montarRespostaPaginada } = require("../helpers/paginacao");
@@ -74,6 +74,7 @@ router.get("/", autenticar, async (requisicao, resposta) => {
   const usuario = requisicao.usuario;
   const transportadoraId = obterIdTransportadora(requisicao);
   const donoSistema = usuarioEhDonoSistema(requisicao);
+  const filtroTransportadoraId = obterFiltroTransportadora(requisicao);
   
   // ✅ PAGINAÇÃO
   const { pagina, limite, offset } = obterParametrosPaginacao(requisicao.query);
@@ -82,9 +83,9 @@ router.get("/", autenticar, async (requisicao, resposta) => {
   let sqlCount = "SELECT COUNT(*) as total FROM viagens v";
   const valoresCount = [];
 
-  if (!donoSistema) {
+  if (!donoSistema || filtroTransportadoraId) {
     sqlCount += " WHERE v.transportadora_id = $1";
-    valoresCount.push(transportadoraId);
+    valoresCount.push(filtroTransportadoraId || transportadoraId);
   }
 
   if (usuario.perfil === "motorista" && usuario.motorista_id) {
@@ -111,9 +112,9 @@ router.get("/", autenticar, async (requisicao, resposta) => {
   `;
   const valores = [];
 
-  if (!donoSistema) {
+  if (!donoSistema || filtroTransportadoraId) {
     sql += " WHERE v.transportadora_id = $1";
-    valores.push(transportadoraId);
+    valores.push(filtroTransportadoraId || transportadoraId);
   }
 
   if (usuario.perfil === "motorista" && usuario.motorista_id) {

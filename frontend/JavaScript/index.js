@@ -278,13 +278,26 @@ function carregarViagensEmAndamento() {
 
   if (viagensEmAndamento.length === 0) {
     listaViagens.innerHTML = `
-      <div class="item-viagem">
-        <div>
-          <div class="rota-viagem">Nenhuma viagem em andamento</div>
-          <div class="nome-motorista">Cadastre ou atualize uma viagem</div>
+      <div class="estado-vazio-viagens">
+        <div class="icone-estado-vazio-viagens">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" />
+            <circle cx="12" cy="9" r="2.5" />
+          </svg>
         </div>
+        <div class="rota-viagem">Nenhuma viagem em andamento</div>
+        <div class="nome-motorista">Assim que uma viagem for iniciada, ela aparece aqui.</div>
+        <button class="botao-secundario" type="button" id="botaoCadastrarPrimeiraViagem">Cadastrar viagem</button>
       </div>
     `;
+
+    const botaoCadastro = document.getElementById("botaoCadastrarPrimeiraViagem");
+    if (botaoCadastro) {
+      botaoCadastro.addEventListener("click", function () {
+        window.location.href = "cadastro-viagem.html";
+      });
+    }
+
     return;
   }
 

@@ -12,6 +12,15 @@ function usuarioEhDonoSistema(requisicao) {
   return requisicao.usuario.perfil === "dono";
 }
 
+function obterFiltroTransportadora(requisicao) {
+  if (!usuarioEhDonoSistema(requisicao)) {
+    return obterIdTransportadora(requisicao);
+  }
+
+  const id = parseInt(requisicao.query && requisicao.query.transportadora_id, 10);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
 const MAPA_TABELA_TRANSPORTADORA = {
   motoristas: "motoristas",
   veiculos: "veiculos",
@@ -52,6 +61,7 @@ async function transportadoraEscopoMutacao(requisicao, chaveTabela, idRecurso) {
 module.exports = {
   obterIdTransportadora,
   usuarioEhDonoSistema,
+  obterFiltroTransportadora,
   MAPA_TABELA_TRANSPORTADORA,
   transportadoraIdParaPost,
   transportadoraEscopoMutacao

@@ -167,6 +167,17 @@
       }, 120);
     });
 
+    input.addEventListener("keydown", function (evento) {
+      if (evento.key !== "Enter") return;
+
+      const cidades = obterCidadesFiltradas(listaCidades, input.value, false);
+      if (cidades.length === 0) return;
+
+      evento.preventDefault();
+      input.value = cidades[0];
+      esconderLista(wrapper);
+    });
+
     botao.addEventListener("click", function () {
       input.focus();
       renderizarLista(wrapper, input, listaCidades, true);

@@ -4,7 +4,7 @@ const rateLimit = require("express-rate-limit");
 const banco = require("../banco");
 const { normalizarEmail, emailValido } = require("../validacoes");
 const { autenticar, exigirAdmin, exigirAdminOuDono } = require("../middlewares/autenticacao");
-const { obterIdTransportadora, usuarioEhDonoSistema, transportadoraIdParaPost } = require("../helpers/escopo");
+const { obterIdTransportadora, usuarioEhDonoSistema, obterFiltroTransportadora, transportadoraIdParaPost } = require("../helpers/escopo");
 const { motoristaPertenceTransportadora } = require("../helpers/validacoes-db");
 const { normalizarIdsExclusao, placeholderIds, responderExclusao } = require("../helpers/exclusao");
 
@@ -21,6 +21,7 @@ const limitadorSenha = rateLimit({
 router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
   const transportadoraId = obterIdTransportadora(requisicao);
   const donoSistema = usuarioEhDonoSistema(requisicao);
+  const filtroTransportadoraId = obterFiltroTransportadora(requisicao);
 
   try {
     let sql = `
@@ -35,9 +36,9 @@ router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
     `;
     const valores = [];
 
-    if (!donoSistema) {
+    if (!donoSistema || filtroTransportadoraId) {
       sql += " WHERE u.transportadora_id = $1";
-      valores.push(transportadoraId);
+      valores.push(filtroTransportadoraId || transportadoraId);
     }
 
     sql += " ORDER BY u.id DESC";

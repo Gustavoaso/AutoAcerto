@@ -123,7 +123,147 @@ window.AutoAcertoHtml = {
     texto: textoHtmlSeguro
 };
 
+const CHAVE_TRANSPORTADORA_MASTER = "master_transportadora_id";
+const CHAVE_TEMA_UI = "autoacerto_tema_ui";
+
 // ==================== UI E MENU ====================
+
+function obterNomePrimeiroUsuario(usuario) {
+    return (usuario && usuario.nome) ? usuario.nome.split(" ")[0] : "Usuario";
+}
+
+function obterNomeEmpresaUsuario(usuario) {
+    if (!usuario) return "Empresa";
+    if (usuario.transportadora_nome) return usuario.transportadora_nome;
+    if (usuario.perfil === "dono") return "Todas as empresas";
+    return "Empresa nao informada";
+}
+
+function obterTransportadoraIdParaCadastroMaster() {
+    const usuario = obterUsuarioLogado();
+    if (!usuario || usuario.perfil !== "dono") return null;
+
+    const valor = sessionStorage.getItem(CHAVE_TRANSPORTADORA_MASTER);
+    const id = parseInt(valor, 10);
+    return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+function anexarTransportadoraIdSeMaster(corpo) {
+    const usuario = obterUsuarioLogado();
+    if (!usuario || usuario.perfil !== "dono") return corpo;
+
+    const tid = obterTransportadoraIdParaCadastroMaster();
+    if (!tid) return corpo;
+    corpo.transportadora_id = tid;
+    return corpo;
+}
+
+function filtrarListaPorTransportadoraMaster(lista) {
+    const usuario = obterUsuarioLogado();
+    if (!usuario || usuario.perfil !== "dono") return lista || [];
+
+    const tid = obterTransportadoraIdParaCadastroMaster();
+    if (!tid) return [];
+
+    return (lista || []).filter(function (item) {
+        return Number(item.transportadora_id) === tid;
+    });
+}
+
+function validarTransportadoraMasterParaCadastro(opcoes) {
+    const usuario = obterUsuarioLogado();
+    if (!usuario || usuario.perfil !== "dono") return true;
+    if (obterTransportadoraIdParaCadastroMaster()) return true;
+
+    const msg = (opcoes && opcoes.mensagemErro) ||
+        "Selecione a transportadora no topo da pagina para definir o escopo do cadastro.";
+    window.alert(msg);
+    return false;
+}
+
+function obterUrlVoltarCadastro() {
+    const pagina = (window.location.pathname.split("/").pop() || "").toLowerCase();
+    const mapa = {
+        "cadastro-motorista.html": "motoristas.html",
+        "cadastro-veiculo.html": "veiculos.html",
+        "cadastro-viagem.html": "viagens.html",
+        "cadastro-despesa.html": "despesas.html",
+        "novo-usuario.html": "configuracoes.html?secao=usuarios"
+    };
+
+    return mapa[pagina] || "index.html";
+}
+
+function navegarVoltarCadastro() {
+    if (document.referrer && document.referrer.startsWith(window.location.origin)) {
+        window.history.back();
+        return;
+    }
+
+    window.location.href = obterUrlVoltarCadastro();
+}
+
+function criarIconePredioTopo() {
+    return '<svg viewBox="0 0 24 24"><path d="M4 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16" /><path d="M3 21h18" /><path d="M8 7h2M8 11h2M8 15h2M14 7h1M14 11h1M14 15h1" /></svg>';
+}
+
+function criarIconeNotificacaoTopo() {
+    return '<svg viewBox="0 0 24 24"><path d="M10.3 21a2 2 0 0 0 3.4 0" /><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /></svg>';
+}
+
+function criarIconeTemaTopo() {
+    return '<svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z" /></svg>';
+}
+
+function padronizarTopoPagina() {
+    const topo = document.querySelector(".topo-pagina");
+    const usuario = obterUsuarioLogado();
+    if (!topo || !usuario) return;
+
+    const controleEmpresa = usuario.perfil === "dono"
+        ? '<div class="botao-empresa-topo controle-empresa-topo" aria-label="Transportadora atual">' +
+            criarIconePredioTopo() +
+            '<select id="seletorEmpresaTopo" class="seletor-empresa-topo" aria-label="Selecionar transportadora">' +
+                '<option value="">Selecionar transportadora</option>' +
+            '</select>' +
+          '</div>'
+        : '<div class="botao-empresa-topo" aria-label="Empresa atual">' +
+            criarIconePredioTopo() +
+            '<span class="nome-empresa-topo">Carregando...</span>' +
+          '</div>';
+
+    topo.innerHTML =
+        '<div class="acoes-topo">' +
+            controleEmpresa +
+            '<span class="divisor-topo"></span>' +
+            '<button class="botao-icone" type="button" id="botaoNotificacoesTopo" aria-label="Notificacoes">' + criarIconeNotificacaoTopo() + '</button>' +
+            '<button class="botao-icone" type="button" id="botaoTemaTopo" aria-label="Alternar tema">' + criarIconeTemaTopo() + '</button>' +
+            '<button class="perfil-usuario" type="button" id="botaoPerfilTopo" aria-label="Abrir perfil">' +
+                '<div class="avatar-usuario">--</div>' +
+                '<span class="nome-usuario">Carregando...</span>' +
+            '</button>' +
+        '</div>' +
+        '<div class="painel-topo-info oculto" id="painelNotificacoesTopo">' +
+            '<strong>Central rapida</strong>' +
+            '<p id="textoPainelNotificacoesTopo">Sem notificacoes no momento.</p>' +
+        '</div>';
+}
+
+function inserirBotaoVoltarCadastro() {
+    const pagina = (window.location.pathname.split("/").pop() || "").toLowerCase();
+    if (!pagina.startsWith("cadastro-") && pagina !== "novo-usuario.html") return;
+
+    const cabecalho = document.querySelector(".cabecalho-conteudo");
+    if (!cabecalho || cabecalho.querySelector("#botaoVoltarCadastro")) return;
+
+    const botao = document.createElement("button");
+    botao.type = "button";
+    botao.id = "botaoVoltarCadastro";
+    botao.className = "botao-secundario";
+    botao.textContent = "Voltar";
+    botao.addEventListener("click", navegarVoltarCadastro);
+    cabecalho.appendChild(botao);
+}
 
 function preencherInfoUsuario() {
     const usuario = obterUsuarioLogado();
@@ -133,13 +273,8 @@ function preencherInfoUsuario() {
     const avatarElement = document.querySelector(".avatar-usuario");
     const empresaElement = document.querySelector(".nome-empresa-topo");
 
-    if (nomeElement) {
-        nomeElement.textContent = usuario.nome || "Usuario";
-    }
-
-    if (empresaElement) {
-        empresaElement.textContent = obterNomeEmpresaUsuario(usuario);
-    }
+    if (nomeElement) nomeElement.textContent = usuario.nome || "Usuario";
+    if (empresaElement) empresaElement.textContent = obterNomeEmpresaUsuario(usuario);
 
     if (avatarElement) {
         const iniciais = usuario.nome
@@ -162,13 +297,6 @@ function preencherInfoUsuario() {
     ajustarMenuPorPerfil(usuario);
 }
 
-function obterNomeEmpresaUsuario(usuario) {
-    if (!usuario) return "Empresa";
-    if (usuario.transportadora_nome) return usuario.transportadora_nome;
-    if (usuario.perfil === "dono") return "Todas as empresas";
-    return "Empresa nao informada";
-}
-
 async function atualizarSessaoAtualDoBanco() {
     if (typeof montarUrlApi !== "function") return;
 
@@ -186,8 +314,127 @@ async function atualizarSessaoAtualDoBanco() {
         const usuarioAtualizado = { ...usuarioAtual, ...dados.usuario };
         localStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
         preencherInfoUsuario();
+        await preencherControleTransportadoraTopo();
+        atualizarPainelTopo();
     } catch (erro) {
         console.warn("Nao foi possivel atualizar dados da sessao:", erro.message);
+    }
+}
+
+async function preencherControleTransportadoraTopo() {
+    const usuario = obterUsuarioLogado();
+    const seletor = document.getElementById("seletorEmpresaTopo");
+    const empresaElement = document.querySelector(".nome-empresa-topo");
+
+    if (!usuario) return;
+
+    if (empresaElement) {
+        empresaElement.textContent = obterNomeEmpresaUsuario(usuario);
+    }
+
+    if (!seletor || usuario.perfil !== "dono" || typeof montarUrlApi !== "function") return;
+
+    const valorSalvo = sessionStorage.getItem(CHAVE_TRANSPORTADORA_MASTER) || "";
+    seletor.innerHTML = '<option value="">Todas as transportadoras</option>';
+
+    try {
+        const resposta = await fetch(montarUrlApi("/transportadoras"), {
+            headers: cabecalhosAutenticados()
+        });
+
+        if (!resposta.ok) {
+            throw new Error("transportadoras");
+        }
+
+        const resultado = await resposta.json();
+        const lista = resultado.dados || resultado;
+
+        lista.forEach(function (transportadora) {
+            const opcao = document.createElement("option");
+            opcao.value = String(transportadora.id);
+            opcao.textContent = transportadora.nome;
+            seletor.appendChild(opcao);
+        });
+
+        if (valorSalvo && lista.some(function (item) { return String(item.id) === valorSalvo; })) {
+            seletor.value = valorSalvo;
+        }
+    } catch (erro) {
+        seletor.innerHTML = '<option value="">Erro ao carregar</option>';
+    }
+}
+
+function atualizarPainelTopo() {
+    const usuario = obterUsuarioLogado();
+    const painel = document.getElementById("textoPainelNotificacoesTopo");
+    if (!usuario || !painel) return;
+
+    const empresa = usuario.perfil === "dono"
+        ? (document.getElementById("seletorEmpresaTopo")?.selectedOptions[0]?.textContent || "Todas as transportadoras")
+        : obterNomeEmpresaUsuario(usuario);
+
+    painel.textContent = "Usuario: " + obterNomePrimeiroUsuario(usuario) + ". Escopo atual: " + empresa + ".";
+}
+
+function aplicarTemaSalvo() {
+    const tema = localStorage.getItem(CHAVE_TEMA_UI) || "claro";
+    document.documentElement.setAttribute("data-tema-ui", tema);
+}
+
+function alternarTemaUi() {
+    const atual = document.documentElement.getAttribute("data-tema-ui") || "claro";
+    const proximo = atual === "escuro" ? "claro" : "escuro";
+    document.documentElement.setAttribute("data-tema-ui", proximo);
+    localStorage.setItem(CHAVE_TEMA_UI, proximo);
+}
+
+function configurarInteracoesTopo() {
+    const usuario = obterUsuarioLogado();
+    const botaoPerfil = document.getElementById("botaoPerfilTopo");
+    const botaoTema = document.getElementById("botaoTemaTopo");
+    const botaoNotificacoes = document.getElementById("botaoNotificacoesTopo");
+    const painelNotificacoes = document.getElementById("painelNotificacoesTopo");
+    const seletorEmpresa = document.getElementById("seletorEmpresaTopo");
+    const blocoEmpresa = document.querySelector(".botao-empresa-topo");
+
+    if (botaoPerfil) {
+        botaoPerfil.addEventListener("click", function () {
+            window.location.href = usuario && usuario.perfil === "motorista" ? "viagens.html" : "configuracoes.html";
+        });
+    }
+
+    if (botaoTema) {
+        botaoTema.addEventListener("click", alternarTemaUi);
+    }
+
+    if (blocoEmpresa && !seletorEmpresa) {
+        blocoEmpresa.addEventListener("click", function () {
+            if (!usuario || usuario.perfil === "motorista") return;
+            window.location.href = "configuracoes.html";
+        });
+    }
+
+    if (botaoNotificacoes && painelNotificacoes) {
+        botaoNotificacoes.addEventListener("click", function () {
+            painelNotificacoes.classList.toggle("oculto");
+            atualizarPainelTopo();
+        });
+    }
+
+    document.addEventListener("click", function (evento) {
+        if (!painelNotificacoes || painelNotificacoes.classList.contains("oculto")) return;
+        if (painelNotificacoes.contains(evento.target)) return;
+        if (botaoNotificacoes && botaoNotificacoes.contains(evento.target)) return;
+        painelNotificacoes.classList.add("oculto");
+    });
+
+    if (seletorEmpresa) {
+        seletorEmpresa.addEventListener("change", function () {
+            sessionStorage.setItem(CHAVE_TRANSPORTADORA_MASTER, seletorEmpresa.value);
+            document.dispatchEvent(new CustomEvent("autoacerto-master-transportadora"));
+            atualizarPainelTopo();
+            window.location.reload();
+        });
     }
 }
 
@@ -256,6 +503,11 @@ function configurarBotaoSair() {
     botaoSair.addEventListener("click", encerrarSessao);
 }
 
+window.obterTransportadoraIdParaCadastroMaster = obterTransportadoraIdParaCadastroMaster;
+window.anexarTransportadoraIdSeMaster = anexarTransportadoraIdSeMaster;
+window.filtrarListaPorTransportadoraMaster = filtrarListaPorTransportadoraMaster;
+window.validarTransportadoraMasterParaCadastro = validarTransportadoraMasterParaCadastro;
+
 // ==================== FETCH INTERCEPTOR ====================
 
 function configurarFetchAutenticado() {
@@ -292,10 +544,28 @@ function configurarFetchAutenticado() {
 
         const novasOpcoes = opcoes ? { ...opcoes } : {};
         const headers = new Headers(novasOpcoes.headers || {});
+        const usuario = obterUsuarioLogado();
+        const metodo = (novasOpcoes.method || (typeof recurso !== "string" && recurso.method) || "GET").toUpperCase();
 
         const token = obterToken();
         if (token && !headers.has("Authorization")) {
             headers.set("Authorization", "Bearer " + token);
+        }
+
+        if (
+            usuario &&
+            usuario.perfil === "dono" &&
+            metodo === "GET" &&
+            !urlFinal.includes("/auth/") &&
+            !urlFinal.includes("/transportadoras")
+        ) {
+            const transportadoraId = obterTransportadoraIdParaCadastroMaster();
+            if (transportadoraId) {
+                const urlComContexto = new URL(urlFinal);
+                urlComContexto.searchParams.set("transportadora_id", String(transportadoraId));
+                urlFinal = urlComContexto.toString();
+                recursoFinal = typeof recurso === "string" ? urlFinal : new Request(urlFinal, recurso);
+            }
         }
 
         novasOpcoes.headers = headers;
@@ -316,8 +586,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const usuario = exigirAutenticacao();
     if (!usuario) return;
 
+    aplicarTemaSalvo();
+    padronizarTopoPagina();
+    inserirBotaoVoltarCadastro();
     preencherInfoUsuario();
+    preencherControleTransportadoraTopo();
     atualizarSessaoAtualDoBanco();
+    configurarInteracoesTopo();
+    atualizarPainelTopo();
     marcarItemMenuLateralAtivo();
     configurarBotaoSair();
 });

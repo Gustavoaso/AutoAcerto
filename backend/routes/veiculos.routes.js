@@ -3,7 +3,7 @@ const banco = require("../banco");
 const { STATUS_VEICULO, normalizarStatus } = require("../validacoes");
 const { exigirAdmin, exigirAdminOuDono } = require("../middlewares/autenticacao");
 const { autorizarAcessoVeiculo } = require("../middlewares/autorizacao");
-const { obterIdTransportadora, usuarioEhDonoSistema, transportadoraIdParaPost, transportadoraEscopoMutacao } = require("../helpers/escopo");
+const { obterIdTransportadora, usuarioEhDonoSistema, obterFiltroTransportadora, transportadoraIdParaPost, transportadoraEscopoMutacao } = require("../helpers/escopo");
 const { normalizarIdsExclusao, placeholderIds, responderExclusao } = require("../helpers/exclusao");
 const { obterParametrosPaginacao, montarRespostaPaginada } = require("../helpers/paginacao");
 
@@ -70,6 +70,7 @@ router.post("/", exigirAdmin, async (req, res) => {
 router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
   const transportadoraId = obterIdTransportadora(requisicao);
   const donoSistema = usuarioEhDonoSistema(requisicao);
+  const filtroTransportadoraId = obterFiltroTransportadora(requisicao);
   
   // ✅ PAGINAÇÃO
   const { pagina, limite, offset } = obterParametrosPaginacao(requisicao.query);
@@ -78,9 +79,9 @@ router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
   let sqlCount = "SELECT COUNT(*) as total FROM veiculos v";
   const valoresCount = [];
 
-  if (!donoSistema) {
+  if (!donoSistema || filtroTransportadoraId) {
     sqlCount += " WHERE v.transportadora_id = $1";
-    valoresCount.push(transportadoraId);
+    valoresCount.push(filtroTransportadoraId || transportadoraId);
   }
 
   // Query para buscar dados paginados
@@ -92,9 +93,9 @@ router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
     `;
     const valores = [];
 
-    if (!donoSistema) {
+    if (!donoSistema || filtroTransportadoraId) {
       sql += " WHERE v.transportadora_id=$1";
-      valores.push(transportadoraId);
+      valores.push(filtroTransportadoraId || transportadoraId);
     }
 
     sql += " ORDER BY v.id DESC";
