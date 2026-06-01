@@ -1,6 +1,6 @@
 const express = require("express");
 const banco = require("../banco");
-const { STATUS_VIAGEM, normalizarStatus, valorMonetarioValido, dataValida } = require("../validacoes");
+const { STATUS_VIAGEM, normalizarStatus, valorMonetarioValido, dataValida, dataMaiorOuIgual } = require("../validacoes");
 const { autenticar, exigirAdmin, exigirAdminOuMotorista } = require("../middlewares/autenticacao");
 const { autorizarAcessoViagem } = require("../middlewares/autorizacao");
 const { obterIdTransportadora, usuarioEhDonoSistema, obterFiltroTransportadora, transportadoraIdParaPost, transportadoraEscopoMutacao } = require("../helpers/escopo");
@@ -39,6 +39,10 @@ router.post("/", exigirAdmin, async (requisicao, resposta) => {
 
   if (!dataValida(dataSaida) || !dataValida(dataChegada)) {
     return resposta.status(400).json({ mensagem: "Informe datas validas para a viagem." });
+  }
+
+  if (!dataMaiorOuIgual(dataChegada, dataSaida)) {
+    return resposta.status(400).json({ mensagem: "A data de chegada nao pode ser anterior a data de saida." });
   }
 
   try {
@@ -238,6 +242,10 @@ router.put("/:id", exigirAdminOuMotorista, autorizarAcessoViagem, async (requisi
 
   if (!dataValida(dataSaida) || !dataValida(dataChegada)) {
     return resposta.status(400).json({ mensagem: "Informe datas validas para a viagem." });
+  }
+
+  if (!dataMaiorOuIgual(dataChegada, dataSaida)) {
+    return resposta.status(400).json({ mensagem: "A data de chegada nao pode ser anterior a data de saida." });
   }
 
   try {

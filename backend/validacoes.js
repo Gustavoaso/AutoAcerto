@@ -19,8 +19,9 @@ function normalizarCorpoEntrada(valor, chave) {
   }
 
   if (typeof valor === "string") {
-    if (String(chave || "").toLowerCase().includes("senha")) {
-      return valor;
+    const nomeCampo = String(chave || "").toLowerCase();
+    if (nomeCampo.includes("senha") || nomeCampo.includes("base64")) {
+      return valor.trim();
     }
     return valor.trim().slice(0, 5000);
   }
@@ -49,6 +50,34 @@ function dataValida(data) {
   if (!data) return false;
   const timestamp = Date.parse(data);
   return Number.isFinite(timestamp);
+}
+
+function extrairDataIso(valor) {
+  if (!valor) return null;
+  const texto = String(valor);
+  if (/^\d{4}-\d{2}-\d{2}/.test(texto)) {
+    return texto.slice(0, 10);
+  }
+  const timestamp = Date.parse(texto);
+  if (!Number.isFinite(timestamp)) return null;
+  const data = new Date(timestamp);
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const dia = String(data.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
+}
+
+function dataMaiorOuIgual(dataA, dataB) {
+  const isoA = extrairDataIso(dataA);
+  const isoB = extrairDataIso(dataB);
+  if (!isoA || !isoB) return false;
+  return isoA >= isoB;
+}
+
+function dataNaoFutura(data) {
+  const iso = extrairDataIso(data);
+  if (!iso) return false;
+  return iso <= extrairDataIso(new Date());
 }
 
 function cpfValido(cpf) {
@@ -117,6 +146,9 @@ module.exports = {
   normalizarStatus,
   valorMonetarioValido,
   dataValida,
+  extrairDataIso,
+  dataMaiorOuIgual,
+  dataNaoFutura,
   cpfValido,
   cnpjValido
 };

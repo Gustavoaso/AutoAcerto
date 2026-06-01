@@ -35,14 +35,32 @@ const xssPatterns = [
   /<embed/gi
 ];
 
+const CAMPOS_IGNORADOS_WAF = new Set(["anexoCupomBase64"]);
+
+function omitirCamposBinarios(valor) {
+  if (Array.isArray(valor)) {
+    return valor.map(omitirCamposBinarios);
+  }
+
+  if (valor && typeof valor === "object") {
+    return Object.fromEntries(
+      Object.entries(valor)
+        .filter(([chave]) => !CAMPOS_IGNORADOS_WAF.has(chave))
+        .map(([chave, conteudo]) => [chave, omitirCamposBinarios(conteudo)])
+    );
+  }
+
+  return valor;
+}
+
 /**
  * Middleware para detectar SQL Injection
  */
 function detectarSqlInjection(requisicao, resposta, proximo) {
   try {
-    // Serializar body e query params para análise
+    // Serializar body e query params para análise (ignora anexos binários/base64)
     const conteudo = JSON.stringify({
-      body: requisicao.body,
+      body: omitirCamposBinarios(requisicao.body),
       query: requisicao.query,
       params: requisicao.params
     });
@@ -81,7 +99,7 @@ function detectarSqlInjection(requisicao, resposta, proximo) {
 function detectarXss(requisicao, resposta, proximo) {
   try {
     const conteudo = JSON.stringify({
-      body: requisicao.body,
+      body: omitirCamposBinarios(requisicao.body),
       query: requisicao.query
     });
     

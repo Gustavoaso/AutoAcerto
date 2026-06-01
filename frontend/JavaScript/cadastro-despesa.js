@@ -11,21 +11,19 @@ const paramsDespesa = new URLSearchParams(window.location.search);
 const viagemPreSelecionada = paramsDespesa.get("viagemId");
 const usuarioLogado = typeof obterUsuarioLogado === "function" ? obterUsuarioLogado() : null;
 let anexoCupomAtual = null;
+let viagensCache = [];
 
 async function carregarViagens() {
   try {
-    const response = await fetch(urlApiViagens, {
-      headers: cabecalhosAutenticados()
-    });
+    let viagens = window.AutoAcertoApi
+      ? await window.AutoAcertoApi.buscarTodosRegistrosPaginados(urlApiViagens)
+      : (await (await fetch(urlApiViagens, { headers: cabecalhosAutenticados() })).json()).dados || [];
 
-    if (!response.ok) return;
-
-    const resultado = await response.json();
-    // Suporta resposta paginada ou array direto
-    let viagens = resultado.dados || resultado;
     if (typeof filtrarListaPorTransportadoraMaster === "function") {
       viagens = filtrarListaPorTransportadoraMaster(viagens);
     }
+
+    viagensCache = viagens;
 
     const selectViagem = document.getElementById("viagemId");
     selectViagem.innerHTML = '<option value="">Selecione</option>';
@@ -257,7 +255,25 @@ function configurarFormularioDespesa() {
       ? window.AutoAcertoMascaras.moedaParaNumero(document.getElementById("valor").value)
       : parseFloat(document.getElementById("valor").value);
     if (valorNum === undefined || isNaN(valorNum) || valorNum <= 0) {
-      alert("Informe um valor válido.");
+      alert("Informe um valor maior que zero.");
+      return;
+    }
+
+    const dataDespesa = document.getElementById("dataDespesa").value;
+    if (tipoDespesaSelecionado === "viagem") {
+      const viagemId = document.getElementById("viagemId").value;
+      const viagem = viagensCache.find(function (item) {
+        return String(item.id) === String(viagemId);
+      });
+      const erroData = window.AutoAcertoRegras
+        ? window.AutoAcertoRegras.validarDespesa(dataDespesa, viagem)
+        : null;
+      if (erroData) {
+        alert(erroData);
+        return;
+      }
+    } else if (window.AutoAcertoRegras && !window.AutoAcertoRegras.dataNaoFutura(dataDespesa)) {
+      alert("A data da despesa nao pode ser futura.");
       return;
     }
 
@@ -267,7 +283,7 @@ function configurarFormularioDespesa() {
       veiculoId: tipoDespesaSelecionado === "veiculo" ? document.getElementById("veiculoId").value : null,
       descricao: document.getElementById("descricao").value,
       categoria: document.getElementById("categoria").value,
-      dataDespesa: document.getElementById("dataDespesa").value,
+      dataDespesa: dataDespesa,
       valor: valorNum
     };
 

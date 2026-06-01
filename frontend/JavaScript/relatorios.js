@@ -7,6 +7,42 @@ let despesas = [];
 let motoristas = [];
 let periodoDias = 30;
 
+async function buscarTodosRegistrosPaginados(url) {
+    if (window.AutoAcertoApi && typeof window.AutoAcertoApi.buscarTodosRegistrosPaginados === "function") {
+        return window.AutoAcertoApi.buscarTodosRegistrosPaginados(url);
+    }
+
+    const resposta = await fetch(url, { headers: cabecalhosAutenticados() });
+    if (!resposta.ok) throw new Error("Falha ao carregar " + url);
+    const json = await resposta.json();
+    return json.dados || json;
+}
+
+function extrairDataIso(valor) {
+    if (window.AutoAcertoRegras && typeof window.AutoAcertoRegras.extrairDataIso === "function") {
+        return window.AutoAcertoRegras.extrairDataIso(valor);
+    }
+    if (!valor) return null;
+    const texto = String(valor);
+    return /^\d{4}-\d{2}-\d{2}/.test(texto) ? texto.slice(0, 10) : null;
+}
+
+function obterDataLimiteIso(dias) {
+    if (dias === 0) return null;
+    const dataLimite = new Date();
+    dataLimite.setHours(0, 0, 0, 0);
+    dataLimite.setDate(dataLimite.getDate() - dias);
+    return extrairDataIso(dataLimite);
+}
+
+function dataDentroDoPeriodo(dataValor, dias) {
+    const dataIso = extrairDataIso(dataValor);
+    const limiteIso = obterDataLimiteIso(dias);
+    if (!dataIso) return false;
+    if (!limiteIso) return true;
+    return dataIso >= limiteIso;
+}
+
 function criarIconeViagemLista() {
     return '<svg viewBox="0 0 24 24">' +
         '<path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" />' +
@@ -24,42 +60,15 @@ function criarIconeForaViagem() {
 
 async function carregarDadosRelatorio() {
     try {
-        const resultados = await Promise.allSettled([
-            fetch(urlApiViagens, { headers: cabecalhosAutenticados() }),
-            fetch(urlApiDespesas, { headers: cabecalhosAutenticados() }),
-            fetch(urlApiMotoristas, { headers: cabecalhosAutenticados() })
+        const [viagensCarregadas, despesasCarregadas, motoristasCarregados] = await Promise.all([
+            buscarTodosRegistrosPaginados(urlApiViagens),
+            buscarTodosRegistrosPaginados(urlApiDespesas),
+            buscarTodosRegistrosPaginados(urlApiMotoristas)
         ]);
 
-        const viagensResultado = resultados[0];
-        const despesasResultado = resultados[1];
-        const motoristasResultado = resultados[2];
-
-        if (viagensResultado.status === "fulfilled" && viagensResultado.value.ok) {
-            const resultadoViagens = await viagensResultado.value.json();
-            // Suporta resposta paginada ou array direto
-            viagens = resultadoViagens.dados || resultadoViagens;
-        } else {
-            console.error("Erro ao carregar viagens no relatório:", viagensResultado.reason || "status HTTP inválido");
-            viagens = [];
-        }
-
-        if (despesasResultado.status === "fulfilled" && despesasResultado.value.ok) {
-            const resultadoDespesas = await despesasResultado.value.json();
-            // Suporta resposta paginada ou array direto
-            despesas = resultadoDespesas.dados || resultadoDespesas;
-        } else {
-            console.error("Erro ao carregar despesas no relatório:", despesasResultado.reason || "status HTTP inválido");
-            despesas = [];
-        }
-
-        if (motoristasResultado.status === "fulfilled" && motoristasResultado.value.ok) {
-            const resultadoMotoristas = await motoristasResultado.value.json();
-            // Suporta resposta paginada ou array direto
-            motoristas = resultadoMotoristas.dados || resultadoMotoristas;
-        } else {
-            console.error("Erro ao carregar motoristas no relatório:", motoristasResultado.reason || "status HTTP inválido");
-            motoristas = [];
-        }
+        viagens = viagensCarregadas;
+        despesas = despesasCarregadas;
+        motoristas = motoristasCarregados;
 
         popularFiltroMotorista();
         aplicarFiltrosRelatorio();
@@ -106,21 +115,18 @@ function obterResumoVeiculosDespesas(listaDespesas) {
     return { modelo: "Diversos veículos", placa: veiculos.length + " veículos" };
 }
 
-function obterDataLimite(dias) {
-    if (dias === 0) return null;
-    const dataLimite = new Date();
-    dataLimite.setDate(dataLimite.getDate() - dias);
-    return dataLimite;
+function filtrarViagensPorPeriodo(listaViagens, dias) {
+    return listaViagens.filter(function (viagem) {
+        return dataDentroDoPeriodo(viagem.data_saida, dias);
+    });
 }
 
-function filtrarViagensPorPeriodo(listaViagens, dias) {
-    const dataLimite = obterDataLimite(dias);
-    if (!dataLimite) return listaViagens;
+function filtrarDespesasForaDeViagem(dias, valorTipoLancamento) {
+    if (valorTipoLancamento === "viagens") return [];
 
-    return listaViagens.filter(function (viagem) {
-        if (!viagem.data_saida) return false;
-        const dataSaida = new Date(viagem.data_saida);
-        return dataSaida >= dataLimite;
+    return despesas.filter(function (despesa) {
+        if (despesa.viagem_id) return false;
+        return dataDentroDoPeriodo(despesa.data_despesa, dias);
     });
 }
 
@@ -130,19 +136,8 @@ function obterDespesasDaViagem(idViagem) {
     });
 }
 
-function filtrarDespesasForaDeViagemPorPeriodo(dias, valorMotorista, valorStatus, valorTipoLancamento) {
-    if (valorTipoLancamento === "viagens") return [];
-    if (valorMotorista !== "todos" || valorStatus !== "todos") return [];
-
-    const dataLimite = obterDataLimite(dias);
-
-    return despesas.filter(function (despesa) {
-        if (despesa.viagem_id) return false;
-        if (!dataLimite) return true;
-        if (!despesa.data_despesa) return false;
-        const dataDespesa = new Date(despesa.data_despesa);
-        return dataDespesa >= dataLimite;
-    });
+function filtrarDespesasForaDeViagemPorPeriodo(dias, valorTipoLancamento) {
+    return filtrarDespesasForaDeViagem(dias, valorTipoLancamento);
 }
 
 function somarDespesasDaViagem(idViagem) {
@@ -401,7 +396,7 @@ function aplicarFiltrosRelatorio() {
         listaFiltrada = [];
     }
 
-    const despesasForaDeViagem = filtrarDespesasForaDeViagemPorPeriodo(periodoDias, valorMotorista, valorStatus, valorTipoLancamento);
+    const despesasForaDeViagem = filtrarDespesasForaDeViagemPorPeriodo(periodoDias, valorTipoLancamento);
 
     atualizarMetricas(listaFiltrada, despesasForaDeViagem);
     renderizarTabelaRelatorio(listaFiltrada, despesasForaDeViagem);
@@ -431,7 +426,7 @@ function exportarCSV() {
         listaFiltrada = [];
     }
 
-    const despesasForaDeViagem = filtrarDespesasForaDeViagemPorPeriodo(periodoDias, valorMotorista, valorStatus, valorTipoLancamento);
+    const despesasForaDeViagem = filtrarDespesasForaDeViagemPorPeriodo(periodoDias, valorTipoLancamento);
 
     const linhasCSV = [
         ["Origem", "Destino", "Motorista", "Veiculo", "Placa", "Data Saida", "Frete", "Despesas", "Lucro", "Status"]

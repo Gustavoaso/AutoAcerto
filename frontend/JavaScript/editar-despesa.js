@@ -8,16 +8,15 @@ const idDespesa = params.get("id");
 const modal = document.getElementById("modalSucesso");
 const botaoOk = document.getElementById("botaoOkModal");
 let tipoDespesaSelecionado = "viagem";
+let viagensCache = [];
 
 async function carregarViagens(viagemIdSelecionada) {
     try {
-        const response = await fetch(urlApiViagens,{ headers: cabecalhosAutenticados() });
+        let viagens = window.AutoAcertoApi
+            ? await window.AutoAcertoApi.buscarTodosRegistrosPaginados(urlApiViagens)
+            : (await (await fetch(urlApiViagens, { headers: cabecalhosAutenticados() })).json()).dados || [];
 
-        if (!response.ok) return;
-
-        const resultado = await response.json();
-        // Suporta resposta paginada ou array direto
-        const viagens = resultado.dados || resultado;
+        viagensCache = viagens;
         const selectViagem = document.getElementById("viagemId");
 
         viagens.forEach(function (viagem) {
@@ -146,7 +145,25 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         ? window.AutoAcertoMascaras.moedaParaNumero(document.getElementById("valor").value)
         : parseFloat(document.getElementById("valor").value);
     if (isNaN(valorNum) || valorNum <= 0) {
-        alert("Informe um valor válido.");
+        alert("Informe um valor maior que zero.");
+        return;
+    }
+
+    const dataDespesa = document.getElementById("dataDespesa").value;
+    if (tipoDespesaSelecionado === "viagem") {
+        const viagemId = document.getElementById("viagemId").value;
+        const viagem = viagensCache.find(function (item) {
+            return String(item.id) === String(viagemId);
+        });
+        const erroData = window.AutoAcertoRegras
+            ? window.AutoAcertoRegras.validarDespesa(dataDespesa, viagem)
+            : null;
+        if (erroData) {
+            alert(erroData);
+            return;
+        }
+    } else if (window.AutoAcertoRegras && !window.AutoAcertoRegras.dataNaoFutura(dataDespesa)) {
+        alert("A data da despesa nao pode ser futura.");
         return;
     }
 
@@ -156,7 +173,7 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         veiculoId: tipoDespesaSelecionado === "veiculo" ? document.getElementById("veiculoId").value : null,
         descricao: document.getElementById("descricao").value,
         categoria: document.getElementById("categoria").value,
-        dataDespesa: document.getElementById("dataDespesa").value,
+        dataDespesa: dataDespesa,
         valor: valorNum,
         observacoes: document.getElementById("observacoes").value
     };

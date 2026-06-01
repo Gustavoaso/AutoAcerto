@@ -77,7 +77,17 @@ function configurarFormularioViagem() {
       ? window.AutoAcertoMascaras.moedaParaNumero(document.getElementById("valorFrete").value)
       : parseFloat(document.getElementById("valorFrete").value);
     if (isNaN(valorFreteNum) || valorFreteNum <= 0) {
-      alert("Informe um valor de frete válido.");
+      alert("Informe um valor de frete maior que zero.");
+      return;
+    }
+
+    const dataSaida = document.getElementById("dataSaida").value;
+    const dataChegada = document.getElementById("dataChegada").value;
+    const erroDatas = window.AutoAcertoRegras
+      ? window.AutoAcertoRegras.validarDatasViagem(dataSaida, dataChegada)
+      : null;
+    if (erroDatas) {
+      alert(erroDatas);
       return;
     }
 
@@ -99,8 +109,8 @@ function configurarFormularioViagem() {
       destino: document.getElementById("destino").value,
       motoristaId: document.getElementById("motoristaId").value,
       veiculoId: document.getElementById("veiculoId").value,
-      dataSaida: document.getElementById("dataSaida").value,
-      dataChegada: document.getElementById("dataChegada").value,
+      dataSaida: dataSaida,
+      dataChegada: dataChegada,
       valorFrete: valorFreteNum,
       kmInicial: kmInicialNum,
       kmFinal: kmFinalNum,

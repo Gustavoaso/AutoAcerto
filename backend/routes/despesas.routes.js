@@ -1,6 +1,6 @@
 const express = require("express");
 const banco = require("../banco");
-const { TIPOS_DESPESA, CATEGORIAS_DESPESA, valorMonetarioValido, dataValida } = require("../validacoes");
+const { TIPOS_DESPESA, CATEGORIAS_DESPESA, valorMonetarioValido, dataValida, dataMaiorOuIgual, dataNaoFutura } = require("../validacoes");
 const { autenticar, exigirAdmin, exigirAdminOuDono, exigirAdminOuMotorista } = require("../middlewares/autenticacao");
 const { autorizarAcessoDespesa } = require("../middlewares/autorizacao");
 const { obterIdTransportadora, usuarioEhDonoSistema, obterFiltroTransportadora, transportadoraEscopoMutacao } = require("../helpers/escopo");
@@ -38,6 +38,10 @@ router.post("/", exigirAdminOuMotorista, async (requisicao, resposta) => {
     return resposta.status(400).json({ mensagem: "Informe uma data valida para a despesa." });
   }
 
+  if (!dataNaoFutura(dataDespesa)) {
+    return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser futura." });
+  }
+
   if (usuario.perfil === "motorista" && tipoDespesaFinal !== "viagem") {
     return resposta.status(400).json({ mensagem: "Motoristas podem registrar apenas despesas de viagem." });
   }
@@ -66,12 +70,18 @@ router.post("/", exigirAdminOuMotorista, async (requisicao, resposta) => {
     let veiculoIdFinal = null;
 
     if (tipoDespesaFinal === "viagem") {
-      const vr = await banco.query("SELECT transportadora_id, motorista_id FROM viagens WHERE id=$1", [viagemId]);
+      const vr = await banco.query("SELECT transportadora_id, motorista_id, data_saida, data_chegada FROM viagens WHERE id=$1", [viagemId]);
       if (vr.rows.length === 0) {
         return resposta.status(400).json({ mensagem: "Viagem não encontrada." });
       }
       if (usuario.perfil === "motorista" && vr.rows[0].motorista_id !== usuario.motorista_id) {
         return resposta.status(403).json({ mensagem: "Voce so pode registrar despesas para suas proprias viagens." });
+      }
+      if (!dataMaiorOuIgual(dataDespesa, vr.rows[0].data_saida)) {
+        return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser anterior a data de saida da viagem." });
+      }
+      if (vr.rows[0].data_chegada && !dataMaiorOuIgual(vr.rows[0].data_chegada, dataDespesa)) {
+        return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser posterior a data de chegada da viagem." });
       }
       tid = vr.rows[0].transportadora_id;
       viagemIdFinal = viagemId;
@@ -248,6 +258,10 @@ router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
     return resposta.status(400).json({ mensagem: "Informe uma data valida para a despesa." });
   }
 
+  if (!dataNaoFutura(dataDespesa)) {
+    return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser futura." });
+  }
+
   if (tipoDespesaFinal === "viagem" && !viagemId) {
     return resposta.status(400).json({ mensagem: "Informe a viagem da despesa." });
   }
@@ -266,9 +280,15 @@ router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
     let veiculoIdFinal = null;
 
     if (tipoDespesaFinal === "viagem") {
-      const vr = await banco.query("SELECT transportadora_id FROM viagens WHERE id=$1", [viagemId]);
+      const vr = await banco.query("SELECT transportadora_id, data_saida, data_chegada FROM viagens WHERE id=$1", [viagemId]);
       if (vr.rows.length === 0 || vr.rows[0].transportadora_id !== transportadoraId) {
         return resposta.status(400).json({ mensagem: "Viagem invalida para o escopo desta despesa." });
+      }
+      if (!dataMaiorOuIgual(dataDespesa, vr.rows[0].data_saida)) {
+        return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser anterior a data de saida da viagem." });
+      }
+      if (vr.rows[0].data_chegada && !dataMaiorOuIgual(vr.rows[0].data_chegada, dataDespesa)) {
+        return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser posterior a data de chegada da viagem." });
       }
       viagemIdFinal = viagemId;
     } else {
