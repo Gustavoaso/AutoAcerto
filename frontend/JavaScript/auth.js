@@ -42,6 +42,72 @@ function encerrarSessao() {
     window.location.href = "/login.html";
 }
 
+let avisoSessaoExpiradaExibido = false;
+
+function urlEhRequisicaoApiAutenticada(url) {
+    if (!url || typeof url !== "string") return false;
+
+    const baseApi = typeof obterApiBaseUrl === "function"
+        ? obterApiBaseUrl()
+        : window.location.origin;
+
+    return url.startsWith(baseApi + "/") && !url.includes("/auth/login");
+}
+
+function exibirAvisoSessaoExpirada() {
+    if (avisoSessaoExpiradaExibido) return;
+    if (window.location.pathname.endsWith("/login.html")) return;
+
+    avisoSessaoExpiradaExibido = true;
+
+    if (document.getElementById("modalSessaoExpirada")) return;
+
+    const modal = document.createElement("div");
+    modal.id = "modalSessaoExpirada";
+    modal.className = "modal-sucesso modal-sessao-expirada";
+    modal.innerHTML =
+        '<div class="fundo-modal-sucesso"></div>' +
+        '<div class="caixa-modal-sucesso">' +
+            '<div class="icone-aviso-sessao" aria-hidden="true">!</div>' +
+            '<h3>Sessão expirada</h3>' +
+            '<p>Sua sessão expirou por inatividade. Faça login novamente para continuar usando o sistema.</p>' +
+            '<div class="acoes-modal-sucesso">' +
+                '<button type="button" class="botao-primario" id="botaoSessaoExpiradaLogin">Ir para login</button>' +
+            '</div>' +
+        '</div>';
+
+    document.body.appendChild(modal);
+
+    const botao = document.getElementById("botaoSessaoExpiradaLogin");
+    if (botao) {
+        botao.addEventListener("click", encerrarSessao);
+    }
+}
+
+function tratarSessaoExpiradaSeNecessario(resposta, url) {
+    if (!resposta || resposta.status !== 401) return resposta;
+    if (!urlEhRequisicaoApiAutenticada(url)) return resposta;
+    exibirAvisoSessaoExpirada();
+    return resposta;
+}
+
+async function verificarSessaoAoRetornarAba() {
+    if (document.visibilityState !== "visible") return;
+    if (window.location.pathname.endsWith("/login.html")) return;
+    if (!obterToken()) return;
+    if (typeof montarUrlApi !== "function") return;
+
+    try {
+        const resposta = await window.fetchOriginal(
+            montarUrlApi("/auth/me"),
+            { headers: cabecalhosAutenticados() }
+        );
+        tratarSessaoExpiradaSeNecessario(resposta, resposta.url);
+    } catch (erro) {
+        console.warn("Nao foi possivel verificar sessao:", erro.message);
+    }
+}
+
 function paginaPermitidaParaMotorista(caminho) {
     return caminho.endsWith("/viagens.html") ||
            caminho.endsWith("/editar-viagem.html") ||
@@ -309,6 +375,11 @@ async function atualizarSessaoAtualDoBanco() {
             headers: cabecalhosAutenticados()
         });
 
+        if (resposta.status === 401) {
+            exibirAvisoSessaoExpirada();
+            return;
+        }
+
         if (!resposta.ok) return;
 
         const dados = await resposta.json();
@@ -345,6 +416,11 @@ async function preencherControleTransportadoraTopo() {
         const resposta = await fetch(montarUrlApi("/transportadoras"), {
             headers: cabecalhosAutenticados()
         });
+
+        if (resposta.status === 401) {
+            exibirAvisoSessaoExpirada();
+            return;
+        }
 
         if (!resposta.ok) {
             throw new Error("transportadoras");
@@ -518,6 +594,7 @@ function configurarFetchAutenticado() {
     if (window.fetchAutenticadoConfigurado) return;
 
     const fetchOriginal = window.fetch.bind(window);
+    window.fetchOriginal = fetchOriginal;
 
     window.fetch = function (recurso, opcoes) {
         const urlOriginal = typeof recurso === "string" ? recurso : recurso.url;
@@ -573,7 +650,9 @@ function configurarFetchAutenticado() {
         }
 
         novasOpcoes.headers = headers;
-        return fetchOriginal(recursoFinal, novasOpcoes);
+        return fetchOriginal(recursoFinal, novasOpcoes).then(function (resposta) {
+            return tratarSessaoExpiradaSeNecessario(resposta, urlFinal);
+        });
     };
 
     window.fetchAutenticadoConfigurado = true;
@@ -600,4 +679,6 @@ document.addEventListener("DOMContentLoaded", function () {
     atualizarPainelTopo();
     marcarItemMenuLateralAtivo();
     configurarBotaoSair();
+
+    document.addEventListener("visibilitychange", verificarSessaoAoRetornarAba);
 });

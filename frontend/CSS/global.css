@@ -1470,6 +1470,24 @@ tbody td {
   justify-content: center;
 }
 
+.modal-sessao-expirada {
+  z-index: 10000;
+}
+
+.icone-aviso-sessao {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--cor-erro-clara);
+  color: var(--cor-erro);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
 /* -------------------------------------------------------
    SEÇÃO DE DETALHES (ver-motorista, ver-veiculo, etc.)
 ------------------------------------------------------- */
