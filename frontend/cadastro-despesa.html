@@ -88,6 +88,22 @@
                 data-mascara="moeda" autocomplete="off" required />
             </div>
 
+            <div class="grupo-campo grupo-campo-largo">
+              <label>Cupom fiscal</label>
+              <div class="acoes-anexo-cupom">
+                <button type="button" class="botao-secundario" id="botaoFotoCupom">Tirar foto</button>
+                <button type="button" class="botao-secundario" id="botaoGaleriaCupom">Escolher da galeria</button>
+                <input type="file" id="inputCupomFiscal" accept="image/*" class="oculto" />
+              </div>
+              <div class="preview-cupom-fiscal oculto" id="previewCupomFiscal">
+                <img id="imagemCupomFiscal" alt="Preview do cupom fiscal" />
+                <div class="meta-preview-cupom">
+                  <span id="nomeCupomFiscal">Nenhum arquivo selecionado</span>
+                  <button type="button" class="botao-secundario" id="botaoRemoverCupom">Remover anexo</button>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <div class="acoes-formulario">

@@ -1,7 +1,7 @@
 const express = require("express");
 const banco = require("../banco");
 const { TIPOS_DESPESA, CATEGORIAS_DESPESA, valorMonetarioValido, dataValida } = require("../validacoes");
-const { exigirAdmin, exigirAdminOuDono } = require("../middlewares/autenticacao");
+const { autenticar, exigirAdmin, exigirAdminOuDono, exigirAdminOuMotorista } = require("../middlewares/autenticacao");
 const { autorizarAcessoDespesa } = require("../middlewares/autorizacao");
 const { obterIdTransportadora, usuarioEhDonoSistema, obterFiltroTransportadora, transportadoraEscopoMutacao } = require("../helpers/escopo");
 const { normalizarIdsExclusao, placeholderIds, responderExclusao } = require("../helpers/exclusao");
@@ -9,10 +9,14 @@ const { obterParametrosPaginacao, montarRespostaPaginada } = require("../helpers
 
 const router = express.Router();
 
-router.post("/", exigirAdmin, async (requisicao, resposta) => {
-  const { tipoDespesa, viagemId, veiculoId, descricao, categoria, dataDespesa, valor } = requisicao.body;
+router.post("/", exigirAdminOuMotorista, async (requisicao, resposta) => {
+  const { tipoDespesa, viagemId, veiculoId, descricao, categoria, dataDespesa, valor, anexoCupomNome, anexoCupomTipo, anexoCupomBase64 } = requisicao.body;
   const tipoDespesaFinal = String(tipoDespesa || "").trim().toLowerCase();
   const categoriaTratada = String(categoria || "").trim().toLowerCase();
+  const usuario = requisicao.usuario;
+  const anexoNomeTratado = anexoCupomNome ? String(anexoCupomNome).trim().slice(0, 255) : null;
+  const anexoTipoTratado = anexoCupomTipo ? String(anexoCupomTipo).trim().slice(0, 100) : null;
+  const anexoBase64Tratado = anexoCupomBase64 ? String(anexoCupomBase64).trim() : null;
 
   if (!descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
@@ -34,6 +38,10 @@ router.post("/", exigirAdmin, async (requisicao, resposta) => {
     return resposta.status(400).json({ mensagem: "Informe uma data valida para a despesa." });
   }
 
+  if (usuario.perfil === "motorista" && tipoDespesaFinal !== "viagem") {
+    return resposta.status(400).json({ mensagem: "Motoristas podem registrar apenas despesas de viagem." });
+  }
+
   if (tipoDespesaFinal === "viagem" && !viagemId) {
     return resposta.status(400).json({ mensagem: "Informe a viagem da despesa." });
   }
@@ -42,15 +50,28 @@ router.post("/", exigirAdmin, async (requisicao, resposta) => {
     return resposta.status(400).json({ mensagem: "Informe o veiculo da despesa." });
   }
 
+  if (anexoBase64Tratado) {
+    if (!/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(anexoBase64Tratado)) {
+      return resposta.status(400).json({ mensagem: "O anexo do cupom deve ser uma imagem valida." });
+    }
+
+    if (anexoBase64Tratado.length > 7 * 1024 * 1024) {
+      return resposta.status(400).json({ mensagem: "A imagem do cupom excede o tamanho permitido." });
+    }
+  }
+
   try {
     let tid;
     let viagemIdFinal = null;
     let veiculoIdFinal = null;
 
     if (tipoDespesaFinal === "viagem") {
-      const vr = await banco.query("SELECT transportadora_id FROM viagens WHERE id=$1", [viagemId]);
+      const vr = await banco.query("SELECT transportadora_id, motorista_id FROM viagens WHERE id=$1", [viagemId]);
       if (vr.rows.length === 0) {
         return resposta.status(400).json({ mensagem: "Viagem não encontrada." });
+      }
+      if (usuario.perfil === "motorista" && vr.rows[0].motorista_id !== usuario.motorista_id) {
+        return resposta.status(403).json({ mensagem: "Voce so pode registrar despesas para suas proprias viagens." });
       }
       tid = vr.rows[0].transportadora_id;
       viagemIdFinal = viagemId;
@@ -70,11 +91,11 @@ router.post("/", exigirAdmin, async (requisicao, resposta) => {
     }
 
     const sql = `
-      INSERT INTO despesas (transportadora_id, viagem_id, veiculo_id, tipo_despesa, descricao, categoria, data_despesa, valor)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO despesas (transportadora_id, viagem_id, veiculo_id, tipo_despesa, descricao, categoria, data_despesa, valor, anexo_cupom_nome, anexo_cupom_tipo, anexo_cupom_base64)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING id
     `;
-    const valores = [tid, viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoriaTratada, dataDespesa, valor];
+    const valores = [tid, viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoriaTratada, dataDespesa, valor, anexoNomeTratado, anexoTipoTratado, anexoBase64Tratado];
 
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Despesa cadastrada com sucesso.", id: resultado.rows[0].id });
@@ -84,10 +105,11 @@ router.post("/", exigirAdmin, async (requisicao, resposta) => {
   }
 });
 
-router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
+router.get("/", autenticar, async (requisicao, resposta) => {
   const transportadoraId = obterIdTransportadora(requisicao);
   const donoSistema = usuarioEhDonoSistema(requisicao);
   const filtroTransportadoraId = obterFiltroTransportadora(requisicao);
+  const usuario = requisicao.usuario;
   
   // ✅ PAGINAÇÃO
   const { pagina, limite, offset } = obterParametrosPaginacao(requisicao.query);
@@ -99,6 +121,13 @@ router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
   if (!donoSistema || filtroTransportadoraId) {
     sqlCount += " WHERE d.transportadora_id = $1";
     valoresCount.push(filtroTransportadoraId || transportadoraId);
+  }
+
+  if (usuario.perfil === "motorista" && usuario.motorista_id) {
+    sqlCount += (valoresCount.length > 0 ? " AND " : " WHERE ") + "d.viagem_id IN (SELECT id FROM viagens WHERE motorista_id = $" + (valoresCount.length + 1) + ")";
+    valoresCount.push(usuario.motorista_id);
+  } else if (usuario.perfil === "motorista") {
+    return resposta.json(montarRespostaPaginada([], 0, pagina, limite));
   }
 
   // Query para buscar dados paginados
@@ -125,6 +154,11 @@ router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
     valores.push(filtroTransportadoraId || transportadoraId);
   }
 
+  if (usuario.perfil === "motorista" && usuario.motorista_id) {
+    sql += (valores.length > 0 ? " AND " : " WHERE ") + "d.viagem_id IN (SELECT id FROM viagens WHERE motorista_id = $" + (valores.length + 1) + ")";
+    valores.push(usuario.motorista_id);
+  }
+
   sql += " ORDER BY d.id DESC";
   
   // Adicionar LIMIT e OFFSET
@@ -148,7 +182,7 @@ router.get("/", exigirAdminOuDono, async (requisicao, resposta) => {
   }
 });
 
-router.get("/:id", exigirAdminOuDono, autorizarAcessoDespesa, async (requisicao, resposta) => {
+router.get("/:id", autenticar, autorizarAcessoDespesa, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const transportadoraId = obterIdTransportadora(requisicao);
   const donoSistema = usuarioEhDonoSistema(requisicao);
@@ -156,7 +190,7 @@ router.get("/:id", exigirAdminOuDono, autorizarAcessoDespesa, async (requisicao,
   let sql = `
     SELECT
       d.id, d.viagem_id, d.veiculo_id, d.tipo_despesa, d.descricao, d.categoria,
-      d.data_despesa, d.valor, d.data_cadastro,
+      d.data_despesa, d.valor, d.data_cadastro, d.anexo_cupom_nome, d.anexo_cupom_tipo, d.anexo_cupom_base64,
       v.origem, v.destino,
       m.nome AS motorista_nome,
       COALESCE(ve_despesa.modelo, ve_viagem.modelo) AS veiculo_modelo,

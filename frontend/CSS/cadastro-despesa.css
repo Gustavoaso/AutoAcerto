@@ -102,6 +102,45 @@
   padding-left: 36px;
 }
 
+.acoes-anexo-cupom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.preview-cupom-fiscal {
+  margin-top: 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  background: var(--cor-superficie-2);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.preview-cupom-fiscal img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: var(--raio-sm);
+  background: #fff;
+}
+
+.meta-preview-cupom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.meta-preview-cupom span {
+  color: var(--cor-texto-secundario);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 @media (max-width: 640px) {
   .grupo-tipo-despesa {
     width: 100%;

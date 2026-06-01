@@ -59,22 +59,43 @@ async function carregarDespesa() {
         document.getElementById("detalheDataDespesa").textContent = formatarData(despesa.data_despesa);
         document.getElementById("detalheValor").textContent = formatarMoeda(despesa.valor);
         document.getElementById("detalheObservacoes").textContent = despesa.observacoes || "-";
+        renderizarAnexoCupom(despesa);
     } catch (erro) {
         console.error("Erro ao carregar despesa:", erro);
         alert("Erro de conexao com a API.");
     }
 }
 
+function renderizarAnexoCupom(despesa) {
+    const container = document.getElementById("detalheAnexoCupom");
+    if (!container) return;
+
+    if (!despesa.anexo_cupom_base64) {
+        container.textContent = "Nenhum anexo.";
+        return;
+    }
+
+    const nome = window.AutoAcertoHtml
+        ? window.AutoAcertoHtml.escapar(despesa.anexo_cupom_nome || "cupom-fiscal")
+        : (despesa.anexo_cupom_nome || "cupom-fiscal");
+
+    container.innerHTML = `
+        <a href="${despesa.anexo_cupom_base64}" target="_blank" rel="noopener noreferrer">
+            <img src="${despesa.anexo_cupom_base64}" alt="${nome}" style="max-width:100%;max-height:320px;border-radius:8px;margin-bottom:8px;" />
+        </a>
+        <div><a href="${despesa.anexo_cupom_base64}" download="${nome}">Baixar anexo</a></div>
+    `;
+}
+
 document.getElementById("botaoVoltar").addEventListener("click", function () {
     window.location.href = "despesas.html";
 });
 
-document.getElementById("botaoEditar").addEventListener("click", function () {
-    window.location.href = "editar-despesa.html?id=" + idDespesa;
-});
-
-document.querySelector(".botao-sair").addEventListener("click", function () {
-    alert("Saindo do sistema...");
-});
+const botaoEditar = document.getElementById("botaoEditar");
+if (botaoEditar) {
+    botaoEditar.addEventListener("click", function () {
+        window.location.href = "editar-despesa.html?id=" + idDespesa;
+    });
+}
 
 carregarDespesa();

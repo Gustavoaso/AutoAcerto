@@ -130,7 +130,7 @@ function criarSeloStatusViagem(status) {
 function renderizarTabelaViagens(listaViagens) {
     const corpoTabelaViagens = document.getElementById("corpoTabelaViagens");
     const usuario = obterUsuarioLogado();
-    const podeEditar = usuario && (usuario.perfil === "admin" || usuario.perfil === "dono");
+    const podeEditar = usuario && (usuario.perfil === "admin" || usuario.perfil === "dono" || usuario.perfil === "motorista");
 
     corpoTabelaViagens.innerHTML = "";
     viagensVisiveis = listaViagens;

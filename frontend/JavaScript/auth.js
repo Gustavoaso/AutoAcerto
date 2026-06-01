@@ -44,7 +44,11 @@ function encerrarSessao() {
 
 function paginaPermitidaParaMotorista(caminho) {
     return caminho.endsWith("/viagens.html") ||
+           caminho.endsWith("/editar-viagem.html") ||
            caminho.endsWith("/ver-viagem.html") ||
+           caminho.endsWith("/despesas.html") ||
+           caminho.endsWith("/cadastro-despesa.html") ||
+           caminho.endsWith("/ver-despesa.html") ||
            caminho.endsWith("/login.html");
 }
 

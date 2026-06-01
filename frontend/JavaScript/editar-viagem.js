@@ -4,6 +4,7 @@ const urlApiVeiculos = montarUrlApi("/veiculos");
 
 const params = new URLSearchParams(window.location.search);
 const idViagem = params.get("id");
+const usuarioLogado = typeof obterUsuarioLogado === "function" ? obterUsuarioLogado() : null;
 
 const modal = document.getElementById("modalSucesso");
 const botaoOk = document.getElementById("botaoOkModal");
@@ -109,11 +110,20 @@ async function carregarViagem() {
 
         await carregarMotoristas(viagem.motorista_id);
         await carregarVeiculos(viagem.veiculo_id);
+        configurarRestricoesMotorista();
 
     } catch (erro) {
         console.error("Erro ao carregar viagem:", erro);
         alert("Erro de conexão com a API.");
     }
+}
+
+function configurarRestricoesMotorista() {
+    if (!usuarioLogado || usuarioLogado.perfil !== "motorista") return;
+
+    document.getElementById("motoristaId").disabled = true;
+    document.getElementById("veiculoId").disabled = true;
+    document.getElementById("valorFrete").disabled = true;
 }
 
 document.getElementById("botaoSalvarEdicao").addEventListener("click", async function (e) {
@@ -182,8 +192,11 @@ document.getElementById("botaoCancelar").addEventListener("click", function () {
     window.location.href = "viagens.html";
 });
 
-if (typeof preencherInfoUsuario === "function") preencherInfoUsuario();
-if (typeof configurarBotaoSair === "function") configurarBotaoSair();
-if (typeof marcarItemMenuLateralAtivo === "function") marcarItemMenuLateralAtivo();
+const sessaoValida = typeof exigirAutenticacao !== "function" || Boolean(exigirAutenticacao());
 
-carregarViagem();
+if (sessaoValida) {
+    if (typeof preencherInfoUsuario === "function") preencherInfoUsuario();
+    if (typeof configurarBotaoSair === "function") configurarBotaoSair();
+    if (typeof marcarItemMenuLateralAtivo === "function") marcarItemMenuLateralAtivo();
+    carregarViagem();
+}

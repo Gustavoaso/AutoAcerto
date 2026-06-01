@@ -222,6 +222,9 @@ async function garantirEstruturaViagens() {
 async function garantirEstruturaDespesas() {
   await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS veiculo_id INTEGER REFERENCES veiculos(id)");
   await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS tipo_despesa VARCHAR(20) NOT NULL DEFAULT 'viagem'");
+  await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS anexo_cupom_nome VARCHAR(255)");
+  await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS anexo_cupom_tipo VARCHAR(100)");
+  await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS anexo_cupom_base64 TEXT");
 }
 
 async function adicionarColunaTransportadora(nomeTabela) {

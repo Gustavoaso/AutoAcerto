@@ -1,7 +1,7 @@
 const express = require("express");
 const banco = require("../banco");
 const { STATUS_VIAGEM, normalizarStatus, valorMonetarioValido, dataValida } = require("../validacoes");
-const { autenticar, exigirAdmin } = require("../middlewares/autenticacao");
+const { autenticar, exigirAdmin, exigirAdminOuMotorista } = require("../middlewares/autenticacao");
 const { autorizarAcessoViagem } = require("../middlewares/autorizacao");
 const { obterIdTransportadora, usuarioEhDonoSistema, obterFiltroTransportadora, transportadoraIdParaPost, transportadoraEscopoMutacao } = require("../helpers/escopo");
 const { motoristaPertenceTransportadora, veiculoPertenceTransportadora } = require("../helpers/validacoes-db");
@@ -48,8 +48,27 @@ router.post("/", exigirAdmin, async (requisicao, resposta) => {
     }
     const transportadoraId = escopo.id;
 
-    const motoristaValido = await motoristaPertenceTransportadora(motoristaId, transportadoraId);
-    const veiculoValido = await veiculoPertenceTransportadora(veiculoId, transportadoraId);
+    let motoristaIdFinal = motoristaId;
+    let veiculoIdFinal = veiculoId;
+    let valorFreteFinal = valorFrete;
+
+    if (requisicao.usuario.perfil === "motorista") {
+      const viagemAtual = await banco.query(
+        "SELECT motorista_id, veiculo_id, valor_frete FROM viagens WHERE id=$1 AND transportadora_id=$2",
+        [id, transportadoraId]
+      );
+
+      if (viagemAtual.rows.length === 0) {
+        return resposta.status(404).json({ mensagem: "Viagem nÃ£o encontrada." });
+      }
+
+      motoristaIdFinal = viagemAtual.rows[0].motorista_id;
+      veiculoIdFinal = viagemAtual.rows[0].veiculo_id;
+      valorFreteFinal = viagemAtual.rows[0].valor_frete;
+    }
+
+    const motoristaValido = await motoristaPertenceTransportadora(motoristaIdFinal, transportadoraId);
+    const veiculoValido = await veiculoPertenceTransportadora(veiculoIdFinal, transportadoraId);
 
     if (!motoristaValido || !veiculoValido) {
       return resposta.status(400).json({ mensagem: "Motorista ou veículo não encontrado para esta transportadora." });
@@ -178,7 +197,7 @@ router.get("/:id", autenticar, autorizarAcessoViagem, async (requisicao, respost
   }
 });
 
-router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
+router.put("/:id", exigirAdminOuMotorista, autorizarAcessoViagem, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
   const statusTratado = normalizarStatus(status);
@@ -243,7 +262,7 @@ router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
       WHERE id=$12 AND transportadora_id=$13
       RETURNING *
     `;
-    const valores = [origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, statusTratado, observacoes || "", id, transportadoraId];
+    const valores = [origem, destino, motoristaIdFinal, veiculoIdFinal, dataSaida, dataChegada, valorFreteFinal, kmInicialNum, kmFinalNum, statusTratado, observacoes || "", id, transportadoraId];
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {

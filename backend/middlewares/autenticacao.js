@@ -36,6 +36,15 @@ function exigirAdmin(requisicao, resposta, proximo) {
 
 const exigirAdminOuDono = exigirAdmin;
 
+function exigirAdminOuMotorista(requisicao, resposta, proximo) {
+  autenticar(requisicao, resposta, function () {
+    if (requisicao.usuario.perfil !== "admin" && requisicao.usuario.perfil !== "dono" && requisicao.usuario.perfil !== "motorista") {
+      return resposta.status(403).json({ mensagem: "Perfil nao autorizado." });
+    }
+    proximo();
+  });
+}
+
 function exigirDonoSistema(requisicao, resposta, proximo) {
   autenticar(requisicao, resposta, function () {
     if (requisicao.usuario.perfil !== "dono") {
@@ -49,5 +58,6 @@ module.exports = {
   autenticar,
   exigirAdmin,
   exigirAdminOuDono,
+  exigirAdminOuMotorista,
   exigirDonoSistema
 };

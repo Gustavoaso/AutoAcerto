@@ -166,6 +166,8 @@ function criarSeloCategoria(categoria) {
 
 function renderizarTabelaDespesas(listaDespesas) {
     const corpoTabelaDespesas = document.getElementById("corpoTabelaDespesas");
+    const usuario = obterUsuarioLogado();
+    const podeEditar = usuario && (usuario.perfil === "admin" || usuario.perfil === "dono");
     corpoTabelaDespesas.innerHTML = "";
     despesasVisiveis = listaDespesas;
 
@@ -218,7 +220,7 @@ function renderizarTabelaDespesas(listaDespesas) {
             <td>
                 <div class="grupo-acoes">
                     <button class="botao-acao" onclick="window.location.href='ver-despesa.html?id=${idDespesa}'">${criarIconeVer()}Ver</button>
-                    <button class="botao-acao" onclick="window.location.href='editar-despesa.html?id=${idDespesa}'">${criarIconeEditar()}Editar</button>
+                    ${podeEditar ? `<button class="botao-acao" onclick="window.location.href='editar-despesa.html?id=${idDespesa}'">${criarIconeEditar()}Editar</button>` : ""}
                 </div>
             </td>
         `;
