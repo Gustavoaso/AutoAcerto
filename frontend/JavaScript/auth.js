@@ -131,9 +131,14 @@ function preencherInfoUsuario() {
 
     const nomeElement   = document.querySelector(".nome-usuario");
     const avatarElement = document.querySelector(".avatar-usuario");
+    const empresaElement = document.querySelector(".nome-empresa-topo");
 
     if (nomeElement) {
-        nomeElement.textContent = usuario.nome.split(" ")[0];
+        nomeElement.textContent = usuario.nome || "Usuario";
+    }
+
+    if (empresaElement) {
+        empresaElement.textContent = obterNomeEmpresaUsuario(usuario);
     }
 
     if (avatarElement) {
@@ -155,6 +160,35 @@ function preencherInfoUsuario() {
     });
 
     ajustarMenuPorPerfil(usuario);
+}
+
+function obterNomeEmpresaUsuario(usuario) {
+    if (!usuario) return "Empresa";
+    if (usuario.transportadora_nome) return usuario.transportadora_nome;
+    if (usuario.perfil === "dono") return "Todas as empresas";
+    return "Empresa nao informada";
+}
+
+async function atualizarSessaoAtualDoBanco() {
+    if (typeof montarUrlApi !== "function") return;
+
+    try {
+        const resposta = await fetch(montarUrlApi("/auth/me"), {
+            headers: cabecalhosAutenticados()
+        });
+
+        if (!resposta.ok) return;
+
+        const dados = await resposta.json();
+        if (!dados.usuario) return;
+
+        const usuarioAtual = obterUsuarioLogado() || {};
+        const usuarioAtualizado = { ...usuarioAtual, ...dados.usuario };
+        localStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+        preencherInfoUsuario();
+    } catch (erro) {
+        console.warn("Nao foi possivel atualizar dados da sessao:", erro.message);
+    }
 }
 
 function ajustarMenuPorPerfil(usuario) {
@@ -283,6 +317,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!usuario) return;
 
     preencherInfoUsuario();
+    atualizarSessaoAtualDoBanco();
     marcarItemMenuLateralAtivo();
     configurarBotaoSair();
 });

@@ -7,7 +7,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .secao-boas-vindas {
-  margin-bottom: 18px;
+  margin-bottom: 24px;
 }
 
 .cabecalho-boas-vindas {
@@ -28,7 +28,7 @@
   box-shadow: var(--sombra-suave);
   font-size: 0.78rem;
   font-weight: 600;
-  padding: 8px 12px;
+  padding: 9px 14px;
   white-space: nowrap;
 }
 
@@ -43,7 +43,7 @@
   color: var(--cor-texto-secundario);
   font-size: 0.74rem;
   font-weight: 800;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .linha-periodo-dashboard {
@@ -56,7 +56,7 @@
 
 .linha-periodo-dashboard select,
 .datas-periodo-dashboard input {
-  min-height: 38px;
+  min-height: 40px;
   border: 1px solid var(--cor-borda);
   background: var(--cor-superficie);
   color: var(--cor-texto);
@@ -92,23 +92,42 @@
 }
 
 .card-resumo {
-  background: var(--cor-superficie);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
   border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
+  border-radius: var(--raio-lg);
   box-shadow: var(--sombra-suave);
-  min-height: 150px;
-  padding: 16px;
+  min-height: 164px;
+  padding: 18px 18px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 10px;
   transition: border-color var(--transicao), box-shadow var(--transicao), transform var(--transicao);
+  position: relative;
+  overflow: hidden;
 }
 
 .card-resumo:hover {
   border-color: var(--cor-borda-forte);
   box-shadow: var(--sombra-media);
   transform: translateY(-1px);
+}
+
+.card-resumo::after {
+  content: "";
+  height: 30px;
+  margin-top: 4px;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 25 C14 15 22 27 34 13 S58 19 70 17 88 24 100 15 122 22 136 18 156 10 178 8' fill='none' stroke='%2310b981' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  opacity: 0.95;
+}
+
+.card-resumo:nth-child(2)::after,
+.card-resumo:nth-child(5)::after {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 24 C15 11 26 18 38 12 S64 18 78 13 100 23 112 17 132 12 146 20 164 10 178 14' fill='none' stroke='%232563eb' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.card-resumo:nth-child(4)::after {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 34' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 22 C16 8 26 16 38 10 S60 17 74 13 92 22 104 18 126 23 138 14 156 11 178 8' fill='none' stroke='%23ef4444' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 .topo-card {
@@ -119,14 +138,14 @@
 
 .titulo-card {
   color: var(--cor-texto-secundario);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 700;
 }
 
 .icone-card-wrapper {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--raio);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -151,7 +170,7 @@
 
 .valor-card {
   color: var(--cor-texto);
-  font-size: 1.55rem;
+  font-size: clamp(1.28rem, 1.6vw, 1.55rem);
   font-weight: 800;
   letter-spacing: 0;
   line-height: 1.05;
@@ -160,7 +179,7 @@
 .descricao-card {
   color: var(--cor-texto-secundario);
   font-size: 0.76rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .botao-card {
@@ -178,7 +197,7 @@
 
 .grade-dashboard {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(360px, 0.75fr);
+  grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.95fr);
   gap: 16px;
   align-items: stretch;
 }
@@ -201,9 +220,9 @@
   padding: 14px;
 }
 
-.mini-card-verde { background: #ecfdf5; border-color: #bbf7d0; }
-.mini-card-vermelho { background: #fff1f2; border-color: #fecdd3; }
-.mini-card-azul { background: #eff6ff; border-color: #bfdbfe; }
+.mini-card-verde { background: #f0fdf7; border-color: #c8f5dc; }
+.mini-card-vermelho { background: #fff5f5; border-color: #ffd6d6; }
+.mini-card-azul { background: #f1f7ff; border-color: #cfe3ff; }
 
 .rotulo-mini-card {
   display: block;
@@ -233,7 +252,7 @@
 .variacao-mini-card.negativa { color: var(--cor-perigo); }
 
 .grafico-linha-financeiro {
-  height: 250px;
+  height: 260px;
   position: relative;
 }
 
@@ -244,13 +263,13 @@
 }
 
 .linhas-grade line {
-  stroke: #e5e9f0;
+  stroke: #e8edf5;
   stroke-width: 1;
 }
 
 .linha-grafico {
   fill: none;
-  stroke-width: 3;
+  stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -336,7 +355,7 @@
 .lista-viagens {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0;
 }
 
 .item-viagem {
@@ -344,23 +363,28 @@
   grid-template-columns: 42px minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio);
-  background: var(--cor-superficie-2);
-  padding: 12px;
+  border: 0;
+  border-bottom: 1px solid var(--cor-borda);
+  border-radius: 0;
+  background: transparent;
+  padding: 14px 0;
   transition: background var(--transicao), border-color var(--transicao), transform var(--transicao);
 }
 
 .item-viagem:hover {
-  background: var(--cor-superficie);
-  border-color: var(--cor-borda-forte);
+  background: transparent;
+  border-color: var(--cor-borda);
   transform: translateY(-1px);
+}
+
+.item-viagem:last-child {
+  border-bottom: 0;
 }
 
 .icone-viagem-andamento {
   width: 38px;
   height: 38px;
-  border-radius: var(--raio);
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -422,6 +446,17 @@
 
   .cabecalho-boas-vindas {
     flex-direction: column;
+  }
+
+  .topo-pagina {
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .acoes-topo {
+    justify-content: space-between;
   }
 
   .controle-periodo-dashboard {

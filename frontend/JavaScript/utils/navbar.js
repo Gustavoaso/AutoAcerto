@@ -15,7 +15,8 @@
 
         const menuHtml = `
             <div class="icone-logo">
-                <img src="/Imagens/logo-autoacerto.png" alt="AutoAcerto" class="imagem-logo">
+                <img src="/Imagens/logo nova.png" alt="" class="imagem-logo">
+                <span class="texto-logo"><span class="texto-logo-auto">Auto</span><span class="texto-logo-acerto">Acerto</span></span>
             </div>
             <nav class="menu-lateral">
                 <a href="index.html" class="item-menu${verificarAtivo('index.html')}">
@@ -65,6 +66,13 @@
                     </svg>
                     Relatórios
                 </a>
+                <a href="transportadoras.html" class="item-menu${verificarAtivo('transportadoras.html')}">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 19V5h16v14" />
+                        <path d="M8 9h8M8 13h8M8 17h4" />
+                    </svg>
+                    Transportadoras
+                </a>
                 <a href="configuracoes.html" class="item-menu${verificarAtivo('configuracoes.html')}">
                     <svg viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="3" />
@@ -74,6 +82,11 @@
                 </a>
             </nav>
             <div class="rodape-barra">
+                <div class="cartao-plano-lateral">
+                    <strong>Plano Profissional</strong>
+                    <span>Seu plano atual</span>
+                    <button type="button">Gerenciar assinatura</button>
+                </div>
                 <button class="botao-sair">Sair</button>
             </div>
         `;

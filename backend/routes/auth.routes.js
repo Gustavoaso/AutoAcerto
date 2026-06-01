@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
 const banco = require("../banco");
 const { normalizarEmail, emailValido } = require("../validacoes");
+const { autenticar } = require("../middlewares/autenticacao");
 
 const router = express.Router();
 
@@ -76,6 +77,34 @@ router.post("/login", limitadorLogin, async (requisicao, resposta) => {
   } catch (erro) {
     console.error("Erro no login:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao processar login." });
+  }
+});
+
+router.get("/me", autenticar, async (requisicao, resposta) => {
+  try {
+    const sql = `
+      SELECT
+        u.id,
+        u.nome,
+        u.email,
+        u.perfil,
+        u.transportadora_id,
+        u.motorista_id,
+        t.nome AS transportadora_nome
+      FROM usuarios u
+      LEFT JOIN transportadoras t ON u.transportadora_id = t.id
+      WHERE u.id = $1
+    `;
+    const resultado = await banco.query(sql, [requisicao.usuario.id]);
+
+    if (resultado.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Usuario nao encontrado." });
+    }
+
+    return resposta.json({ usuario: resultado.rows[0] });
+  } catch (erro) {
+    console.error("Erro ao buscar sessao atual:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao buscar sessao atual." });
   }
 });
 
