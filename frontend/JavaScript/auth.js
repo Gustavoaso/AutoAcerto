@@ -37,12 +37,54 @@ function obterUsuarioLogado() {
 // ==================== AUTENTICAÇÃO E PERMISSÕES ====================
 
 function encerrarSessao() {
+    limparMonitoramentoSessao();
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
     window.location.href = "/login.html";
 }
 
 let avisoSessaoExpiradaExibido = false;
+let temporizadorSessaoExpirada = null;
+let intervaloMonitoramentoSessao = null;
+
+function decodificarPayloadToken(token) {
+    if (!token) return null;
+
+    try {
+        const partes = token.split(".");
+        if (partes.length < 2) return null;
+
+        const base64 = partes[1].replace(/-/g, "+").replace(/_/g, "/");
+        const preenchimento = base64.length % 4;
+        const base64Normalizado = preenchimento ? base64 + "=".repeat(4 - preenchimento) : base64;
+        return JSON.parse(atob(base64Normalizado));
+    } catch {
+        return null;
+    }
+}
+
+function obterExpiracaoTokenEmMs() {
+    const payload = decodificarPayloadToken(obterToken());
+    if (!payload || typeof payload.exp !== "number") return null;
+    return payload.exp * 1000;
+}
+
+function sessaoJaExpirou() {
+    const expiracaoEmMs = obterExpiracaoTokenEmMs();
+    return Boolean(expiracaoEmMs && Date.now() >= expiracaoEmMs);
+}
+
+function limparMonitoramentoSessao() {
+    if (temporizadorSessaoExpirada) {
+        clearTimeout(temporizadorSessaoExpirada);
+        temporizadorSessaoExpirada = null;
+    }
+
+    if (intervaloMonitoramentoSessao) {
+        clearInterval(intervaloMonitoramentoSessao);
+        intervaloMonitoramentoSessao = null;
+    }
+}
 
 function urlEhRequisicaoApiAutenticada(url) {
     if (!url || typeof url !== "string") return false;
@@ -84,6 +126,36 @@ function exibirAvisoSessaoExpirada() {
     }
 }
 
+function verificarExpiracaoLocalSessao() {
+    if (window.location.pathname.endsWith("/login.html")) return false;
+    if (!obterToken()) return false;
+    if (!sessaoJaExpirou()) return false;
+
+    exibirAvisoSessaoExpirada();
+    return true;
+}
+
+function agendarMonitoramentoSessao() {
+    limparMonitoramentoSessao();
+
+    if (window.location.pathname.endsWith("/login.html")) return;
+    if (!obterToken()) return;
+
+    if (verificarExpiracaoLocalSessao()) return;
+
+    const expiracaoEmMs = obterExpiracaoTokenEmMs();
+    if (expiracaoEmMs) {
+        const atraso = Math.max(expiracaoEmMs - Date.now(), 0);
+        temporizadorSessaoExpirada = window.setTimeout(function () {
+            verificarExpiracaoLocalSessao();
+        }, atraso + 250);
+    }
+
+    intervaloMonitoramentoSessao = window.setInterval(function () {
+        verificarExpiracaoLocalSessao();
+    }, 60000);
+}
+
 function tratarSessaoExpiradaSeNecessario(resposta, url) {
     if (!resposta || resposta.status !== 401) return resposta;
     if (!urlEhRequisicaoApiAutenticada(url)) return resposta;
@@ -96,6 +168,8 @@ async function verificarSessaoAoRetornarAba() {
     if (window.location.pathname.endsWith("/login.html")) return;
     if (!obterToken()) return;
     if (typeof montarUrlApi !== "function") return;
+
+    if (verificarExpiracaoLocalSessao()) return;
 
     try {
         const resposta = await window.fetchOriginal(
@@ -679,6 +753,9 @@ document.addEventListener("DOMContentLoaded", function () {
     atualizarPainelTopo();
     marcarItemMenuLateralAtivo();
     configurarBotaoSair();
+    agendarMonitoramentoSessao();
 
     document.addEventListener("visibilitychange", verificarSessaoAoRetornarAba);
+    window.addEventListener("focus", verificarSessaoAoRetornarAba);
+    window.addEventListener("pageshow", verificarSessaoAoRetornarAba);
 });

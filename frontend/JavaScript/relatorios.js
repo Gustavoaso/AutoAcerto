@@ -35,12 +35,20 @@ function obterDataLimiteIso(dias) {
     return extrairDataIso(dataLimite);
 }
 
+function obterDataAtualIso() {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    return extrairDataIso(hoje);
+}
+
 function dataDentroDoPeriodo(dataValor, dias) {
     const dataIso = extrairDataIso(dataValor);
     const limiteIso = obterDataLimiteIso(dias);
+    const dataAtualIso = obterDataAtualIso();
     if (!dataIso) return false;
+    if (dataIso > dataAtualIso) return false;
     if (!limiteIso) return true;
-    return dataIso >= limiteIso;
+    return dataIso >= limiteIso && dataIso <= dataAtualIso;
 }
 
 function criarIconeViagemLista() {

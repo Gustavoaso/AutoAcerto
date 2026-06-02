@@ -414,19 +414,21 @@ function montarFinanceiroMensal() {
     }, []);
 }
 
-function deveUsarBarrasDespesasNoGrafico(dados) {
-  if (periodoDashboard.tipo === "365") return false;
-  if (periodoDashboard.tipo === "customizado") return true;
-  if (periodoDashboard.tipo === "30" || periodoDashboard.tipo === "90") return true;
-  return dados.length >= 6;
-}
-
 function criarPathLinha(dados, chave, escalaY, inicioX, espacamento) {
   return dados.map(function (item, indice) {
     const x = inicioX + indice * espacamento;
     const y = escalaY(item[chave]);
     return (indice === 0 ? "M" : "L") + x + " " + y;
   }).join(" ");
+}
+
+function obterPosicaoXGrafico(indice, totalItens, inicioX, largura) {
+  if (totalItens <= 1) {
+    return inicioX + (largura / 2);
+  }
+
+  const espacamento = largura / (totalItens - 1);
+  return inicioX + indice * espacamento;
 }
 
 function mostrarTooltipGrafico(evento, item, serie) {
@@ -478,7 +480,6 @@ function carregarGraficoFinanceiro() {
   const largura = 656;
   const topo = 30;
   const base = 230;
-  const espacamento = dados.length === 1 ? 0 : largura / (dados.length - 1);
   const valores = [];
 
   dados.forEach(function (item) {
@@ -488,45 +489,59 @@ function carregarGraficoFinanceiro() {
   const maior = Math.max(...valores, 1);
   const menor = Math.min(...valores, 0);
   const amplitude = maior - menor || 1;
-  const usarBarrasDespesas = deveUsarBarrasDespesasNoGrafico(dados);
 
   function escalaY(valor) {
     return base - ((valor - menor) / amplitude) * (base - topo);
   }
 
-  document.getElementById("linhaReceita").setAttribute("d", criarPathLinha(dados, "receita", escalaY, inicioX, espacamento));
-  document.getElementById("linhaLucro").setAttribute("d", criarPathLinha(dados, "lucro", escalaY, inicioX, espacamento));
-  document.getElementById("linhaDespesas").setAttribute("d", usarBarrasDespesas ? "" : criarPathLinha(dados, "despesas", escalaY, inicioX, espacamento));
+  document.getElementById("linhaReceita").setAttribute("d", "");
+  document.getElementById("linhaLucro").setAttribute("d", "");
+  document.getElementById("linhaDespesas").setAttribute("d", "");
 
-  if (usarBarrasDespesas) {
-    const larguraBarra = Math.max(Math.min(espacamento * 0.42, 22), dados.length === 1 ? 22 : 10);
+  const espacamentoGrupos = dados.length <= 1 ? largura : largura / (dados.length - 1);
+  const larguraGrupo = Math.max(Math.min(espacamentoGrupos * 0.6, 52), 24);
+  const larguraBarra = Math.max((larguraGrupo - 8) / 3, 6);
+  const deslocamentoInicial = larguraGrupo / 2;
+  const yZero = escalaY(0);
+  const series = [
+    { chave: "receita", cor: "#22c55e", preenchimento: "rgba(34, 197, 94, 0.22)" },
+    { chave: "despesas", cor: "#f43f5e", preenchimento: "rgba(244, 63, 94, 0.22)" },
+    { chave: "lucro", cor: "#2563eb", preenchimento: "rgba(37, 99, 235, 0.22)" }
+  ];
 
-    dados.forEach(function (item, indice) {
-      const x = inicioX + indice * espacamento - (larguraBarra / 2);
-      const y = escalaY(Math.max(item.despesas, 0));
-      const altura = Math.max(base - y, 2);
+  dados.forEach(function (item, indice) {
+    const centroX = obterPosicaoXGrafico(indice, dados.length, inicioX, largura);
+
+    series.forEach(function (serie, serieIndice) {
+      const valor = item[serie.chave];
+      const yValor = escalaY(valor);
+      const altura = Math.max(Math.abs(yValor - yZero), 2);
+      const y = valor >= 0 ? Math.min(yValor, yZero) : yZero;
+      const x = centroX - deslocamentoInicial + (serieIndice * larguraBarra) + (serieIndice * 4);
       const barra = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+
       barra.setAttribute("x", x);
       barra.setAttribute("y", y);
       barra.setAttribute("width", larguraBarra);
       barra.setAttribute("height", altura);
-      barra.setAttribute("rx", Math.min(larguraBarra / 2, 6));
-      barra.setAttribute("fill", "rgba(244, 63, 94, 0.22)");
-      barra.setAttribute("stroke", "#f43f5e");
-      barra.setAttribute("stroke-width", "1");
+      barra.setAttribute("rx", Math.min(larguraBarra / 2, 5));
+      barra.setAttribute("fill", serie.preenchimento);
+      barra.setAttribute("stroke", serie.cor);
+      barra.setAttribute("stroke-width", "1.2");
+      barra.setAttribute("class", "barra-grafico");
       barra.addEventListener("mouseenter", function (evento) {
-        mostrarTooltipGrafico(evento, item, "despesas");
+        mostrarTooltipGrafico(evento, item, serie.chave);
       });
       barra.addEventListener("mousemove", function (evento) {
-        mostrarTooltipGrafico(evento, item, "despesas");
+        mostrarTooltipGrafico(evento, item, serie.chave);
       });
       barra.addEventListener("mouseleave", esconderTooltipGrafico);
       barras.appendChild(barra);
     });
-  }
+  });
 
   dados.forEach(function (item, indice) {
-    const x = inicioX + indice * espacamento;
+    const x = obterPosicaoXGrafico(indice, dados.length, inicioX, largura);
     const texto = document.createElementNS("http://www.w3.org/2000/svg", "text");
     texto.setAttribute("x", x);
     texto.setAttribute("y", 252);
@@ -534,28 +549,6 @@ function carregarGraficoFinanceiro() {
     texto.setAttribute("class", "rotulo-grafico");
     texto.textContent = item.mes;
     rotulos.appendChild(texto);
-
-    [
-      { chave: "receita", cor: "#22c55e" },
-      { chave: "lucro", cor: "#2563eb" },
-      { chave: "despesas", cor: "#f43f5e", ocultarPonto: usarBarrasDespesas }
-    ].forEach(function (serie) {
-      if (serie.ocultarPonto) return;
-      const circulo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      circulo.setAttribute("cx", x);
-      circulo.setAttribute("cy", escalaY(item[serie.chave]));
-      circulo.setAttribute("r", 4);
-      circulo.setAttribute("fill", serie.cor);
-      circulo.setAttribute("class", "ponto-grafico");
-      circulo.addEventListener("mouseenter", function (evento) {
-        mostrarTooltipGrafico(evento, item, serie.chave);
-      });
-      circulo.addEventListener("mousemove", function (evento) {
-        mostrarTooltipGrafico(evento, item, serie.chave);
-      });
-      circulo.addEventListener("mouseleave", esconderTooltipGrafico);
-      pontos.appendChild(circulo);
-    });
   });
 }
 
