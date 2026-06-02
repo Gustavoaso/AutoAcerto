@@ -131,21 +131,15 @@ function filtrarViagensPorPeriodo(listaViagens, dias) {
 
 function filtrarDespesasForaDeViagem(dias, valorTipoLancamento) {
     if (valorTipoLancamento === "viagens") return [];
+    if (dias !== 0) return [];
 
-    return obterDespesasFiltradasPorPeriodo(dias).filter(function (despesa) {
-        if (despesa.viagem_id) return false;
-        return true;
-    });
-}
-
-function obterDespesasFiltradasPorPeriodo(dias) {
     return despesas.filter(function (despesa) {
-        return dataDentroDoPeriodo(despesa.data_despesa, dias);
+        return !despesa.viagem_id;
     });
 }
 
-function obterDespesasDaViagem(idViagem, dias) {
-    return obterDespesasFiltradasPorPeriodo(dias).filter(function (despesa) {
+function obterDespesasDaViagem(idViagem) {
+    return despesas.filter(function (despesa) {
         return String(despesa.viagem_id) === String(idViagem);
     });
 }
@@ -154,8 +148,8 @@ function filtrarDespesasForaDeViagemPorPeriodo(dias, valorTipoLancamento) {
     return filtrarDespesasForaDeViagem(dias, valorTipoLancamento);
 }
 
-function somarDespesasDaViagem(idViagem, dias) {
-    return obterDespesasDaViagem(idViagem, dias).reduce(function (acumulador, despesa) {
+function somarDespesasDaViagem(idViagem) {
+    return obterDespesasDaViagem(idViagem).reduce(function (acumulador, despesa) {
         return acumulador + Number(despesa.valor);
     }, 0);
 }
@@ -193,7 +187,7 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
 
     listaViagens.forEach(function (viagem) {
         const frete = Number(viagem.valor_frete || 0);
-        const totalDespesasViagem = somarDespesasDaViagem(viagem.id, periodoDias);
+        const totalDespesasViagem = somarDespesasDaViagem(viagem.id);
         const lucro = frete - totalDespesasViagem;
         const origemViagem = window.AutoAcertoHtml.texto(viagem.origem, "-");
         const destinoViagem = window.AutoAcertoHtml.texto(viagem.destino, "-");
@@ -292,7 +286,7 @@ function renderizarTabelaCategorias(listaViagens, despesasForaDeViagem) {
         return String(viagem.id);
     });
 
-    const despesasFiltradas = obterDespesasFiltradasPorPeriodo(periodoDias).filter(function (despesa) {
+    const despesasFiltradas = despesas.filter(function (despesa) {
         return idsViagens.includes(String(despesa.viagem_id));
     }).concat(despesasForaDeViagem);
 
@@ -365,7 +359,7 @@ function atualizarMetricas(listaViagens, despesasForaDeViagem) {
         return String(viagem.id);
     });
 
-    const despesasFiltradas = obterDespesasFiltradasPorPeriodo(periodoDias).filter(function (despesa) {
+    const despesasFiltradas = despesas.filter(function (despesa) {
         return idsViagens.includes(String(despesa.viagem_id));
     }).concat(despesasForaDeViagem);
 
@@ -448,7 +442,7 @@ function exportarCSV() {
 
     listaFiltrada.forEach(function (viagem) {
         const frete = Number(viagem.valor_frete || 0);
-        const totalDespesasViagem = somarDespesasDaViagem(viagem.id, periodoDias);
+        const totalDespesasViagem = somarDespesasDaViagem(viagem.id);
         const lucro = frete - totalDespesasViagem;
 
         linhasCSV.push([

@@ -191,9 +191,17 @@ function obterViagensPeriodo() {
   });
 }
 
-function obterDespesasPeriodo() {
+function obterIdsViagensPeriodo() {
+  return obterViagensPeriodo().map(function (viagem) {
+    return String(viagem.id);
+  });
+}
+
+function obterDespesasRelacionadasAsViagensDoPeriodo() {
+  const idsViagensPeriodo = obterIdsViagensPeriodo();
+
   return despesas.filter(function (despesa) {
-    return dataEstaNoPeriodo(despesa.data_despesa);
+    return idsViagensPeriodo.includes(String(despesa.viagem_id));
   });
 }
 
@@ -235,7 +243,7 @@ function atualizarCardsResumo() {
     return veiculo.status === "ativo";
   }).length;
   const viagensPeriodo = obterViagensPeriodo();
-  const despesasPeriodo = obterDespesasPeriodo();
+  const despesasPeriodo = obterDespesasRelacionadasAsViagensDoPeriodo();
   const totalViagens = viagensPeriodo.length;
   const valorTotalDespesasPeriodo = despesasPeriodo.reduce(function (acumulador, despesa) {
     return acumulador + obterValorDespesa(despesa);
@@ -249,7 +257,7 @@ function atualizarCardsResumo() {
 
 function atualizarResumoFinanceiro() {
   const viagensPeriodo = obterViagensPeriodo();
-  const despesasPeriodo = obterDespesasPeriodo();
+  const despesasPeriodo = obterDespesasRelacionadasAsViagensDoPeriodo();
 
   const receitaTotal = viagensPeriodo
     .filter(function (viagem) {
@@ -338,17 +346,12 @@ function montarFinanceiroMensal() {
   const mapaMeses = {};
   const intervalo = obterIntervaloDashboard();
   const viagensPeriodo = obterViagensPeriodo();
-  const despesasPeriodo = obterDespesasPeriodo();
+  const despesasRelacionadas = obterDespesasRelacionadasAsViagensDoPeriodo();
   const datasLancamentos = [];
 
   viagensPeriodo.forEach(function (viagem) {
     const dataViagem = obterDataLocal(viagem.data_saida);
     if (dataViagem) datasLancamentos.push(dataViagem);
-  });
-
-  despesasPeriodo.forEach(function (despesa) {
-    const dataDespesa = obterDataLocal(despesa.data_despesa);
-    if (dataDespesa) datasLancamentos.push(dataDespesa);
   });
 
   const menorData = datasLancamentos.length ? new Date(Math.min.apply(null, datasLancamentos)) : null;
@@ -370,9 +373,14 @@ function montarFinanceiroMensal() {
     mapaMeses[chave].receita += obterValorFrete(viagem);
   });
 
-  despesasPeriodo.forEach(function (despesa) {
-    const dataDespesa = obterDataLocal(despesa.data_despesa);
-    const chave = usarPeriodoDiario && dataDespesa ? obterChaveDia(dataDespesa) : obterMesAno(despesa.data_despesa);
+  despesasRelacionadas.forEach(function (despesa) {
+    const viagemRelacionada = viagensPeriodo.find(function (viagem) {
+      return String(viagem.id) === String(despesa.viagem_id);
+    });
+    if (!viagemRelacionada) return;
+
+    const dataViagem = obterDataLocal(viagemRelacionada.data_saida);
+    const chave = usarPeriodoDiario && dataViagem ? obterChaveDia(dataViagem) : obterMesAno(viagemRelacionada.data_saida);
     if (!chave) return;
 
     if (!mapaMeses[chave]) {
