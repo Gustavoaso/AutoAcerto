@@ -137,6 +137,11 @@ function obterRotuloDia(chaveDia) {
   return dia + "/" + mes;
 }
 
+function diferencaDiasEntreDatas(inicio, fim) {
+  if (!inicio || !fim) return 0;
+  return Math.round((fim - inicio) / 86400000);
+}
+
 function obterIntervaloDashboard() {
   if (periodoDashboard.tipo === "0") return null;
 
@@ -348,7 +353,7 @@ function montarFinanceiroMensal() {
 
   const menorData = datasLancamentos.length ? new Date(Math.min.apply(null, datasLancamentos)) : null;
   const maiorData = datasLancamentos.length ? new Date(Math.max.apply(null, datasLancamentos)) : null;
-  const diferencaDias = menorData && maiorData ? Math.round((maiorData - menorData) / 86400000) : 0;
+  const diferencaDias = diferencaDiasEntreDatas(menorData, maiorData);
   const usarPeriodoDiario = periodoDashboard.tipo !== "365" && (Boolean(intervalo) || diferencaDias <= 90);
 
   viagensPeriodo.forEach(function (viagem) {
@@ -409,6 +414,13 @@ function montarFinanceiroMensal() {
     }, []);
 }
 
+function deveUsarBarrasDespesasNoGrafico(dados) {
+  if (periodoDashboard.tipo === "365") return false;
+  if (periodoDashboard.tipo === "customizado") return true;
+  if (periodoDashboard.tipo === "30" || periodoDashboard.tipo === "90") return true;
+  return dados.length >= 6;
+}
+
 function criarPathLinha(dados, chave, escalaY, inicioX, espacamento) {
   return dados.map(function (item, indice) {
     const x = inicioX + indice * espacamento;
@@ -449,8 +461,10 @@ function carregarGraficoFinanceiro() {
 
   const dados = montarFinanceiroMensal();
   const rotulos = document.getElementById("rotulosGraficoFinanceiro");
+  const barras = document.getElementById("barrasGraficoFinanceiro");
   const pontos = document.getElementById("pontosGraficoFinanceiro");
   rotulos.innerHTML = "";
+  barras.innerHTML = "";
   pontos.innerHTML = "";
 
   if (dados.length === 0) {
@@ -474,6 +488,7 @@ function carregarGraficoFinanceiro() {
   const maior = Math.max(...valores, 1);
   const menor = Math.min(...valores, 0);
   const amplitude = maior - menor || 1;
+  const usarBarrasDespesas = deveUsarBarrasDespesasNoGrafico(dados);
 
   function escalaY(valor) {
     return base - ((valor - menor) / amplitude) * (base - topo);
@@ -481,7 +496,34 @@ function carregarGraficoFinanceiro() {
 
   document.getElementById("linhaReceita").setAttribute("d", criarPathLinha(dados, "receita", escalaY, inicioX, espacamento));
   document.getElementById("linhaLucro").setAttribute("d", criarPathLinha(dados, "lucro", escalaY, inicioX, espacamento));
-  document.getElementById("linhaDespesas").setAttribute("d", criarPathLinha(dados, "despesas", escalaY, inicioX, espacamento));
+  document.getElementById("linhaDespesas").setAttribute("d", usarBarrasDespesas ? "" : criarPathLinha(dados, "despesas", escalaY, inicioX, espacamento));
+
+  if (usarBarrasDespesas) {
+    const larguraBarra = Math.max(Math.min(espacamento * 0.42, 22), dados.length === 1 ? 22 : 10);
+
+    dados.forEach(function (item, indice) {
+      const x = inicioX + indice * espacamento - (larguraBarra / 2);
+      const y = escalaY(Math.max(item.despesas, 0));
+      const altura = Math.max(base - y, 2);
+      const barra = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      barra.setAttribute("x", x);
+      barra.setAttribute("y", y);
+      barra.setAttribute("width", larguraBarra);
+      barra.setAttribute("height", altura);
+      barra.setAttribute("rx", Math.min(larguraBarra / 2, 6));
+      barra.setAttribute("fill", "rgba(244, 63, 94, 0.22)");
+      barra.setAttribute("stroke", "#f43f5e");
+      barra.setAttribute("stroke-width", "1");
+      barra.addEventListener("mouseenter", function (evento) {
+        mostrarTooltipGrafico(evento, item, "despesas");
+      });
+      barra.addEventListener("mousemove", function (evento) {
+        mostrarTooltipGrafico(evento, item, "despesas");
+      });
+      barra.addEventListener("mouseleave", esconderTooltipGrafico);
+      barras.appendChild(barra);
+    });
+  }
 
   dados.forEach(function (item, indice) {
     const x = inicioX + indice * espacamento;
@@ -496,8 +538,9 @@ function carregarGraficoFinanceiro() {
     [
       { chave: "receita", cor: "#22c55e" },
       { chave: "lucro", cor: "#2563eb" },
-      { chave: "despesas", cor: "#f43f5e" }
+      { chave: "despesas", cor: "#f43f5e", ocultarPonto: usarBarrasDespesas }
     ].forEach(function (serie) {
+      if (serie.ocultarPonto) return;
       const circulo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       circulo.setAttribute("cx", x);
       circulo.setAttribute("cy", escalaY(item[serie.chave]));
