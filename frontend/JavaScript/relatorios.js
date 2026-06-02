@@ -46,8 +46,8 @@ function dataDentroDoPeriodo(dataValor, dias) {
     const limiteIso = obterDataLimiteIso(dias);
     const dataAtualIso = obterDataAtualIso();
     if (!dataIso) return false;
-    if (dataIso > dataAtualIso) return false;
     if (!limiteIso) return true;
+    if (dataIso > dataAtualIso) return false;
     return dataIso >= limiteIso && dataIso <= dataAtualIso;
 }
 
