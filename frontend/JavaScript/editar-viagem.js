@@ -8,6 +8,7 @@ const usuarioLogado = typeof obterUsuarioLogado === "function" ? obterUsuarioLog
 
 const modal = document.getElementById("modalSucesso");
 const botaoOk = document.getElementById("botaoOkModal");
+let viagemAtual = null;
 
 if (window.AutoAcertoCidades) {
     window.AutoAcertoCidades.configurar(["origem", "destino"]);
@@ -94,6 +95,8 @@ async function carregarViagem() {
 
         const viagem = await response.json();
 
+        viagemAtual = viagem;
+
         document.getElementById("origem").value = viagem.origem;
         document.getElementById("destino").value = viagem.destino;
         document.getElementById("dataSaida").value = formatarDataParaInput(viagem.data_saida);
@@ -111,6 +114,7 @@ async function carregarViagem() {
         await carregarMotoristas(viagem.motorista_id);
         await carregarVeiculos(viagem.veiculo_id);
         configurarRestricoesMotorista();
+        configurarInterfacePorStatus(viagem);
 
     } catch (erro) {
         console.error("Erro ao carregar viagem:", erro);
@@ -126,6 +130,51 @@ function configurarRestricoesMotorista() {
     document.getElementById("valorFrete").disabled = true;
 }
 
+function configurarInterfacePorStatus(viagem) {
+    const emAndamento = viagem.status === "em andamento";
+    const botaoConcluir = document.getElementById("botaoConcluirViagem");
+    const campoChegada = document.getElementById("dataChegada");
+    const campoKmFinal = document.getElementById("kmFinal");
+    const selectStatus = document.getElementById("status");
+
+    if (botaoConcluir) {
+        botaoConcluir.classList.toggle("oculto", !emAndamento);
+    }
+
+    if (campoChegada) {
+        campoChegada.disabled = emAndamento;
+        if (emAndamento) campoChegada.value = "";
+    }
+
+    if (campoKmFinal) {
+        campoKmFinal.disabled = emAndamento;
+        if (emAndamento) campoKmFinal.value = "";
+    }
+
+    if (selectStatus && !emAndamento && !selectStatus.querySelector('option[value="finalizada"]')) {
+        const opcaoFinalizada = document.createElement("option");
+        opcaoFinalizada.value = "finalizada";
+        opcaoFinalizada.textContent = "Finalizada";
+        selectStatus.insertBefore(opcaoFinalizada, selectStatus.querySelector('option[value="cancelada"]'));
+    }
+}
+
+const botaoConcluirViagem = document.getElementById("botaoConcluirViagem");
+if (botaoConcluirViagem) {
+    botaoConcluirViagem.addEventListener("click", function () {
+        if (!viagemAtual || !window.AutoAcertoViagem) return;
+
+        window.AutoAcertoViagem.abrirModalFinalizarViagem({
+            idViagem: idViagem,
+            kmInicial: viagemAtual.km_inicial,
+            dataSaida: viagemAtual.data_saida,
+            aoConcluir: function () {
+                window.location.href = "viagens.html";
+            }
+        });
+    });
+}
+
 document.getElementById("botaoSalvarEdicao").addEventListener("click", async function (e) {
     e.preventDefault();
 
@@ -139,25 +188,36 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
 
     const dataSaida = document.getElementById("dataSaida").value;
     const dataChegada = document.getElementById("dataChegada").value;
-    const erroDatas = window.AutoAcertoRegras
-        ? window.AutoAcertoRegras.validarDatasViagem(dataSaida, dataChegada)
-        : null;
-    if (erroDatas) {
-        alert(erroDatas);
-        return;
+    const emAndamento = viagemAtual && viagemAtual.status === "em andamento";
+
+    if (!emAndamento) {
+        const erroDatas = window.AutoAcertoRegras
+            ? window.AutoAcertoRegras.validarDatasViagem(dataSaida, dataChegada)
+            : null;
+        if (erroDatas) {
+            alert(erroDatas);
+            return;
+        }
     }
 
     const kmInicialNum = parseInt(document.getElementById("kmInicial").value, 10);
     const kmFinalNum = parseInt(document.getElementById("kmFinal").value, 10);
 
-    if (isNaN(kmInicialNum) || kmInicialNum < 0 || isNaN(kmFinalNum) || kmFinalNum < 0) {
-        alert("Informe KM inicial e KM final validos.");
+    if (isNaN(kmInicialNum) || kmInicialNum < 0) {
+        alert("Informe o KM inicial valido.");
         return;
     }
 
-    if (kmFinalNum < kmInicialNum) {
-        alert("O KM final nao pode ser menor que o KM inicial.");
-        return;
+    if (!emAndamento) {
+        if (isNaN(kmFinalNum) || kmFinalNum < 0) {
+            alert("Informe o KM final valido.");
+            return;
+        }
+
+        if (kmFinalNum < kmInicialNum) {
+            alert("O KM final nao pode ser menor que o KM inicial.");
+            return;
+        }
     }
 
     const dados = {
@@ -166,13 +226,16 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         motoristaId: document.getElementById("motoristaId").value,
         veiculoId: document.getElementById("veiculoId").value,
         dataSaida: dataSaida,
-        dataChegada: dataChegada,
         valorFrete: valorFreteNum,
         kmInicial: kmInicialNum,
-        kmFinal: kmFinalNum,
         status: document.getElementById("status").value,
         observacoes: document.getElementById("observacoes").value
     };
+
+    if (!emAndamento) {
+        dados.dataChegada = dataChegada;
+        dados.kmFinal = kmFinalNum;
+    }
 
     try {
         const response = await fetch(urlApiViagens + "/" + idViagem, {

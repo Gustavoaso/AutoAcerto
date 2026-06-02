@@ -2,6 +2,7 @@ const urlApiViagens = montarUrlApi("/viagens");
 
 const params = new URLSearchParams(window.location.search);
 const idViagem = params.get("id");
+let viagemAtual = null;
 
 function formatarData(dataISO) {
     if (!dataISO) return "—";
@@ -30,6 +31,21 @@ function formatarMoeda(valor) {
     });
 }
 
+function configurarAcoesViagem(viagem) {
+    viagemAtual = viagem;
+    const emAndamento = viagem.status === "em andamento";
+    const botaoConcluir = document.getElementById("botaoConcluirViagem");
+    const botaoLancarDespesa = document.getElementById("botaoLancarDespesa");
+
+    if (botaoConcluir) {
+        botaoConcluir.classList.toggle("oculto", !emAndamento);
+    }
+
+    if (botaoLancarDespesa) {
+        botaoLancarDespesa.classList.toggle("oculto", !emAndamento);
+    }
+}
+
 async function carregarViagem() {
     if (!idViagem) {
         alert("Viagem não encontrada.");
@@ -38,7 +54,7 @@ async function carregarViagem() {
     }
 
     try {
-        const response = await fetch(urlApiViagens + "/" + idViagem,{ headers: cabecalhosAutenticados() });
+        const response = await fetch(urlApiViagens + "/" + idViagem, { headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
             alert("Viagem não encontrada.");
@@ -56,7 +72,9 @@ async function carregarViagem() {
                 ? viagem.veiculo_modelo + " — " + viagem.veiculo_placa
                 : "—";
         document.getElementById("detalheDataSaida").textContent = formatarData(viagem.data_saida);
-        document.getElementById("detalheDataChegada").textContent = formatarData(viagem.data_chegada);
+        document.getElementById("detalheDataChegada").textContent = viagem.data_chegada
+            ? formatarData(viagem.data_chegada)
+            : "Pendente";
         document.getElementById("detalheValorFrete").textContent = formatarMoeda(viagem.valor_frete);
         document.getElementById("detalheObservacoes").textContent = viagem.observacoes || "—";
         document.getElementById("detalheDataCadastro").textContent = formatarDataHora(viagem.data_cadastro);
@@ -71,6 +89,7 @@ async function carregarViagem() {
             statusEl.innerHTML = '<span class="selo-status selo-cancelada">Cancelada</span>';
         }
 
+        configurarAcoesViagem(viagem);
     } catch (erro) {
         console.error("Erro ao carregar viagem:", erro);
         alert("Erro de conexão com a API.");
@@ -92,6 +111,20 @@ const botaoLancarDespesa = document.getElementById("botaoLancarDespesa");
 if (botaoLancarDespesa) {
     botaoLancarDespesa.addEventListener("click", function () {
         window.location.href = "cadastro-despesa.html?viagemId=" + idViagem;
+    });
+}
+
+const botaoConcluirViagem = document.getElementById("botaoConcluirViagem");
+if (botaoConcluirViagem) {
+    botaoConcluirViagem.addEventListener("click", function () {
+        if (!viagemAtual || !window.AutoAcertoViagem) return;
+
+        window.AutoAcertoViagem.abrirModalFinalizarViagem({
+            idViagem: idViagem,
+            kmInicial: viagemAtual.km_inicial,
+            dataSaida: viagemAtual.data_saida,
+            aoConcluir: carregarViagem
+        });
     });
 }
 

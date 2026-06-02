@@ -23,6 +23,10 @@ async function carregarViagens() {
       viagens = filtrarListaPorTransportadoraMaster(viagens);
     }
 
+    viagens = viagens.filter(function (viagem) {
+      return viagem.status === "em andamento";
+    });
+
     viagensCache = viagens;
 
     const selectViagem = document.getElementById("viagemId");

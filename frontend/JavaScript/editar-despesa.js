@@ -18,6 +18,7 @@ async function carregarViagens(viagemIdSelecionada) {
 
         viagensCache = viagens;
         const selectViagem = document.getElementById("viagemId");
+        selectViagem.innerHTML = '<option value="">Selecione</option>';
 
         viagens.forEach(function (viagem) {
             const opcao = document.createElement("option");

@@ -683,6 +683,18 @@ html[data-tema-ui="escuro"] {
   transform: translateY(-1px);
 }
 
+.botao-primario.botao-sucesso,
+.botao-sucesso {
+  background: var(--cor-sucesso);
+  color: #fff;
+}
+
+.botao-primario.botao-sucesso:hover,
+.botao-sucesso:hover {
+  background: #059669;
+  box-shadow: 0 14px 28px rgba(5, 150, 105, 0.24);
+}
+
 .botao-perigo {
   border: none;
   background: var(--cor-perigo-clara);
@@ -1231,6 +1243,21 @@ tbody td {
 
 .botao-acao:hover svg {
   stroke: var(--cor-texto);
+}
+
+.botao-acao.botao-acao-sucesso {
+  color: var(--cor-sucesso);
+  border-color: #bbf7d0;
+  background: var(--cor-sucesso-clara);
+}
+
+.botao-acao.botao-acao-sucesso:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.botao-acao.botao-acao-sucesso svg {
+  stroke: var(--cor-sucesso);
 }
 
 /* -------------------------------------------------------

@@ -217,6 +217,7 @@ async function garantirEstruturaVeiculos() {
 async function garantirEstruturaViagens() {
   await banco.query("ALTER TABLE viagens ADD COLUMN IF NOT EXISTS km_inicial INTEGER");
   await banco.query("ALTER TABLE viagens ADD COLUMN IF NOT EXISTS km_final INTEGER");
+  await banco.query("ALTER TABLE viagens ALTER COLUMN data_chegada DROP NOT NULL");
 }
 
 async function garantirEstruturaDespesas() {

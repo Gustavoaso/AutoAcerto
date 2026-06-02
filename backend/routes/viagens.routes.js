@@ -1,6 +1,6 @@
 const express = require("express");
 const banco = require("../banco");
-const { STATUS_VIAGEM, normalizarStatus, valorMonetarioValido, dataValida, dataMaiorOuIgual } = require("../validacoes");
+const { STATUS_VIAGEM, normalizarStatus, valorMonetarioValido, dataValida, dataMaiorOuIgual, obterDataHojeIso } = require("../validacoes");
 const { autenticar, exigirAdmin, exigirAdminOuMotorista } = require("../middlewares/autenticacao");
 const { autorizarAcessoViagem } = require("../middlewares/autorizacao");
 const { obterIdTransportadora, usuarioEhDonoSistema, obterFiltroTransportadora, transportadoraIdParaPost, transportadoraEscopoMutacao } = require("../helpers/escopo");
@@ -11,38 +11,25 @@ const { obterParametrosPaginacao, montarRespostaPaginada } = require("../helpers
 const router = express.Router();
 
 router.post("/", exigirAdmin, async (requisicao, resposta) => {
-  const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
-  const statusTratado = normalizarStatus(status);
+  const { origem, destino, motoristaId, veiculoId, dataSaida, valorFrete, kmInicial, observacoes } = requisicao.body;
+  const statusTratado = "em andamento";
 
-  if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || kmInicial == null || kmFinal == null || !status) {
+  if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !valorFrete || kmInicial == null) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   const kmInicialNum = parseInt(kmInicial, 10);
-  const kmFinalNum = parseInt(kmFinal, 10);
 
-  if (!Number.isInteger(kmInicialNum) || !Number.isInteger(kmFinalNum) || kmInicialNum < 0 || kmFinalNum < 0) {
-    return resposta.status(400).json({ mensagem: "Informe os KM da viagem corretamente." });
-  }
-
-  if (kmFinalNum < kmInicialNum) {
-    return resposta.status(400).json({ mensagem: "O KM final não pode ser menor que o KM inicial." });
-  }
-
-  if (!STATUS_VIAGEM.has(statusTratado)) {
-    return resposta.status(400).json({ mensagem: "Status de viagem invalido." });
+  if (!Number.isInteger(kmInicialNum) || kmInicialNum < 0) {
+    return resposta.status(400).json({ mensagem: "Informe o KM inicial da viagem corretamente." });
   }
 
   if (!valorMonetarioValido(valorFrete)) {
     return resposta.status(400).json({ mensagem: "Informe um valor de frete valido." });
   }
 
-  if (!dataValida(dataSaida) || !dataValida(dataChegada)) {
-    return resposta.status(400).json({ mensagem: "Informe datas validas para a viagem." });
-  }
-
-  if (!dataMaiorOuIgual(dataChegada, dataSaida)) {
-    return resposta.status(400).json({ mensagem: "A data de chegada nao pode ser anterior a data de saida." });
+  if (!dataValida(dataSaida)) {
+    return resposta.status(400).json({ mensagem: "Informe uma data valida para a viagem." });
   }
 
   try {
@@ -52,27 +39,8 @@ router.post("/", exigirAdmin, async (requisicao, resposta) => {
     }
     const transportadoraId = escopo.id;
 
-    let motoristaIdFinal = motoristaId;
-    let veiculoIdFinal = veiculoId;
-    let valorFreteFinal = valorFrete;
-
-    if (requisicao.usuario.perfil === "motorista") {
-      const viagemAtual = await banco.query(
-        "SELECT motorista_id, veiculo_id, valor_frete FROM viagens WHERE id=$1 AND transportadora_id=$2",
-        [id, transportadoraId]
-      );
-
-      if (viagemAtual.rows.length === 0) {
-        return resposta.status(404).json({ mensagem: "Viagem nÃ£o encontrada." });
-      }
-
-      motoristaIdFinal = viagemAtual.rows[0].motorista_id;
-      veiculoIdFinal = viagemAtual.rows[0].veiculo_id;
-      valorFreteFinal = viagemAtual.rows[0].valor_frete;
-    }
-
-    const motoristaValido = await motoristaPertenceTransportadora(motoristaIdFinal, transportadoraId);
-    const veiculoValido = await veiculoPertenceTransportadora(veiculoIdFinal, transportadoraId);
+    const motoristaValido = await motoristaPertenceTransportadora(motoristaId, transportadoraId);
+    const veiculoValido = await veiculoPertenceTransportadora(veiculoId, transportadoraId);
 
     if (!motoristaValido || !veiculoValido) {
       return resposta.status(400).json({ mensagem: "Motorista ou veículo não encontrado para esta transportadora." });
@@ -80,10 +48,10 @@ router.post("/", exigirAdmin, async (requisicao, resposta) => {
 
     const sql = `
       INSERT INTO viagens (transportadora_id, origem, destino, motorista_id, veiculo_id, data_saida, data_chegada, valor_frete, km_inicial, km_final, status, observacoes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      VALUES ($1, $2, $3, $4, $5, $6, NULL, $7, $8, NULL, $9, $10)
       RETURNING id
     `;
-    const valores = [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, statusTratado, observacoes || ""];
+    const valores = [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, valorFrete, kmInicialNum, statusTratado, observacoes || ""];
 
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Viagem cadastrada com sucesso.", id: resultado.rows[0].id });
@@ -168,6 +136,64 @@ router.get("/", autenticar, async (requisicao, resposta) => {
   }
 });
 
+router.patch("/:id/finalizar", exigirAdminOuMotorista, autorizarAcessoViagem, async (requisicao, resposta) => {
+  const { id } = requisicao.params;
+  const { dataChegada, kmFinal } = requisicao.body;
+  const dataChegadaFinal = dataChegada || obterDataHojeIso();
+  const kmFinalNum = parseInt(kmFinal, 10);
+
+  if (!dataValida(dataChegadaFinal)) {
+    return resposta.status(400).json({ mensagem: "Informe uma data de chegada valida." });
+  }
+
+  if (!Number.isInteger(kmFinalNum) || kmFinalNum < 0) {
+    return resposta.status(400).json({ mensagem: "Informe o KM final da viagem corretamente." });
+  }
+
+  try {
+    const transportadoraId = await transportadoraEscopoMutacao(requisicao, "viagens", id);
+    if (transportadoraId === null) {
+      return resposta.status(404).json({ mensagem: "Viagem nao encontrada." });
+    }
+
+    const viagemAtual = await banco.query(
+      "SELECT status, data_saida, km_inicial FROM viagens WHERE id=$1 AND transportadora_id=$2",
+      [id, transportadoraId]
+    );
+
+    if (viagemAtual.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Viagem nao encontrada." });
+    }
+
+    const viagem = viagemAtual.rows[0];
+
+    if (viagem.status !== "em andamento") {
+      return resposta.status(400).json({ mensagem: "Somente viagens em andamento podem ser concluidas." });
+    }
+
+    if (!dataMaiorOuIgual(dataChegadaFinal, viagem.data_saida)) {
+      return resposta.status(400).json({ mensagem: "A data de chegada nao pode ser anterior a data de saida." });
+    }
+
+    if (viagem.km_inicial != null && kmFinalNum < viagem.km_inicial) {
+      return resposta.status(400).json({ mensagem: "O KM final nao pode ser menor que o KM inicial." });
+    }
+
+    const resultado = await banco.query(
+      `UPDATE viagens
+       SET data_chegada=$1, km_final=$2, status='finalizada'
+       WHERE id=$3 AND transportadora_id=$4
+       RETURNING *`,
+      [dataChegadaFinal, kmFinalNum, id, transportadoraId]
+    );
+
+    return resposta.json({ mensagem: "Viagem concluida com sucesso.", viagem: resultado.rows[0] });
+  } catch (erro) {
+    console.error("Erro ao concluir viagem:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao concluir viagem." });
+  }
+});
+
 router.get("/:id", autenticar, autorizarAcessoViagem, async (requisicao, resposta) => {
   const { id } = requisicao.params;
 
@@ -205,9 +231,14 @@ router.put("/:id", exigirAdminOuMotorista, autorizarAcessoViagem, async (requisi
   const { id } = requisicao.params;
   const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
   const statusTratado = normalizarStatus(status);
+  const usuario = requisicao.usuario;
 
-  if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || !status) {
+  if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !valorFrete || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
+  }
+
+  if (statusTratado === "finalizada") {
+    return resposta.status(400).json({ mensagem: "Use a acao de concluir viagem para finalizar uma viagem em andamento." });
   }
 
   let kmInicialNum = null;
@@ -240,12 +271,8 @@ router.put("/:id", exigirAdminOuMotorista, autorizarAcessoViagem, async (requisi
     return resposta.status(400).json({ mensagem: "Informe um valor de frete valido." });
   }
 
-  if (!dataValida(dataSaida) || !dataValida(dataChegada)) {
-    return resposta.status(400).json({ mensagem: "Informe datas validas para a viagem." });
-  }
-
-  if (!dataMaiorOuIgual(dataChegada, dataSaida)) {
-    return resposta.status(400).json({ mensagem: "A data de chegada nao pode ser anterior a data de saida." });
+  if (!dataValida(dataSaida)) {
+    return resposta.status(400).json({ mensagem: "Informe uma data valida para a viagem." });
   }
 
   try {
@@ -254,8 +281,41 @@ router.put("/:id", exigirAdminOuMotorista, autorizarAcessoViagem, async (requisi
       return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
     }
 
-    const motoristaValido = await motoristaPertenceTransportadora(motoristaId, transportadoraId);
-    const veiculoValido = await veiculoPertenceTransportadora(veiculoId, transportadoraId);
+    const viagemAtual = await banco.query(
+      "SELECT status, data_chegada, km_final, motorista_id, veiculo_id, valor_frete FROM viagens WHERE id=$1 AND transportadora_id=$2",
+      [id, transportadoraId]
+    );
+
+    if (viagemAtual.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Viagem nao encontrada." });
+    }
+
+    const atual = viagemAtual.rows[0];
+    let motoristaIdFinal = motoristaId;
+    let veiculoIdFinal = veiculoId;
+    let valorFreteFinal = valorFrete;
+    let dataChegadaFinal = atual.data_chegada;
+    let kmFinalAtual = atual.km_final;
+
+    if (usuario.perfil === "motorista") {
+      motoristaIdFinal = atual.motorista_id;
+      veiculoIdFinal = atual.veiculo_id;
+      valorFreteFinal = atual.valor_frete;
+    }
+
+    if (atual.status !== "em andamento") {
+      if (!dataChegada || !dataValida(dataChegada)) {
+        return resposta.status(400).json({ mensagem: "Informe a data de chegada da viagem." });
+      }
+      if (!dataMaiorOuIgual(dataChegada, dataSaida)) {
+        return resposta.status(400).json({ mensagem: "A data de chegada nao pode ser anterior a data de saida." });
+      }
+      dataChegadaFinal = dataChegada;
+      kmFinalAtual = kmFinalNum != null ? kmFinalNum : atual.km_final;
+    }
+
+    const motoristaValido = await motoristaPertenceTransportadora(motoristaIdFinal, transportadoraId);
+    const veiculoValido = await veiculoPertenceTransportadora(veiculoIdFinal, transportadoraId);
 
     if (!motoristaValido || !veiculoValido) {
       return resposta.status(400).json({ mensagem: "Motorista ou veículo não encontrado para esta transportadora." });
@@ -265,12 +325,15 @@ router.put("/:id", exigirAdminOuMotorista, autorizarAcessoViagem, async (requisi
       UPDATE viagens SET
         origem=$1, destino=$2, motorista_id=$3, veiculo_id=$4,
         data_saida=$5, data_chegada=$6, valor_frete=$7,
-        km_inicial=COALESCE($8, km_inicial), km_final=COALESCE($9, km_final),
+        km_inicial=COALESCE($8, km_inicial), km_final=$9,
         status=$10, observacoes=$11
       WHERE id=$12 AND transportadora_id=$13
       RETURNING *
     `;
-    const valores = [origem, destino, motoristaIdFinal, veiculoIdFinal, dataSaida, dataChegada, valorFreteFinal, kmInicialNum, kmFinalNum, statusTratado, observacoes || "", id, transportadoraId];
+    const valores = [
+      origem, destino, motoristaIdFinal, veiculoIdFinal, dataSaida, dataChegadaFinal, valorFreteFinal,
+      kmInicialNum, kmFinalAtual, statusTratado, observacoes || "", id, transportadoraId
+    ];
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {

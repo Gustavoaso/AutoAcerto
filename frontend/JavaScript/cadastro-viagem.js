@@ -82,25 +82,15 @@ function configurarFormularioViagem() {
     }
 
     const dataSaida = document.getElementById("dataSaida").value;
-    const dataChegada = document.getElementById("dataChegada").value;
-    const erroDatas = window.AutoAcertoRegras
-      ? window.AutoAcertoRegras.validarDatasViagem(dataSaida, dataChegada)
-      : null;
-    if (erroDatas) {
-      alert(erroDatas);
+    if (!dataSaida) {
+      alert("Informe a data de saída da viagem.");
       return;
     }
 
     const kmInicialNum = parseInt(document.getElementById("kmInicial").value, 10);
-    const kmFinalNum = parseInt(document.getElementById("kmFinal").value, 10);
 
-    if (isNaN(kmInicialNum) || kmInicialNum < 0 || isNaN(kmFinalNum) || kmFinalNum < 0) {
-      alert("Informe os KM da viagem corretamente.");
-      return;
-    }
-
-    if (kmFinalNum < kmInicialNum) {
-      alert("O KM final não pode ser menor que o KM inicial.");
+    if (isNaN(kmInicialNum) || kmInicialNum < 0) {
+      alert("Informe o KM inicial da viagem corretamente.");
       return;
     }
 
@@ -110,11 +100,8 @@ function configurarFormularioViagem() {
       motoristaId: document.getElementById("motoristaId").value,
       veiculoId: document.getElementById("veiculoId").value,
       dataSaida: dataSaida,
-      dataChegada: dataChegada,
       valorFrete: valorFreteNum,
       kmInicial: kmInicialNum,
-      kmFinal: kmFinalNum,
-      status: document.getElementById("status").value,
       observacoes: document.getElementById("observacoes").value
     };
 

@@ -25,6 +25,31 @@ function criarIconeEditar() {
     return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
 }
 
+function criarIconeConcluir() {
+    return '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg>';
+}
+
+function abrirFinalizacaoViagem(idViagem) {
+    const viagem = viagensVisiveis.find(function (item) {
+        return String(item.id) === String(idViagem);
+    }) || viagens.find(function (item) {
+        return String(item.id) === String(idViagem);
+    });
+
+    if (!viagem || !window.AutoAcertoViagem) return;
+
+    window.AutoAcertoViagem.abrirModalFinalizarViagem({
+        idViagem: viagem.id,
+        kmInicial: viagem.km_inicial,
+        dataSaida: viagem.data_saida,
+        aoConcluir: function () {
+            carregarViagens(paginacaoAtual.paginaAtual || 1);
+        }
+    });
+}
+
+window.abrirFinalizacaoViagem = abrirFinalizacaoViagem;
+
 async function carregarViagens(pagina = 1) {
     try {
         mostrarLoading(true);
@@ -174,13 +199,14 @@ function renderizarTabelaViagens(listaViagens) {
                 <span class="texto-secundario">${placaVeiculo}</span>
             </td>
             <td>${formatarData(viagem.data_saida)}</td>
-            <td>${formatarData(viagem.data_chegada)}</td>
+            <td>${viagem.data_chegada ? formatarData(viagem.data_chegada) : "Pendente"}</td>
             <td>${formatarMoeda(viagem.valor_frete)}</td>
             <td>${criarSeloStatusViagem(viagem.status)}</td>
             <td>
                 <div class="grupo-acoes">
                     <button class="botao-acao" onclick="window.location.href='ver-viagem.html?id=${idViagem}'">${criarIconeVer()}Ver</button>
                     ${podeEditar ? `<button class="botao-acao" onclick="window.location.href='editar-viagem.html?id=${idViagem}'">${criarIconeEditar()}Editar</button>` : ""}
+                    ${podeEditar && viagem.status === "em andamento" ? `<button class="botao-acao botao-acao-sucesso" onclick="abrirFinalizacaoViagem(${idViagem})">${criarIconeConcluir()}Concluir</button>` : ""}
                 </div>
             </td>
         `;

@@ -74,10 +74,18 @@ function dataMaiorOuIgual(dataA, dataB) {
   return isoA >= isoB;
 }
 
+function obterDataHojeIso() {
+  const data = new Date();
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const dia = String(data.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
+}
+
 function dataNaoFutura(data) {
   const iso = extrairDataIso(data);
   if (!iso) return false;
-  return iso <= extrairDataIso(new Date());
+  return iso <= obterDataHojeIso();
 }
 
 function cpfValido(cpf) {
@@ -147,6 +155,7 @@ module.exports = {
   valorMonetarioValido,
   dataValida,
   extrairDataIso,
+  obterDataHojeIso,
   dataMaiorOuIgual,
   dataNaoFutura,
   cpfValido,
