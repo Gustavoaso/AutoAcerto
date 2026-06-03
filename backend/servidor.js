@@ -1,4 +1,4 @@
-const path    = require("path");
+﻿const path    = require("path");
 const express = require("express");
 const cors    = require("cors");
 const helmet  = require("helmet");
@@ -36,7 +36,7 @@ function origemCorsPermitida(origem) {
 
 if (!process.env.JWT_SECRET) {
   throw new Error(
-    "JWT_SECRET não configurado. Defina a variável de ambiente antes de iniciar o servidor.\n" +
+    "JWT_SECRET nÃ£o configurado. Defina a variÃ¡vel de ambiente antes de iniciar o servidor.\n" +
     "Gere um valor seguro com: node -e \"console.log(require('crypto').randomBytes(64).toString('hex'))\""
   );
 }
@@ -59,6 +59,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
+  credentials: true,
   origin: function (origem, callback) {
     if (!origem || origemCorsPermitida(origem)) {
       return callback(null, true);
@@ -69,7 +70,7 @@ app.use(cors({
 
 app.use(express.json({ limit: "8mb" }));
 
-// ✅ SEGURANÇA: WAF para detectar SQL Injection e XSS
+// âœ… SEGURANÃ‡A: WAF para detectar SQL Injection e XSS
 app.use(detectarSqlInjection);
 app.use(detectarXss);
 
@@ -84,35 +85,6 @@ app.use("/frontend", express.static(path.join(__dirname, "..", "frontend")));
 
 app.get("/", (requisicao, resposta) => {
   resposta.json({ mensagem: "API AutoAcerto funcionando." });
-});
-
-// ✅ HEALTH CHECK: Endpoint para monitoramento
-app.get("/health", async (requisicao, resposta) => {
-  const healthCheck = {
-    status: "ok",
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || "development",
-    version: "1.2.0"
-  };
-
-  try {
-    // Verificar conexão com banco de dados
-    const resultado = await banco.query("SELECT 1 as health_check");
-    healthCheck.database = {
-      status: "connected",
-      responseTime: "< 100ms"
-    };
-  } catch (erro) {
-    healthCheck.status = "degraded";
-    healthCheck.database = {
-      status: "disconnected",
-      error: erro.message
-    };
-    return resposta.status(503).json(healthCheck);
-  }
-
-  return resposta.json(healthCheck);
 });
 
 // Registrar Rotas Modularizadas
@@ -133,14 +105,15 @@ app.use((erro, requisicao, resposta, proximo) => {
   return resposta.status(500).json({ mensagem: "Erro interno do servidor." });
 });
 
-// Inicializar banco explicitamente e então iniciar o servidor
+// Inicializar banco explicitamente e entÃ£o iniciar o servidor
 banco.inicializar()
   .then(() => {
     app.listen(porta, "0.0.0.0", () => {
-      console.log(`🚀 Servidor rodando na porta ${porta}`);
+      console.log(`ðŸš€ Servidor rodando na porta ${porta}`);
     });
   })
   .catch((erro) => {
-    console.error("Falha ao inicializar o banco de dados. O servidor não será iniciado.", erro);
+    console.error("Falha ao inicializar o banco de dados. O servidor nÃ£o serÃ¡ iniciado.", erro);
     process.exit(1);
   });
+

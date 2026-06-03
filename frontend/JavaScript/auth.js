@@ -11,10 +11,10 @@ if (typeof window.montarUrlApi !== "function") {
 
 function obterSessao() {
     try {
-        const token = localStorage.getItem("token");
         const usuario = JSON.parse(localStorage.getItem("usuario"));
-        if (token && usuario) {
-            return { token, usuario };
+        const sessaoExpiraEm = localStorage.getItem("sessao_expira_em");
+        if (usuario) {
+            return { usuario, sessaoExpiraEm };
         }
         return null;
     } catch {
@@ -23,7 +23,7 @@ function obterSessao() {
 }
 
 function obterToken() {
-    return localStorage.getItem("token");
+    return null;
 }
 
 function obterUsuarioLogado() {
@@ -38,8 +38,16 @@ function obterUsuarioLogado() {
 
 function encerrarSessao() {
     limparMonitoramentoSessao();
-    localStorage.removeItem("token");
     localStorage.removeItem("usuario");
+    localStorage.removeItem("sessao_expira_em");
+
+    if (typeof montarUrlApi === "function") {
+        fetch(montarUrlApi("/auth/logout"), {
+            method: "POST",
+            credentials: "include"
+        }).catch(function () {});
+    }
+
     window.location.href = "/login.html";
 }
 
@@ -47,26 +55,12 @@ let avisoSessaoExpiradaExibido = false;
 let temporizadorSessaoExpirada = null;
 let intervaloMonitoramentoSessao = null;
 
-function decodificarPayloadToken(token) {
-    if (!token) return null;
-
-    try {
-        const partes = token.split(".");
-        if (partes.length < 2) return null;
-
-        const base64 = partes[1].replace(/-/g, "+").replace(/_/g, "/");
-        const preenchimento = base64.length % 4;
-        const base64Normalizado = preenchimento ? base64 + "=".repeat(4 - preenchimento) : base64;
-        return JSON.parse(atob(base64Normalizado));
-    } catch {
-        return null;
-    }
-}
-
 function obterExpiracaoTokenEmMs() {
-    const payload = decodificarPayloadToken(obterToken());
-    if (!payload || typeof payload.exp !== "number") return null;
-    return payload.exp * 1000;
+    const valor = localStorage.getItem("sessao_expira_em");
+    if (!valor) return null;
+    const data = new Date(valor);
+    const timestamp = data.getTime();
+    return Number.isFinite(timestamp) ? timestamp : null;
 }
 
 function sessaoJaExpirou() {
@@ -139,7 +133,7 @@ function agendarMonitoramentoSessao() {
     limparMonitoramentoSessao();
 
     if (window.location.pathname.endsWith("/login.html")) return;
-    if (!obterToken()) return;
+    if (!obterUsuarioLogado()) return;
 
     if (verificarExpiracaoLocalSessao()) return;
 
@@ -174,7 +168,7 @@ async function verificarSessaoAoRetornarAba() {
     try {
         const resposta = await window.fetchOriginal(
             montarUrlApi("/auth/me"),
-            { headers: cabecalhosAutenticados() }
+            { headers: cabecalhosAutenticados(), credentials: "include" }
         );
         tratarSessaoExpiradaSeNecessario(resposta, resposta.url);
     } catch (erro) {
@@ -197,15 +191,14 @@ function paginaPermitidaParaDonoSistema(caminho) {
 }
 
 function exigirAutenticacao() {
-    const token = obterToken();
     const usuario = obterUsuarioLogado();
 
     const paginaAtual = window.location.pathname;
     const paginaLogin = "/login.html";
 
-    if (!token || !usuario) {
-        localStorage.removeItem("token");
+    if (!usuario) {
         localStorage.removeItem("usuario");
+        localStorage.removeItem("sessao_expira_em");
 
         if (paginaAtual !== paginaLogin) {
             window.location.href = paginaLogin;
@@ -240,8 +233,7 @@ function usuarioEhAdminOuDonoMaster(usuario) {
 
 function cabecalhosAutenticados() {
     return {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + (obterToken() || "")
+        "Content-Type": "application/json"
     };
 }
 
@@ -462,9 +454,13 @@ async function atualizarSessaoAtualDoBanco() {
         const usuarioAtual = obterUsuarioLogado() || {};
         const usuarioAtualizado = { ...usuarioAtual, ...dados.usuario };
         localStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+        if (dados.sessao_expira_em) {
+            localStorage.setItem("sessao_expira_em", dados.sessao_expira_em);
+        }
         preencherInfoUsuario();
         await preencherControleTransportadoraTopo();
         atualizarPainelTopo();
+        agendarMonitoramentoSessao();
     } catch (erro) {
         console.warn("Nao foi possivel atualizar dados da sessao:", erro.message);
     }
@@ -701,11 +697,7 @@ function configurarFetchAutenticado() {
         const headers = new Headers(novasOpcoes.headers || {});
         const usuario = obterUsuarioLogado();
         const metodo = (novasOpcoes.method || (typeof recurso !== "string" && recurso.method) || "GET").toUpperCase();
-
-        const token = obterToken();
-        if (token && !headers.has("Authorization")) {
-            headers.set("Authorization", "Bearer " + token);
-        }
+        novasOpcoes.credentials = "include";
 
         if (
             usuario &&

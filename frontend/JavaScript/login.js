@@ -19,15 +19,26 @@ function redirecionarPorPerfil(perfil) {
     }
 }
 
-function verificarSessaoExistente() {
+async function verificarSessaoExistente() {
     try {
-        const token = localStorage.getItem("token");
         const usuario = JSON.parse(localStorage.getItem("usuario"));
-        if (token && usuario) {
-            redirecionarPorPerfil(usuario.perfil);
+        if (!usuario) {
+            return;
         }
+
+        const resposta = await fetch(obterApiBaseLogin() + "/auth/me", {
+            credentials: "include"
+        });
+
+        if (resposta.ok) {
+            redirecionarPorPerfil(usuario.perfil);
+            return;
+        }
+
+        localStorage.removeItem("sessao_expira_em");
+        localStorage.removeItem("usuario");
     } catch {
-        localStorage.removeItem("token");
+        localStorage.removeItem("sessao_expira_em");
         localStorage.removeItem("usuario");
     }
 }
@@ -126,6 +137,7 @@ function configurarFormulario() {
         try {
             const resposta = await fetch(urlApiLogin, {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, senha })
             });
@@ -137,8 +149,10 @@ function configurarFormulario() {
                 return;
             }
 
-            localStorage.setItem("token", dados.token);
             localStorage.setItem("usuario", JSON.stringify(dados.usuario));
+            if (dados.sessao_expira_em) {
+                localStorage.setItem("sessao_expira_em", dados.sessao_expira_em);
+            }
 
             redirecionarPorPerfil(dados.usuario.perfil);
 

@@ -111,6 +111,7 @@ async function criarTabelas() {
       perfil VARCHAR(20) NOT NULL DEFAULT 'motorista',
       motorista_id INTEGER REFERENCES motoristas(id) ON DELETE SET NULL,
       ativo BOOLEAN NOT NULL DEFAULT TRUE,
+      token_version INTEGER NOT NULL DEFAULT 0,
       data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -119,6 +120,7 @@ async function criarTabelas() {
   await garantirEstruturaVeiculos();
   await garantirEstruturaViagens();
   await garantirEstruturaDespesas();
+  await garantirEstruturaUsuarios();
   await criarIndices();
   await garantirConstraintsDominio();
 }
@@ -226,6 +228,10 @@ async function garantirEstruturaDespesas() {
   await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS anexo_cupom_nome VARCHAR(255)");
   await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS anexo_cupom_tipo VARCHAR(100)");
   await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS anexo_cupom_base64 TEXT");
+}
+
+async function garantirEstruturaUsuarios() {
+  await banco.query("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0");
 }
 
 async function adicionarColunaTransportadora(nomeTabela) {

@@ -1,127 +1,116 @@
-// ============================================================
-// MIDDLEWARE - WEB APPLICATION FIREWALL (WAF)
-// Detecta e bloqueia tentativas de SQL Injection e ataques comuns
-// ============================================================
-
-/**
- * Padrões de SQL Injection conhecidos
- */
 const sqlInjectionPatterns = [
-  // Comandos SQL perigosos
-  /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|TRUNCATE)\b)/gi,
-  
-  // Comentários SQL e delimitadores
-  /(--|;|\/\*|\*\/|xp_|sp_)/gi,
-  
-  // Caracteres de escape e quotes
-  /('|(\\')|(--)|(%27)|(%23)|(%2D%2D))/gi,
-  
-  // UNION-based injection
-  /(\bUNION\b.*\bSELECT\b)/gi,
-  
-  // Boolean-based blind injection
-  /(\bOR\b.*=.*|AND.*=.*)/gi
+  /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|TRUNCATE)\b)/i,
+  /(--|;|\/\*|\*\/|xp_|sp_)/i,
+  /('|(\\')|(%27)|(%23)|(%2D%2D))/i,
+  /(\bUNION\b.*\bSELECT\b)/i,
+  /(\bOR\b.*=.*|\bAND\b.*=.*)/i
 ];
 
-/**
- * Padrões de XSS conhecidos
- */
 const xssPatterns = [
-  /<script[^>]*>.*?<\/script>/gi,
-  /javascript:/gi,
-  /on\w+\s*=/gi,
-  /<iframe/gi,
-  /<object/gi,
-  /<embed/gi
+  /<script[^>]*>.*?<\/script>/i,
+  /javascript:/i,
+  /on\w+\s*=/i,
+  /<iframe/i,
+  /<object/i,
+  /<embed/i
 ];
 
-const CAMPOS_IGNORADOS_WAF = new Set(["anexoCupomBase64"]);
+const CAMPOS_OCULTOS_WAF = new Set([
+  "anexoCupomBase64",
+  "senha",
+  "senhaAtual",
+  "novaSenha",
+  "senhaUsuario",
+  "token"
+]);
 
-function omitirCamposBinarios(valor) {
+function sanitizarConteudoParaWaf(valor) {
   if (Array.isArray(valor)) {
-    return valor.map(omitirCamposBinarios);
+    return valor.map(sanitizarConteudoParaWaf);
   }
 
   if (valor && typeof valor === "object") {
     return Object.fromEntries(
-      Object.entries(valor)
-        .filter(([chave]) => !CAMPOS_IGNORADOS_WAF.has(chave))
-        .map(([chave, conteudo]) => [chave, omitirCamposBinarios(conteudo)])
+      Object.entries(valor).map(function ([chave, conteudo]) {
+        if (CAMPOS_OCULTOS_WAF.has(chave)) {
+          return [chave, "[oculto]"];
+        }
+        return [chave, sanitizarConteudoParaWaf(conteudo)];
+      })
     );
   }
 
   return valor;
 }
 
-/**
- * Middleware para detectar SQL Injection
- */
+function montarResumoRequisicao(requisicao) {
+  return {
+    timestamp: new Date().toISOString(),
+    ip: requisicao.ip,
+    method: requisicao.method,
+    path: requisicao.path,
+    query: sanitizarConteudoParaWaf(requisicao.query),
+    params: sanitizarConteudoParaWaf(requisicao.params),
+    body: sanitizarConteudoParaWaf(requisicao.body),
+    usuario: requisicao.usuario?.email || "nao autenticado",
+    user_agent: requisicao.get("user-agent")
+  };
+}
+
+function detectarPadrao(conteudo, padroes) {
+  return padroes.some(function (pattern) {
+    pattern.lastIndex = 0;
+    return pattern.test(conteudo);
+  });
+}
+
 function detectarSqlInjection(requisicao, resposta, proximo) {
   try {
-    // Serializar body e query params para análise (ignora anexos binários/base64)
     const conteudo = JSON.stringify({
-      body: omitirCamposBinarios(requisicao.body),
-      query: requisicao.query,
-      params: requisicao.params
+      body: sanitizarConteudoParaWaf(requisicao.body),
+      query: sanitizarConteudoParaWaf(requisicao.query),
+      params: sanitizarConteudoParaWaf(requisicao.params)
     });
-    
-    // Verificar padrões de SQL Injection
-    for (const pattern of sqlInjectionPatterns) {
-      if (pattern.test(conteudo)) {
-        // ✅ SEGURANÇA: Registrar tentativa de ataque
-        console.error('🚨 Tentativa de SQL Injection detectada', {
-          timestamp: new Date().toISOString(),
-          ip: requisicao.ip,
-          method: requisicao.method,
-          path: requisicao.path,
-          body: requisicao.body,
-          query: requisicao.query,
-          usuario: requisicao.usuario?.email || 'não autenticado',
-          user_agent: requisicao.get('user-agent')
-        });
-        
-        return resposta.status(400).json({ 
-          mensagem: 'Requisição inválida detectada' 
-        });
-      }
+
+    if (detectarPadrao(conteudo, sqlInjectionPatterns)) {
+      console.error("Tentativa de SQL Injection detectada", montarResumoRequisicao(requisicao));
+      return resposta.status(400).json({ mensagem: "Requisicao invalida detectada." });
     }
-    
+
     proximo();
   } catch (erro) {
-    console.error('Erro no WAF:', erro);
-    proximo(); // Em caso de erro, permitir requisição (fail-open)
+    console.error("Falha ao analisar requisicao no WAF SQL:", {
+      timestamp: new Date().toISOString(),
+      path: requisicao.path,
+      method: requisicao.method,
+      erro: erro.message
+    });
+    return resposta.status(400).json({ mensagem: "Requisicao invalida." });
   }
 }
 
-/**
- * Middleware para detectar XSS
- */
 function detectarXss(requisicao, resposta, proximo) {
   try {
     const conteudo = JSON.stringify({
-      body: omitirCamposBinarios(requisicao.body),
-      query: requisicao.query
+      body: sanitizarConteudoParaWaf(requisicao.body),
+      query: sanitizarConteudoParaWaf(requisicao.query),
+      params: sanitizarConteudoParaWaf(requisicao.params)
     });
-    
-    for (const pattern of xssPatterns) {
-      if (pattern.test(conteudo)) {
-        console.error('🚨 Tentativa de XSS detectada', {
-          timestamp: new Date().toISOString(),
-          ip: requisicao.ip,
-          path: requisicao.path,
-          usuario: requisicao.usuario?.email || 'não autenticado'
-        });
-        
-        return resposta.status(400).json({ 
-          mensagem: 'Conteúdo inválido detectado' 
-        });
-      }
+
+    if (detectarPadrao(conteudo, xssPatterns)) {
+      console.error("Tentativa de XSS detectada", montarResumoRequisicao(requisicao));
+      return resposta.status(400).json({ mensagem: "Conteudo invalido detectado." });
     }
-    
+
     proximo();
   } catch (erro) {
-    console.error('Erro no WAF XSS:', erro);
-    proximo();
+    console.error("Falha ao analisar requisicao no WAF XSS:", {
+      timestamp: new Date().toISOString(),
+      path: requisicao.path,
+      method: requisicao.method,
+      erro: erro.message
+    });
+    return resposta.status(400).json({ mensagem: "Requisicao invalida." });
   }
 }
 

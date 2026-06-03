@@ -195,13 +195,13 @@ router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
     let valores;
     if (donoSistema) {
       sql = `
-        UPDATE usuarios SET nome=$1, email=$2, motorista_id=$3, ativo=$4
+        UPDATE usuarios SET nome=$1, email=$2, motorista_id=$3, ativo=$4, token_version = token_version + 1
         WHERE id=$5 RETURNING id
       `;
       valores = [nome, emailNormalizado, motoristaIdFinal || null, ativo !== false, id];
     } else {
       sql = `
-        UPDATE usuarios SET nome=$1, email=$2, motorista_id=$3, ativo=$4
+        UPDATE usuarios SET nome=$1, email=$2, motorista_id=$3, ativo=$4, token_version = token_version + 1
         WHERE id=$5 AND transportadora_id=$6 RETURNING id
       `;
       valores = [nome, emailNormalizado, motoristaIdFinal || null, ativo !== false, id, transportadoraAlvo];
@@ -251,7 +251,7 @@ router.patch("/senha", limitadorSenha, autenticar, async (requisicao, resposta) 
 
     const novaHash = await bcrypt.hash(novaSenha, 10);
     await banco.query(
-      "UPDATE usuarios SET senha_hash=$1 WHERE id=$2",
+      "UPDATE usuarios SET senha_hash=$1, token_version = token_version + 1 WHERE id=$2",
       [novaHash, idUsuario]
     );
 
