@@ -383,6 +383,10 @@ body {
   text-decoration: none;
 }
 
+.separador-rodape-login {
+  color: #c0cbe0;
+}
+
 .aviso-seguranca-login {
   display: grid;
   justify-items: center;
@@ -571,6 +575,151 @@ body {
   text-decoration: underline;
 }
 
+.pagina-assinatura {
+  min-height: 100vh;
+}
+
+.caixa-assinatura {
+  gap: 28px;
+}
+
+.alinhado-esquerda {
+  text-align: left;
+}
+
+.titulo-menor {
+  font-size: clamp(1.8rem, 2.3vw, 2.45rem);
+}
+
+.grade-planos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.cartao-plano-assinatura {
+  text-align: left;
+  border: 1px solid #dbe5f4;
+  border-radius: 18px;
+  background: #f8fbff;
+  padding: 18px 16px;
+  cursor: pointer;
+  display: grid;
+  gap: 10px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.cartao-plano-assinatura:hover {
+  transform: translateY(-1px);
+  border-color: #93c5fd;
+}
+
+.cartao-plano-assinatura.ativo {
+  background: #eef4ff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.tag-plano-assinatura {
+  justify-self: start;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cartao-plano-assinatura strong {
+  font-size: 1rem;
+  color: #13244a;
+}
+
+.preco-plano-assinatura {
+  font-size: 1.48rem;
+  color: #13244a;
+  font-weight: 800;
+}
+
+.preco-plano-assinatura small {
+  font-size: 0.82rem;
+  color: #5f7197;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.descricao-plano-assinatura {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #5f7197;
+}
+
+.texto-carregando-assinatura {
+  grid-column: 1 / -1;
+  padding: 18px;
+  border-radius: 16px;
+  background: #f8fbff;
+  border: 1px dashed #dbe5f4;
+  color: #5f7197;
+  text-align: center;
+}
+
+.grade-formulario-assinatura {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.grupo-campo-largo-assinatura {
+  grid-column: 1 / -1;
+}
+
+.caixa-status-assinatura {
+  text-align: center;
+}
+
+.painel-status-assinatura {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid #dbe5f4;
+  border-radius: 18px;
+  background: #f8fbff;
+}
+
+.selo-status-assinatura {
+  justify-self: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.selo-pendente {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.selo-sucesso {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.selo-erro {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.detalhes-status-assinatura {
+  display: grid;
+  gap: 10px;
+  text-align: left;
+  color: #42557f;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
 @media (max-width: 1180px) {
   .layout-login {
     grid-template-columns: minmax(460px, 40vw) minmax(0, 1fr);
@@ -590,6 +739,10 @@ body {
 
   .caixa-login {
     padding: 38px 30px 32px;
+  }
+
+  .grade-planos {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -658,6 +811,10 @@ body {
 
   .bloco-formulario-login {
     width: 100%;
+  }
+
+  .grade-formulario-assinatura {
+    grid-template-columns: 1fr;
   }
 }
 

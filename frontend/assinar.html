@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Assinar</title>
+  <link rel="icon" type="image/png" href="/Imagens/logo nova.png" />
+  <link rel="stylesheet" href="/CSS/login.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body class="pagina-assinatura">
+  <main class="layout-assinatura">
+    <section class="painel-marca" aria-label="Apresentacao da AutoAcerto">
+      <div class="conteudo-marca">
+        <div class="logo-container">
+          <img src="/Imagens/logo nova.png" alt="Logo AutoAcerto" class="logo-login">
+          <span class="logo-texto"><span>Auto</span><strong>Acerto</strong></span>
+        </div>
+
+        <div class="bloco-apresentacao">
+          <h1 class="slogan">Assine e comece sua operacao com tudo pronto</h1>
+          <p class="descricao-marca">
+            Escolha o plano, cadastre os dados da transportadora e finalize a assinatura no Mercado Pago.
+          </p>
+        </div>
+
+        <div class="lista-destaques">
+          <article class="item-destaque-login">
+            <div class="icone-destaque-login" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 16L10 10L14 14L20 8" />
+                <path d="M15 8H20V13" />
+              </svg>
+            </div>
+            <div>
+              <h2>Ativacao automatica</h2>
+              <p>Com o pagamento confirmado, criamos sua transportadora e o admin inicial automaticamente.</p>
+            </div>
+          </article>
+
+          <article class="item-destaque-login">
+            <div class="icone-destaque-login" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 3L19 6V11C19 15.4 16.1 19.3 12 21C7.9 19.3 5 15.4 5 11V6L12 3Z" />
+                <path d="M9.5 11.5L11.3 13.3L14.8 9.8" />
+              </svg>
+            </div>
+            <div>
+              <h2>Pagamento recorrente</h2>
+              <p>Assinatura mensal simples, com status centralizado e pronta para crescer com o produto.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="midia-marca" aria-hidden="true">
+        <div class="overlay-midia-marca"></div>
+      </div>
+    </section>
+
+    <section class="painel-formulario">
+      <div class="bloco-formulario-login">
+        <div class="caixa-login caixa-assinatura">
+          <div class="cabecalho-login alinhado-esquerda">
+            <h2 class="titulo-login titulo-menor">Criar assinatura</h2>
+            <p class="subtitulo-login">Escolha o plano e preencha os dados iniciais da sua operacao.</p>
+          </div>
+
+          <form id="formularioAssinatura" class="formulario-login" novalidate>
+            <div class="grade-planos" id="gradePlanosAssinatura"></div>
+
+            <div class="grade-formulario-assinatura">
+              <div class="campo-form">
+                <label for="campoNomeTransportadoraAssinatura">Nome da transportadora</label>
+                <input type="text" id="campoNomeTransportadoraAssinatura" placeholder="Ex.: Transportes Almeida" required />
+              </div>
+
+              <div class="campo-form">
+                <label for="campoCnpjTransportadoraAssinatura">CNPJ</label>
+                <input type="text" id="campoCnpjTransportadoraAssinatura" placeholder="00.000.000/0000-00" maxlength="18" data-mascara="cnpj" />
+              </div>
+
+              <div class="campo-form">
+                <label for="campoNomeAdminAssinatura">Nome do administrador</label>
+                <input type="text" id="campoNomeAdminAssinatura" placeholder="Nome completo" required />
+              </div>
+
+              <div class="campo-form">
+                <label for="campoEmailAdminAssinatura">E-mail do administrador</label>
+                <input type="email" id="campoEmailAdminAssinatura" placeholder="admin@transportadora.com" required />
+              </div>
+
+              <div class="campo-form grupo-campo-largo-assinatura">
+                <label for="campoSenhaAdminAssinatura">Senha inicial</label>
+                <input type="password" id="campoSenhaAdminAssinatura" placeholder="Minimo de 8 caracteres" required />
+              </div>
+            </div>
+
+            <div class="erro-geral" id="erroAssinatura"></div>
+
+            <button type="submit" class="botao-primario botao-login" id="botaoAssinarAgora">
+              Continuar para o pagamento
+            </button>
+          </form>
+
+          <div class="rodape-cartao-login">
+            <a href="/login.html">Voltar para o login</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/JavaScript/utils/navbar.js"></script>
+  <script src="/JavaScript/config.js"></script>
+  <script src="/JavaScript/mascaras.js"></script>
+  <script src="/JavaScript/assinar.js"></script>
+</body>
+
+</html>

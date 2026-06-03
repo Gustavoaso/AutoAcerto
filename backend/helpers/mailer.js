@@ -112,11 +112,43 @@ function montarEmailContato({ nome, email, mensagem }) {
   });
 }
 
+function montarEmailBoasVindasAssinatura({ nomeAdmin, nomeTransportadora, emailAdmin, linkLogin, planoNome }) {
+  return criarLayoutEmail({
+    titulo: "Assinatura confirmada",
+    subtitulo: `A conta da transportadora ${nomeTransportadora} foi criada com sucesso no AutoAcerto.`,
+    conteudoHtml: `
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#30476d;">
+        Ola ${nomeAdmin || "cliente"}, sua assinatura do plano <strong>${planoNome}</strong> foi confirmada e o acesso inicial ja esta pronto.
+      </p>
+      <div style="display:grid;gap:12px;margin:20px 0;">
+        <div style="padding:14px 16px;border:1px solid #d9e4f7;border-radius:12px;background:#f8fbff;">
+          <strong style="display:block;font-size:13px;color:#5f7197;margin-bottom:6px;">Transportadora</strong>
+          <span style="font-size:15px;color:#14213d;">${nomeTransportadora}</span>
+        </div>
+        <div style="padding:14px 16px;border:1px solid #d9e4f7;border-radius:12px;background:#f8fbff;">
+          <strong style="display:block;font-size:13px;color:#5f7197;margin-bottom:6px;">Administrador inicial</strong>
+          <span style="font-size:15px;color:#14213d;">${nomeAdmin} (${emailAdmin})</span>
+        </div>
+      </div>
+      <div style="margin:28px 0;">
+        <a href="${linkLogin}" style="display:inline-block;padding:14px 24px;border-radius:12px;background:#1d4ed8;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">
+          Acessar AutoAcerto
+        </a>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:1.7;color:#5f7197;">
+        Caso precise de apoio para os primeiros passos, basta responder este e-mail.
+      </p>
+    `,
+    rodapeHtml: "Este e-mail confirma a ativacao da assinatura e a criacao automatica da sua conta no AutoAcerto."
+  });
+}
+
 module.exports = {
   FRONTEND_URL,
   SUPORTE_EMAIL,
   mailerConfigurado,
   enviarEmail,
   montarEmailRecuperacaoSenha,
-  montarEmailContato
+  montarEmailContato,
+  montarEmailBoasVindasAssinatura
 };

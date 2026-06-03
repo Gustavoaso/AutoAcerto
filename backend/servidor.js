@@ -15,6 +15,7 @@ const motoristasRoutes = require("./routes/motoristas.routes");
 const veiculosRoutes = require("./routes/veiculos.routes");
 const viagensRoutes = require("./routes/viagens.routes");
 const despesasRoutes = require("./routes/despesas.routes");
+const assinaturasRoutes = require("./routes/assinaturas.routes");
 
 const app   = express();
 const porta = process.env.PORT || 3000;
@@ -95,6 +96,7 @@ app.use("/motoristas", motoristasRoutes);
 app.use("/veiculos", veiculosRoutes);
 app.use("/viagens", viagensRoutes);
 app.use("/despesas", despesasRoutes);
+app.use("/assinaturas", assinaturasRoutes);
 
 app.use((erro, requisicao, resposta, proximo) => {
   if (erro.message === "Origem nao permitida pelo CORS.") {

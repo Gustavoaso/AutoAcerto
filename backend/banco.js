@@ -127,11 +127,55 @@ async function criarTabelas() {
     )
   `);
 
+  await banco.query(`
+    CREATE TABLE IF NOT EXISTS assinaturas_pendentes (
+      id SERIAL PRIMARY KEY,
+      referencia_externa VARCHAR(120) NOT NULL UNIQUE,
+      gateway VARCHAR(40) NOT NULL DEFAULT 'mercado_pago',
+      plano_codigo VARCHAR(40) NOT NULL,
+      plano_nome VARCHAR(120) NOT NULL,
+      valor NUMERIC(10,2) NOT NULL,
+      nome_transportadora VARCHAR(255) NOT NULL,
+      cnpj VARCHAR(18),
+      nome_admin VARCHAR(255) NOT NULL,
+      email_admin VARCHAR(255) NOT NULL,
+      senha_hash_admin VARCHAR(255) NOT NULL,
+      mercado_pago_preapproval_id VARCHAR(120),
+      status VARCHAR(40) NOT NULL DEFAULT 'aguardando_pagamento',
+      provisionado_em TIMESTAMP,
+      transportadora_id INTEGER REFERENCES transportadoras(id),
+      usuario_admin_id INTEGER REFERENCES usuarios(id),
+      ultimo_payload JSONB,
+      data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await banco.query(`
+    CREATE TABLE IF NOT EXISTS assinaturas (
+      id SERIAL PRIMARY KEY,
+      transportadora_id INTEGER NOT NULL REFERENCES transportadoras(id) ON DELETE CASCADE,
+      plano_codigo VARCHAR(40) NOT NULL,
+      plano_nome VARCHAR(120) NOT NULL,
+      gateway VARCHAR(40) NOT NULL DEFAULT 'mercado_pago',
+      gateway_assinatura_id VARCHAR(120) NOT NULL UNIQUE,
+      referencia_externa VARCHAR(120) NOT NULL UNIQUE,
+      status VARCHAR(40) NOT NULL,
+      valor NUMERIC(10,2) NOT NULL,
+      proxima_cobranca_em TIMESTAMP,
+      email_pagador VARCHAR(255),
+      ultimo_payload JSONB,
+      data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   await garantirEstruturaMultiTransportadora();
   await garantirEstruturaVeiculos();
   await garantirEstruturaViagens();
   await garantirEstruturaDespesas();
   await garantirEstruturaUsuarios();
+  await garantirEstruturaAssinaturas();
   await criarIndices();
   await garantirConstraintsDominio();
 }
@@ -149,6 +193,10 @@ async function criarIndices() {
   await banco.query("CREATE INDEX IF NOT EXISTS idx_usuarios_motorista ON usuarios(motorista_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_recuperacao_usuario ON recuperacao_senha(usuario_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_recuperacao_token_hash ON recuperacao_senha(token_hash)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_pendentes_email_admin ON assinaturas_pendentes(email_admin)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_pendentes_preapproval ON assinaturas_pendentes(mercado_pago_preapproval_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_transportadora ON assinaturas(transportadora_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_gateway_assinatura ON assinaturas(gateway_assinatura_id)");
 }
 
 async function adicionarConstraint(nome, sql) {
@@ -245,6 +293,23 @@ async function garantirEstruturaDespesas() {
 
 async function garantirEstruturaUsuarios() {
   await banco.query("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0");
+}
+
+async function garantirEstruturaAssinaturas() {
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS gateway VARCHAR(40) NOT NULL DEFAULT 'mercado_pago'");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS plano_codigo VARCHAR(40) NOT NULL DEFAULT 'essencial'");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS plano_nome VARCHAR(120) NOT NULL DEFAULT 'Plano Essencial'");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS valor NUMERIC(10,2) NOT NULL DEFAULT 0");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS mercado_pago_preapproval_id VARCHAR(120)");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS status VARCHAR(40) NOT NULL DEFAULT 'aguardando_pagamento'");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS provisionado_em TIMESTAMP");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS transportadora_id INTEGER REFERENCES transportadoras(id)");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS usuario_admin_id INTEGER REFERENCES usuarios(id)");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS ultimo_payload JSONB");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS email_pagador VARCHAR(255)");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS ultimo_payload JSONB");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
 }
 
 async function adicionarColunaTransportadora(nomeTabela) {
