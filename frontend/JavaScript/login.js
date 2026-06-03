@@ -1,13 +1,10 @@
-// =============================================================
-// AUTOACERTO — LOGIN
-// Controle do formulário de autenticação.
-// =============================================================
-
 function obterApiBaseLogin() {
     return window.obterApiBase ? window.obterApiBase() : window.location.origin.replace(/\/+$/, "");
 }
 
 const urlApiLogin = obterApiBaseLogin() + "/auth/login";
+const urlApiRecuperarSenha = obterApiBaseLogin() + "/auth/recuperar-senha";
+const urlApiContato = obterApiBaseLogin() + "/auth/contato";
 
 function redirecionarPorPerfil(perfil) {
     if (perfil === "dono") {
@@ -22,9 +19,7 @@ function redirecionarPorPerfil(perfil) {
 async function verificarSessaoExistente() {
     try {
         const usuario = JSON.parse(localStorage.getItem("usuario"));
-        if (!usuario) {
-            return;
-        }
+        if (!usuario) return;
 
         const resposta = await fetch(obterApiBaseLogin() + "/auth/me", {
             credentials: "include"
@@ -54,19 +49,19 @@ function limparErroGeral() {
     const elemento = document.getElementById("erroGeral");
     if (!elemento) return;
     elemento.textContent = "";
-    elemento.classList.remove("visivel");
+    elemento.classList.remove("visivel", "mensagem-sucesso");
 }
 
 function exibirErroCampo(idCampo, mensagem) {
     const input = document.getElementById(idCampo);
-    const erro  = document.getElementById("erro" + idCampo.replace("campo", ""));
+    const erro = document.getElementById("erro" + idCampo.replace("campo", ""));
     if (input) input.classList.add("campo-invalido");
     if (erro) erro.textContent = mensagem;
 }
 
 function limparErroCampo(idCampo) {
     const input = document.getElementById(idCampo);
-    const erro  = document.getElementById("erro" + idCampo.replace("campo", ""));
+    const erro = document.getElementById("erro" + idCampo.replace("campo", ""));
     if (input) input.classList.remove("campo-invalido");
     if (erro) erro.textContent = "";
 }
@@ -83,6 +78,26 @@ function configurarToggleSenha() {
     });
 }
 
+function abrirModal(idModal) {
+    const modal = document.getElementById(idModal);
+    if (!modal) return;
+    modal.classList.remove("oculto");
+    modal.setAttribute("aria-hidden", "false");
+}
+
+function fecharModal(modal) {
+    if (!modal) return;
+    modal.classList.add("oculto");
+    modal.setAttribute("aria-hidden", "true");
+}
+
+function exibirMensagemModal(idElemento, mensagem, tipo) {
+    const elemento = document.getElementById(idElemento);
+    if (!elemento) return;
+    elemento.textContent = mensagem;
+    elemento.classList.toggle("mensagem-sucesso", tipo === "sucesso");
+}
+
 function configurarAcoesAuxiliares() {
     const linkEsqueciSenha = document.getElementById("linkEsqueciSenha");
     const linkFaleConosco = document.getElementById("linkFaleConosco");
@@ -90,21 +105,110 @@ function configurarAcoesAuxiliares() {
     if (linkEsqueciSenha) {
         linkEsqueciSenha.addEventListener("click", function (evento) {
             evento.preventDefault();
-            exibirErroGeral("Recuperacao de senha ainda nao esta disponivel nesta tela. Fale com o administrador para redefinir o acesso.");
+            exibirMensagemModal("mensagemRecuperarSenha", "", "erro");
+            document.getElementById("campoEmailRecuperacao").value = document.getElementById("campoEmail").value.trim();
+            abrirModal("modalRecuperarSenha");
         });
     }
 
     if (linkFaleConosco) {
         linkFaleConosco.addEventListener("click", function (evento) {
             evento.preventDefault();
-            exibirErroGeral("Entre em contato com o time responsavel pelo AutoAcerto para solicitar seu acesso.");
+            exibirMensagemModal("mensagemContatoTime", "", "erro");
+            document.getElementById("campoEmailContato").value = document.getElementById("campoEmail").value.trim();
+            abrirModal("modalContatoTime");
         });
     }
+
+    document.querySelectorAll("[data-fechar-modal]").forEach(function (botao) {
+        botao.addEventListener("click", function () {
+            fecharModal(botao.closest(".modal-login"));
+        });
+    });
+}
+
+function configurarFormularioRecuperacao() {
+    const formulario = document.getElementById("formularioRecuperarSenha");
+    if (!formulario) return;
+
+    formulario.addEventListener("submit", async function (evento) {
+        evento.preventDefault();
+        const campoEmail = document.getElementById("campoEmailRecuperacao");
+        const botao = formulario.querySelector("button[type='submit']");
+        exibirMensagemModal("mensagemRecuperarSenha", "", "erro");
+
+        botao.disabled = true;
+        botao.textContent = "Enviando...";
+
+        try {
+            const resposta = await fetch(urlApiRecuperarSenha, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: campoEmail.value.trim() })
+            });
+
+            const dados = await resposta.json();
+            if (!resposta.ok) {
+                exibirMensagemModal("mensagemRecuperarSenha", dados.mensagem || "Nao foi possivel enviar o link.", "erro");
+                return;
+            }
+
+            exibirMensagemModal("mensagemRecuperarSenha", dados.mensagem, "sucesso");
+            formulario.reset();
+        } catch (erro) {
+            exibirMensagemModal("mensagemRecuperarSenha", "Nao foi possivel enviar o link agora.", "erro");
+        } finally {
+            botao.disabled = false;
+            botao.textContent = "Enviar link";
+        }
+    });
+}
+
+function configurarFormularioContato() {
+    const formulario = document.getElementById("formularioContatoTime");
+    if (!formulario) return;
+
+    formulario.addEventListener("submit", async function (evento) {
+        evento.preventDefault();
+        const botao = formulario.querySelector("button[type='submit']");
+        exibirMensagemModal("mensagemContatoTime", "", "erro");
+
+        const corpo = {
+            nome: document.getElementById("campoNomeContato").value.trim(),
+            email: document.getElementById("campoEmailContato").value.trim(),
+            mensagem: document.getElementById("campoMensagemContato").value.trim()
+        };
+
+        botao.disabled = true;
+        botao.textContent = "Enviando...";
+
+        try {
+            const resposta = await fetch(urlApiContato, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(corpo)
+            });
+
+            const dados = await resposta.json();
+            if (!resposta.ok) {
+                exibirMensagemModal("mensagemContatoTime", dados.mensagem || "Nao foi possivel enviar a mensagem.", "erro");
+                return;
+            }
+
+            exibirMensagemModal("mensagemContatoTime", dados.mensagem, "sucesso");
+            formulario.reset();
+        } catch (erro) {
+            exibirMensagemModal("mensagemContatoTime", "Nao foi possivel enviar a mensagem agora.", "erro");
+        } finally {
+            botao.disabled = false;
+            botao.textContent = "Enviar mensagem";
+        }
+    });
 }
 
 function configurarFormulario() {
     const formulario = document.getElementById("formularioLogin");
-    const botao      = document.getElementById("botaoEntrar");
+    const botao = document.getElementById("botaoEntrar");
 
     formulario.addEventListener("submit", async function (evento) {
         evento.preventDefault();
@@ -115,7 +219,6 @@ function configurarFormulario() {
 
         const email = document.getElementById("campoEmail").value.trim();
         const senha = document.getElementById("campoSenha").value;
-
         let valido = true;
 
         if (!email) {
@@ -139,7 +242,7 @@ function configurarFormulario() {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, senha })
+                body: JSON.stringify({ email: email, senha: senha })
             });
 
             const dados = await resposta.json();
@@ -155,10 +258,9 @@ function configurarFormulario() {
             }
 
             redirecionarPorPerfil(dados.usuario.perfil);
-
         } catch (erro) {
             console.error("Erro ao conectar com o servidor:", erro.message);
-            exibirErroGeral("Não foi possível conectar ao servidor. Verifique a URL da API e se o backend está online.");
+            exibirErroGeral("Nao foi possivel conectar ao servidor. Verifique a API e tente novamente.");
         } finally {
             botao.disabled = false;
             botao.classList.remove("carregando");
@@ -171,5 +273,7 @@ document.addEventListener("DOMContentLoaded", function () {
     verificarSessaoExistente();
     configurarToggleSenha();
     configurarAcoesAuxiliares();
+    configurarFormularioRecuperacao();
+    configurarFormularioContato();
     configurarFormulario();
 });

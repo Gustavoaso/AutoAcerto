@@ -1,6 +1,20 @@
 (function () {
     "use strict";
 
+    function garantirFavicon() {
+        const hrefFavicon = "/Imagens/logo nova.png";
+        let linkFavicon = document.querySelector("link[rel='icon']");
+
+        if (!linkFavicon) {
+            linkFavicon = document.createElement("link");
+            linkFavicon.rel = "icon";
+            document.head.appendChild(linkFavicon);
+        }
+
+        linkFavicon.type = "image/png";
+        linkFavicon.href = hrefFavicon;
+    }
+
     function injetarMenuLateral() {
         const aside = document.querySelector('aside.barra-lateral');
         if (!aside) return;
@@ -102,5 +116,8 @@
     }
 
     // Injetar logo no carregamento do DOM
-    document.addEventListener('DOMContentLoaded', injetarMenuLateral);
+    document.addEventListener('DOMContentLoaded', function () {
+        garantirFavicon();
+        injetarMenuLateral();
+    });
 })();

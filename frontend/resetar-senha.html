@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Redefinir senha</title>
+  <link rel="icon" type="image/png" href="/Imagens/logo nova.png" />
+  <link rel="stylesheet" href="/CSS/login.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body class="pagina-resetar-senha">
+  <main class="layout-resetar-senha">
+    <section class="caixa-resetar-senha">
+      <div class="logo-container logo-container-reset">
+        <img src="/Imagens/logo nova.png" alt="Logo AutoAcerto" class="logo-login">
+        <span class="logo-texto"><span>Auto</span><strong>Acerto</strong></span>
+      </div>
+
+      <div class="cabecalho-login">
+        <h1 class="titulo-login">Criar nova senha</h1>
+        <p class="subtitulo-login">Defina uma nova senha para voltar ao sistema com seguranca.</p>
+      </div>
+
+      <form id="formularioResetarSenha" class="formulario-login" novalidate>
+        <div class="campo-form">
+          <label for="campoNovaSenhaReset">Nova senha</label>
+          <input type="password" id="campoNovaSenhaReset" placeholder="Minimo de 8 caracteres" required />
+        </div>
+
+        <div class="campo-form">
+          <label for="campoConfirmarSenhaReset">Confirmar nova senha</label>
+          <input type="password" id="campoConfirmarSenhaReset" placeholder="Repita a nova senha" required />
+        </div>
+
+        <div class="erro-geral" id="mensagemResetarSenha"></div>
+        <button type="submit" class="botao-primario" id="botaoResetarSenha">Salvar nova senha</button>
+      </form>
+
+      <a href="/login.html" class="link-voltar-login">Voltar para o login</a>
+    </section>
+  </main>
+
+  <script src="/JavaScript/config.js"></script>
+  <script src="/JavaScript/resetar-senha.js"></script>
+</body>
+
+</html>

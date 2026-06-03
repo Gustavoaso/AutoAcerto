@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AutoAcerto - Login</title>
+  <link rel="icon" type="image/png" href="/Imagens/logo nova.png" />
   <link rel="stylesheet" href="/CSS/login.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -149,6 +150,40 @@
       </div>
     </section>
   </main>
+
+  <div class="modal-login oculto" id="modalRecuperarSenha" aria-hidden="true">
+    <div class="modal-login-backdrop" data-fechar-modal></div>
+    <div class="modal-login-caixa" role="dialog" aria-modal="true" aria-labelledby="tituloRecuperarSenha">
+      <button type="button" class="modal-login-fechar" data-fechar-modal aria-label="Fechar">×</button>
+      <h2 id="tituloRecuperarSenha">Recuperar senha</h2>
+      <p class="modal-login-texto">Enviaremos um link seguro para o e-mail informado.</p>
+      <form id="formularioRecuperarSenha" class="modal-login-form">
+        <label for="campoEmailRecuperacao">E-mail</label>
+        <input type="email" id="campoEmailRecuperacao" placeholder="seu@email.com" required />
+        <div class="modal-login-mensagem" id="mensagemRecuperarSenha"></div>
+        <button type="submit" class="botao-primario">Enviar link</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-login oculto" id="modalContatoTime" aria-hidden="true">
+    <div class="modal-login-backdrop" data-fechar-modal></div>
+    <div class="modal-login-caixa" role="dialog" aria-modal="true" aria-labelledby="tituloContatoTime">
+      <button type="button" class="modal-login-fechar" data-fechar-modal aria-label="Fechar">×</button>
+      <h2 id="tituloContatoTime">Fale com nosso time</h2>
+      <p class="modal-login-texto">Conte rapidamente o que voce precisa. Nosso time responde por e-mail.</p>
+      <form id="formularioContatoTime" class="modal-login-form">
+        <label for="campoNomeContato">Nome</label>
+        <input type="text" id="campoNomeContato" placeholder="Seu nome" required />
+        <label for="campoEmailContato">E-mail</label>
+        <input type="email" id="campoEmailContato" placeholder="voce@empresa.com" required />
+        <label for="campoMensagemContato">Mensagem</label>
+        <textarea id="campoMensagemContato" rows="4" placeholder="Descreva o que voce precisa" required></textarea>
+        <div class="modal-login-mensagem" id="mensagemContatoTime"></div>
+        <button type="submit" class="botao-primario">Enviar mensagem</button>
+      </form>
+    </div>
+  </div>
 
   <script src="/JavaScript/utils/navbar.js"></script>
   <script src="/JavaScript/utils/formatar.js"></script>

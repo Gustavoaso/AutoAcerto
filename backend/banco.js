@@ -116,6 +116,17 @@ async function criarTabelas() {
     )
   `);
 
+  await banco.query(`
+    CREATE TABLE IF NOT EXISTS recuperacao_senha (
+      id SERIAL PRIMARY KEY,
+      usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+      token_hash VARCHAR(128) NOT NULL,
+      expira_em TIMESTAMP NOT NULL,
+      usado_em TIMESTAMP,
+      data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   await garantirEstruturaMultiTransportadora();
   await garantirEstruturaVeiculos();
   await garantirEstruturaViagens();
@@ -136,6 +147,8 @@ async function criarIndices() {
   await banco.query("CREATE INDEX IF NOT EXISTS idx_despesas_veiculo ON despesas(veiculo_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_usuarios_transportadora ON usuarios(transportadora_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_usuarios_motorista ON usuarios(motorista_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_recuperacao_usuario ON recuperacao_senha(usuario_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_recuperacao_token_hash ON recuperacao_senha(token_hash)");
 }
 
 async function adicionarConstraint(nome, sql) {

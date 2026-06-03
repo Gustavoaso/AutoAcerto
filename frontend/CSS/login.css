@@ -423,6 +423,154 @@ body {
   line-height: 1.65;
 }
 
+.oculto {
+  display: none !important;
+}
+
+.modal-login {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.modal-login-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(6px);
+}
+
+.modal-login-caixa {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 520px);
+  padding: 30px 26px 24px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid #dbe5f4;
+  box-shadow: 0 24px 60px rgba(20, 33, 61, 0.18);
+}
+
+.modal-login-caixa h2 {
+  font-size: 1.65rem;
+  line-height: 1.15;
+  color: #13244a;
+  margin-bottom: 10px;
+}
+
+.modal-login-texto {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: #5f7197;
+  margin-bottom: 18px;
+}
+
+.modal-login-fechar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid #dbe5f4;
+  background: #f8fbff;
+  color: #4f6ea9;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.modal-login-form {
+  display: grid;
+  gap: 14px;
+}
+
+.modal-login-form label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #13244a;
+}
+
+.modal-login-form input,
+.modal-login-form textarea {
+  width: 100%;
+  border: 1px solid #dbe5f4;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 14px 16px;
+  font-size: 1rem;
+  color: #13244a;
+  outline: none;
+}
+
+.modal-login-form textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.modal-login-form input:focus,
+.modal-login-form textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.modal-login-mensagem {
+  min-height: 20px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #be123c;
+}
+
+.modal-login-mensagem.mensagem-sucesso,
+.erro-geral.mensagem-sucesso {
+  color: #047857;
+  background: #ecfdf5;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.pagina-resetar-senha {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
+    radial-gradient(circle at right center, rgba(59, 130, 246, 0.05), transparent 24%),
+    #f7faff;
+}
+
+.layout-resetar-senha {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.caixa-resetar-senha {
+  width: min(100%, 560px);
+  padding: 36px 32px;
+  border-radius: 24px;
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 20px 70px rgba(37, 99, 235, 0.08);
+  display: grid;
+  gap: 24px;
+}
+
+.logo-container-reset {
+  justify-self: center;
+}
+
+.link-voltar-login {
+  justify-self: center;
+  color: #1d4ed8;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.link-voltar-login:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 1180px) {
   .layout-login {
     grid-template-columns: minmax(460px, 40vw) minmax(0, 1fr);
@@ -550,5 +698,10 @@ body {
 
   .rodape-cartao-login {
     align-items: center;
+  }
+
+  .modal-login-caixa,
+  .caixa-resetar-senha {
+    padding: 24px 18px;
   }
 }
