@@ -12,72 +12,176 @@
 </head>
 
 <body>
-  <div class="layout-login">
-
-    <!-- Painel esquerdo — marca -->
-    <div class="painel-marca">
+  <main class="layout-login">
+    <section class="painel-marca" aria-label="Apresentacao da AutoAcerto">
       <div class="conteudo-marca">
         <div class="logo-container">
-           <img src="/Imagens/logo nova.png" alt="AutoAcerto Logo" class="logo-login">
-           <span class="logo-texto">AutoAcerto</span>
-         </div>
-        <h1 class="slogan">Controle de frota simplificado para quem vive na estrada.</h1>
-        <p class="descricao-marca">Motoristas, viagens, despesas e relatórios em um só lugar.</p>
-      </div>
-    </div>
-
-    <!-- Painel direito — formulário -->
-    <div class="painel-formulario">
-      <div class="caixa-login">
-        <div class="cabecalho-login">
-          <h2 class="titulo-login">Entrar na conta</h2>
-          <p class="subtitulo-login">Informe suas credenciais para acessar o sistema.</p>
+          <img src="/Imagens/logo nova.png" alt="Logo AutoAcerto" class="logo-login">
+          <span class="logo-texto"><span>Auto</span><strong>Acerto</strong></span>
         </div>
 
-        <form class="formulario-login" id="formularioLogin" novalidate>
-          <div class="campo-form">
-            <label for="campoEmail">E-mail</label>
-            <input
-              type="email"
-              id="campoEmail"
-              placeholder="seu@email.com"
-              autocomplete="email"
-              required
-            />
-            <span class="erro-campo" id="erroEmail"></span>
-          </div>
+        <div class="bloco-apresentacao">
+          <h1 class="slogan">Gestao de transporte simples, inteligente e completa</h1>
+          <p class="descricao-marca">
+            Controle sua operacao, reduza custos e aumente a eficiencia da sua frota com a AutoAcerto.
+          </p>
+        </div>
 
-          <div class="campo-form">
-            <label for="campoSenha">Senha</label>
-            <div class="grupo-senha">
-              <input
-                type="password"
-                id="campoSenha"
-                placeholder="Sua senha"
-                autocomplete="current-password"
-                required
-              />
-              <button type="button" class="botao-ver-senha" id="botaoVerSenha" aria-label="Mostrar senha">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              </button>
+        <div class="lista-destaques">
+          <article class="item-destaque-login">
+            <div class="icone-destaque-login" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 16L10 10L14 14L20 8" />
+                <path d="M15 8H20V13" />
+              </svg>
             </div>
-            <span class="erro-campo" id="erroSenha"></span>
+            <div>
+              <h2>Visao completa do negocio</h2>
+              <p>Acompanhe indicadores e resultados em tempo real.</p>
+            </div>
+          </article>
+
+          <article class="item-destaque-login">
+            <div class="icone-destaque-login" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 3L19 6V11C19 15.4 16.1 19.3 12 21C7.9 19.3 5 15.4 5 11V6L12 3Z" />
+                <path d="M9.5 11.5L11.3 13.3L14.8 9.8" />
+              </svg>
+            </div>
+            <div>
+              <h2>Seguranca e confiabilidade</h2>
+              <p>Seus dados protegidos com o mais alto padrao de seguranca.</p>
+            </div>
+          </article>
+
+          <article class="item-destaque-login">
+            <div class="icone-destaque-login" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 15V11A8 8 0 0 1 20 11V15" />
+                <path d="M4 15V17A2 2 0 0 0 6 19H8V13H4Z" />
+                <path d="M20 15V17A2 2 0 0 1 18 19H16V13H20Z" />
+              </svg>
+            </div>
+            <div>
+              <h2>Suporte especializado</h2>
+              <p>Time preparado para ajudar sua empresa a crescer.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="midia-marca" aria-hidden="true">
+        <div class="overlay-midia-marca"></div>
+      </div>
+    </section>
+
+    <section class="painel-formulario">
+      <div class="bloco-formulario-login">
+        <div class="caixa-login">
+          <div class="cabecalho-login">
+            <h2 class="titulo-login">Bem-vindo de volta <span aria-hidden="true">👋</span></h2>
+            <p class="subtitulo-login">Faca login para acessar sua conta</p>
           </div>
 
-          <div class="erro-geral" id="erroGeral"></div>
+          <form class="formulario-login" id="formularioLogin" novalidate>
+            <div class="campo-form">
+              <label for="campoEmail">E-mail ou usuario</label>
+              <div class="campo-com-icone">
+                <span class="icone-campo" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M4 6H20V18H4Z" />
+                    <path d="M4 7L12 13L20 7" />
+                  </svg>
+                </span>
+                <input
+                  type="email"
+                  id="campoEmail"
+                  placeholder="seu@email.com"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+              <span class="erro-campo" id="erroEmail"></span>
+            </div>
 
-          <button type="submit" class="botao-primario botao-login" id="botaoEntrar">
-            Entrar
-          </button>
-        </form>
+            <div class="campo-form">
+              <label for="campoSenha">Senha</label>
+              <div class="campo-com-icone grupo-senha">
+                <span class="icone-campo" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <rect x="5" y="11" width="14" height="10" rx="2" />
+                    <path d="M8 11V8A4 4 0 0 1 16 8V11" />
+                  </svg>
+                </span>
+                <input
+                  type="password"
+                  id="campoSenha"
+                  placeholder="Digite sua senha"
+                  autocomplete="current-password"
+                  required
+                />
+                <button type="button" class="botao-ver-senha" id="botaoVerSenha" aria-label="Mostrar senha">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M2 12S5.6 6 12 6s10 6 10 6-3.6 6-10 6S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="2.5" />
+                  </svg>
+                </button>
+              </div>
+              <div class="linha-apoio-form">
+                <span class="erro-campo" id="erroSenha"></span>
+                <a href="#" class="link-auxiliar" id="linkEsqueciSenha">Esqueceu sua senha?</a>
+              </div>
+            </div>
+
+            <div class="erro-geral" id="erroGeral"></div>
+
+            <button type="submit" class="botao-primario botao-login" id="botaoEntrar">
+              Entrar
+            </button>
+          </form>
+
+          <div class="divisor-login" aria-hidden="true">
+            <span></span>
+            <strong>ou continue com</strong>
+            <span></span>
+          </div>
+
+          <div class="acoes-login-secundarias">
+            <button type="button" class="botao-social-login" id="botaoGoogleLogin">
+              <span class="marca-social google" aria-hidden="true">G</span>
+              <span>Google</span>
+            </button>
+            <button type="button" class="botao-social-login" id="botaoMicrosoftLogin">
+              <span class="marca-social microsoft" aria-hidden="true">
+                <i></i><i></i><i></i><i></i>
+              </span>
+              <span>Microsoft</span>
+            </button>
+          </div>
+
+          <div class="rodape-cartao-login">
+            <span>Ainda nao tem uma conta?</span>
+            <a href="#" id="linkFaleConosco">Fale com nosso time</a>
+          </div>
+        </div>
+
+        <div class="aviso-seguranca-login">
+          <div class="icone-seguranca-login" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 3L19 6V11C19 15.4 16.1 19.3 12 21C7.9 19.3 5 15.4 5 11V6L12 3Z" />
+              <path d="M9.5 11.5L11.3 13.3L14.8 9.8" />
+            </svg>
+          </div>
+          <div>
+            <strong>Seus dados estao protegidos</strong>
+            <p>Utilizamos criptografia e seguimos as melhores praticas de seguranca da informacao.</p>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
+  </main>
 
-  </div>
-   <script src="/JavaScript/utils/navbar.js"></script>
+  <script src="/JavaScript/utils/navbar.js"></script>
   <script src="/JavaScript/utils/formatar.js"></script>
   <script src="/JavaScript/config.js"></script>
   <script src="/JavaScript/login.js"></script>

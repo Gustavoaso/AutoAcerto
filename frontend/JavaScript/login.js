@@ -72,6 +72,34 @@ function configurarToggleSenha() {
     });
 }
 
+function configurarAcoesAuxiliares() {
+    const linkEsqueciSenha = document.getElementById("linkEsqueciSenha");
+    const linkFaleConosco = document.getElementById("linkFaleConosco");
+    const botaoGoogleLogin = document.getElementById("botaoGoogleLogin");
+    const botaoMicrosoftLogin = document.getElementById("botaoMicrosoftLogin");
+
+    if (linkEsqueciSenha) {
+        linkEsqueciSenha.addEventListener("click", function (evento) {
+            evento.preventDefault();
+            exibirErroGeral("Recuperacao de senha ainda nao esta disponivel nesta tela. Fale com o administrador para redefinir o acesso.");
+        });
+    }
+
+    if (linkFaleConosco) {
+        linkFaleConosco.addEventListener("click", function (evento) {
+            evento.preventDefault();
+            exibirErroGeral("Entre em contato com o time responsavel pelo AutoAcerto para solicitar seu acesso.");
+        });
+    }
+
+    [botaoGoogleLogin, botaoMicrosoftLogin].forEach(function (botao) {
+        if (!botao) return;
+        botao.addEventListener("click", function () {
+            exibirErroGeral("Login social ainda nao esta configurado neste ambiente.");
+        });
+    });
+}
+
 function configurarFormulario() {
     const formulario = document.getElementById("formularioLogin");
     const botao      = document.getElementById("botaoEntrar");
@@ -137,5 +165,6 @@ function configurarFormulario() {
 document.addEventListener("DOMContentLoaded", function () {
     verificarSessaoExistente();
     configurarToggleSenha();
+    configurarAcoesAuxiliares();
     configurarFormulario();
 });
