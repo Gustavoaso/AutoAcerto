@@ -75,8 +75,6 @@ function configurarToggleSenha() {
 function configurarAcoesAuxiliares() {
     const linkEsqueciSenha = document.getElementById("linkEsqueciSenha");
     const linkFaleConosco = document.getElementById("linkFaleConosco");
-    const botaoGoogleLogin = document.getElementById("botaoGoogleLogin");
-    const botaoMicrosoftLogin = document.getElementById("botaoMicrosoftLogin");
 
     if (linkEsqueciSenha) {
         linkEsqueciSenha.addEventListener("click", function (evento) {
@@ -91,13 +89,6 @@ function configurarAcoesAuxiliares() {
             exibirErroGeral("Entre em contato com o time responsavel pelo AutoAcerto para solicitar seu acesso.");
         });
     }
-
-    [botaoGoogleLogin, botaoMicrosoftLogin].forEach(function (botao) {
-        if (!botao) return;
-        botao.addEventListener("click", function () {
-            exibirErroGeral("Login social ainda nao esta configurado neste ambiente.");
-        });
-    });
 }
 
 function configurarFormulario() {
