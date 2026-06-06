@@ -170,9 +170,10 @@ body {
 
 .painel-formulario {
   width: 70%;
+  margin: 0 auto;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   padding: 44px 56px;
 }
 
