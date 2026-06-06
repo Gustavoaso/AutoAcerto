@@ -807,6 +807,8 @@ body {
 
   .painel-formulario {
     padding: 24px 18px 32px;
+    display: flex;
+    gap: 32px;
   }
 
   .bloco-formulario-login {
