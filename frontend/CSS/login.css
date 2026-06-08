@@ -602,18 +602,20 @@ body {
 }
 
 .layout-assinatura .slogan {
-  max-width: 420px;
-  font-size: clamp(2.1rem, 2.5vw, 2.8rem);
+  max-width: 430px;
+  font-size: 2rem;
+  line-height: 1.14;
+  font-weight: 800;
 }
 
 .layout-assinatura .descricao-marca {
   max-width: 420px;
-  font-size: 1rem;
-  line-height: 1.75;
+  font-size: 1.05rem;
+  line-height: 1.7;
 }
 
 .layout-assinatura .lista-destaques {
-  gap: 18px;
+  gap: 22px;
 }
 
 .layout-assinatura .midia-marca {
@@ -637,10 +639,11 @@ body {
 
 .alinhado-esquerda {
   text-align: left;
+  gap: 10px;
 }
 
 .titulo-menor {
-  font-size: clamp(1.8rem, 2.3vw, 2.45rem);
+  font-size: clamp(2rem, 2.7vw, 2.9rem);
 }
 
 .grade-planos {
@@ -687,8 +690,9 @@ body {
 }
 
 .cartao-plano-assinatura strong {
-  font-size: 1.02rem;
+  font-size: 0.98rem;
   line-height: 1.35;
+  font-weight: 700;
   color: #13244a;
 }
 
@@ -697,7 +701,8 @@ body {
   align-items: baseline;
   gap: 4px;
   flex-wrap: wrap;
-  font-size: 1.25rem;
+  font-size: 1.48rem;
+  line-height: 1.1;
   color: #13244a;
   font-weight: 800;
 }
@@ -710,8 +715,8 @@ body {
 }
 
 .descricao-plano-assinatura {
-  font-size: 0.87rem;
-  line-height: 1.5;
+  font-size: 0.92rem;
+  line-height: 1.55;
   color: #5f7197;
 }
 
@@ -737,15 +742,18 @@ body {
 
 .caixa-assinatura .campo-form input {
   padding: 0 18px;
-  font-size: 1rem;
+  font-size: 1.08rem;
 }
 
 .caixa-assinatura .campo-form label {
-  font-size: 0.94rem;
+  font-size: 0.98rem;
+  font-weight: 700;
 }
 
 .caixa-assinatura .subtitulo-login {
   max-width: 620px;
+  font-size: 1.1rem;
+  line-height: 1.5;
 }
 
 .caixa-status-assinatura {
