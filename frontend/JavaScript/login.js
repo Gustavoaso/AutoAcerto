@@ -19,10 +19,12 @@ function redirecionarPorPerfil(perfil) {
 async function verificarSessaoExistente() {
     try {
         const usuario = JSON.parse(localStorage.getItem("usuario"));
+        const token = localStorage.getItem("token");
         if (!usuario) return;
 
         const resposta = await fetch(obterApiBaseLogin() + "/auth/me", {
-            credentials: "include"
+            credentials: "include",
+            headers: token ? { Authorization: "Bearer " + token } : {}
         });
 
         if (resposta.ok) {
@@ -32,9 +34,11 @@ async function verificarSessaoExistente() {
 
         localStorage.removeItem("sessao_expira_em");
         localStorage.removeItem("usuario");
+        localStorage.removeItem("token");
     } catch {
         localStorage.removeItem("sessao_expira_em");
         localStorage.removeItem("usuario");
+        localStorage.removeItem("token");
     }
 }
 
@@ -253,6 +257,9 @@ function configurarFormulario() {
             }
 
             localStorage.setItem("usuario", JSON.stringify(dados.usuario));
+            if (dados.token) {
+                localStorage.setItem("token", dados.token);
+            }
             if (dados.sessao_expira_em) {
                 localStorage.setItem("sessao_expira_em", dados.sessao_expira_em);
             }

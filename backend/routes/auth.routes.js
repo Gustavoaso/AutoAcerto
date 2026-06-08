@@ -129,6 +129,7 @@ router.post("/login", limitadorLogin, async (requisicao, resposta) => {
 
     return resposta.json({
       mensagem: "Login realizado com sucesso.",
+      token,
       usuario: payload,
       sessao_expira_em: new Date(Date.now() + DURACAO_SESSAO_MS).toISOString()
     });

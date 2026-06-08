@@ -23,7 +23,7 @@ function obterSessao() {
 }
 
 function obterToken() {
-    return null;
+    return localStorage.getItem("token");
 }
 
 function obterUsuarioLogado() {
@@ -39,6 +39,7 @@ function obterUsuarioLogado() {
 function encerrarSessao() {
     limparMonitoramentoSessao();
     localStorage.removeItem("usuario");
+    localStorage.removeItem("token");
     localStorage.removeItem("sessao_expira_em");
 
     if (typeof montarUrlApi === "function") {
@@ -198,6 +199,7 @@ function exigirAutenticacao() {
 
     if (!usuario) {
         localStorage.removeItem("usuario");
+        localStorage.removeItem("token");
         localStorage.removeItem("sessao_expira_em");
 
         if (paginaAtual !== paginaLogin) {
@@ -232,9 +234,14 @@ function usuarioEhAdminOuDonoMaster(usuario) {
 // ==================== HEADERS ====================
 
 function cabecalhosAutenticados() {
-    return {
+    const cabecalhos = {
         "Content-Type": "application/json"
     };
+    const token = obterToken();
+    if (token) {
+        cabecalhos.Authorization = "Bearer " + token;
+    }
+    return cabecalhos;
 }
 
 function escaparHtml(valor) {
@@ -695,9 +702,14 @@ function configurarFetchAutenticado() {
 
         const novasOpcoes = opcoes ? { ...opcoes } : {};
         const headers = new Headers(novasOpcoes.headers || {});
+        const token = obterToken();
         const usuario = obterUsuarioLogado();
         const metodo = (novasOpcoes.method || (typeof recurso !== "string" && recurso.method) || "GET").toUpperCase();
         novasOpcoes.credentials = "include";
+
+        if (token && !headers.has("Authorization")) {
+            headers.set("Authorization", "Bearer " + token);
+        }
 
         if (
             usuario &&
