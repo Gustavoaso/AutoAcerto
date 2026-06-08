@@ -22,10 +22,26 @@ const NOME_COOKIE_SESSAO = "autoacerto_token";
 const DURACAO_SESSAO_MS = 8 * 60 * 60 * 1000;
 const DURACAO_TOKEN_RECUPERACAO_MS = 60 * 60 * 1000;
 
-function opcoesCookieSessao() {
+function opcoesCookieSessao(requisicao) {
+  const origem = String(requisicao.headers.origin || "").trim();
+  const frontendConfigurado = String(FRONTEND_URL || "").trim();
+  let origemFrontend = "";
+
+  if (frontendConfigurado) {
+    try {
+      origemFrontend = new URL(frontendConfigurado).origin;
+    } catch {
+      origemFrontend = frontendConfigurado;
+    }
+  }
+
+  const ambienteSeguro = requisicao.secure || String(requisicao.headers["x-forwarded-proto"] || "").includes("https");
+  const cruzandoOrigem = Boolean(origem && origemFrontend && origem !== origemFrontend);
+
   return {
     httpOnly: true,
-    secure: true,
+    secure: ambienteSeguro,
+    sameSite: cruzandoOrigem ? "none" : "lax",
     path: "/",
     maxAge: DURACAO_SESSAO_MS
   };
@@ -109,7 +125,7 @@ router.post("/login", limitadorLogin, async (requisicao, resposta) => {
     };
 
     const token = jwt.sign(payload, SEGREDO_JWT, { expiresIn: "8h" });
-    resposta.cookie(NOME_COOKIE_SESSAO, token, opcoesCookieSessao());
+    resposta.cookie(NOME_COOKIE_SESSAO, token, opcoesCookieSessao(requisicao));
 
     return resposta.json({
       mensagem: "Login realizado com sucesso.",
@@ -123,11 +139,7 @@ router.post("/login", limitadorLogin, async (requisicao, resposta) => {
 });
 
 router.post("/logout", (requisicao, resposta) => {
-  resposta.clearCookie(NOME_COOKIE_SESSAO, {
-    httpOnly: true,
-    secure: true,
-    path: "/"
-  });
+  resposta.clearCookie(NOME_COOKIE_SESSAO, opcoesCookieSessao(requisicao));
 
   return resposta.json({ mensagem: "Logout realizado com sucesso." });
 });

@@ -59,7 +59,7 @@ function criarLayoutEmail({ titulo, subtitulo, conteudoHtml, rodapeHtml }) {
 
 async function enviarEmail(destinatario, assunto, html) {
   const transportador = obterTransportador();
-  await transportador.sendMail({
+  return transportador.sendMail({
     from: SMTP_FROM,
     to: destinatario,
     subject: assunto,

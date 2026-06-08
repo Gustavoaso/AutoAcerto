@@ -67,9 +67,11 @@ function resumirErroEmail(erro) {
 }
 
 async function enviarEmailBoasVindas(pendencia) {
-  if (!mailerConfigurado()) return;
+  if (!mailerConfigurado()) {
+    throw new Error("SMTP nao configurado no backend.");
+  }
 
-  await enviarEmail(
+  const info = await enviarEmail(
     pendencia.email_admin,
     "AutoAcerto | Assinatura confirmada",
     montarEmailBoasVindasAssinatura({
@@ -80,6 +82,12 @@ async function enviarEmailBoasVindas(pendencia) {
       planoNome: pendencia.plano_nome
     })
   );
+
+  if (info && Array.isArray(info.rejected) && info.rejected.length > 0) {
+    throw new Error("O servidor SMTP rejeitou o destinatario do e-mail de boas-vindas.");
+  }
+
+  return info;
 }
 
 async function registrarAssinaturaAtiva({ cliente, pendencia, assinaturaStripe, transportadoraId }) {
