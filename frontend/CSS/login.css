@@ -169,21 +169,10 @@ body {
 }
 
 .painel-formulario {
-  width: 70%;
-  margin: 0 auto;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
   padding: 44px 56px;
-}
-
-#paymentBrick_container {
-  /* width: min(100%, 610px); */
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(191, 219, 254, 0.7);
-  border-radius: 24px;
-  box-shadow: 0 20px 70px rgba(37, 99, 235, 0.08);
-  padding: 24px;
 }
 
 .bloco-formulario-login {
@@ -588,10 +577,62 @@ body {
 
 .pagina-assinatura {
   min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
+    radial-gradient(circle at right center, rgba(59, 130, 246, 0.05), transparent 24%),
+    #f3f7ff;
+}
+
+.layout-assinatura {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(420px, 35vw) minmax(640px, 1fr);
+}
+
+.layout-assinatura .painel-marca {
+  padding: 40px 48px;
+  align-items: flex-start;
+}
+
+.layout-assinatura .conteudo-marca {
+  width: min(100%, 460px);
+  margin-top: 24px;
+  margin-bottom: clamp(190px, 24vh, 290px);
+  gap: 32px;
+}
+
+.layout-assinatura .slogan {
+  max-width: 420px;
+  font-size: clamp(2.1rem, 2.5vw, 2.8rem);
+}
+
+.layout-assinatura .descricao-marca {
+  max-width: 420px;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.layout-assinatura .lista-destaques {
+  gap: 18px;
+}
+
+.layout-assinatura .midia-marca {
+  height: clamp(240px, 34vh, 330px);
+}
+
+.layout-assinatura .overlay-midia-marca {
+  background:
+    linear-gradient(180deg, #f3f7ff 0%, rgba(243, 247, 255, 0.92) 14%, rgba(243, 247, 255, 0.44) 40%, rgba(10, 31, 74, 0.12) 68%, rgba(10, 31, 74, 0.32) 100%);
+}
+
+.layout-assinatura .painel-formulario {
+  padding: 40px 48px;
 }
 
 .caixa-assinatura {
-  gap: 28px;
+  width: min(100%, 880px);
+  gap: 30px;
+  padding: 36px 34px 30px;
 }
 
 .alinhado-esquerda {
@@ -605,7 +646,7 @@ body {
 .grade-planos {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
 }
 
 .cartao-plano-assinatura {
@@ -613,10 +654,12 @@ body {
   border: 1px solid #dbe5f4;
   border-radius: 18px;
   background: #f8fbff;
-  padding: 18px 16px;
+  min-height: 208px;
+  padding: 16px 15px;
   cursor: pointer;
   display: grid;
-  gap: 10px;
+  align-content: start;
+  gap: 9px;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
@@ -633,36 +676,42 @@ body {
 
 .tag-plano-assinatura {
   justify-self: start;
-  padding: 6px 10px;
+  padding: 5px 9px;
   border-radius: 999px;
   background: rgba(37, 99, 235, 0.1);
   color: #1d4ed8;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .cartao-plano-assinatura strong {
-  font-size: 1rem;
+  font-size: 1.02rem;
+  line-height: 1.35;
   color: #13244a;
 }
 
 .preco-plano-assinatura {
-  font-size: 1.48rem;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 1.25rem;
   color: #13244a;
   font-weight: 800;
 }
 
 .preco-plano-assinatura small {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: #5f7197;
   font-weight: 600;
-  margin-left: 4px;
+  margin-left: 0;
 }
 
 .descricao-plano-assinatura {
-  font-size: 0.9rem;
-  line-height: 1.55;
+  font-size: 0.87rem;
+  line-height: 1.5;
   color: #5f7197;
 }
 
@@ -679,11 +728,24 @@ body {
 .grade-formulario-assinatura {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 16px;
 }
 
 .grupo-campo-largo-assinatura {
   grid-column: 1 / -1;
+}
+
+.caixa-assinatura .campo-form input {
+  padding: 0 18px;
+  font-size: 1rem;
+}
+
+.caixa-assinatura .campo-form label {
+  font-size: 0.94rem;
+}
+
+.caixa-assinatura .subtitulo-login {
+  max-width: 620px;
 }
 
 .caixa-status-assinatura {
@@ -753,7 +815,19 @@ body {
   }
 
   .grade-planos {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .layout-assinatura {
+    grid-template-columns: minmax(360px, 34vw) minmax(0, 1fr);
+  }
+
+  .layout-assinatura .painel-formulario {
+    padding: 32px 28px;
+  }
+
+  .caixa-assinatura {
+    width: min(100%, 760px);
   }
 }
 
@@ -795,6 +869,10 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .layout-assinatura {
+    grid-template-columns: 1fr;
+  }
+
   .painel-marca {
     padding: 40px 24px 0;
     border-right: none;
@@ -825,6 +903,10 @@ body {
   }
 
   .grade-formulario-assinatura {
+    grid-template-columns: 1fr;
+  }
+
+  .grade-planos {
     grid-template-columns: 1fr;
   }
 }
@@ -871,5 +953,14 @@ body {
   .modal-login-caixa,
   .caixa-resetar-senha {
     padding: 24px 18px;
+  }
+
+  .caixa-assinatura {
+    width: 100%;
+    padding: 28px 18px 24px;
+  }
+
+  .cartao-plano-assinatura {
+    min-height: auto;
   }
 }
