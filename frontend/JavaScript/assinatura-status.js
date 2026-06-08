@@ -41,7 +41,7 @@ function preencherStatusAssinatura(dados) {
     if (texto) {
         texto.textContent = dados.provisionado_em
             ? "Pagamento confirmado e conta criada. Voce ja pode entrar no sistema com o e-mail cadastrado."
-            : "Recebemos sua assinatura e estamos aguardando a confirmacao do Mercado Pago para criar sua conta.";
+            : "Recebemos sua assinatura e estamos aguardando a confirmacao da Stripe para criar sua conta.";
     }
 
     if (detalhes) {

@@ -69,7 +69,14 @@ app.use(cors({
   }
 }));
 
-app.use(express.json({ limit: "8mb" }));
+app.use(express.json({
+  limit: "8mb",
+  verify: function (requisicao, resposta, buffer) {
+    if (requisicao.originalUrl === "/assinaturas/stripe/webhook") {
+      requisicao.rawBody = buffer.toString("utf8");
+    }
+  }
+}));
 
 // âœ… SEGURANÃ‡A: WAF para detectar SQL Injection e XSS
 app.use(detectarSqlInjection);
