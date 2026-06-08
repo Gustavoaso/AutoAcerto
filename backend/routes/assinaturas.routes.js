@@ -61,6 +61,11 @@ function normalizarStatusStripe(status) {
   return String(status || "").trim().toLowerCase() || "pending";
 }
 
+function resumirErroEmail(erro) {
+  if (!erro) return null;
+  return String(erro.message || erro).trim().slice(0, 500) || "Falha ao enviar o e-mail.";
+}
+
 async function enviarEmailBoasVindas(pendencia) {
   if (!mailerConfigurado()) return;
 
@@ -249,8 +254,25 @@ async function provisionarPendenciaPorReferencia(referenciaExterna, assinaturaSt
         transportadora_id: transportadoraId,
         usuario_admin_id: usuarioAdminId
       });
+
+      await banco.query(
+        `UPDATE assinaturas_pendentes
+         SET boas_vindas_email_enviado_em = CURRENT_TIMESTAMP,
+             boas_vindas_email_erro = NULL,
+             data_atualizacao = CURRENT_TIMESTAMP
+         WHERE id = $1`,
+        [pendencia.id]
+      );
     } catch (erroEmail) {
       console.error("Erro ao enviar e-mail de boas-vindas:", erroEmail.message);
+
+      await banco.query(
+        `UPDATE assinaturas_pendentes
+         SET boas_vindas_email_erro = $1,
+             data_atualizacao = CURRENT_TIMESTAMP
+         WHERE id = $2`,
+        [resumirErroEmail(erroEmail), pendencia.id]
+      );
     }
 
     return { ok: true, provisionado: true, status: statusStripe };
@@ -390,7 +412,8 @@ router.get("/public/status/:referencia", async (requisicao, resposta) => {
     const referencia = String(requisicao.params.referencia || "").trim();
     const resultado = await banco.query(
       `SELECT referencia_externa, plano_codigo, plano_nome, valor, nome_transportadora, nome_admin, email_admin,
-              stripe_checkout_session_id, stripe_subscription_id, status, provisionado_em, transportadora_id, usuario_admin_id, data_cadastro
+              stripe_checkout_session_id, stripe_subscription_id, status, provisionado_em, boas_vindas_email_enviado_em,
+              boas_vindas_email_erro, transportadora_id, usuario_admin_id, data_cadastro
        FROM assinaturas_pendentes
        WHERE referencia_externa = $1`,
       [referencia]
@@ -412,7 +435,8 @@ router.get("/public/status/:referencia", async (requisicao, resposta) => {
 
     const atualizado = await banco.query(
       `SELECT referencia_externa, plano_codigo, plano_nome, valor, nome_transportadora, nome_admin, email_admin,
-              stripe_checkout_session_id, stripe_subscription_id, status, provisionado_em, transportadora_id, usuario_admin_id, data_cadastro
+              stripe_checkout_session_id, stripe_subscription_id, status, provisionado_em, boas_vindas_email_enviado_em,
+              boas_vindas_email_erro, transportadora_id, usuario_admin_id, data_cadastro
        FROM assinaturas_pendentes
        WHERE referencia_externa = $1`,
       [referencia]

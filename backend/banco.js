@@ -146,6 +146,8 @@ async function criarTabelas() {
       stripe_subscription_id VARCHAR(120),
       status VARCHAR(40) NOT NULL DEFAULT 'aguardando_pagamento',
       provisionado_em TIMESTAMP,
+      boas_vindas_email_enviado_em TIMESTAMP,
+      boas_vindas_email_erro TEXT,
       transportadora_id INTEGER REFERENCES transportadoras(id),
       usuario_admin_id INTEGER REFERENCES usuarios(id),
       ultimo_payload JSONB,
@@ -314,6 +316,8 @@ async function garantirEstruturaAssinaturas() {
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(120)");
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS status VARCHAR(40) NOT NULL DEFAULT 'aguardando_pagamento'");
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS provisionado_em TIMESTAMP");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS boas_vindas_email_enviado_em TIMESTAMP");
+  await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS boas_vindas_email_erro TEXT");
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS transportadora_id INTEGER REFERENCES transportadoras(id)");
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS usuario_admin_id INTEGER REFERENCES usuarios(id)");
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS ultimo_payload JSONB");

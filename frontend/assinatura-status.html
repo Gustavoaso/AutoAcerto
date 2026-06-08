@@ -23,12 +23,47 @@
       <div class="cabecalho-login">
         <h1 class="titulo-login titulo-menor">Estamos confirmando sua assinatura</h1>
         <p class="subtitulo-login" id="textoStatusAssinatura">
-          Assim que o Mercado Pago confirmar o pagamento, sua transportadora sera criada automaticamente.
+          Assim que a Stripe confirmar o pagamento, sua transportadora sera criada automaticamente.
         </p>
       </div>
 
       <div class="painel-status-assinatura" id="painelStatusAssinatura">
-        <div class="selo-status-assinatura selo-pendente" id="seloStatusAssinatura">Aguardando confirmacao</div>
+        <div class="topo-status-assinatura">
+          <div class="orb-status-assinatura orb-pendente" id="orbStatusAssinatura">
+            <span class="orb-anel"></span>
+            <span class="orb-centro"></span>
+          </div>
+          <div class="resumo-status-assinatura">
+            <div class="selo-status-assinatura selo-pendente" id="seloStatusAssinatura">Aguardando confirmacao</div>
+            <p class="descricao-status-assinatura" id="descricaoStatusAssinatura">
+              Validando o checkout e aguardando a confirmacao final da assinatura.
+            </p>
+          </div>
+        </div>
+
+        <div class="linha-etapas-assinatura" id="linhaEtapasAssinatura">
+          <div class="etapa-assinatura" data-etapa="checkout">
+            <span class="etapa-indicador">1</span>
+            <strong>Checkout</strong>
+            <small>Pagamento iniciado</small>
+          </div>
+          <div class="etapa-assinatura" data-etapa="assinatura">
+            <span class="etapa-indicador">2</span>
+            <strong>Stripe</strong>
+            <small>Assinatura confirmada</small>
+          </div>
+          <div class="etapa-assinatura" data-etapa="provisionamento">
+            <span class="etapa-indicador">3</span>
+            <strong>Conta</strong>
+            <small>Ambiente criado</small>
+          </div>
+          <div class="etapa-assinatura" data-etapa="email">
+            <span class="etapa-indicador">4</span>
+            <strong>E-mail</strong>
+            <small>Boas-vindas enviado</small>
+          </div>
+        </div>
+
         <div class="detalhes-status-assinatura" id="detalhesStatusAssinatura"></div>
       </div>
 
