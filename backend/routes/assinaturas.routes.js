@@ -331,6 +331,52 @@ async function sincronizarAssinaturaStripePorId(subscriptionId) {
   return { ...resultado, assinaturaStripe, referenciaExterna };
 }
 
+async function sincronizarCheckoutStripePorSessionId(sessionId) {
+  const checkoutSession = await stripe.checkout.sessions.retrieve(sessionId, {
+    expand: ["subscription"]
+  });
+
+  const referenciaExterna = String((checkoutSession.metadata && checkoutSession.metadata.referencia_externa) || "").trim();
+  if (!referenciaExterna) {
+    return { ok: false, motivo: "sem_referencia_externa", checkoutSession };
+  }
+
+  await banco.query(
+    `UPDATE assinaturas_pendentes
+     SET stripe_customer_id = COALESCE($1, stripe_customer_id),
+         stripe_subscription_id = COALESCE($2, stripe_subscription_id),
+         status = $3,
+         ultimo_payload = $4::jsonb,
+         data_atualizacao = CURRENT_TIMESTAMP
+     WHERE referencia_externa = $5`,
+    [
+      checkoutSession.customer ? String(checkoutSession.customer) : null,
+      checkoutSession.subscription
+        ? String(typeof checkoutSession.subscription === "string" ? checkoutSession.subscription : checkoutSession.subscription.id)
+        : null,
+      checkoutSession.status === "complete" ? "checkout_concluido" : "checkout_criado",
+      JSON.stringify(checkoutSession),
+      referenciaExterna
+    ]
+  );
+
+  const subscriptionId = checkoutSession.subscription
+    ? String(typeof checkoutSession.subscription === "string" ? checkoutSession.subscription : checkoutSession.subscription.id)
+    : "";
+
+  if (subscriptionId) {
+    return sincronizarAssinaturaStripePorId(subscriptionId);
+  }
+
+  return {
+    ok: true,
+    provisionado: false,
+    status: checkoutSession.status === "complete" ? "checkout_concluido" : "checkout_criado",
+    referenciaExterna,
+    checkoutSession
+  };
+}
+
 router.get("/public/planos", (requisicao, resposta) => {
   return resposta.json(Object.values(PLANOS_ASSINATURA).map(function (plano) {
     return {
@@ -463,6 +509,12 @@ router.get("/public/status/:referencia", async (requisicao, resposta) => {
         await sincronizarAssinaturaStripePorId(pendencia.stripe_subscription_id);
       } catch (erro) {
         console.error("Erro ao sincronizar assinatura Stripe:", erro.message);
+      }
+    } else if (pendencia.stripe_checkout_session_id && !pendencia.provisionado_em && stripe) {
+      try {
+        await sincronizarCheckoutStripePorSessionId(pendencia.stripe_checkout_session_id);
+      } catch (erro) {
+        console.error("Erro ao sincronizar checkout Stripe:", erro.message);
       }
     }
 
