@@ -425,6 +425,40 @@ button {
   background: #ffffff;
 }
 
+.campo-com-acao {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.campo-com-acao input {
+  min-width: 0;
+}
+
+.botao-campo-acao {
+  min-height: 42px;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--raio);
+  background: #eff6ff;
+  color: var(--cor-primaria);
+  padding: 0 14px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.botao-campo-acao:hover {
+  border-color: var(--cor-primaria);
+  background: #dbeafe;
+}
+
+.botao-campo-acao:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
 .botao-icone {
   width: 40px;
   height: 40px;
