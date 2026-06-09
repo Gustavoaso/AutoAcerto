@@ -178,12 +178,30 @@ async function criarTabelas() {
     )
   `);
 
+  await banco.query(`
+    CREATE TABLE IF NOT EXISTS notificacoes (
+      id SERIAL PRIMARY KEY,
+      transportadora_id INTEGER REFERENCES transportadoras(id) ON DELETE CASCADE,
+      usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE,
+      tipo VARCHAR(60) NOT NULL,
+      titulo VARCHAR(160) NOT NULL,
+      mensagem TEXT NOT NULL,
+      url VARCHAR(255),
+      email_enviado_em TIMESTAMP,
+      email_erro TEXT,
+      lida_em TIMESTAMP,
+      dados JSONB,
+      data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   await garantirEstruturaMultiTransportadora();
   await garantirEstruturaVeiculos();
   await garantirEstruturaViagens();
   await garantirEstruturaDespesas();
   await garantirEstruturaUsuarios();
   await garantirEstruturaAssinaturas();
+  await garantirEstruturaNotificacoes();
   await criarIndices();
   await garantirConstraintsDominio();
 }
@@ -207,6 +225,9 @@ async function criarIndices() {
   await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_pendentes_subscription ON assinaturas_pendentes(stripe_subscription_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_transportadora ON assinaturas(transportadora_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_gateway_assinatura ON assinaturas(gateway_assinatura_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_notificacoes_usuario ON notificacoes(usuario_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_notificacoes_transportadora ON notificacoes(transportadora_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_notificacoes_lida ON notificacoes(lida_em)");
 }
 
 async function adicionarConstraint(nome, sql) {
@@ -328,6 +349,20 @@ async function garantirEstruturaAssinaturas() {
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS email_pagador VARCHAR(255)");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS ultimo_payload JSONB");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+}
+
+async function garantirEstruturaNotificacoes() {
+  await banco.query("ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS transportadora_id INTEGER REFERENCES transportadoras(id) ON DELETE CASCADE");
+  await banco.query("ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS usuario_id INTEGER REFERENCES usuarios(id) ON DELETE CASCADE");
+  await banco.query("ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS tipo VARCHAR(60) NOT NULL DEFAULT 'geral'");
+  await banco.query("ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS titulo VARCHAR(160) NOT NULL DEFAULT 'Notificacao'");
+  await banco.query("ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS mensagem TEXT NOT NULL DEFAULT ''");
+  await banco.query("ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS url VARCHAR(255)");
+  await banco.query("ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS email_enviado_em TIMESTAMP");
+  await banco.query("ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS email_erro TEXT");
+  await banco.query("ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS lida_em TIMESTAMP");
+  await banco.query("ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS dados JSONB");
+  await banco.query("ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
 }
 
 async function adicionarColunaTransportadora(nomeTabela) {

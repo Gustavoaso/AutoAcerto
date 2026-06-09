@@ -7,6 +7,7 @@ const { obterIdTransportadora, usuarioEhDonoSistema, obterFiltroTransportadora, 
 const { motoristaPertenceTransportadora, veiculoPertenceTransportadora } = require("../helpers/validacoes-db");
 const { normalizarIdsExclusao, placeholderIds, responderExclusao } = require("../helpers/exclusao");
 const { obterParametrosPaginacao, montarRespostaPaginada } = require("../helpers/paginacao");
+const { notificarAdministradoresTransportadora } = require("../helpers/notificacoes");
 
 const router = express.Router();
 
@@ -187,7 +188,25 @@ router.patch("/:id/finalizar", exigirAdminOuMotorista, autorizarAcessoViagem, as
       [dataChegadaFinal, kmFinalNum, id, transportadoraId]
     );
 
-    return resposta.json({ mensagem: "Viagem concluida com sucesso.", viagem: resultado.rows[0] });
+    const viagemConcluida = resultado.rows[0];
+
+    notificarAdministradoresTransportadora({
+      transportadoraId,
+      tipo: "viagem_concluida",
+      titulo: "Viagem concluida",
+      mensagem: "A viagem de " + viagemConcluida.origem + " para " + viagemConcluida.destino + " foi concluida.",
+      url: "ver-viagem.html?id=" + viagemConcluida.id,
+      dados: {
+        viagem_id: viagemConcluida.id,
+        origem: viagemConcluida.origem,
+        destino: viagemConcluida.destino,
+        data_chegada: viagemConcluida.data_chegada
+      }
+    }).catch(function (erro) {
+      console.error("Erro ao criar notificacao de viagem:", erro.message);
+    });
+
+    return resposta.json({ mensagem: "Viagem concluida com sucesso.", viagem: viagemConcluida });
   } catch (erro) {
     console.error("Erro ao concluir viagem:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao concluir viagem." });

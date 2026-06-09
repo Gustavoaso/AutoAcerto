@@ -4,6 +4,8 @@ const crypto = require("crypto");
 const Stripe = require("stripe");
 const banco = require("../banco");
 const { normalizarEmail, emailValido, cnpjValido } = require("../validacoes");
+const { exigirAdmin } = require("../middlewares/autenticacao");
+const { obterIdTransportadora } = require("../helpers/escopo");
 const { FRONTEND_URL, diagnosticarMailer, mailerConfigurado, enviarEmail, montarEmailBoasVindasAssinatura } = require("../helpers/mailer");
 
 const router = express.Router();
@@ -43,6 +45,13 @@ const PLANOS_ASSINATURA = {
 
 function obterPlano(codigo) {
   return PLANOS_ASSINATURA[String(codigo || "").trim().toLowerCase()] || null;
+}
+
+function obterPlanoPorStripePriceId(priceId) {
+  const priceTratado = String(priceId || "").trim();
+  return Object.values(PLANOS_ASSINATURA).find(function (plano) {
+    return plano.stripePriceId && plano.stripePriceId === priceTratado;
+  }) || null;
 }
 
 function stripeConfigurado() {
@@ -135,6 +144,12 @@ async function registrarAssinaturaAtiva({ cliente, pendencia, assinaturaStripe, 
   const itemPrincipal = assinaturaStripe.items && assinaturaStripe.items.data && assinaturaStripe.items.data[0]
     ? assinaturaStripe.items.data[0]
     : null;
+  const priceIdAtual = itemPrincipal && itemPrincipal.price ? itemPrincipal.price.id : null;
+  const planoAtual = obterPlanoPorStripePriceId(priceIdAtual) || obterPlano(pendencia.plano_codigo) || {
+    codigo: pendencia.plano_codigo,
+    nome: pendencia.plano_nome,
+    valor: pendencia.valor
+  };
 
   await cliente.query(
     `INSERT INTO assinaturas
@@ -155,14 +170,14 @@ async function registrarAssinaturaAtiva({ cliente, pendencia, assinaturaStripe, 
       data_atualizacao = CURRENT_TIMESTAMP`,
     [
       transportadoraId,
-      pendencia.plano_codigo,
-      pendencia.plano_nome,
+      planoAtual.codigo,
+      planoAtual.nome,
       assinaturaStripe.id,
       pendencia.referencia_externa,
       normalizarStatusStripe(assinaturaStripe.status),
-      pendencia.valor,
+      planoAtual.valor,
       String(assinaturaStripe.customer || pendencia.stripe_customer_id || ""),
-      itemPrincipal && itemPrincipal.price ? itemPrincipal.price.id : null,
+      priceIdAtual,
       assinaturaStripe.current_period_end || null,
       Boolean(assinaturaStripe.cancel_at_period_end),
       pendencia.email_admin,
@@ -378,6 +393,61 @@ async function sincronizarCheckoutStripePorSessionId(sessionId) {
   };
 }
 
+async function atualizarAssinaturaExistentePorStripe(assinaturaStripe) {
+  const itemPrincipal = assinaturaStripe.items && assinaturaStripe.items.data && assinaturaStripe.items.data[0]
+    ? assinaturaStripe.items.data[0]
+    : null;
+  const priceIdAtual = itemPrincipal && itemPrincipal.price ? itemPrincipal.price.id : null;
+  const planoAtual = obterPlanoPorStripePriceId(priceIdAtual);
+
+  if (!planoAtual) {
+    await banco.query(
+      `UPDATE assinaturas
+       SET status = $1,
+           stripe_price_id = COALESCE($2, stripe_price_id),
+           proxima_cobranca_em = to_timestamp($3),
+           cancel_at_period_end = $4,
+           ultimo_payload = $5::jsonb,
+           data_atualizacao = CURRENT_TIMESTAMP
+       WHERE gateway = 'stripe' AND gateway_assinatura_id = $6`,
+      [
+        normalizarStatusStripe(assinaturaStripe.status),
+        priceIdAtual,
+        assinaturaStripe.current_period_end || null,
+        Boolean(assinaturaStripe.cancel_at_period_end),
+        JSON.stringify(assinaturaStripe),
+        assinaturaStripe.id
+      ]
+    );
+    return;
+  }
+
+  await banco.query(
+    `UPDATE assinaturas
+     SET plano_codigo = $1,
+         plano_nome = $2,
+         status = $3,
+         valor = $4,
+         stripe_price_id = $5,
+         proxima_cobranca_em = to_timestamp($6),
+         cancel_at_period_end = $7,
+         ultimo_payload = $8::jsonb,
+         data_atualizacao = CURRENT_TIMESTAMP
+     WHERE gateway = 'stripe' AND gateway_assinatura_id = $9`,
+    [
+      planoAtual.codigo,
+      planoAtual.nome,
+      normalizarStatusStripe(assinaturaStripe.status),
+      planoAtual.valor,
+      priceIdAtual,
+      assinaturaStripe.current_period_end || null,
+      Boolean(assinaturaStripe.cancel_at_period_end),
+      JSON.stringify(assinaturaStripe),
+      assinaturaStripe.id
+    ]
+  );
+}
+
 router.get("/public/planos", (requisicao, resposta) => {
   return resposta.json(Object.values(PLANOS_ASSINATURA).map(function (plano) {
     return {
@@ -388,6 +458,98 @@ router.get("/public/planos", (requisicao, resposta) => {
       limiteVeiculos: plano.limiteVeiculos
     };
   }));
+});
+
+router.get("/minha", exigirAdmin, async (requisicao, resposta) => {
+  try {
+    const transportadoraId = obterIdTransportadora(requisicao);
+    if (!transportadoraId) {
+      return resposta.status(400).json({ mensagem: "Transportadora nao identificada para consultar a assinatura." });
+    }
+
+    const [assinaturaResultado, veiculosResultado] = await Promise.all([
+      banco.query(
+        `SELECT id, plano_codigo, plano_nome, status, valor, gateway, gateway_assinatura_id,
+                stripe_customer_id, stripe_price_id, proxima_cobranca_em, cancel_at_period_end,
+                data_cadastro, data_atualizacao
+         FROM assinaturas
+         WHERE transportadora_id = $1
+         ORDER BY data_atualizacao DESC, id DESC
+         LIMIT 1`,
+        [transportadoraId]
+      ),
+      banco.query(
+        "SELECT COUNT(*)::int AS total FROM veiculos WHERE transportadora_id = $1",
+        [transportadoraId]
+      )
+    ]);
+
+    const assinatura = assinaturaResultado.rows[0] || null;
+    const plano = assinatura ? obterPlano(assinatura.plano_codigo) : null;
+
+    return resposta.json({
+      assinatura,
+      plano: plano ? {
+        codigo: plano.codigo,
+        nome: plano.nome,
+        valor: plano.valor,
+        descricao: plano.descricao,
+        limiteVeiculos: plano.limiteVeiculos
+      } : null,
+      uso: {
+        veiculos: veiculosResultado.rows[0] ? veiculosResultado.rows[0].total : 0
+      },
+      planos: Object.values(PLANOS_ASSINATURA).map(function (item) {
+        return {
+          codigo: item.codigo,
+          nome: item.nome,
+          valor: item.valor,
+          descricao: item.descricao,
+          limiteVeiculos: item.limiteVeiculos
+        };
+      })
+    });
+  } catch (erro) {
+    console.error("Erro ao consultar assinatura atual:", erro.message);
+    return resposta.status(500).json({ mensagem: "Nao foi possivel carregar a assinatura." });
+  }
+});
+
+router.post("/portal", exigirAdmin, async (requisicao, resposta) => {
+  if (!stripe) {
+    return resposta.status(500).json({ mensagem: "Stripe ainda nao configurado no backend." });
+  }
+
+  try {
+    const transportadoraId = obterIdTransportadora(requisicao);
+    if (!transportadoraId) {
+      return resposta.status(400).json({ mensagem: "Transportadora nao identificada para gerenciar a assinatura." });
+    }
+
+    const resultado = await banco.query(
+      `SELECT stripe_customer_id
+       FROM assinaturas
+       WHERE transportadora_id = $1
+         AND gateway = 'stripe'
+       ORDER BY data_atualizacao DESC, id DESC
+       LIMIT 1`,
+      [transportadoraId]
+    );
+
+    if (resultado.rows.length === 0 || !resultado.rows[0].stripe_customer_id) {
+      return resposta.status(404).json({ mensagem: "Nao encontramos uma assinatura Stripe ativa para esta transportadora." });
+    }
+
+    const sessao = await stripe.billingPortal.sessions.create({
+      customer: resultado.rows[0].stripe_customer_id,
+      return_url: URL_FRONTEND + "/configuracoes.html"
+    });
+
+    return resposta.json({ url: sessao.url });
+  } catch (erro) {
+    console.error("Erro ao criar portal Stripe:", erro.message);
+    return resposta.status(500).json({ mensagem: "Nao foi possivel abrir o gerenciamento da assinatura." });
+  }
 });
 
 router.post("/public/contratar", async (requisicao, resposta) => {
@@ -601,7 +763,10 @@ router.post("/stripe/webhook", async (requisicao, resposta) => {
 
     if (evento.type === "customer.subscription.updated" || evento.type === "customer.subscription.created") {
       const subscription = evento.data.object;
-      await sincronizarAssinaturaStripePorId(subscription.id);
+      const resultado = await sincronizarAssinaturaStripePorId(subscription.id);
+      if (!resultado.ok) {
+        await atualizarAssinaturaExistentePorStripe(subscription);
+      }
     }
 
     if (evento.type === "customer.subscription.deleted") {

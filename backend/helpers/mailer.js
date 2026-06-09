@@ -201,6 +201,26 @@ function montarEmailBoasVindasAssinatura({ nomeAdmin, nomeTransportadora, emailA
   });
 }
 
+function montarEmailNotificacao({ titulo, mensagem, linkAcao, textoAcao }) {
+  return criarLayoutEmail({
+    titulo,
+    subtitulo: mensagem,
+    conteudoHtml: `
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#30476d;">
+        ${mensagem}
+      </p>
+      ${linkAcao ? `
+        <div style="margin:28px 0;">
+          <a href="${linkAcao}" style="display:inline-block;padding:14px 24px;border-radius:12px;background:#1d4ed8;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">
+            ${textoAcao || "Abrir no AutoAcerto"}
+          </a>
+        </div>
+      ` : ""}
+    `,
+    rodapeHtml: "Esta notificacao foi enviada automaticamente pelo AutoAcerto."
+  });
+}
+
 module.exports = {
   FRONTEND_URL,
   SUPORTE_EMAIL,
@@ -209,5 +229,6 @@ module.exports = {
   enviarEmail,
   montarEmailRecuperacaoSenha,
   montarEmailContato,
-  montarEmailBoasVindasAssinatura
+  montarEmailBoasVindasAssinatura,
+  montarEmailNotificacao
 };

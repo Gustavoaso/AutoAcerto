@@ -358,6 +358,32 @@ function criarIconeTemaTopo() {
     return '<svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z" /></svg>';
 }
 
+function escaparHtml(valor) {
+    return String(valor == null ? "" : valor)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function formatarMoedaTopo(valor) {
+    return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    }).format(Number(valor || 0));
+}
+
+function formatarDataTopo(valor) {
+    if (!valor) return "";
+    const data = new Date(valor);
+    if (Number.isNaN(data.getTime())) return "";
+    return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short"
+    }).format(data);
+}
+
 function padronizarTopoPagina() {
     const topo = document.querySelector(".topo-pagina");
     const usuario = obterUsuarioLogado();
@@ -379,7 +405,7 @@ function padronizarTopoPagina() {
         '<div class="acoes-topo">' +
             controleEmpresa +
             '<span class="divisor-topo"></span>' +
-            '<button class="botao-icone" type="button" id="botaoNotificacoesTopo" aria-label="Notificacoes">' + criarIconeNotificacaoTopo() + '</button>' +
+            '<button class="botao-icone botao-notificacoes-topo" type="button" id="botaoNotificacoesTopo" aria-label="Notificacoes">' + criarIconeNotificacaoTopo() + '<span class="contador-notificacoes oculto" id="contadorNotificacoesTopo">0</span></button>' +
             '<button class="botao-icone" type="button" id="botaoTemaTopo" aria-label="Alternar tema">' + criarIconeTemaTopo() + '</button>' +
             '<button class="perfil-usuario" type="button" id="botaoPerfilTopo" aria-label="Abrir perfil">' +
                 '<div class="avatar-usuario">--</div>' +
@@ -387,8 +413,13 @@ function padronizarTopoPagina() {
             '</button>' +
         '</div>' +
         '<div class="painel-topo-info oculto" id="painelNotificacoesTopo">' +
-            '<strong>Central rapida</strong>' +
-            '<p id="textoPainelNotificacoesTopo">Sem notificacoes no momento.</p>' +
+            '<div class="cabecalho-painel-notificacoes">' +
+                '<strong>Notificacoes</strong>' +
+                '<button type="button" id="botaoMarcarNotificacoesLidas">Marcar lidas</button>' +
+            '</div>' +
+            '<div id="listaNotificacoesTopo" class="lista-notificacoes-topo">' +
+                '<p id="textoPainelNotificacoesTopo">Sem notificacoes no momento.</p>' +
+            '</div>' +
         '</div>';
 }
 
@@ -533,6 +564,143 @@ function atualizarPainelTopo() {
     painel.textContent = "Usuario: " + obterNomePrimeiroUsuario(usuario) + ". Escopo atual: " + empresa + ".";
 }
 
+async function carregarAssinaturaLateral() {
+    const usuario = obterUsuarioLogado();
+    const nomePlano = document.getElementById("nomePlanoLateral");
+    const resumoPlano = document.getElementById("resumoPlanoLateral");
+    const botao = document.getElementById("botaoGerenciarAssinatura");
+
+    if (!nomePlano || !resumoPlano || !botao || !usuario || usuario.perfil === "motorista") return;
+
+    try {
+        const resposta = await fetch(montarUrlApi("/assinaturas/minha"), {
+            headers: cabecalhosAutenticados()
+        });
+        const dados = await resposta.json();
+
+        if (!resposta.ok || !dados.assinatura) {
+            nomePlano.textContent = "Sem assinatura";
+            resumoPlano.textContent = "Plano nao localizado";
+            botao.disabled = true;
+            return;
+        }
+
+        const limite = dados.plano && dados.plano.limiteVeiculos == null
+            ? "veiculos ilimitados"
+            : "ate " + (dados.plano ? dados.plano.limiteVeiculos : 0) + " veiculos";
+        const uso = dados.uso ? dados.uso.veiculos : 0;
+        const cancelamento = dados.assinatura.cancel_at_period_end ? " - cancela no fim do ciclo" : "";
+
+        nomePlano.textContent = dados.assinatura.plano_nome || "Plano contratado";
+        resumoPlano.textContent = formatarMoedaTopo(dados.assinatura.valor) + "/mes - " + uso + " de " + limite + cancelamento;
+        botao.disabled = false;
+    } catch (erro) {
+        nomePlano.textContent = "Plano indisponivel";
+        resumoPlano.textContent = "Tente novamente em instantes";
+        botao.disabled = true;
+    }
+}
+
+async function abrirPortalAssinatura() {
+    const botao = document.getElementById("botaoGerenciarAssinatura");
+    if (botao) {
+        botao.disabled = true;
+        botao.textContent = "Abrindo...";
+    }
+
+    try {
+        const resposta = await fetch(montarUrlApi("/assinaturas/portal"), {
+            method: "POST",
+            headers: cabecalhosAutenticados()
+        });
+        const dados = await resposta.json();
+
+        if (!resposta.ok || !dados.url) {
+            throw new Error(dados.mensagem || "portal");
+        }
+
+        window.location.href = dados.url;
+    } catch (erro) {
+        alert("Nao foi possivel abrir o gerenciamento da assinatura agora.");
+        if (botao) {
+            botao.disabled = false;
+            botao.textContent = "Gerenciar assinatura";
+        }
+    }
+}
+
+function renderizarNotificacoesTopo(dados) {
+    const lista = document.getElementById("listaNotificacoesTopo");
+    const contador = document.getElementById("contadorNotificacoesTopo");
+    if (!lista) return;
+
+    const notificacoes = Array.isArray(dados.dados) ? dados.dados : [];
+    const naoLidas = Number(dados.nao_lidas || 0);
+
+    if (contador) {
+        contador.textContent = naoLidas > 9 ? "9+" : String(naoLidas);
+        contador.classList.toggle("oculto", naoLidas <= 0);
+    }
+
+    if (notificacoes.length === 0) {
+        lista.innerHTML = '<p id="textoPainelNotificacoesTopo">Sem notificacoes no momento.</p>';
+        return;
+    }
+
+    lista.innerHTML = notificacoes.map(function (item) {
+        const lida = Boolean(item.lida_em);
+        const url = item.url ? escaparHtml(item.url) : "";
+        return `
+            <button type="button" class="item-notificacao-topo${lida ? "" : " nao-lida"}" data-id="${item.id}" data-url="${url}">
+                <span class="titulo-notificacao-topo">${escaparHtml(item.titulo)}</span>
+                <span class="mensagem-notificacao-topo">${escaparHtml(item.mensagem)}</span>
+                <span class="data-notificacao-topo">${escaparHtml(formatarDataTopo(item.data_cadastro))}</span>
+            </button>
+        `;
+    }).join("");
+}
+
+async function carregarNotificacoesTopo() {
+    const usuario = obterUsuarioLogado();
+    if (!usuario || typeof montarUrlApi !== "function") return;
+
+    try {
+        const resposta = await fetch(montarUrlApi("/notificacoes?limite=8"), {
+            headers: cabecalhosAutenticados()
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok) throw new Error("notificacoes");
+        renderizarNotificacoesTopo(dados);
+    } catch (erro) {
+        const lista = document.getElementById("listaNotificacoesTopo");
+        if (lista) lista.innerHTML = '<p id="textoPainelNotificacoesTopo">Nao foi possivel carregar as notificacoes.</p>';
+    }
+}
+
+async function marcarNotificacaoComoLida(id) {
+    if (!id) return;
+    try {
+        await fetch(montarUrlApi("/notificacoes/" + encodeURIComponent(id) + "/lida"), {
+            method: "PATCH",
+            headers: cabecalhosAutenticados()
+        });
+    } catch {
+        return;
+    }
+}
+
+async function marcarTodasNotificacoesLidas() {
+    try {
+        await fetch(montarUrlApi("/notificacoes/marcar-todas-lidas"), {
+            method: "PATCH",
+            headers: cabecalhosAutenticados()
+        });
+        await carregarNotificacoesTopo();
+    } catch {
+        alert("Nao foi possivel marcar as notificacoes como lidas.");
+    }
+}
+
 function aplicarTemaSalvo() {
     const tema = localStorage.getItem(CHAVE_TEMA_UI) || "claro";
     document.documentElement.setAttribute("data-tema-ui", tema);
@@ -574,7 +742,32 @@ function configurarInteracoesTopo() {
     if (botaoNotificacoes && painelNotificacoes) {
         botaoNotificacoes.addEventListener("click", function () {
             painelNotificacoes.classList.toggle("oculto");
-            atualizarPainelTopo();
+            carregarNotificacoesTopo();
+        });
+    }
+
+    const botaoGerenciarAssinatura = document.getElementById("botaoGerenciarAssinatura");
+    if (botaoGerenciarAssinatura) {
+        botaoGerenciarAssinatura.addEventListener("click", abrirPortalAssinatura);
+    }
+
+    const botaoMarcarLidas = document.getElementById("botaoMarcarNotificacoesLidas");
+    if (botaoMarcarLidas) {
+        botaoMarcarLidas.addEventListener("click", marcarTodasNotificacoesLidas);
+    }
+
+    const listaNotificacoes = document.getElementById("listaNotificacoesTopo");
+    if (listaNotificacoes) {
+        listaNotificacoes.addEventListener("click", async function (evento) {
+            const item = evento.target.closest(".item-notificacao-topo");
+            if (!item) return;
+            await marcarNotificacaoComoLida(item.getAttribute("data-id"));
+            const url = item.getAttribute("data-url");
+            if (url) {
+                window.location.href = url;
+            } else {
+                await carregarNotificacoesTopo();
+            }
         });
     }
 
@@ -752,6 +945,8 @@ document.addEventListener("DOMContentLoaded", function () {
     inserirBotaoVoltarCadastro();
     preencherInfoUsuario();
     preencherControleTransportadoraTopo();
+    carregarAssinaturaLateral();
+    carregarNotificacoesTopo();
     atualizarSessaoAtualDoBanco();
     configurarInteracoesTopo();
     atualizarPainelTopo();

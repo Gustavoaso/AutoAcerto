@@ -9,6 +9,45 @@ const { obterParametrosPaginacao, montarRespostaPaginada } = require("../helpers
 
 const router = express.Router();
 
+const LIMITES_VEICULOS_PLANO = {
+  essencial: 10,
+  profissional: 20,
+  escala: null
+};
+
+async function validarLimiteVeiculosPlano(transportadoraId) {
+  const resultado = await banco.query(
+    `SELECT plano_codigo
+     FROM assinaturas
+     WHERE transportadora_id = $1
+       AND status IN ('active', 'trialing')
+     ORDER BY data_atualizacao DESC, id DESC
+     LIMIT 1`,
+    [transportadoraId]
+  );
+
+  if (resultado.rows.length === 0) return null;
+
+  const planoCodigo = String(resultado.rows[0].plano_codigo || "").toLowerCase();
+  const limite = Object.prototype.hasOwnProperty.call(LIMITES_VEICULOS_PLANO, planoCodigo)
+    ? LIMITES_VEICULOS_PLANO[planoCodigo]
+    : null;
+
+  if (limite == null) return null;
+
+  const contagem = await banco.query(
+    "SELECT COUNT(*)::int AS total FROM veiculos WHERE transportadora_id = $1",
+    [transportadoraId]
+  );
+
+  const total = contagem.rows[0] ? contagem.rows[0].total : 0;
+  if (total >= limite) {
+    return "Seu plano permite ate " + limite + " veiculos. Faca upgrade para cadastrar mais veiculos.";
+  }
+
+  return null;
+}
+
 router.post("/", exigirAdmin, async (req, res) => {
   const { modelo, placa, status, ano, observacoes } = req.body;
 
@@ -48,6 +87,10 @@ router.post("/", exigirAdmin, async (req, res) => {
       return res.status(400).json({ mensagem: escopo.erro });
     }
     const transportadoraId = escopo.id;
+    const erroLimitePlano = await validarLimiteVeiculosPlano(transportadoraId);
+    if (erroLimitePlano) {
+      return res.status(403).json({ mensagem: erroLimitePlano });
+    }
 
     const sql = `
       INSERT INTO veiculos (transportadora_id, modelo, placa, status, ano, observacoes)
