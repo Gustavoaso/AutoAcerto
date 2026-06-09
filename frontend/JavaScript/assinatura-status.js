@@ -40,8 +40,9 @@ function obterMetadadosStatus(dados) {
         return {
             classeSelo: "selo-sucesso",
             classeOrb: "orb-sucesso",
-            titulo: "Assinatura ativa e conta pronta",
-            descricao: "Pagamento confirmado, ambiente criado e e-mail de boas-vindas enviado com sucesso.",
+            tituloPagina: "Tudo pronto!",
+            titulo: "Conta pronta para usar",
+            descricao: "Sua assinatura foi confirmada e o acesso da transportadora ja esta liberado.",
             subtitulo: "Tudo certo: voce ja pode entrar no AutoAcerto com o e-mail cadastrado."
         };
     }
@@ -50,9 +51,10 @@ function obterMetadadosStatus(dados) {
         return {
             classeSelo: "selo-alerta",
             classeOrb: "orb-alerta",
-            titulo: "Conta criada, mas o e-mail falhou",
-            descricao: "A assinatura foi provisionada, porem o disparo do e-mail de boas-vindas nao foi concluido.",
-            subtitulo: "Sua conta ja existe. Se o e-mail nao chegar, ainda assim voce pode entrar usando o login cadastrado."
+            tituloPagina: "Sua conta esta pronta",
+            titulo: "Acesso liberado",
+            descricao: "O acesso ja esta liberado. O e-mail de confirmacao ainda nao foi entregue, mas voce pode entrar normalmente.",
+            subtitulo: "Sua conta ja existe. Use o e-mail cadastrado para acessar o AutoAcerto."
         };
     }
 
@@ -60,8 +62,9 @@ function obterMetadadosStatus(dados) {
         return {
             classeSelo: "selo-sucesso",
             classeOrb: "orb-sucesso",
-            titulo: "Conta criada com sucesso",
-            descricao: "Pagamento confirmado e ambiente provisionado. Estamos finalizando as ultimas atualizacoes.",
+            tituloPagina: "Sua conta esta pronta",
+            titulo: "Acesso liberado",
+            descricao: "Pagamento confirmado e conta criada. Estamos apenas finalizando a confirmacao por e-mail.",
             subtitulo: "Voce ja pode entrar no sistema com o e-mail cadastrado."
         };
     }
@@ -70,8 +73,9 @@ function obterMetadadosStatus(dados) {
         return {
             classeSelo: "selo-processando",
             classeOrb: "orb-processando",
-            titulo: "Pagamento aprovado, criando ambiente",
-            descricao: "A Stripe confirmou a assinatura e estamos concluindo a criacao da transportadora e do usuario administrador.",
+            tituloPagina: "Estamos preparando sua conta",
+            titulo: "Pagamento aprovado",
+            descricao: "Recebemos a confirmacao do pagamento e estamos liberando seu acesso.",
             subtitulo: "Essa etapa costuma levar apenas alguns instantes."
         };
     }
@@ -80,8 +84,9 @@ function obterMetadadosStatus(dados) {
         return {
             classeSelo: "selo-processando",
             classeOrb: "orb-processando",
-            titulo: "Checkout concluido, aguardando sincronizacao",
-            descricao: "Recebemos o retorno do checkout e estamos aguardando a confirmacao definitiva da assinatura pela Stripe.",
+            tituloPagina: "Recebemos seu pagamento",
+            titulo: "Finalizando sua assinatura",
+            descricao: "Estamos confirmando os ultimos detalhes para liberar sua conta.",
             subtitulo: "Deixe esta pagina aberta por alguns segundos enquanto atualizamos o status."
         };
     }
@@ -90,8 +95,9 @@ function obterMetadadosStatus(dados) {
         return {
             classeSelo: "selo-alerta",
             classeOrb: "orb-alerta",
-            titulo: "Pagamento pendente de regularizacao",
-            descricao: "A assinatura existe, mas a cobranca ainda precisa ser confirmada ou regularizada para liberar o acesso.",
+            tituloPagina: "Pagamento em analise",
+            titulo: "Pagamento pendente",
+            descricao: "Ainda precisamos confirmar a cobranca para liberar o acesso.",
             subtitulo: "Se voce acabou de pagar, aguarde um pouco e acompanhe esta pagina."
         };
     }
@@ -100,8 +106,9 @@ function obterMetadadosStatus(dados) {
         return {
             classeSelo: "selo-erro",
             classeOrb: "orb-erro",
+            tituloPagina: "Assinatura nao concluida",
             titulo: "Assinatura nao concluida",
-            descricao: "O checkout foi interrompido ou a assinatura foi cancelada antes da ativacao completa.",
+            descricao: "Nao conseguimos concluir a assinatura nesta tentativa.",
             subtitulo: "Voce pode retornar para a pagina de assinatura e iniciar uma nova tentativa."
         };
     }
@@ -110,8 +117,9 @@ function obterMetadadosStatus(dados) {
         return {
             classeSelo: "selo-pendente",
             classeOrb: "orb-pendente",
-            titulo: "Aguardando confirmacao do pagamento",
-            descricao: "Seu checkout foi criado e estamos esperando a Stripe confirmar a assinatura para continuar.",
+            tituloPagina: "Estamos confirmando sua assinatura",
+            titulo: "Aguardando confirmacao",
+            descricao: "Recebemos sua solicitacao e estamos aguardando a confirmacao do pagamento.",
             subtitulo: "Assim que a confirmacao chegar, a conta sera criada automaticamente."
         };
     }
@@ -119,8 +127,9 @@ function obterMetadadosStatus(dados) {
     return {
         classeSelo: "selo-pendente",
         classeOrb: "orb-pendente",
-        titulo: "Estamos acompanhando sua assinatura",
-        descricao: "O status foi registrado e seguimos consultando a Stripe para concluir o fluxo.",
+        tituloPagina: "Estamos confirmando sua assinatura",
+        titulo: "Acompanhando assinatura",
+        descricao: "Recebemos sua solicitacao e estamos atualizando o status da sua conta.",
         subtitulo: "Atualize em instantes se esta etapa demorar mais do que o esperado."
     };
 }
@@ -156,6 +165,7 @@ function atualizarEtapasStatus(dados) {
 function preencherStatusAssinatura(dados) {
     const selo = document.getElementById("seloStatusAssinatura");
     const orb = document.getElementById("orbStatusAssinatura");
+    const titulo = document.getElementById("tituloStatusAssinatura");
     const texto = document.getElementById("textoStatusAssinatura");
     const descricao = document.getElementById("descricaoStatusAssinatura");
     const detalhes = document.getElementById("detalhesStatusAssinatura");
@@ -163,19 +173,19 @@ function preencherStatusAssinatura(dados) {
     const mensagem = document.getElementById("mensagemStatusAssinatura");
     const metadados = obterMetadadosStatus(dados);
     const emailStatus = dados.boas_vindas_email_enviado_em
-        ? "Enviado em " + formatarDataStatus(dados.boas_vindas_email_enviado_em)
+        ? "Enviado"
         : dados.boas_vindas_email_erro
-            ? "Falhou no ultimo disparo"
+            ? "Nao entregue"
             : dados.provisionado_em
                 ? "Aguardando envio"
-                : "Aguardando provisionamento";
+                : "Sera enviado em breve";
     const emailDetalhe = dados.boas_vindas_email_enviado_em
-        ? "O aviso foi processado pelo backend para o e-mail cadastrado."
+        ? "Confirmacao enviada em " + formatarDataStatus(dados.boas_vindas_email_enviado_em) + "."
         : dados.boas_vindas_email_erro
-            ? dados.boas_vindas_email_erro
+            ? "Seu acesso esta liberado. Voce pode tentar reenviar a confirmacao agora."
             : dados.provisionado_em
-                ? "A conta ja foi criada. Estamos tentando concluir o envio do e-mail de boas-vindas."
-                : "Quando o ambiente estiver pronto, o aviso sera disparado para o e-mail cadastrado.";
+                ? "Sua conta ja esta pronta. Estamos concluindo o envio da confirmacao."
+                : "Assim que o acesso estiver pronto, enviaremos a confirmacao para o e-mail cadastrado.";
     const acaoEmail = dados.provisionado_em && dados.boas_vindas_email_erro
         ? '<button type="button" class="botao-reenviar-email-status" id="botaoReenviarEmailBoasVindas">Tentar reenviar</button>'
         : "";
@@ -188,6 +198,10 @@ function preencherStatusAssinatura(dados) {
     if (selo) {
         selo.className = "selo-status-assinatura " + metadados.classeSelo;
         selo.textContent = metadados.titulo;
+    }
+
+    if (titulo) {
+        titulo.textContent = metadados.tituloPagina || "Estamos confirmando sua assinatura";
     }
 
     if (orb) {
@@ -207,7 +221,7 @@ function preencherStatusAssinatura(dados) {
           <div class="cartao-detalhe-status">
             <span class="rotulo-detalhe-status">Transportadora</span>
             <strong>${dados.nome_transportadora || "-"}</strong>
-            <small>CNPJ e dados serao vinculados assim que o fluxo terminar.</small>
+            <small>Dados recebidos com sucesso.</small>
           </div>
           <div class="cartao-detalhe-status">
             <span class="rotulo-detalhe-status">Plano contratado</span>
@@ -215,12 +229,12 @@ function preencherStatusAssinatura(dados) {
             <small>${formatarMoedaStatus(dados.valor)} por mes</small>
           </div>
           <div class="cartao-detalhe-status">
-            <span class="rotulo-detalhe-status">Administrador inicial</span>
-            <strong>${dados.nome_admin || "-"}</strong>
+            <span class="rotulo-detalhe-status">Acesso principal</span>
+            <strong>${dados.provisionado_em ? "Liberado" : "Em preparacao"}</strong>
             <small>${dados.email_admin || "-"}</small>
           </div>
           <div class="cartao-detalhe-status">
-            <span class="rotulo-detalhe-status">E-mail de boas-vindas</span>
+            <span class="rotulo-detalhe-status">E-mail de confirmacao</span>
             <strong>${emailStatus}</strong>
             <small>${emailDetalhe}</small>
             ${acaoEmail}
@@ -236,7 +250,7 @@ function preencherStatusAssinatura(dados) {
     }
 
     if (dados.provisionado_em && dados.boas_vindas_email_erro && mensagem) {
-        mensagem.textContent = "A conta foi criada, mas o e-mail de boas-vindas falhou. Voce ja pode entrar normalmente e revisar a configuracao da API Brevo no backend.";
+        mensagem.textContent = "Seu acesso ja esta liberado. O e-mail nao foi entregue nesta tentativa, mas voce pode entrar agora ou tentar reenviar a confirmacao.";
         mensagem.classList.add("visivel");
     }
 
