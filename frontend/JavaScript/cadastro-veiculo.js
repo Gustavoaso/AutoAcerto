@@ -6,6 +6,11 @@ const botaoLimpar = document.getElementById("botaoLimpar");
 const modal = document.getElementById("modalSucesso");
 const botaoOk = document.getElementById("botaoOkModal");
 const mensagemRetorno = document.getElementById("mensagemRetorno");
+let temporizadorConsultaPlaca = null;
+let ultimaPlacaConsultada = "";
+let modeloPreenchidoPorConsulta = "";
+let anoPreenchidoPorConsulta = "";
+let observacoesPreenchidasPorConsulta = "";
 
 function exibirMensagem(texto, classe) {
   mensagemRetorno.textContent = texto;
@@ -16,13 +21,42 @@ function limparPlacaConsulta(valor) {
   return String(valor || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7);
 }
 
-function preencherCampoVeiculoSeVazio(id, valor) {
+function preencherCampoVeiculoAutomatico(id, valor, ultimoValorAutomatico, registrarValorAutomatico) {
   const campo = document.getElementById(id);
-  if (!campo || !valor || campo.value.trim()) return;
+  if (!campo || !valor) return;
+
+  const valorAtual = campo.value.trim();
+  const podePreencher = !valorAtual || valorAtual === ultimoValorAutomatico;
+  if (!podePreencher) return;
+
   campo.value = valor;
+  registrarValorAutomatico(String(valor));
 }
 
-async function consultarPlacaVeiculo() {
+function registrarRetornoConsultaPlaca(placa, retorno) {
+  console.groupCollapsed("Retorno APIGratis /integracoes/veiculos/placa " + placa);
+  console.log("Resposta completa:", retorno);
+  console.log("Payload bruto da API:", retorno && retorno.bruto);
+  console.log("Dados normalizados para preenchimento:", retorno && retorno.dados);
+  console.groupEnd();
+}
+
+function preencherDadosConsultaPlaca(retorno) {
+  const dados = retorno && retorno.dados ? retorno.dados : {};
+
+  preencherCampoVeiculoAutomatico("modelo", dados.modelo, modeloPreenchidoPorConsulta, function (valor) {
+    modeloPreenchidoPorConsulta = valor;
+  });
+  preencherCampoVeiculoAutomatico("ano", dados.ano, anoPreenchidoPorConsulta, function (valor) {
+    anoPreenchidoPorConsulta = valor;
+  });
+  preencherCampoVeiculoAutomatico("observacoes", dados.observacoes, observacoesPreenchidasPorConsulta, function (valor) {
+    observacoesPreenchidasPorConsulta = valor;
+  });
+}
+
+async function consultarPlacaVeiculo(opcoes) {
+  const forcarConsulta = Boolean(opcoes && opcoes.forcar);
   const campoPlaca = document.getElementById("placa");
   const botao = document.getElementById("botaoConsultarPlaca");
   const placa = limparPlacaConsulta(campoPlaca ? campoPlaca.value : "");
@@ -31,6 +65,8 @@ async function consultarPlacaVeiculo() {
     exibirMensagem("Informe uma placa completa para buscar os dados.", "erro");
     return;
   }
+
+  if (!forcarConsulta && placa === ultimaPlacaConsultada) return;
 
   if (botao) {
     botao.disabled = true;
@@ -42,16 +78,15 @@ async function consultarPlacaVeiculo() {
       headers: cabecalhosAutenticados()
     });
     const retorno = await resposta.json();
+    registrarRetornoConsultaPlaca(placa, retorno);
 
     if (!resposta.ok) {
       exibirMensagem(retorno.mensagem || "Nao foi possivel consultar a placa.", "erro");
       return;
     }
 
-    const dados = retorno.dados || {};
-    preencherCampoVeiculoSeVazio("modelo", dados.modelo);
-    preencherCampoVeiculoSeVazio("ano", dados.ano);
-    preencherCampoVeiculoSeVazio("observacoes", dados.observacoes);
+    ultimaPlacaConsultada = placa;
+    preencherDadosConsultaPlaca(retorno);
     exibirMensagem("Dados encontrados. Confira as informacoes antes de salvar.", "sucesso");
   } catch (erro) {
     exibirMensagem("Nao foi possivel conectar ao servico de consulta de placa.", "erro");
@@ -68,14 +103,32 @@ function configurarFormularioVeiculo() {
   const campoPlaca = document.getElementById("placa");
 
   if (botaoConsultarPlaca) {
-    botaoConsultarPlaca.addEventListener("click", consultarPlacaVeiculo);
+    botaoConsultarPlaca.addEventListener("click", function () {
+      consultarPlacaVeiculo({ forcar: true });
+    });
   }
 
   if (campoPlaca) {
+    campoPlaca.addEventListener("input", function () {
+      const placa = limparPlacaConsulta(campoPlaca.value);
+      if (temporizadorConsultaPlaca) clearTimeout(temporizadorConsultaPlaca);
+
+      if (placa.length !== 7) {
+        ultimaPlacaConsultada = "";
+        return;
+      }
+
+      if (placa === ultimaPlacaConsultada) return;
+
+      temporizadorConsultaPlaca = setTimeout(function () {
+        consultarPlacaVeiculo();
+      }, 700);
+    });
+
     campoPlaca.addEventListener("keydown", function (evento) {
       if (evento.key === "Enter") {
         evento.preventDefault();
-        consultarPlacaVeiculo();
+        consultarPlacaVeiculo({ forcar: true });
       }
     });
     campoPlaca.addEventListener("blur", function () {
@@ -147,6 +200,10 @@ function configurarFormularioVeiculo() {
     document.getElementById("ano").value = "";
     document.getElementById("observacoes").value = "";
     mensagemRetorno.className = "mensagem-retorno";
+    ultimaPlacaConsultada = "";
+    modeloPreenchidoPorConsulta = "";
+    anoPreenchidoPorConsulta = "";
+    observacoesPreenchidasPorConsulta = "";
   });
 }
 

@@ -38,7 +38,7 @@ function emailValido(email) {
 }
 
 function normalizarStatus(status) {
-  return String(status || "").trim().toLowerCase();
+  return String(status || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
 function valorMonetarioValido(valor) {

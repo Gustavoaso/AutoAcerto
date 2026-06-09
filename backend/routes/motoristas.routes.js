@@ -9,9 +9,14 @@ const { obterParametrosPaginacao, montarRespostaPaginada } = require("../helpers
 
 const router = express.Router();
 
+function normalizarCpf(cpf) {
+  return String(cpf || "").replace(/\D/g, "");
+}
+
 router.post("/", exigirAdmin, async (requisicao, resposta) => {
   const { nome, cpf, telefone, cnh, status } = requisicao.body;
   const statusTratado = normalizarStatus(status);
+  const cpfTratado = normalizarCpf(cpf);
 
   if (!nome || !cpf || !telefone || !cnh || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
@@ -21,7 +26,7 @@ router.post("/", exigirAdmin, async (requisicao, resposta) => {
     return resposta.status(400).json({ mensagem: "Status de motorista invalido." });
   }
 
-  if (!cpfValido(cpf)) {
+  if (!cpfValido(cpfTratado)) {
     return resposta.status(400).json({ mensagem: "CPF informado é inválido." });
   }
 
@@ -37,7 +42,7 @@ router.post("/", exigirAdmin, async (requisicao, resposta) => {
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id
     `;
-    const valores = [transportadoraId, nome, cpf, telefone, cnh, statusTratado];
+    const valores = [transportadoraId, nome, cpfTratado, telefone, cnh, statusTratado];
 
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Motorista cadastrado com sucesso.", id: resultado.rows[0].id });
@@ -137,6 +142,7 @@ router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
   const { nome, cpf, telefone, cnh, status } = requisicao.body;
   const statusTratado = normalizarStatus(status);
+  const cpfTratado = normalizarCpf(cpf);
 
   if (!nome || !cpf || !telefone || !cnh || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
@@ -146,7 +152,7 @@ router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
     return resposta.status(400).json({ mensagem: "Status de motorista invalido." });
   }
 
-  if (!cpfValido(cpf)) {
+  if (!cpfValido(cpfTratado)) {
     return resposta.status(400).json({ mensagem: "CPF informado é inválido." });
   }
 
@@ -162,7 +168,7 @@ router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
       WHERE id=$6 AND transportadora_id=$7
       RETURNING *
     `;
-    const valores = [nome, cpf, telefone, cnh, statusTratado, id, transportadoraId];
+    const valores = [nome, cpfTratado, telefone, cnh, statusTratado, id, transportadoraId];
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {

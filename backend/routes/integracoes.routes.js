@@ -24,6 +24,14 @@ function obterCaminho(objeto, caminho) {
   }, objeto);
 }
 
+function normalizarChave(chave) {
+  return String(chave || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toLowerCase();
+}
+
 function primeiroValor(objeto, caminhos) {
   for (const caminho of caminhos) {
     const valor = obterCaminho(objeto, caminho);
@@ -32,6 +40,40 @@ function primeiroValor(objeto, caminhos) {
     }
   }
   return "";
+}
+
+function primeiroValorRecursivo(valor, chaves, visitados = new Set()) {
+  if (!valor || typeof valor !== "object") return "";
+  if (visitados.has(valor)) return "";
+  visitados.add(valor);
+
+  const chavesNormalizadas = new Set(chaves.map(normalizarChave));
+
+  if (Array.isArray(valor)) {
+    for (const item of valor) {
+      const encontrado = primeiroValorRecursivo(item, chaves, visitados);
+      if (encontrado) return encontrado;
+    }
+    return "";
+  }
+
+  for (const [chave, conteudo] of Object.entries(valor)) {
+    const valorSimples = conteudo === null || ["string", "number", "boolean"].includes(typeof conteudo);
+    if (valorSimples && chavesNormalizadas.has(normalizarChave(chave)) && conteudo !== undefined && conteudo !== null && String(conteudo).trim() !== "") {
+      return String(conteudo).trim();
+    }
+  }
+
+  for (const conteudo of Object.values(valor)) {
+    const encontrado = primeiroValorRecursivo(conteudo, chaves, visitados);
+    if (encontrado) return encontrado;
+  }
+
+  return "";
+}
+
+function primeiroDadoVeiculo(dados, caminhos, chaves) {
+  return primeiroValor(dados, caminhos) || primeiroValorRecursivo(dados, chaves || caminhos);
 }
 
 function obterCredenciaisApiGratis() {
@@ -97,18 +139,29 @@ router.get("/veiculos/placa/:placa", exigirAdmin, async (requisicao, resposta) =
     }
 
     const dados = retorno.dados || {};
-    const marca = primeiroValor(dados, ["marca", "MARCA", "brand", "data.marca", "result.marca"]);
-    const modelo = primeiroValor(dados, ["modelo", "MODELO", "marca_modelo", "data.modelo", "result.modelo"]);
-    const ano = primeiroValor(dados, ["ano", "ANO", "ano_modelo", "anoModelo", "data.ano", "data.ano_modelo", "result.ano"]);
-    const cor = primeiroValor(dados, ["cor", "COR", "data.cor", "result.cor"]);
-    const municipio = primeiroValor(dados, ["municipio", "MUNICIPIO", "cidade", "data.municipio", "result.municipio"]);
-    const uf = primeiroValor(dados, ["uf", "UF", "estado", "data.uf", "result.uf"]);
+    const marca = primeiroDadoVeiculo(dados, ["marca", "MARCA", "brand", "data.marca", "result.marca"], ["marca", "brand", "fabricante"]);
+    const modelo = primeiroDadoVeiculo(dados, ["modelo", "MODELO", "marca_modelo", "data.modelo", "result.modelo"], ["modelo", "model", "veiculo", "marcaModelo", "marca_modelo"]);
+    const versao = primeiroDadoVeiculo(dados, ["versao", "VERSAO", "data.versao", "result.versao"], ["versao", "version", "submodelo"]);
+    const ano = primeiroDadoVeiculo(dados, ["ano", "ANO", "ano_modelo", "anoModelo", "data.ano", "data.ano_modelo", "result.ano"], ["ano", "anoModelo", "ano_modelo", "anoFabricacao", "ano_fabricacao", "year", "modelYear"]);
+    const cor = primeiroDadoVeiculo(dados, ["cor", "COR", "data.cor", "result.cor"], ["cor", "color"]);
+    const municipio = primeiroDadoVeiculo(dados, ["municipio", "MUNICIPIO", "cidade", "data.municipio", "result.municipio"], ["municipio", "cidade", "city"]);
+    const uf = primeiroDadoVeiculo(dados, ["uf", "UF", "estado", "data.uf", "result.uf"], ["uf", "estado", "state"]);
+    const modeloCompleto = [marca, modelo, versao]
+      .filter(Boolean)
+      .filter((valor, indice, lista) => lista.findIndex((item) => item.toLowerCase() === valor.toLowerCase()) === indice)
+      .join(" ")
+      .trim();
 
     return resposta.json({
       encontrado: true,
       dados: {
-        modelo: marca && modelo && !modelo.toLowerCase().includes(marca.toLowerCase()) ? marca + " " + modelo : modelo,
+        marca,
+        modelo: modeloCompleto || modelo,
+        versao,
         ano,
+        cor,
+        municipio,
+        uf,
         observacoes: [
           cor ? "Cor: " + cor : "",
           municipio || uf ? "Local: " + [municipio, uf].filter(Boolean).join(" - ") : ""

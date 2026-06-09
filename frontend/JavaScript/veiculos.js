@@ -1,4 +1,4 @@
-const urlApi = montarUrlApi("/veiculos");
+﻿const urlApi = montarUrlApi("/veiculos");
 
 let veiculosTodos = [];
 let veiculosVisiveis = [];
@@ -22,15 +22,21 @@ function criarIconeEditar() {
   return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
 }
 
+function normalizarStatusVeiculo(status) {
+  return String(status || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+
 function criarSeloStatusVeiculo(status) {
-  if (status === "ativo")       return '<span class="selo-status selo-ativo">Ativo</span>';
-  if (status === "em viagem")   return '<span class="selo-status selo-em-viagem">Em viagem</span>';
-  if (status === "manutenção")  return '<span class="selo-status selo-manutencao">Manutenção</span>';
+  const statusTratado = normalizarStatusVeiculo(status);
+  if (statusTratado === "ativo") return '<span class="selo-status selo-ativo">Ativo</span>';
+  if (statusTratado === "em viagem") return '<span class="selo-status selo-em-viagem">Em viagem</span>';
+  if (statusTratado === "manutencao") return '<span class="selo-status selo-manutencao">Manutencao</span>';
   return '<span class="selo-status selo-inativo">Inativo</span>';
 }
 
 function formatarPlacaExibicao(placa) {
-  if (!placa) return "—";
+  if (!placa) return "â€”";
   if (window.AutoAcertoMascaras) {
     return window.AutoAcertoMascaras.aplicarPlaca(String(placa).replace(/-/g, ""));
   }
@@ -45,7 +51,7 @@ function renderizarTabelaVeiculos(lista) {
   veiculosVisiveis = lista;
 
   if (lista.length === 0) {
-    corpo.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#6b7280;">Nenhum veículo encontrado.</td></tr>';
+    corpo.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#6b7280;">Nenhum veÃ­culo encontrado.</td></tr>';
     if (exclusaoVeiculos) exclusaoVeiculos.aposRender([]);
     return;
   }
@@ -56,7 +62,7 @@ function renderizarTabelaVeiculos(lista) {
     const idVeiculo = Number(veiculo.id);
     const modeloVeiculo = window.AutoAcertoHtml.texto(veiculo.modelo, "-");
     const placaVeiculo = window.AutoAcertoHtml.texto(formatarPlacaExibicao(veiculo.placa), "-");
-    const anoVeiculo = window.AutoAcertoHtml.texto(veiculo.ano, "—");
+    const anoVeiculo = window.AutoAcertoHtml.texto(veiculo.ano, "â€”");
 
     linha.innerHTML =
       (exclusaoVeiculos ? exclusaoVeiculos.colunaLinha(idVeiculo) : "") +
@@ -87,11 +93,11 @@ function renderizarTabelaVeiculos(lista) {
 function atualizarResumoVeiculos(lista) {
   document.getElementById("totalVeiculos").textContent = lista.length;
   document.getElementById("totalVeiculosAtivos").textContent =
-    lista.filter(function(v) { return v.status === "ativo"; }).length;
+    lista.filter(function(v) { return normalizarStatusVeiculo(v.status) === "ativo"; }).length;
   document.getElementById("totalEmViagem").textContent =
-    lista.filter(function(v) { return v.status === "em viagem"; }).length;
+    lista.filter(function(v) { return normalizarStatusVeiculo(v.status) === "em viagem"; }).length;
   document.getElementById("totalEmManutencao").textContent =
-    lista.filter(function(v) { return v.status === "manutenção"; }).length;
+    lista.filter(function(v) { return normalizarStatusVeiculo(v.status) === "manutencao"; }).length;
 }
 
 function aplicarFiltros() {
@@ -105,7 +111,7 @@ function aplicarFiltros() {
       (veiculo.observacoes  || "").toLowerCase().includes(pesquisa);
 
     var correspondeStatus =
-      statusSelecionado === "todos" || veiculo.status === statusSelecionado;
+      statusSelecionado === "todos" || normalizarStatusVeiculo(veiculo.status) === normalizarStatusVeiculo(statusSelecionado);
 
     return correspondePesquisa && correspondeStatus;
   });
@@ -139,9 +145,9 @@ async function carregarVeiculos(pagina = 1) {
     atualizarResumoVeiculos(veiculosTodos);
     renderizarTabelaVeiculos(veiculosTodos);
   } catch (erro) {
-    console.error("Erro ao carregar veículos:", erro);
+    console.error("Erro ao carregar veÃ­culos:", erro);
     document.getElementById("corpoTabelaVeiculos").innerHTML =
-      '<tr><td colspan="6" style="text-align:center;padding:40px;color:#dc2626;">Erro ao conectar com o servidor. Verifique se o backend está em execução.</td></tr>';
+      '<tr><td colspan="6" style="text-align:center;padding:40px;color:#dc2626;">Erro ao conectar com o servidor. Verifique se o backend estÃ¡ em execuÃ§Ã£o.</td></tr>';
   }
 }
 
@@ -170,8 +176,8 @@ function configurarExclusaoVeiculos() {
     seletorTabela: ".tabela-veiculos",
     seletorLinhas: "[data-selecionar-id]",
     seletorSelecionarTodos: "[data-selecionar-todos-veiculos]",
-    singular: "veículo",
-    plural: "veículos",
+    singular: "veÃ­culo",
+    plural: "veÃ­culos",
     renderizarAtual: function () { renderizarTabelaVeiculos(veiculosVisiveis); },
     aoExcluir: carregarVeiculos
   });

@@ -48,8 +48,36 @@
   color: var(--cor-texto);
 }
 
+.campo-com-acao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.botao-campo-acao {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-sm);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.botao-campo-acao:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 @media (max-width: 640px) {
   .grade-tipo-veiculo {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .campo-com-acao {
+    grid-template-columns: 1fr;
   }
 }

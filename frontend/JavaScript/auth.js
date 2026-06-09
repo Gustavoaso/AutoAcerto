@@ -191,6 +191,12 @@ function paginaPermitidaParaDonoSistema(caminho) {
     return true; // Dono tem acesso a tudo
 }
 
+function paginaExclusivaDonoSistema(caminho) {
+    return caminho.endsWith("/transportadoras.html") ||
+           caminho.endsWith("/editar-transportadora.html") ||
+           caminho.endsWith("/ver-transportadora.html");
+}
+
 function exigirAutenticacao() {
     const usuario = obterUsuarioLogado();
 
@@ -211,6 +217,11 @@ function exigirAutenticacao() {
     // Redirecionamentos por perfil
     if (usuario.perfil === "motorista" && !paginaPermitidaParaMotorista(paginaAtual)) {
         window.location.href = "/viagens.html";
+        return null;
+    }
+
+    if (usuario.perfil !== "dono" && paginaExclusivaDonoSistema(paginaAtual)) {
+        window.location.href = "/index.html";
         return null;
     }
 
@@ -796,6 +807,8 @@ function ajustarMenuPorPerfil(usuario) {
         return;
     }
 
+    esconderMenuTransportadoras();
+
     if (usuario.perfil === "admin") return;
 
     // Motorista: esconde tudo exceto Viagens
@@ -804,6 +817,12 @@ function ajustarMenuPorPerfil(usuario) {
         if (!destino.endsWith("viagens.html")) {
             item.style.display = "none";
         }
+    });
+}
+
+function esconderMenuTransportadoras() {
+    document.querySelectorAll('.menu-lateral [href="transportadoras.html"]').forEach(item => {
+        item.style.display = "none";
     });
 }
 

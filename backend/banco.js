@@ -46,7 +46,7 @@ async function criarTabelas() {
       id SERIAL PRIMARY KEY,
       transportadora_id INTEGER REFERENCES transportadoras(id),
       nome VARCHAR(255) NOT NULL,
-      cpf VARCHAR(14) NOT NULL UNIQUE,
+      cpf VARCHAR(14) NOT NULL,
       telefone VARCHAR(15) NOT NULL,
       cnh VARCHAR(50) NOT NULL,
       status VARCHAR(20) NOT NULL,
@@ -196,6 +196,7 @@ async function criarTabelas() {
   `);
 
   await garantirEstruturaMultiTransportadora();
+  await garantirUnicidadeMotoristasPorTransportadora();
   await garantirEstruturaVeiculos();
   await garantirEstruturaViagens();
   await garantirEstruturaDespesas();
@@ -228,6 +229,12 @@ async function criarIndices() {
   await banco.query("CREATE INDEX IF NOT EXISTS idx_notificacoes_usuario ON notificacoes(usuario_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_notificacoes_transportadora ON notificacoes(transportadora_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_notificacoes_lida ON notificacoes(lida_em)");
+}
+
+async function garantirUnicidadeMotoristasPorTransportadora() {
+  await banco.query("ALTER TABLE motoristas DROP CONSTRAINT IF EXISTS motoristas_cpf_key");
+  await banco.query("UPDATE motoristas SET cpf = regexp_replace(cpf, '\\D', '', 'g') WHERE cpf <> regexp_replace(cpf, '\\D', '', 'g')");
+  await banco.query("CREATE UNIQUE INDEX IF NOT EXISTS motoristas_transportadora_cpf_unique ON motoristas(transportadora_id, cpf)");
 }
 
 async function adicionarConstraint(nome, sql) {

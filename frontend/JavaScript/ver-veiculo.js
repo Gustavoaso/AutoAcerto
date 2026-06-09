@@ -13,6 +13,10 @@ function formatarPlacaExibicao(placa) {
   return u.slice(0, 3) + "-" + u.slice(3);
 }
 
+function normalizarStatusVeiculo(status) {
+  return String(status || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
 function formatarDataHora(dataISO) {
   if (!dataISO) return "—";
   const data = new Date(dataISO);
@@ -58,7 +62,10 @@ async function carregarVeiculo() {
       "manutenção": ["selo-manutencao", "Manutenção"],
       "inativo":    ["selo-inativo",    "Inativo"]
     };
-    const [classe, texto] = statusMap[veiculo.status] || ["selo-inativo", "Inativo"];
+    const statusTratado = normalizarStatusVeiculo(veiculo.status);
+    const [classe, texto] = statusTratado === "manutencao"
+      ? ["selo-manutencao", "Manutencao"]
+      : (statusMap[statusTratado] || ["selo-inativo", "Inativo"]);
     statusEl.innerHTML = '<span class="selo-status ' + classe + '">' + texto + '</span>';
 
   } catch (error) {

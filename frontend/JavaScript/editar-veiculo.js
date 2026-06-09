@@ -63,7 +63,7 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
   try {
     const response = await fetch(urlApi + "/" + idVeiculo, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: cabecalhosAutenticados(),
       body: JSON.stringify(dados)
     });
 
