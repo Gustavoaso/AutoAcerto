@@ -124,16 +124,10 @@ async function registrarResultadoEmailBoasVindas({ pendenciaId, erro }) {
   );
 }
 
-<<<<<<< HEAD
-async function tentarEnviarEmailBoasVindasSePendente(pendencia) {
-  if (!pendencia || !pendencia.id || !pendencia.provisionado_em) return false;
-  if (pendencia.boas_vindas_email_enviado_em || pendencia.boas_vindas_email_erro) return false;
-=======
 async function tentarEnviarEmailBoasVindasSePendente(pendencia, opcoes = {}) {
   if (!pendencia || !pendencia.id || !pendencia.provisionado_em) return false;
   if (pendencia.boas_vindas_email_enviado_em) return false;
   if (pendencia.boas_vindas_email_erro && !opcoes.forcar) return false;
->>>>>>> 5ecaf8fbb79ee22c55c5f68d1c7944226377ad37
 
   try {
     await enviarEmailBoasVindas(pendencia);
@@ -698,11 +692,7 @@ router.get("/public/status/:referencia", async (requisicao, resposta) => {
     );
 
     const pendenciaAtualizada = atualizado.rows[0];
-<<<<<<< HEAD
-    const reenviado = await tentarEnviarEmailBoasVindasSePendente(pendenciaAtualizada);
-=======
     const reenviado = await tentarEnviarEmailBoasVindasSePendente(pendenciaAtualizada, { forcar: forcarReenvioEmail });
->>>>>>> 5ecaf8fbb79ee22c55c5f68d1c7944226377ad37
 
     if (reenviado) {
       const resultadoFinal = await banco.query(
