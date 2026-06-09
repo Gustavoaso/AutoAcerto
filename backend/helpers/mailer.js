@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
 function obterEnv(...nomes) {
   for (const nome of nomes) {
@@ -10,44 +10,41 @@ function obterEnv(...nomes) {
   return "";
 }
 
-const SMTP_URL = obterEnv("SMTP_URL", "MAIL_URL", "EMAIL_URL");
-const SMTP_HOST = obterEnv("SMTP_HOST", "MAIL_HOST", "EMAIL_HOST");
-const SMTP_PORT_BRUTA = obterEnv("SMTP_PORT", "MAIL_PORT", "EMAIL_PORT") || "465";
-const SMTP_PORT = parseInt(SMTP_PORT_BRUTA, 10);
-const SMTP_USER = obterEnv("SMTP_USER", "MAIL_USER", "EMAIL_USER");
-const SMTP_PASS = obterEnv("SMTP_PASS", "MAIL_PASS", "EMAIL_PASS", "SMTP_PASSWORD", "MAIL_PASSWORD", "EMAIL_PASSWORD");
-const SMTP_FROM = obterEnv("SMTP_FROM", "MAIL_FROM", "EMAIL_FROM") || SMTP_USER || "no-reply@autoacerto.com";
-const SMTP_SECURE_BRUTO = obterEnv("SMTP_SECURE", "MAIL_SECURE", "EMAIL_SECURE");
-const SUPORTE_EMAIL = obterEnv("SUPORTE_EMAIL", "SUPPORT_EMAIL") || SMTP_FROM;
+const BREVO_API_KEY = obterEnv("BREVO_API_KEY", "SENDINBLUE_API_KEY");
+const BREVO_FROM = obterEnv("BREVO_FROM", "MAIL_FROM", "EMAIL_FROM") || "AutoAcerto <no-reply@autoacerto.com>";
+const SUPORTE_EMAIL = obterEnv("SUPORTE_EMAIL", "SUPPORT_EMAIL") || parseRemetente(BREVO_FROM).email;
 const FRONTEND_URL = (process.env.FRONTEND_URL || "https://autoacerto.com.br").replace(/\/+$/, "");
 
-let transportadorMemo = null;
+function parseRemetente(remetente) {
+  const texto = String(remetente || "").trim();
+  const combinado = texto.match(/^(.*?)\s*<([^>]+)>$/);
 
-function interpretarBoolean(valor) {
-  const texto = String(valor || "").trim().toLowerCase();
-  if (!texto) return null;
-  if (["1", "true", "yes", "sim"].includes(texto)) return true;
-  if (["0", "false", "no", "nao", "não"].includes(texto)) return false;
-  return null;
+  if (combinado) {
+    return {
+      name: combinado[1].trim().replace(/^"|"$/g, "") || "AutoAcerto",
+      email: combinado[2].trim()
+    };
+  }
+
+  return {
+    name: "AutoAcerto",
+    email: texto
+  };
 }
 
 function diagnosticarMailer() {
   const faltando = [];
+  const remetente = parseRemetente(BREVO_FROM);
 
-  if (!SMTP_URL) {
-    if (!SMTP_HOST) faltando.push("SMTP_HOST/MAIL_HOST");
-    if (!Number.isInteger(SMTP_PORT) || SMTP_PORT <= 0) faltando.push("SMTP_PORT/MAIL_PORT");
-    if (!SMTP_USER) faltando.push("SMTP_USER/MAIL_USER");
-    if (!SMTP_PASS) faltando.push("SMTP_PASS/MAIL_PASS");
-  }
+  if (!BREVO_API_KEY) faltando.push("BREVO_API_KEY");
+  if (!remetente.email) faltando.push("BREVO_FROM/MAIL_FROM/EMAIL_FROM");
 
   return {
     configurado: faltando.length === 0,
-    usandoUrl: Boolean(SMTP_URL),
+    provedor: "brevo_api",
     faltando,
-    from: SMTP_FROM,
-    host: SMTP_HOST,
-    port: Number.isInteger(SMTP_PORT) ? SMTP_PORT : null
+    from: BREVO_FROM,
+    sender: remetente.email
   };
 }
 
@@ -55,36 +52,54 @@ function mailerConfigurado() {
   return diagnosticarMailer().configurado;
 }
 
-function obterConfiguracaoTransportador() {
-  if (SMTP_URL) {
-    return SMTP_URL;
-  }
-
-  const secureInterpretado = interpretarBoolean(SMTP_SECURE_BRUTO);
-
-  return {
-    host: SMTP_HOST,
-    port: SMTP_PORT,
-    secure: secureInterpretado == null ? SMTP_PORT === 465 : secureInterpretado,
-    auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS
-    }
-  };
+function resumirRespostaBrevo(retorno) {
+  if (!retorno) return "Falha ao enviar e-mail pela API Brevo.";
+  if (retorno.message) return String(retorno.message);
+  if (retorno.code) return String(retorno.code);
+  if (retorno.bruto) return String(retorno.bruto).slice(0, 500);
+  return "Falha ao enviar e-mail pela API Brevo.";
 }
 
-function obterTransportador() {
+async function enviarEmail(destinatario, assunto, html) {
   const diagnostico = diagnosticarMailer();
 
   if (!diagnostico.configurado) {
-    throw new Error("SMTP nao configurado no backend. Campos ausentes: " + diagnostico.faltando.join(", "));
+    throw new Error("Brevo API nao configurada. Campos ausentes: " + diagnostico.faltando.join(", "));
   }
 
-  if (!transportadorMemo) {
-    transportadorMemo = nodemailer.createTransport(obterConfiguracaoTransportador());
+  const resposta = await fetch(BREVO_API_URL, {
+    method: "POST",
+    headers: {
+      "accept": "application/json",
+      "api-key": BREVO_API_KEY,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      sender: parseRemetente(BREVO_FROM),
+      to: [{ email: destinatario }],
+      subject: assunto,
+      htmlContent: html
+    })
+  });
+
+  const texto = await resposta.text();
+  let retorno = null;
+
+  try {
+    retorno = texto ? JSON.parse(texto) : null;
+  } catch {
+    retorno = { bruto: texto };
   }
 
-  return transportadorMemo;
+  if (!resposta.ok) {
+    throw new Error(resumirRespostaBrevo(retorno));
+  }
+
+  return {
+    provider: "brevo_api",
+    messageId: retorno && retorno.messageId ? retorno.messageId : null,
+    response: retorno
+  };
 }
 
 function criarLayoutEmail({ titulo, subtitulo, conteudoHtml, rodapeHtml }) {
@@ -108,16 +123,6 @@ function criarLayoutEmail({ titulo, subtitulo, conteudoHtml, rodapeHtml }) {
       </div>
     </div>
   `;
-}
-
-async function enviarEmail(destinatario, assunto, html) {
-  const transportador = obterTransportador();
-  return transportador.sendMail({
-    from: SMTP_FROM,
-    to: destinatario,
-    subject: assunto,
-    html
-  });
 }
 
 function montarEmailRecuperacaoSenha({ nome, linkRedefinicao }) {
@@ -196,6 +201,26 @@ function montarEmailBoasVindasAssinatura({ nomeAdmin, nomeTransportadora, emailA
   });
 }
 
+function montarEmailNotificacao({ titulo, mensagem, linkAcao, textoAcao }) {
+  return criarLayoutEmail({
+    titulo,
+    subtitulo: mensagem,
+    conteudoHtml: `
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#30476d;">
+        ${mensagem}
+      </p>
+      ${linkAcao ? `
+        <div style="margin:28px 0;">
+          <a href="${linkAcao}" style="display:inline-block;padding:14px 24px;border-radius:12px;background:#1d4ed8;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">
+            ${textoAcao || "Abrir no AutoAcerto"}
+          </a>
+        </div>
+      ` : ""}
+    `,
+    rodapeHtml: "Esta notificacao foi enviada automaticamente pelo AutoAcerto."
+  });
+}
+
 module.exports = {
   FRONTEND_URL,
   SUPORTE_EMAIL,
@@ -204,5 +229,6 @@ module.exports = {
   enviarEmail,
   montarEmailRecuperacaoSenha,
   montarEmailContato,
-  montarEmailBoasVindasAssinatura
+  montarEmailBoasVindasAssinatura,
+  montarEmailNotificacao
 };

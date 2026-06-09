@@ -6,6 +6,7 @@ const { autorizarAcessoDespesa } = require("../middlewares/autorizacao");
 const { obterIdTransportadora, usuarioEhDonoSistema, obterFiltroTransportadora, transportadoraEscopoMutacao } = require("../helpers/escopo");
 const { normalizarIdsExclusao, placeholderIds, responderExclusao } = require("../helpers/exclusao");
 const { obterParametrosPaginacao, montarRespostaPaginada } = require("../helpers/paginacao");
+const { notificarAdministradoresTransportadora } = require("../helpers/notificacoes");
 
 const router = express.Router();
 
@@ -111,7 +112,26 @@ router.post("/", exigirAdminOuMotorista, async (requisicao, resposta) => {
     const valores = [tid, viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoriaTratada, dataDespesa, valor, anexoNomeTratado, anexoTipoTratado, anexoBase64Tratado];
 
     const resultado = await banco.query(sql, valores);
-    return resposta.status(201).json({ mensagem: "Despesa cadastrada com sucesso.", id: resultado.rows[0].id });
+    const despesaId = resultado.rows[0].id;
+
+    notificarAdministradoresTransportadora({
+      transportadoraId: tid,
+      tipo: "despesa_criada",
+      titulo: "Nova despesa registrada",
+      mensagem: "Uma despesa de " + categoriaTratada + " no valor de R$ " + Number(valor).toFixed(2).replace(".", ",") + " foi registrada.",
+      url: "ver-despesa.html?id=" + despesaId,
+      dados: {
+        despesa_id: despesaId,
+        viagem_id: viagemIdFinal,
+        veiculo_id: veiculoIdFinal,
+        categoria: categoriaTratada,
+        valor: Number(valor)
+      }
+    }).catch(function (erro) {
+      console.error("Erro ao criar notificacao de despesa:", erro.message);
+    });
+
+    return resposta.status(201).json({ mensagem: "Despesa cadastrada com sucesso.", id: despesaId });
   } catch (erro) {
     console.error("Erro ao salvar despesa:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao salvar despesa no banco de dados." });

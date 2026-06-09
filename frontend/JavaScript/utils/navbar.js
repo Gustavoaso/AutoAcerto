@@ -97,9 +97,9 @@
             </nav>
             <div class="rodape-barra">
                 <div class="cartao-plano-lateral">
-                    <strong>Plano Profissional</strong>
-                    <span>Seu plano atual</span>
-                    <button type="button">Gerenciar assinatura</button>
+                    <strong id="nomePlanoLateral">Carregando plano...</strong>
+                    <span id="resumoPlanoLateral">Seu plano atual</span>
+                    <button type="button" id="botaoGerenciarAssinatura">Gerenciar assinatura</button>
                 </div>
                 <button class="botao-sair">Sair</button>
             </div>
