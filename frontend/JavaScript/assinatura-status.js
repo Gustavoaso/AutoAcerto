@@ -166,12 +166,16 @@ function preencherStatusAssinatura(dados) {
         ? "Enviado em " + formatarDataStatus(dados.boas_vindas_email_enviado_em)
         : dados.boas_vindas_email_erro
             ? "Falhou no ultimo disparo"
-            : "Aguardando provisionamento";
+            : dados.provisionado_em
+                ? "Aguardando envio"
+                : "Aguardando provisionamento";
     const emailDetalhe = dados.boas_vindas_email_enviado_em
         ? "O aviso foi processado pelo backend para o e-mail cadastrado."
         : dados.boas_vindas_email_erro
             ? dados.boas_vindas_email_erro
-            : "Quando o ambiente estiver pronto, o aviso sera disparado para o e-mail cadastrado.";
+            : dados.provisionado_em
+                ? "A conta ja foi criada. Estamos tentando concluir o envio do e-mail de boas-vindas."
+                : "Quando o ambiente estiver pronto, o aviso sera disparado para o e-mail cadastrado.";
 
     if (mensagem) {
         mensagem.classList.remove("visivel", "mensagem-sucesso");

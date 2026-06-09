@@ -91,6 +91,45 @@ async function enviarEmailBoasVindas(pendencia) {
   return info;
 }
 
+async function registrarResultadoEmailBoasVindas({ pendenciaId, erro }) {
+  if (!pendenciaId) return;
+
+  if (erro) {
+    await banco.query(
+      `UPDATE assinaturas_pendentes
+       SET boas_vindas_email_erro = $1,
+           data_atualizacao = CURRENT_TIMESTAMP
+       WHERE id = $2`,
+      [resumirErroEmail(erro), pendenciaId]
+    );
+    return;
+  }
+
+  await banco.query(
+    `UPDATE assinaturas_pendentes
+     SET boas_vindas_email_enviado_em = CURRENT_TIMESTAMP,
+         boas_vindas_email_erro = NULL,
+         data_atualizacao = CURRENT_TIMESTAMP
+     WHERE id = $1`,
+    [pendenciaId]
+  );
+}
+
+async function tentarEnviarEmailBoasVindasSePendente(pendencia) {
+  if (!pendencia || !pendencia.id || !pendencia.provisionado_em) return false;
+  if (pendencia.boas_vindas_email_enviado_em || pendencia.boas_vindas_email_erro) return false;
+
+  try {
+    await enviarEmailBoasVindas(pendencia);
+    await registrarResultadoEmailBoasVindas({ pendenciaId: pendencia.id });
+  } catch (erroEmail) {
+    console.error("Erro ao reenviar e-mail de boas-vindas:", erroEmail.message);
+    await registrarResultadoEmailBoasVindas({ pendenciaId: pendencia.id, erro: erroEmail });
+  }
+
+  return true;
+}
+
 async function registrarAssinaturaAtiva({ cliente, pendencia, assinaturaStripe, transportadoraId }) {
   const itemPrincipal = assinaturaStripe.items && assinaturaStripe.items.data && assinaturaStripe.items.data[0]
     ? assinaturaStripe.items.data[0]
@@ -263,25 +302,10 @@ async function provisionarPendenciaPorReferencia(referenciaExterna, assinaturaSt
         transportadora_id: transportadoraId,
         usuario_admin_id: usuarioAdminId
       });
-
-      await banco.query(
-        `UPDATE assinaturas_pendentes
-         SET boas_vindas_email_enviado_em = CURRENT_TIMESTAMP,
-             boas_vindas_email_erro = NULL,
-             data_atualizacao = CURRENT_TIMESTAMP
-         WHERE id = $1`,
-        [pendencia.id]
-      );
+      await registrarResultadoEmailBoasVindas({ pendenciaId: pendencia.id });
     } catch (erroEmail) {
       console.error("Erro ao enviar e-mail de boas-vindas:", erroEmail.message);
-
-      await banco.query(
-        `UPDATE assinaturas_pendentes
-         SET boas_vindas_email_erro = $1,
-             data_atualizacao = CURRENT_TIMESTAMP
-         WHERE id = $2`,
-        [resumirErroEmail(erroEmail), pendencia.id]
-      );
+      await registrarResultadoEmailBoasVindas({ pendenciaId: pendencia.id, erro: erroEmail });
     }
 
     return { ok: true, provisionado: true, status: statusStripe };
@@ -420,7 +444,7 @@ router.get("/public/status/:referencia", async (requisicao, resposta) => {
   try {
     const referencia = String(requisicao.params.referencia || "").trim();
     const resultado = await banco.query(
-      `SELECT referencia_externa, plano_codigo, plano_nome, valor, nome_transportadora, nome_admin, email_admin,
+      `SELECT id, referencia_externa, plano_codigo, plano_nome, valor, nome_transportadora, nome_admin, email_admin,
               stripe_checkout_session_id, stripe_subscription_id, status, provisionado_em, boas_vindas_email_enviado_em,
               boas_vindas_email_erro, transportadora_id, usuario_admin_id, data_cadastro
        FROM assinaturas_pendentes
@@ -443,7 +467,7 @@ router.get("/public/status/:referencia", async (requisicao, resposta) => {
     }
 
     const atualizado = await banco.query(
-      `SELECT referencia_externa, plano_codigo, plano_nome, valor, nome_transportadora, nome_admin, email_admin,
+      `SELECT id, referencia_externa, plano_codigo, plano_nome, valor, nome_transportadora, nome_admin, email_admin,
               stripe_checkout_session_id, stripe_subscription_id, status, provisionado_em, boas_vindas_email_enviado_em,
               boas_vindas_email_erro, transportadora_id, usuario_admin_id, data_cadastro
        FROM assinaturas_pendentes
@@ -451,7 +475,23 @@ router.get("/public/status/:referencia", async (requisicao, resposta) => {
       [referencia]
     );
 
-    return resposta.json(atualizado.rows[0]);
+    const pendenciaAtualizada = atualizado.rows[0];
+    const reenviado = await tentarEnviarEmailBoasVindasSePendente(pendenciaAtualizada);
+
+    if (reenviado) {
+      const resultadoFinal = await banco.query(
+        `SELECT id, referencia_externa, plano_codigo, plano_nome, valor, nome_transportadora, nome_admin, email_admin,
+                stripe_checkout_session_id, stripe_subscription_id, status, provisionado_em, boas_vindas_email_enviado_em,
+                boas_vindas_email_erro, transportadora_id, usuario_admin_id, data_cadastro
+         FROM assinaturas_pendentes
+         WHERE referencia_externa = $1`,
+        [referencia]
+      );
+
+      return resposta.json(resultadoFinal.rows[0]);
+    }
+
+    return resposta.json(pendenciaAtualizada);
   } catch (erro) {
     console.error("Erro ao consultar status da assinatura:", erro.message);
     return resposta.status(500).json({ mensagem: "Nao foi possivel consultar o status da assinatura." });
