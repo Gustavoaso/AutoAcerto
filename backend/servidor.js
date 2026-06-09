@@ -6,6 +6,7 @@ const rateLimit = require("express-rate-limit");
 const banco   = require("./banco");
 const { normalizarCorpoEntrada } = require("./validacoes");
 const { detectarSqlInjection, detectarXss } = require("./middlewares/waf");
+const { diagnosticarMailer } = require("./helpers/mailer");
 
 // Importando Rotas
 const authRoutes = require("./routes/auth.routes");
@@ -117,6 +118,11 @@ app.use((erro, requisicao, resposta, proximo) => {
 // Inicializar banco explicitamente e entÃ£o iniciar o servidor
 banco.inicializar()
   .then(() => {
+    const diagnosticoMailer = diagnosticarMailer();
+    if (!diagnosticoMailer.configurado) {
+      console.warn("Mailer indisponivel. Campos ausentes:", diagnosticoMailer.faltando.join(", "));
+    }
+
     app.listen(porta, "0.0.0.0", () => {
       console.log(`ðŸš€ Servidor rodando na porta ${porta}`);
     });

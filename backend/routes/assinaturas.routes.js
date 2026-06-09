@@ -4,7 +4,7 @@ const crypto = require("crypto");
 const Stripe = require("stripe");
 const banco = require("../banco");
 const { normalizarEmail, emailValido, cnpjValido } = require("../validacoes");
-const { FRONTEND_URL, mailerConfigurado, enviarEmail, montarEmailBoasVindasAssinatura } = require("../helpers/mailer");
+const { FRONTEND_URL, diagnosticarMailer, mailerConfigurado, enviarEmail, montarEmailBoasVindasAssinatura } = require("../helpers/mailer");
 
 const router = express.Router();
 
@@ -68,7 +68,8 @@ function resumirErroEmail(erro) {
 
 async function enviarEmailBoasVindas(pendencia) {
   if (!mailerConfigurado()) {
-    throw new Error("SMTP nao configurado no backend.");
+    const diagnostico = diagnosticarMailer();
+    throw new Error("SMTP nao configurado no backend. Campos ausentes: " + diagnostico.faltando.join(", "));
   }
 
   const info = await enviarEmail(

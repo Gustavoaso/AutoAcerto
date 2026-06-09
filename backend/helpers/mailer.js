@@ -1,34 +1,87 @@
 const nodemailer = require("nodemailer");
 
-const SMTP_HOST = process.env.SMTP_HOST || "";
-const SMTP_PORT = parseInt(process.env.SMTP_PORT || "465", 10);
-const SMTP_USER = process.env.SMTP_USER || "";
-const SMTP_PASS = process.env.SMTP_PASS || "";
-const SMTP_FROM = process.env.SMTP_FROM || SMTP_USER || "no-reply@autoacerto.com";
-const SUPORTE_EMAIL = process.env.SUPORTE_EMAIL || SMTP_FROM;
+function obterEnv(...nomes) {
+  for (const nome of nomes) {
+    const valor = process.env[nome];
+    if (valor !== undefined && valor !== null && String(valor).trim() !== "") {
+      return String(valor).trim();
+    }
+  }
+  return "";
+}
+
+const SMTP_URL = obterEnv("SMTP_URL", "MAIL_URL", "EMAIL_URL");
+const SMTP_HOST = obterEnv("SMTP_HOST", "MAIL_HOST", "EMAIL_HOST");
+const SMTP_PORT_BRUTA = obterEnv("SMTP_PORT", "MAIL_PORT", "EMAIL_PORT") || "465";
+const SMTP_PORT = parseInt(SMTP_PORT_BRUTA, 10);
+const SMTP_USER = obterEnv("SMTP_USER", "MAIL_USER", "EMAIL_USER");
+const SMTP_PASS = obterEnv("SMTP_PASS", "MAIL_PASS", "EMAIL_PASS", "SMTP_PASSWORD", "MAIL_PASSWORD", "EMAIL_PASSWORD");
+const SMTP_FROM = obterEnv("SMTP_FROM", "MAIL_FROM", "EMAIL_FROM") || SMTP_USER || "no-reply@autoacerto.com";
+const SMTP_SECURE_BRUTO = obterEnv("SMTP_SECURE", "MAIL_SECURE", "EMAIL_SECURE");
+const SUPORTE_EMAIL = obterEnv("SUPORTE_EMAIL", "SUPPORT_EMAIL") || SMTP_FROM;
 const FRONTEND_URL = (process.env.FRONTEND_URL || "https://autoacerto.com.br").replace(/\/+$/, "");
 
 let transportadorMemo = null;
 
+function interpretarBoolean(valor) {
+  const texto = String(valor || "").trim().toLowerCase();
+  if (!texto) return null;
+  if (["1", "true", "yes", "sim"].includes(texto)) return true;
+  if (["0", "false", "no", "nao", "não"].includes(texto)) return false;
+  return null;
+}
+
+function diagnosticarMailer() {
+  const faltando = [];
+
+  if (!SMTP_URL) {
+    if (!SMTP_HOST) faltando.push("SMTP_HOST/MAIL_HOST");
+    if (!Number.isInteger(SMTP_PORT) || SMTP_PORT <= 0) faltando.push("SMTP_PORT/MAIL_PORT");
+    if (!SMTP_USER) faltando.push("SMTP_USER/MAIL_USER");
+    if (!SMTP_PASS) faltando.push("SMTP_PASS/MAIL_PASS");
+  }
+
+  return {
+    configurado: faltando.length === 0,
+    usandoUrl: Boolean(SMTP_URL),
+    faltando,
+    from: SMTP_FROM,
+    host: SMTP_HOST,
+    port: Number.isInteger(SMTP_PORT) ? SMTP_PORT : null
+  };
+}
+
 function mailerConfigurado() {
-  return Boolean(SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS && SMTP_FROM);
+  return diagnosticarMailer().configurado;
+}
+
+function obterConfiguracaoTransportador() {
+  if (SMTP_URL) {
+    return SMTP_URL;
+  }
+
+  const secureInterpretado = interpretarBoolean(SMTP_SECURE_BRUTO);
+
+  return {
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: secureInterpretado == null ? SMTP_PORT === 465 : secureInterpretado,
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS
+    }
+  };
 }
 
 function obterTransportador() {
-  if (!mailerConfigurado()) {
-    throw new Error("SMTP nao configurado.");
+  const diagnostico = diagnosticarMailer();
+
+  if (!diagnostico.configurado) {
+    throw new Error("SMTP nao configurado no backend. Campos ausentes: " + diagnostico.faltando.join(", "));
   }
 
   if (!transportadorMemo) {
-    transportadorMemo = nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: SMTP_PORT,
-      secure: SMTP_PORT === 465,
-      auth: {
-        user: SMTP_USER,
-        pass: SMTP_PASS
-      }
-    });
+    transportadorMemo = nodemailer.createTransport(obterConfiguracaoTransportador());
   }
 
   return transportadorMemo;
@@ -146,6 +199,7 @@ function montarEmailBoasVindasAssinatura({ nomeAdmin, nomeTransportadora, emailA
 module.exports = {
   FRONTEND_URL,
   SUPORTE_EMAIL,
+  diagnosticarMailer,
   mailerConfigurado,
   enviarEmail,
   montarEmailRecuperacaoSenha,

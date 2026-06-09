@@ -9,6 +9,7 @@ const { autenticar } = require("../middlewares/autenticacao");
 const {
   FRONTEND_URL,
   SUPORTE_EMAIL,
+  diagnosticarMailer,
   mailerConfigurado,
   enviarEmail,
   montarEmailRecuperacaoSenha,
@@ -153,7 +154,8 @@ router.post("/recuperar-senha", limitadorRecuperacaoSenha, async (requisicao, re
   }
 
   if (!mailerConfigurado()) {
-    return resposta.status(503).json({ mensagem: "Recuperacao de senha indisponivel neste ambiente." });
+    const diagnostico = diagnosticarMailer();
+    return resposta.status(503).json({ mensagem: "Recuperacao de senha indisponivel neste ambiente. Campos ausentes: " + diagnostico.faltando.join(", ") });
   }
 
   try {
@@ -276,7 +278,8 @@ router.post("/contato", limitadorContato, async (requisicao, resposta) => {
   }
 
   if (!mailerConfigurado()) {
-    return resposta.status(503).json({ mensagem: "Canal de contato indisponivel neste ambiente." });
+    const diagnostico = diagnosticarMailer();
+    return resposta.status(503).json({ mensagem: "Canal de contato indisponivel neste ambiente. Campos ausentes: " + diagnostico.faltando.join(", ") });
   }
 
   try {
