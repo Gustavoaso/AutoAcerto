@@ -3,8 +3,6 @@ const { exigirAdmin } = require("../middlewares/autenticacao");
 
 const router = express.Router();
 
-const CONSULTAR_PLACA_URL = "https://api.consultarplaca.com.br/v2/consultarPlaca";
-
 function obterEnv(...nomes) {
   for (const nome of nomes) {
     const valor = process.env[nome];
@@ -36,61 +34,47 @@ function primeiroValor(objeto, caminhos) {
   return "";
 }
 
-function obterCredenciaisConsultarPlaca() {
+function obterCredenciaisApiGratis() {
   return {
-    email: obterEnv("CONSULTAR_PLACA_EMAIL"),
-    apiKey: obterEnv("CONSULTAR_PLACA_API_KEY")
+    bearerToken: obterEnv("APIGRATIS_BEARER_TOKEN", "API_GRATIS_BEARER_TOKEN"),
+    deviceToken: obterEnv("APIGRATIS_DEVICE_TOKEN", "API_GRATIS_DEVICE_TOKEN")
   };
 }
 
 async function consultarPlaca(placa) {
-  const credenciais = obterCredenciaisConsultarPlaca();
+  const credenciais = obterCredenciaisApiGratis();
 
-  if (!credenciais.email || !credenciais.apiKey) {
+  if (!credenciais.bearerToken || !credenciais.deviceToken) {
     return {
       erroConfiguracao: true,
-      mensagem: "Consulta por placa ainda nao configurada. Configure CONSULTAR_PLACA_EMAIL e CONSULTAR_PLACA_API_KEY no Railway."
+      mensagem: "Consulta por placa ainda nao configurada. Configure APIGRATIS_BEARER_TOKEN e APIGRATIS_DEVICE_TOKEN no Railway."
     };
   }
 
-  const url = new URL(CONSULTAR_PLACA_URL);
-  url.searchParams.set("placa", placa);
-
-  const autenticacao = Buffer.from(credenciais.email + ":" + credenciais.apiKey).toString("base64");
-  const controlador = new AbortController();
-  const timeout = setTimeout(function () {
-    controlador.abort();
-  }, 10000);
-
   try {
-    const resposta = await fetch(url.toString(), {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        authorization: "Basic " + autenticacao
-      },
-      signal: controlador.signal
-    });
-    const texto = await resposta.text();
-    let dados = null;
+    const sdk = await import("apigratis-sdk-nodejs");
+    const createVehiclesApi = sdk.createVehiclesApi || (sdk.default && sdk.default.createVehiclesApi);
 
-    try {
-      dados = texto ? JSON.parse(texto) : null;
-    } catch {
-      dados = { bruto: texto };
-    }
-
-    if (!resposta.ok) {
+    if (typeof createVehiclesApi !== "function") {
       return {
         erroProvider: true,
-        status: resposta.status,
-        mensagem: dados && dados.message ? String(dados.message) : "O provedor de consulta de placa retornou erro."
+        mensagem: "SDK da API Gratis nao disponibilizou o servico de veiculos."
       };
     }
 
+    const vehiclesApi = createVehiclesApi({
+      BearerToken: credenciais.bearerToken,
+      DeviceToken: credenciais.deviceToken
+    });
+
+    const dados = await vehiclesApi.request("/dados", { placa });
+
     return { dados };
-  } finally {
-    clearTimeout(timeout);
+  } catch (erro) {
+    return {
+      erroProvider: true,
+      mensagem: erro && erro.message ? String(erro.message) : "O provedor de consulta de placa retornou erro."
+    };
   }
 }
 
