@@ -18,6 +18,10 @@ const SMTP_USER = obterEnv("SMTP_USER", "MAIL_USER", "EMAIL_USER");
 const SMTP_PASS = obterEnv("SMTP_PASS", "MAIL_PASS", "EMAIL_PASS", "SMTP_PASSWORD", "MAIL_PASSWORD", "EMAIL_PASSWORD");
 const SMTP_FROM = obterEnv("SMTP_FROM", "MAIL_FROM", "EMAIL_FROM") || SMTP_USER || "no-reply@autoacerto.com";
 const SMTP_SECURE_BRUTO = obterEnv("SMTP_SECURE", "MAIL_SECURE", "EMAIL_SECURE");
+const SMTP_REQUIRE_TLS_BRUTO = obterEnv("SMTP_REQUIRE_TLS", "MAIL_REQUIRE_TLS", "EMAIL_REQUIRE_TLS");
+const SMTP_CONNECTION_TIMEOUT = parseInt(obterEnv("SMTP_CONNECTION_TIMEOUT", "MAIL_CONNECTION_TIMEOUT") || "30000", 10);
+const SMTP_GREETING_TIMEOUT = parseInt(obterEnv("SMTP_GREETING_TIMEOUT", "MAIL_GREETING_TIMEOUT") || "30000", 10);
+const SMTP_SOCKET_TIMEOUT = parseInt(obterEnv("SMTP_SOCKET_TIMEOUT", "MAIL_SOCKET_TIMEOUT") || "60000", 10);
 const SUPORTE_EMAIL = obterEnv("SUPORTE_EMAIL", "SUPPORT_EMAIL") || SMTP_FROM;
 const FRONTEND_URL = (process.env.FRONTEND_URL || "https://autoacerto.com.br").replace(/\/+$/, "");
 
@@ -47,7 +51,8 @@ function diagnosticarMailer() {
     faltando,
     from: SMTP_FROM,
     host: SMTP_HOST,
-    port: Number.isInteger(SMTP_PORT) ? SMTP_PORT : null
+    port: Number.isInteger(SMTP_PORT) ? SMTP_PORT : null,
+    secure: SMTP_URL ? null : (interpretarBoolean(SMTP_SECURE_BRUTO) == null ? SMTP_PORT === 465 : interpretarBoolean(SMTP_SECURE_BRUTO))
   };
 }
 
@@ -61,11 +66,16 @@ function obterConfiguracaoTransportador() {
   }
 
   const secureInterpretado = interpretarBoolean(SMTP_SECURE_BRUTO);
+  const requireTlsInterpretado = interpretarBoolean(SMTP_REQUIRE_TLS_BRUTO);
 
   return {
     host: SMTP_HOST,
     port: SMTP_PORT,
     secure: secureInterpretado == null ? SMTP_PORT === 465 : secureInterpretado,
+    requireTLS: requireTlsInterpretado == null ? SMTP_PORT === 587 : requireTlsInterpretado,
+    connectionTimeout: Number.isInteger(SMTP_CONNECTION_TIMEOUT) ? SMTP_CONNECTION_TIMEOUT : 30000,
+    greetingTimeout: Number.isInteger(SMTP_GREETING_TIMEOUT) ? SMTP_GREETING_TIMEOUT : 30000,
+    socketTimeout: Number.isInteger(SMTP_SOCKET_TIMEOUT) ? SMTP_SOCKET_TIMEOUT : 60000,
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASS

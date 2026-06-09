@@ -115,9 +115,10 @@ async function registrarResultadoEmailBoasVindas({ pendenciaId, erro }) {
   );
 }
 
-async function tentarEnviarEmailBoasVindasSePendente(pendencia) {
+async function tentarEnviarEmailBoasVindasSePendente(pendencia, opcoes = {}) {
   if (!pendencia || !pendencia.id || !pendencia.provisionado_em) return false;
-  if (pendencia.boas_vindas_email_enviado_em || pendencia.boas_vindas_email_erro) return false;
+  if (pendencia.boas_vindas_email_enviado_em) return false;
+  if (pendencia.boas_vindas_email_erro && !opcoes.forcar) return false;
 
   try {
     await enviarEmailBoasVindas(pendencia);
@@ -489,6 +490,7 @@ router.post("/public/contratar", async (requisicao, resposta) => {
 router.get("/public/status/:referencia", async (requisicao, resposta) => {
   try {
     const referencia = String(requisicao.params.referencia || "").trim();
+    const forcarReenvioEmail = String(requisicao.query.reenviar_email || "") === "1";
     const resultado = await banco.query(
       `SELECT id, referencia_externa, plano_codigo, plano_nome, valor, nome_transportadora, nome_admin, email_admin,
               stripe_checkout_session_id, stripe_subscription_id, status, provisionado_em, boas_vindas_email_enviado_em,
@@ -528,7 +530,7 @@ router.get("/public/status/:referencia", async (requisicao, resposta) => {
     );
 
     const pendenciaAtualizada = atualizado.rows[0];
-    const reenviado = await tentarEnviarEmailBoasVindasSePendente(pendenciaAtualizada);
+    const reenviado = await tentarEnviarEmailBoasVindasSePendente(pendenciaAtualizada, { forcar: forcarReenvioEmail });
 
     if (reenviado) {
       const resultadoFinal = await banco.query(

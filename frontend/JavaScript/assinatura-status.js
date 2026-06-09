@@ -176,6 +176,9 @@ function preencherStatusAssinatura(dados) {
             : dados.provisionado_em
                 ? "A conta ja foi criada. Estamos tentando concluir o envio do e-mail de boas-vindas."
                 : "Quando o ambiente estiver pronto, o aviso sera disparado para o e-mail cadastrado.";
+    const acaoEmail = dados.provisionado_em && dados.boas_vindas_email_erro
+        ? '<button type="button" class="botao-reenviar-email-status" id="botaoReenviarEmailBoasVindas">Tentar reenviar</button>'
+        : "";
 
     if (mensagem) {
         mensagem.classList.remove("visivel", "mensagem-sucesso");
@@ -220,6 +223,7 @@ function preencherStatusAssinatura(dados) {
             <span class="rotulo-detalhe-status">E-mail de boas-vindas</span>
             <strong>${emailStatus}</strong>
             <small>${emailDetalhe}</small>
+            ${acaoEmail}
           </div>
         `;
     }
@@ -235,9 +239,16 @@ function preencherStatusAssinatura(dados) {
         mensagem.textContent = "A conta foi criada, mas o e-mail de boas-vindas falhou. Voce ja pode entrar normalmente e revisar a configuracao SMTP no backend.";
         mensagem.classList.add("visivel");
     }
+
+    const botaoReenviarEmail = document.getElementById("botaoReenviarEmailBoasVindas");
+    if (botaoReenviarEmail) {
+        botaoReenviarEmail.addEventListener("click", function () {
+            consultarStatusAssinatura({ reenviarEmail: true });
+        });
+    }
 }
 
-async function consultarStatusAssinatura() {
+async function consultarStatusAssinatura(opcoes = {}) {
     const referencia = obterReferenciaAssinatura();
     const mensagem = document.getElementById("mensagemStatusAssinatura");
 
@@ -250,7 +261,17 @@ async function consultarStatusAssinatura() {
     }
 
     try {
-        const resposta = await fetch(obterApiBaseStatusAssinatura() + "/assinaturas/public/status/" + encodeURIComponent(referencia));
+        const url = new URL(obterApiBaseStatusAssinatura() + "/assinaturas/public/status/" + encodeURIComponent(referencia));
+        if (opcoes.reenviarEmail) {
+            url.searchParams.set("reenviar_email", "1");
+            const botaoReenviarEmail = document.getElementById("botaoReenviarEmailBoasVindas");
+            if (botaoReenviarEmail) {
+                botaoReenviarEmail.disabled = true;
+                botaoReenviarEmail.textContent = "Reenviando...";
+            }
+        }
+
+        const resposta = await fetch(url.toString());
         const dados = await resposta.json();
 
         if (!resposta.ok) {
