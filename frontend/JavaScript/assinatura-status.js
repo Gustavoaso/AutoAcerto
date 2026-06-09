@@ -236,7 +236,7 @@ function preencherStatusAssinatura(dados) {
     }
 
     if (dados.provisionado_em && dados.boas_vindas_email_erro && mensagem) {
-        mensagem.textContent = "A conta foi criada, mas o e-mail de boas-vindas falhou. Voce ja pode entrar normalmente e revisar a configuracao SMTP no backend.";
+        mensagem.textContent = "A conta foi criada, mas o e-mail de boas-vindas falhou. Voce ja pode entrar normalmente e revisar a configuracao da API Brevo no backend.";
         mensagem.classList.add("visivel");
     }
 

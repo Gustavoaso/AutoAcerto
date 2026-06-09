@@ -69,7 +69,7 @@ function resumirErroEmail(erro) {
 async function enviarEmailBoasVindas(pendencia) {
   if (!mailerConfigurado()) {
     const diagnostico = diagnosticarMailer();
-    throw new Error("SMTP nao configurado no backend. Campos ausentes: " + diagnostico.faltando.join(", "));
+    throw new Error("Brevo API nao configurada no backend. Campos ausentes: " + diagnostico.faltando.join(", "));
   }
 
   const info = await enviarEmail(
@@ -85,7 +85,7 @@ async function enviarEmailBoasVindas(pendencia) {
   );
 
   if (info && Array.isArray(info.rejected) && info.rejected.length > 0) {
-    throw new Error("O servidor SMTP rejeitou o destinatario do e-mail de boas-vindas.");
+    throw new Error("O provedor de e-mail rejeitou o destinatario do e-mail de boas-vindas.");
   }
 
   return info;

@@ -1,4 +1,4 @@
-const nodemailer = require("nodemailer");
+const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
 function obterEnv(...nomes) {
   for (const nome of nomes) {
@@ -10,49 +10,41 @@ function obterEnv(...nomes) {
   return "";
 }
 
-const SMTP_URL = obterEnv("SMTP_URL", "MAIL_URL", "EMAIL_URL");
-const SMTP_HOST = obterEnv("SMTP_HOST", "MAIL_HOST", "EMAIL_HOST");
-const SMTP_PORT_BRUTA = obterEnv("SMTP_PORT", "MAIL_PORT", "EMAIL_PORT") || "465";
-const SMTP_PORT = parseInt(SMTP_PORT_BRUTA, 10);
-const SMTP_USER = obterEnv("SMTP_USER", "MAIL_USER", "EMAIL_USER");
-const SMTP_PASS = obterEnv("SMTP_PASS", "MAIL_PASS", "EMAIL_PASS", "SMTP_PASSWORD", "MAIL_PASSWORD", "EMAIL_PASSWORD");
-const SMTP_FROM = obterEnv("SMTP_FROM", "MAIL_FROM", "EMAIL_FROM") || SMTP_USER || "no-reply@autoacerto.com";
-const SMTP_SECURE_BRUTO = obterEnv("SMTP_SECURE", "MAIL_SECURE", "EMAIL_SECURE");
-const SMTP_REQUIRE_TLS_BRUTO = obterEnv("SMTP_REQUIRE_TLS", "MAIL_REQUIRE_TLS", "EMAIL_REQUIRE_TLS");
-const SMTP_CONNECTION_TIMEOUT = parseInt(obterEnv("SMTP_CONNECTION_TIMEOUT", "MAIL_CONNECTION_TIMEOUT") || "30000", 10);
-const SMTP_GREETING_TIMEOUT = parseInt(obterEnv("SMTP_GREETING_TIMEOUT", "MAIL_GREETING_TIMEOUT") || "30000", 10);
-const SMTP_SOCKET_TIMEOUT = parseInt(obterEnv("SMTP_SOCKET_TIMEOUT", "MAIL_SOCKET_TIMEOUT") || "60000", 10);
-const SUPORTE_EMAIL = obterEnv("SUPORTE_EMAIL", "SUPPORT_EMAIL") || SMTP_FROM;
+const BREVO_API_KEY = obterEnv("BREVO_API_KEY", "SENDINBLUE_API_KEY");
+const BREVO_FROM = obterEnv("BREVO_FROM", "MAIL_FROM", "EMAIL_FROM") || "AutoAcerto <no-reply@autoacerto.com>";
+const SUPORTE_EMAIL = obterEnv("SUPORTE_EMAIL", "SUPPORT_EMAIL") || parseRemetente(BREVO_FROM).email;
 const FRONTEND_URL = (process.env.FRONTEND_URL || "https://autoacerto.com.br").replace(/\/+$/, "");
 
-let transportadorMemo = null;
+function parseRemetente(remetente) {
+  const texto = String(remetente || "").trim();
+  const combinado = texto.match(/^(.*?)\s*<([^>]+)>$/);
 
-function interpretarBoolean(valor) {
-  const texto = String(valor || "").trim().toLowerCase();
-  if (!texto) return null;
-  if (["1", "true", "yes", "sim"].includes(texto)) return true;
-  if (["0", "false", "no", "nao", "não"].includes(texto)) return false;
-  return null;
+  if (combinado) {
+    return {
+      name: combinado[1].trim().replace(/^"|"$/g, "") || "AutoAcerto",
+      email: combinado[2].trim()
+    };
+  }
+
+  return {
+    name: "AutoAcerto",
+    email: texto
+  };
 }
 
 function diagnosticarMailer() {
   const faltando = [];
+  const remetente = parseRemetente(BREVO_FROM);
 
-  if (!SMTP_URL) {
-    if (!SMTP_HOST) faltando.push("SMTP_HOST/MAIL_HOST");
-    if (!Number.isInteger(SMTP_PORT) || SMTP_PORT <= 0) faltando.push("SMTP_PORT/MAIL_PORT");
-    if (!SMTP_USER) faltando.push("SMTP_USER/MAIL_USER");
-    if (!SMTP_PASS) faltando.push("SMTP_PASS/MAIL_PASS");
-  }
+  if (!BREVO_API_KEY) faltando.push("BREVO_API_KEY");
+  if (!remetente.email) faltando.push("BREVO_FROM/MAIL_FROM/EMAIL_FROM");
 
   return {
     configurado: faltando.length === 0,
-    usandoUrl: Boolean(SMTP_URL),
+    provedor: "brevo_api",
     faltando,
-    from: SMTP_FROM,
-    host: SMTP_HOST,
-    port: Number.isInteger(SMTP_PORT) ? SMTP_PORT : null,
-    secure: SMTP_URL ? null : (interpretarBoolean(SMTP_SECURE_BRUTO) == null ? SMTP_PORT === 465 : interpretarBoolean(SMTP_SECURE_BRUTO))
+    from: BREVO_FROM,
+    sender: remetente.email
   };
 }
 
@@ -60,41 +52,54 @@ function mailerConfigurado() {
   return diagnosticarMailer().configurado;
 }
 
-function obterConfiguracaoTransportador() {
-  if (SMTP_URL) {
-    return SMTP_URL;
-  }
-
-  const secureInterpretado = interpretarBoolean(SMTP_SECURE_BRUTO);
-  const requireTlsInterpretado = interpretarBoolean(SMTP_REQUIRE_TLS_BRUTO);
-
-  return {
-    host: SMTP_HOST,
-    port: SMTP_PORT,
-    secure: secureInterpretado == null ? SMTP_PORT === 465 : secureInterpretado,
-    requireTLS: requireTlsInterpretado == null ? SMTP_PORT === 587 : requireTlsInterpretado,
-    connectionTimeout: Number.isInteger(SMTP_CONNECTION_TIMEOUT) ? SMTP_CONNECTION_TIMEOUT : 30000,
-    greetingTimeout: Number.isInteger(SMTP_GREETING_TIMEOUT) ? SMTP_GREETING_TIMEOUT : 30000,
-    socketTimeout: Number.isInteger(SMTP_SOCKET_TIMEOUT) ? SMTP_SOCKET_TIMEOUT : 60000,
-    auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS
-    }
-  };
+function resumirRespostaBrevo(retorno) {
+  if (!retorno) return "Falha ao enviar e-mail pela API Brevo.";
+  if (retorno.message) return String(retorno.message);
+  if (retorno.code) return String(retorno.code);
+  if (retorno.bruto) return String(retorno.bruto).slice(0, 500);
+  return "Falha ao enviar e-mail pela API Brevo.";
 }
 
-function obterTransportador() {
+async function enviarEmail(destinatario, assunto, html) {
   const diagnostico = diagnosticarMailer();
 
   if (!diagnostico.configurado) {
-    throw new Error("SMTP nao configurado no backend. Campos ausentes: " + diagnostico.faltando.join(", "));
+    throw new Error("Brevo API nao configurada. Campos ausentes: " + diagnostico.faltando.join(", "));
   }
 
-  if (!transportadorMemo) {
-    transportadorMemo = nodemailer.createTransport(obterConfiguracaoTransportador());
+  const resposta = await fetch(BREVO_API_URL, {
+    method: "POST",
+    headers: {
+      "accept": "application/json",
+      "api-key": BREVO_API_KEY,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      sender: parseRemetente(BREVO_FROM),
+      to: [{ email: destinatario }],
+      subject: assunto,
+      htmlContent: html
+    })
+  });
+
+  const texto = await resposta.text();
+  let retorno = null;
+
+  try {
+    retorno = texto ? JSON.parse(texto) : null;
+  } catch {
+    retorno = { bruto: texto };
   }
 
-  return transportadorMemo;
+  if (!resposta.ok) {
+    throw new Error(resumirRespostaBrevo(retorno));
+  }
+
+  return {
+    provider: "brevo_api",
+    messageId: retorno && retorno.messageId ? retorno.messageId : null,
+    response: retorno
+  };
 }
 
 function criarLayoutEmail({ titulo, subtitulo, conteudoHtml, rodapeHtml }) {
@@ -118,16 +123,6 @@ function criarLayoutEmail({ titulo, subtitulo, conteudoHtml, rodapeHtml }) {
       </div>
     </div>
   `;
-}
-
-async function enviarEmail(destinatario, assunto, html) {
-  const transportador = obterTransportador();
-  return transportador.sendMail({
-    from: SMTP_FROM,
-    to: destinatario,
-    subject: assunto,
-    html
-  });
 }
 
 function montarEmailRecuperacaoSenha({ nome, linkRedefinicao }) {
