@@ -502,7 +502,47 @@
 @media (max-width: 560px) {
   .grade-cards-resumo,
   .linha-resumo-financeiro {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .grade-cards-resumo .card-resumo {
+    min-height: 132px;
+    padding: 12px;
+    gap: 7px;
+    border-radius: var(--raio);
+  }
+
+  .grade-cards-resumo .card-resumo::after {
+    height: 20px;
+    margin-top: 0;
+  }
+
+  .grade-cards-resumo .topo-card {
+    gap: 7px;
+  }
+
+  .grade-cards-resumo .icone-card-wrapper {
+    width: 34px;
+    height: 34px;
+  }
+
+  .grade-cards-resumo .icone-card-wrapper svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .grade-cards-resumo .titulo-card {
+    font-size: 0.72rem;
+  }
+
+  .grade-cards-resumo .valor-card {
+    font-size: 1.08rem;
+  }
+
+  .grade-cards-resumo .descricao-card,
+  .grade-cards-resumo .botao-card {
+    font-size: 0.68rem;
   }
 
   .item-viagem {
