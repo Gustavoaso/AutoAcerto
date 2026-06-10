@@ -139,6 +139,16 @@ router.get("/veiculos/placa/:placa", exigirAdmin, async (requisicao, resposta) =
     }
 
     const dados = retorno.dados || {};
+    if (String(dados.status || "").toLowerCase() === "error") {
+      return resposta.json({
+        encontrado: false,
+        status: "error",
+        mensagem: dados.message || dados.mensagem || "Placa nao encontrada.",
+        dados: {},
+        bruto: dados
+      });
+    }
+
     const marca = primeiroDadoVeiculo(dados, ["marca", "MARCA", "brand", "data.marca", "result.marca"], ["marca", "brand", "fabricante"]);
     const modelo = primeiroDadoVeiculo(dados, ["modelo", "MODELO", "marca_modelo", "data.modelo", "result.modelo"], ["modelo", "model", "veiculo", "marcaModelo", "marca_modelo"]);
     const versao = primeiroDadoVeiculo(dados, ["versao", "VERSAO", "data.versao", "result.versao"], ["versao", "version", "submodelo"]);

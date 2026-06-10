@@ -43,6 +43,9 @@ function registrarRetornoConsultaPlaca(placa, retorno) {
 
 function preencherDadosConsultaPlaca(retorno) {
   const dados = retorno && retorno.dados ? retorno.dados : {};
+  const temDados = Boolean(dados.modelo || dados.ano || dados.observacoes);
+
+  if (!temDados) return false;
 
   preencherCampoVeiculoAutomatico("modelo", dados.modelo, modeloPreenchidoPorConsulta, function (valor) {
     modeloPreenchidoPorConsulta = valor;
@@ -53,16 +56,21 @@ function preencherDadosConsultaPlaca(retorno) {
   preencherCampoVeiculoAutomatico("observacoes", dados.observacoes, observacoesPreenchidasPorConsulta, function (valor) {
     observacoesPreenchidasPorConsulta = valor;
   });
+
+  return true;
 }
 
 async function consultarPlacaVeiculo(opcoes) {
   const forcarConsulta = Boolean(opcoes && opcoes.forcar);
+  const silencioso = !forcarConsulta;
   const campoPlaca = document.getElementById("placa");
   const botao = document.getElementById("botaoConsultarPlaca");
   const placa = limparPlacaConsulta(campoPlaca ? campoPlaca.value : "");
 
   if (placa.length !== 7) {
-    exibirMensagem("Informe uma placa completa para buscar os dados.", "erro");
+    if (!silencioso) {
+      exibirMensagem("Informe uma placa completa para buscar os dados.", "erro");
+    }
     return;
   }
 
@@ -80,15 +88,20 @@ async function consultarPlacaVeiculo(opcoes) {
     const retorno = await resposta.json();
     registrarRetornoConsultaPlaca(placa, retorno);
 
-    if (!resposta.ok) {
+    if (!resposta.ok || retorno.status === "error") {
+      ultimaPlacaConsultada = placa;
+      if (silencioso) return;
       exibirMensagem(retorno.mensagem || "Nao foi possivel consultar a placa.", "erro");
       return;
     }
 
     ultimaPlacaConsultada = placa;
-    preencherDadosConsultaPlaca(retorno);
-    exibirMensagem("Dados encontrados. Confira as informacoes antes de salvar.", "sucesso");
+    const preencheu = preencherDadosConsultaPlaca(retorno);
+    if (preencheu) {
+      exibirMensagem("Dados encontrados. Confira as informacoes antes de salvar.", "sucesso");
+    }
   } catch (erro) {
+    if (silencioso) return;
     exibirMensagem("Nao foi possivel conectar ao servico de consulta de placa.", "erro");
   } finally {
     if (botao) {
@@ -128,7 +141,7 @@ function configurarFormularioVeiculo() {
     campoPlaca.addEventListener("keydown", function (evento) {
       if (evento.key === "Enter") {
         evento.preventDefault();
-        consultarPlacaVeiculo({ forcar: true });
+        consultarPlacaVeiculo();
       }
     });
     campoPlaca.addEventListener("blur", function () {
