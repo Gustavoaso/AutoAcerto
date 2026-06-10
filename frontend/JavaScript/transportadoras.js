@@ -93,7 +93,7 @@ function renderizarTabelaTransportadoras(lista) {
 
         linha.innerHTML = `
             ${exclusaoTransportadoras ? exclusaoTransportadoras.colunaLinha(idTransportadora) : ""}
-            <td>
+            <td data-label="Transportadora">
                 <div class="bloco-transportadora">
                     <div class="avatar-transportadora">${criarIconeTransportadoraLista()}</div>
                     <div>
@@ -102,10 +102,10 @@ function renderizarTabelaTransportadoras(lista) {
                     </div>
                 </div>
             </td>
-            <td>${cnpjTransportadora}</td>
-            <td>${totalAdmins}</td>
-            <td>${seloStatus}</td>
-            <td>
+            <td data-label="CNPJ">${cnpjTransportadora}</td>
+            <td data-label="Admins">${totalAdmins}</td>
+            <td data-label="Status">${seloStatus}</td>
+            <td data-label="Acoes">
                 <div class="grupo-acoes">
                     <button class="botao-acao" onclick="window.location.href='ver-transportadora.html?id=${idTransportadora}'">${criarIconeVer()}Ver</button>
                     <button class="botao-acao" onclick="window.location.href='editar-transportadora.html?id=${idTransportadora}'">${criarIconeEditar()}Editar</button>

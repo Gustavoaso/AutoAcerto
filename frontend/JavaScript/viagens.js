@@ -184,7 +184,7 @@ function renderizarTabelaViagens(listaViagens) {
 
         linha.innerHTML = `
             ${exclusaoViagens ? exclusaoViagens.colunaLinha(idViagem) : ""}
-            <td>
+            <td data-label="Viagem">
                 <div class="bloco-viagem">
                     <div class="avatar-viagem">${criarIconeViagemLista()}</div>
                     <div>
@@ -192,17 +192,17 @@ function renderizarTabelaViagens(listaViagens) {
                     </div>
                 </div>
             </td>
-            <td>${motoristaViagem}</td>
-            <td>
+            <td data-label="Motorista">${motoristaViagem}</td>
+            <td data-label="Veiculo">
                 ${modeloVeiculo}
                 <br>
                 <span class="texto-secundario">${placaVeiculo}</span>
             </td>
-            <td>${formatarData(viagem.data_saida)}</td>
-            <td>${viagem.data_chegada ? formatarData(viagem.data_chegada) : "Pendente"}</td>
-            <td>${formatarMoeda(viagem.valor_frete)}</td>
-            <td>${criarSeloStatusViagem(viagem.status)}</td>
-            <td>
+            <td data-label="Saida">${formatarData(viagem.data_saida)}</td>
+            <td data-label="Chegada">${viagem.data_chegada ? formatarData(viagem.data_chegada) : "Pendente"}</td>
+            <td data-label="Frete">${formatarMoeda(viagem.valor_frete)}</td>
+            <td data-label="Status">${criarSeloStatusViagem(viagem.status)}</td>
+            <td data-label="Acoes">
                 <div class="grupo-acoes">
                     <button class="botao-acao" onclick="window.location.href='ver-viagem.html?id=${idViagem}'">${criarIconeVer()}Ver</button>
                     ${podeEditar ? `<button class="botao-acao" onclick="window.location.href='editar-viagem.html?id=${idViagem}'">${criarIconeEditar()}Editar</button>` : ""}

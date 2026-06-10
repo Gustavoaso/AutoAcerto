@@ -199,7 +199,7 @@ function renderizarTabelaDespesas(listaDespesas) {
 
         linha.innerHTML = `
             ${exclusaoDespesas ? exclusaoDespesas.colunaLinha(idDespesa) : ""}
-            <td>
+            <td data-label="Despesa">
                 <div class="bloco-despesa">
                     <div class="avatar-despesa ${obterClasseCategoria(despesa.categoria)}">${criarIconeCategoria(despesa.categoria)}</div>
                     <div>
@@ -207,17 +207,17 @@ function renderizarTabelaDespesas(listaDespesas) {
                     </div>
                 </div>
             </td>
-            <td>${nomeViagemSeguro}</td>
-            <td>${motoristaDespesa}</td>
-            <td>
+            <td data-label="Viagem">${nomeViagemSeguro}</td>
+            <td data-label="Motorista">${motoristaDespesa}</td>
+            <td data-label="Veiculo">
                 ${modeloVeiculo}
                 <br>
                 <span class="texto-secundario">${placaVeiculo}</span>
             </td>
-            <td>${criarSeloCategoria(despesa.categoria)}</td>
-            <td>${formatarData(despesa.data_despesa)}</td>
-            <td class="valor-despesa">${formatarMoeda(despesa.valor)}</td>
-            <td>
+            <td data-label="Categoria">${criarSeloCategoria(despesa.categoria)}</td>
+            <td data-label="Data">${formatarData(despesa.data_despesa)}</td>
+            <td data-label="Valor" class="valor-despesa">${formatarMoeda(despesa.valor)}</td>
+            <td data-label="Acoes">
                 <div class="grupo-acoes">
                     <button class="botao-acao" onclick="window.location.href='ver-despesa.html?id=${idDespesa}'">${criarIconeVer()}Ver</button>
                     ${podeEditar ? `<button class="botao-acao" onclick="window.location.href='editar-despesa.html?id=${idDespesa}'">${criarIconeEditar()}Editar</button>` : ""}

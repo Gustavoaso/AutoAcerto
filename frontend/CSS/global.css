@@ -3056,14 +3056,16 @@ button.loading::after,
   .bloco-motorista,
   .bloco-veiculo,
   .bloco-viagem,
-  .bloco-despesa {
+  .bloco-despesa,
+  .bloco-transportadora {
     gap: 8px;
   }
 
   .avatar-motorista,
   .avatar-veiculo,
   .avatar-viagem,
-  .avatar-despesa {
+  .avatar-despesa,
+  .avatar-transportadora {
     width: 30px;
     height: 30px;
   }
@@ -3071,7 +3073,8 @@ button.loading::after,
   .avatar-motorista svg,
   .avatar-veiculo svg,
   .avatar-viagem svg,
-  .avatar-despesa svg {
+  .avatar-despesa svg,
+  .avatar-transportadora svg {
     width: 16px;
     height: 16px;
   }
@@ -3079,7 +3082,9 @@ button.loading::after,
   .nome-motorista,
   .nome-veiculo,
   .nome-viagem,
-  .nome-despesa {
+  .nome-despesa,
+  .nome-rota,
+  .nome-transportadora {
     font-size: 0.8rem;
     margin-bottom: 0;
   }
@@ -3106,6 +3111,57 @@ button.loading::after,
     justify-content: center;
     min-height: 38px;
     font-size: 0.76rem;
+  }
+
+  .barra-exclusao-lista {
+    display: none;
+  }
+
+  table td.coluna-selecao,
+  table th.coluna-selecao {
+    display: none !important;
+  }
+
+  table td[data-label]:not([data-label="Motorista"]):not([data-label="Registro"]):not([data-label="Viagem"]):not([data-label="Despesa"]):not([data-label="Transportadora"]):not([data-label="Status"]):not([data-label="Categoria"]):not([data-label="Acoes"]) {
+    display: none;
+  }
+
+  table td[data-label="Motorista"],
+  table td[data-label="Registro"],
+  table td[data-label="Viagem"],
+  table td[data-label="Despesa"],
+  table td[data-label="Transportadora"],
+  table td[data-label="Status"],
+  table td[data-label="Categoria"],
+  table td[data-label="Acoes"] {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  table td[data-label="Motorista"]::before,
+  table td[data-label="Registro"]::before,
+  table td[data-label="Viagem"]::before,
+  table td[data-label="Despesa"]::before,
+  table td[data-label="Transportadora"]::before,
+  table td[data-label="Status"]::before,
+  table td[data-label="Categoria"]::before,
+  table td[data-label="Acoes"]::before {
+    display: none;
+  }
+
+  table td[data-label="Motorista"],
+  table td[data-label="Registro"],
+  table td[data-label="Viagem"],
+  table td[data-label="Despesa"],
+  table td[data-label="Transportadora"] {
+    padding-right: 88px;
+  }
+
+  table td[data-label="Status"],
+  table td[data-label="Categoria"] {
+    position: absolute;
+    top: 12px;
+    right: 12px;
   }
 
   .modal-sucesso {

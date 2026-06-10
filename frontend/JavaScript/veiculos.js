@@ -66,7 +66,7 @@ function renderizarTabelaVeiculos(lista) {
 
     linha.innerHTML =
       (exclusaoVeiculos ? exclusaoVeiculos.colunaLinha(idVeiculo) : "") +
-      '<td>' +
+      '<td data-label="Registro">' +
         '<div class="bloco-veiculo">' +
           '<div class="avatar-veiculo">' + criarIconeVeiculoLista() + '</div>' +
           '<div>' +
@@ -74,10 +74,10 @@ function renderizarTabelaVeiculos(lista) {
           '</div>' +
         '</div>' +
       '</td>' +
-      '<td>' + placaVeiculo + '</td>' +
-      '<td>' + anoVeiculo + '</td>' +
-      '<td>' + criarSeloStatusVeiculo(veiculo.status) + '</td>' +
-      '<td>' +
+      '<td data-label="Placa">' + placaVeiculo + '</td>' +
+      '<td data-label="Ano">' + anoVeiculo + '</td>' +
+      '<td data-label="Status">' + criarSeloStatusVeiculo(veiculo.status) + '</td>' +
+      '<td data-label="Acoes">' +
         '<div class="grupo-acoes">' +
           '<button class="botao-acao" onclick="irParaVerVeiculo(' + idVeiculo + ')">' + criarIconeVer() + 'Ver</button>' +
           '<button class="botao-acao" onclick="irParaEditarVeiculo(' + idVeiculo + ')">' + criarIconeEditar() + 'Editar</button>' +
