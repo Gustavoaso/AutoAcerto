@@ -111,15 +111,58 @@
   }
 
   .barra-exclusao-lista {
-    min-height: 0;
-    padding: 8px 10px;
-    margin-bottom: 10px;
-    font-size: 0.72rem;
+    display: none;
   }
 
-  .barra-exclusao-lista .botao-perigo {
+  .tabela-motoristas td.coluna-selecao,
+  .tabela-motoristas th.coluna-selecao {
+    display: none !important;
+  }
+
+  .tabela-motoristas td[data-label="CPF"],
+  .tabela-motoristas td[data-label="Telefone"],
+  .tabela-motoristas td[data-label="CNH"] {
+    display: none;
+  }
+
+  .tabela-motoristas tr.linha-tabela {
+    gap: 9px;
+    padding: 12px;
+  }
+
+  .tabela-motoristas td[data-label="Motorista"],
+  .tabela-motoristas td[data-label="Status"],
+  .tabela-motoristas td[data-label="Acoes"] {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .tabela-motoristas td[data-label="Motorista"]::before,
+  .tabela-motoristas td[data-label="Status"]::before,
+  .tabela-motoristas td[data-label="Acoes"]::before {
+    display: none;
+  }
+
+  .tabela-motoristas td[data-label="Motorista"] {
+    padding-right: 0;
+  }
+
+  .tabela-motoristas td[data-label="Status"] {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+
+  .tabela-motoristas .bloco-motorista {
+    padding-right: 86px;
+  }
+
+  .tabela-motoristas .grupo-acoes {
+    margin-top: 2px;
+  }
+
+  .tabela-motoristas .grupo-acoes .botao-acao {
     min-height: 36px;
-    padding: 8px 10px;
-    font-size: 0.72rem;
+    flex-basis: 92px;
   }
 }
