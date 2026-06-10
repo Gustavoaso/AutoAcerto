@@ -204,7 +204,7 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
         linha.classList.add("linha-tabela");
 
         linha.innerHTML = `
-            <td>
+            <td data-label="Rota">
                 <div class="bloco-viagem">
                     <div class="avatar-viagem">${criarIconeViagemLista()}</div>
                     <div>
@@ -212,16 +212,16 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
                     </div>
                 </div>
             </td>
-            <td>${motoristaViagem}</td>
-            <td>
+            <td data-label="Motorista">${motoristaViagem}</td>
+            <td data-label="Veículo">
                 ${modeloVeiculo}<br>
                 <span class="texto-secundario">${placaVeiculo}</span>
             </td>
-            <td>${formatarData(viagem.data_saida)}</td>
-            <td>${formatarMoeda(frete)}</td>
-            <td>${formatarMoeda(totalDespesasViagem)}</td>
-            <td style="font-weight: 600; color: ${corLucro};">${formatarMoeda(lucro)}</td>
-            <td>${criarSeloStatusViagem(viagem.status)}</td>
+            <td data-label="Data saída">${formatarData(viagem.data_saida)}</td>
+            <td data-label="Frete">${formatarMoeda(frete)}</td>
+            <td data-label="Despesas">${formatarMoeda(totalDespesasViagem)}</td>
+            <td data-label="Lucro" style="font-weight: 600; color: ${corLucro};">${formatarMoeda(lucro)}</td>
+            <td data-label="Status">${criarSeloStatusViagem(viagem.status)}</td>
         `;
 
         corpoTabela.appendChild(linha);
@@ -240,7 +240,7 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
         const linhaForaViagem = document.createElement("tr");
         linhaForaViagem.classList.add("linha-tabela");
         linhaForaViagem.innerHTML = `
-            <td>
+            <td data-label="Rota">
                 <div class="bloco-viagem">
                     <div class="avatar-viagem">${criarIconeForaViagem()}</div>
                     <div>
@@ -249,17 +249,17 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
                     </div>
                 </div>
             </td>
-            <td>-</td>
-            <td>
+            <td data-label="Motorista">-</td>
+            <td data-label="Veículo">
                 ${modeloForaViagem}
                 <br>
                 <span class="texto-secundario">${placaForaViagem}</span>
             </td>
-            <td>-</td>
-            <td>${formatarMoeda(0)}</td>
-            <td>${formatarMoeda(totalDespesasForaViagem)}</td>
-            <td style="font-weight: 600; color: var(--cor-perigo);">${formatarMoeda(totalDespesasForaViagem * -1)}</td>
-            <td><span class="selo-status selo-cancelada">Fora de viagem</span></td>
+            <td data-label="Data saída">-</td>
+            <td data-label="Frete">${formatarMoeda(0)}</td>
+            <td data-label="Despesas">${formatarMoeda(totalDespesasForaViagem)}</td>
+            <td data-label="Lucro" style="font-weight: 600; color: var(--cor-perigo);">${formatarMoeda(totalDespesasForaViagem * -1)}</td>
+            <td data-label="Status"><span class="selo-status selo-cancelada">Fora de viagem</span></td>
         `;
         corpoTabela.appendChild(linhaForaViagem);
     }
@@ -336,10 +336,10 @@ function renderizarTabelaCategorias(listaViagens, despesasForaDeViagem) {
         linha.classList.add("linha-tabela");
 
         linha.innerHTML = `
-            <td style="font-weight: 500;">${nomeCategoria}</td>
-            <td>${qtd}</td>
-            <td>${formatarMoeda(valorCategoria)}</td>
-            <td>${percentual}%</td>
+            <td data-label="Categoria" style="font-weight: 500;">${nomeCategoria}</td>
+            <td data-label="Quantidade">${qtd}</td>
+            <td data-label="Valor total">${formatarMoeda(valorCategoria)}</td>
+            <td data-label="% do total">${percentual}%</td>
         `;
 
         corpoTabela.appendChild(linha);

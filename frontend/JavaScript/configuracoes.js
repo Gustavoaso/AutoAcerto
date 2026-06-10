@@ -182,7 +182,7 @@ function renderizarTabelaUsuarios(lista) {
 
     linha.innerHTML = `
             ${celulaSelecao}
-            <td>
+            <td data-label="Usuário">
                 <div class="bloco-usuario-nome">
                     <div class="avatar-mini">${obterIniciaisNome(nomeUsuario)}</div>
                     <div>
@@ -192,10 +192,10 @@ function renderizarTabelaUsuarios(lista) {
                     </div>
                 </div>
             </td>
-            <td>${seloPerfil}</td>
-            <td>${usuario.perfil === "dono" ? "-" : motoristaUsuario}</td>
-            <td>${seloAtivo}</td>
-            <td>
+            <td data-label="Perfil">${seloPerfil}</td>
+            <td data-label="Motorista vinculado">${usuario.perfil === "dono" ? "-" : motoristaUsuario}</td>
+            <td data-label="Status">${seloAtivo}</td>
+            <td data-label="Acoes">
                 <div class="grupo-acoes">
                     ${botoesAcao}
                 </div>

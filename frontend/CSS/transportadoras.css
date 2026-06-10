@@ -141,4 +141,26 @@
   .formulario-transportadora .grade-formulario {
     grid-template-columns: 1fr;
   }
+
+  .grade-transportadoras .acoes-formulario {
+    position: static;
+    z-index: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin: 18px 0 0;
+    padding: 14px 0 0;
+    border: 0;
+    border-top: 1px solid var(--cor-borda);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .grade-transportadoras .acoes-formulario .botao-secundario,
+  .grade-transportadoras .acoes-formulario .botao-primario {
+    width: 100%;
+    justify-content: center;
+  }
 }

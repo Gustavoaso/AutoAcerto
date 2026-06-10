@@ -110,3 +110,156 @@
     align-items: stretch;
   }
 }
+
+@media (max-width: 768px) {
+  .barra-filtros-relatorio > div:last-child {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .filtro-periodo {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .botao-periodo {
+    padding: 9px 6px;
+    text-align: center;
+  }
+
+  .grade-metricas .card-resumo {
+    min-height: 116px;
+    padding: 14px 52px 14px 13px;
+    gap: 8px;
+  }
+
+  .grade-metricas .card-resumo::before {
+    right: 12px;
+    top: 14px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .grade-metricas .card-resumo::after {
+    right: 21px;
+    top: 23px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .grade-metricas .rotulo-resumo {
+    max-width: 100%;
+    font-size: 0.74rem;
+    line-height: 1.25;
+    text-transform: none;
+  }
+
+  .grade-metricas .valor-resumo,
+  .grade-metricas .valor-monetario {
+    max-width: 100%;
+    font-size: clamp(1.05rem, 4.2vw, 1.28rem);
+    line-height: 1.16;
+    overflow-wrap: anywhere;
+  }
+
+  .tabela-relatorio tbody tr,
+  .tabela-relatorio tfoot tr {
+    border-radius: 14px;
+    padding: 12px;
+  }
+
+  .tabela-relatorio td[data-label] {
+    display: grid !important;
+    grid-template-columns: minmax(76px, 34%) minmax(0, 1fr);
+  }
+
+  .tabela-relatorio td[data-label="Rota"],
+  .tabela-relatorio td[data-label="Categoria"] {
+    grid-template-columns: 1fr;
+  }
+
+  .tabela-relatorio td[data-label="Rota"] {
+    padding-right: 94px;
+  }
+
+  .tabela-relatorio td[data-label="Categoria"] {
+    position: static;
+    padding-right: 0;
+  }
+
+  .tabela-relatorio td[data-label="Rota"]::before,
+  .tabela-relatorio td[data-label="Categoria"]::before {
+    display: none;
+  }
+
+  .tabela-relatorio td[data-label="Motorista"],
+  .tabela-relatorio td[data-label="Veículo"],
+  .tabela-relatorio td[data-label="Data saída"] {
+    display: none !important;
+  }
+
+  .tabela-relatorio td[data-label="Status"] {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    grid-template-columns: 1fr;
+  }
+
+  .tabela-relatorio td[data-label="Status"]::before {
+    display: none;
+  }
+
+  .tabela-relatorio td[data-label="Frete"],
+  .tabela-relatorio td[data-label="Despesas"],
+  .tabela-relatorio td[data-label="Lucro"],
+  .tabela-relatorio td[data-label="Quantidade"],
+  .tabela-relatorio td[data-label="Valor total"],
+  .tabela-relatorio td[data-label="% do total"] {
+    font-size: 0.78rem;
+  }
+
+  .tabela-relatorio tfoot {
+    display: block;
+    margin-top: 8px;
+  }
+
+  .tabela-relatorio tfoot tr {
+    display: grid;
+    gap: 6px;
+    background: #f8fbff;
+    border: 1px solid #bfdbfe;
+    box-shadow: none;
+  }
+
+  .tabela-relatorio tfoot td {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .tabela-relatorio tfoot td:empty {
+    display: none;
+  }
+
+  .tabela-relatorio tfoot td[data-label="Resumo"] {
+    grid-template-columns: 1fr;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    color: var(--cor-texto-secundario);
+  }
+
+  .tabela-relatorio tfoot td[data-label="Resumo"]::before {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .grade-metricas .card-resumo {
+    padding-right: 48px;
+  }
+
+  .filtro-periodo {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

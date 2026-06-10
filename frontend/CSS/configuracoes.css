@@ -358,3 +358,114 @@
     width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .menu-configuracoes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .item-menu-config {
+    min-width: 0;
+    padding: 11px 8px;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  #secao-usuarios .painel {
+    padding: 14px;
+  }
+
+  #secao-usuarios .cabecalho-painel {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  #secao-usuarios .cabecalho-painel h3 {
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+
+  #secao-usuarios .cabecalho-painel .botao-primario {
+    width: 100%;
+    justify-content: center;
+    min-height: 46px;
+    border-radius: 14px;
+  }
+
+  #secao-usuarios table tbody {
+    gap: 8px;
+  }
+
+  #secao-usuarios table tbody tr {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  #secao-usuarios table td[data-label] {
+    display: grid !important;
+  }
+
+  #secao-usuarios table td[data-label="Motorista vinculado"] {
+    display: none !important;
+  }
+
+  #secao-usuarios table td[data-label="Usuário"],
+  #secao-usuarios table td[data-label="Perfil"],
+  #secao-usuarios table td[data-label="Status"],
+  #secao-usuarios table td[data-label="Acoes"] {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  #secao-usuarios table td[data-label="Usuário"]::before,
+  #secao-usuarios table td[data-label="Perfil"]::before,
+  #secao-usuarios table td[data-label="Status"]::before,
+  #secao-usuarios table td[data-label="Acoes"]::before {
+    display: none;
+  }
+
+  #secao-usuarios table td[data-label="Usuário"] {
+    padding-right: 86px;
+  }
+
+  #secao-usuarios table td[data-label="Perfil"] {
+    margin-top: 3px;
+  }
+
+  #secao-usuarios table td[data-label="Status"] {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+
+  #secao-usuarios .bloco-usuario-nome {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  #secao-usuarios .avatar-mini {
+    width: 30px;
+    height: 30px;
+    font-size: 0.68rem;
+  }
+
+  #secao-usuarios .nome-usuario-tabela {
+    font-size: 0.84rem;
+    line-height: 1.25;
+  }
+
+  #secao-usuarios .texto-secundario {
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  #secao-usuarios .grupo-acoes {
+    flex-direction: row;
+    margin-top: 6px;
+  }
+}
