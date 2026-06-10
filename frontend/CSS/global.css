@@ -2988,39 +2988,40 @@ button.loading::after,
 
   table tbody {
     display: grid;
-    gap: 10px;
+    gap: 8px;
   }
 
   table tr.linha-tabela,
   table tbody tr {
     display: grid;
-    gap: 7px;
-    padding: 14px;
+    gap: 5px;
+    padding: 12px;
     border: 1px solid var(--cor-borda);
-    border-radius: 18px;
+    border-radius: var(--raio);
     background: #ffffff;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.055);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.045);
     animation: mobileCardIn 180ms ease-out both;
+    position: relative;
   }
 
   table td {
     display: grid;
-    grid-template-columns: minmax(92px, 36%) minmax(0, 1fr);
+    grid-template-columns: minmax(74px, 30%) minmax(0, 1fr);
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     padding: 0;
     border: none;
-    min-height: 30px;
-    font-size: 0.86rem;
+    min-height: 24px;
+    font-size: 0.78rem;
   }
 
   table td::before {
     content: attr(data-label);
     color: var(--cor-texto-secundario);
-    font-size: 0.7rem;
+    font-size: 0.62rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
   }
 
   table td:empty {
@@ -3029,9 +3030,14 @@ button.loading::after,
 
   table td.coluna-selecao,
   table td:has(input[type="checkbox"]) {
-    grid-template-columns: 1fr;
-    justify-items: end;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: block;
+    width: 18px;
+    height: 18px;
     min-height: 0;
+    z-index: 2;
   }
 
   table td.coluna-selecao::before,
@@ -3039,19 +3045,67 @@ button.loading::after,
     display: none;
   }
 
+  table td.coluna-selecao input[type="checkbox"],
+  table td:has(input[type="checkbox"]) input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    display: block;
+    margin: 0;
+  }
+
+  .bloco-motorista,
+  .bloco-veiculo,
+  .bloco-viagem,
+  .bloco-despesa {
+    gap: 8px;
+  }
+
+  .avatar-motorista,
+  .avatar-veiculo,
+  .avatar-viagem,
+  .avatar-despesa {
+    width: 30px;
+    height: 30px;
+  }
+
+  .avatar-motorista svg,
+  .avatar-veiculo svg,
+  .avatar-viagem svg,
+  .avatar-despesa svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .nome-motorista,
+  .nome-veiculo,
+  .nome-viagem,
+  .nome-despesa {
+    font-size: 0.8rem;
+    margin-bottom: 0;
+  }
+
+  .selo-status,
+  .selo-categoria {
+    width: fit-content;
+    padding: 3px 8px;
+    font-size: 0.7rem;
+  }
+
   .grupo-acoes {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 7px;
     justify-content: flex-start;
   }
 
   .grupo-acoes .botao-acao,
   .botao-acao {
     width: auto;
-    flex: 1 1 118px;
+    flex: 1 1 96px;
     justify-content: center;
+    min-height: 38px;
+    font-size: 0.76rem;
   }
 
   .modal-sucesso {

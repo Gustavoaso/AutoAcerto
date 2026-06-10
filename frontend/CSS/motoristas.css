@@ -77,4 +77,49 @@
   .grade-resumo-motoristas {
     grid-template-columns: 1fr 1fr;
   }
+
+  .painel {
+    padding: 12px;
+  }
+
+  .cabecalho-painel {
+    margin-bottom: 10px;
+  }
+
+  .cabecalho-painel h3,
+  .cabecalho-painel .texto-auxiliar {
+    display: none;
+  }
+
+  .barra-filtros {
+    padding: 10px;
+    gap: 10px;
+    border-radius: var(--raio);
+    margin-bottom: 12px;
+  }
+
+  .campo-filtro label {
+    font-size: 0.64rem;
+    margin-bottom: 5px;
+  }
+
+  .campo-filtro input,
+  .campo-filtro select {
+    min-height: 38px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .barra-exclusao-lista {
+    min-height: 0;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    font-size: 0.72rem;
+  }
+
+  .barra-exclusao-lista .botao-perigo {
+    min-height: 36px;
+    padding: 8px 10px;
+    font-size: 0.72rem;
+  }
 }

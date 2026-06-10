@@ -72,7 +72,7 @@ function renderizarTabela(listaMotoristas) {
 
         linha.innerHTML = `
             ${exclusaoMotoristas ? exclusaoMotoristas.colunaLinha(idMotorista) : ""}
-            <td>
+            <td data-label="Motorista">
                 <div class="bloco-motorista">
                     <div class="avatar-motorista">${criarIconeMotoristaLista()}</div>
                     <div>
@@ -80,11 +80,11 @@ function renderizarTabela(listaMotoristas) {
                     </div>
                 </div>
             </td>
-            <td>${cpfMotorista}</td>
-            <td>${telefoneMotorista}</td>
-            <td>${cnhMotorista}</td>
-            <td>${criarSeloStatus(motorista.status)}</td>
-            <td>
+            <td data-label="CPF">${cpfMotorista}</td>
+            <td data-label="Telefone">${telefoneMotorista}</td>
+            <td data-label="CNH">${cnhMotorista}</td>
+            <td data-label="Status">${criarSeloStatus(motorista.status)}</td>
+            <td data-label="Acoes">
                 <div class="grupo-acoes">
                     <button class="botao-acao" onclick="window.location.href='ver-motorista.html?id=${idMotorista}'">${criarIconeVer()}Ver</button>
                     <button class="botao-acao" onclick="window.location.href='editar-motorista.html?id=${idMotorista}'">${criarIconeEditar()}Editar</button>
