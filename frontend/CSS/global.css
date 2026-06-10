@@ -2650,3 +2650,494 @@ button.loading::after,
     min-width: 44px;
   }
 }
+
+/* =============================================================
+   EXPERIENCIA MOBILE APP
+   ============================================================= */
+
+@media (max-width: 768px) {
+  :root {
+    --mobile-nav-altura: 74px;
+    --mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html {
+    scroll-padding-top: 78px;
+  }
+
+  body {
+    background: #f4f7fb;
+    overscroll-behavior-y: contain;
+  }
+
+  .layout-principal {
+    display: block;
+    min-height: 100dvh;
+  }
+
+  .conteudo-principal {
+    min-height: 100dvh;
+    padding: 12px 14px calc(var(--mobile-nav-altura) + var(--mobile-safe-bottom) + 86px);
+    background: linear-gradient(180deg, #f8fbff 0%, #f4f7fb 42%, #f6f8fc 100%);
+    overflow: visible;
+  }
+
+  .barra-lateral {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: calc(10px + var(--mobile-safe-bottom));
+    z-index: 900;
+    width: auto;
+    height: var(--mobile-nav-altura);
+    padding: 6px;
+    border: 1px solid rgba(203, 213, 225, 0.82);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.18);
+    backdrop-filter: blur(18px);
+    display: block;
+  }
+
+  .barra-lateral .icone-logo,
+  .barra-lateral .rodape-barra {
+    display: none;
+  }
+
+  .menu-lateral {
+    height: 100%;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(66px, 1fr);
+    gap: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 2px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .menu-lateral::-webkit-scrollbar {
+    display: none;
+  }
+
+  .item-menu {
+    min-width: 66px;
+    min-height: 60px;
+    padding: 8px 6px 7px;
+    border-radius: 17px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.66rem;
+    line-height: 1.05;
+    text-align: center;
+    color: #64748b;
+    scroll-snap-align: center;
+    transform: none;
+  }
+
+  .item-menu:hover {
+    transform: none;
+    background: #f4f8ff;
+  }
+
+  .item-menu svg {
+    width: 21px;
+    height: 21px;
+    stroke-width: 2;
+  }
+
+  .item-menu.ativo {
+    background: var(--cor-primaria-clara);
+    color: var(--cor-primaria);
+    box-shadow: inset 0 0 0 1px rgba(15, 98, 254, 0.10);
+  }
+
+  .item-menu.ativo::before {
+    display: none;
+  }
+
+  .topo-pagina {
+    position: sticky;
+    top: 0;
+    z-index: 120;
+    min-height: 58px;
+    margin: -12px -14px 14px;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 14px 8px;
+    justify-content: stretch;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.86);
+    background: rgba(248, 251, 255, 0.92);
+    backdrop-filter: blur(18px);
+  }
+
+  .acoes-topo {
+    width: 100%;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .botao-empresa-topo {
+    flex: 1;
+    min-width: 0;
+    min-height: 42px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    box-shadow: none;
+  }
+
+  .nome-empresa-topo {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .seletor-empresa-topo {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .divisor-topo,
+  .nome-usuario {
+    display: none;
+  }
+
+  .perfil-usuario {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 4px;
+    border-radius: 15px;
+    box-shadow: none;
+  }
+
+  .avatar-usuario {
+    width: 34px;
+    height: 34px;
+  }
+
+  .botao-icone {
+    width: 44px;
+    height: 44px;
+    border-radius: 15px;
+    box-shadow: none;
+  }
+
+  .painel-topo-info {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: calc(62px + env(safe-area-inset-top, 0px));
+    width: auto;
+    border-radius: 18px;
+  }
+
+  .cabecalho-conteudo {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .titulo-pagina {
+    font-size: 1.38rem;
+    line-height: 1.15;
+  }
+
+  .subtitulo-pagina {
+    font-size: 0.84rem;
+    line-height: 1.45;
+  }
+
+  .cabecalho-conteudo > .botao-primario {
+    position: fixed;
+    right: 16px;
+    bottom: calc(var(--mobile-nav-altura) + var(--mobile-safe-bottom) + 24px);
+    z-index: 760;
+    width: auto;
+    min-height: 50px;
+    padding: 0 18px;
+    border-radius: 999px;
+    box-shadow: 0 16px 34px rgba(15, 98, 254, 0.32);
+  }
+
+  .grade-resumo,
+  .grade-resumo-motoristas,
+  .grade-resumo-veiculos,
+  .grade-resumo-viagens,
+  .grade-resumo-despesas,
+  .grade-cards-resumo,
+  .grade-metricas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .card-resumo,
+  .grade-cards-resumo .card-resumo,
+  .mini-card,
+  .painel,
+  .painel-formulario,
+  .painel-dados,
+  .painel-detalhes,
+  .painel-config-card,
+  .cartao-formulario,
+  .cartao-detalhes {
+    border-radius: 18px;
+    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.055);
+  }
+
+  .card-resumo {
+    min-height: 96px;
+    padding: 15px;
+  }
+
+  .valor-resumo,
+  .valor-card {
+    font-size: 1.42rem;
+  }
+
+  .painel,
+  .painel-formulario,
+  .painel-dados {
+    padding: 16px;
+  }
+
+  .cabecalho-painel,
+  .cabecalho-painel-config {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .barra-filtros,
+  .barra-filtros-relatorio {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 18px;
+    background: #f8fbff;
+  }
+
+  .grupo-campo input,
+  .grupo-campo select,
+  .grupo-campo textarea,
+  .campo-filtro input,
+  .campo-filtro select,
+  .modal-login-form input,
+  .modal-login-form textarea {
+    min-height: 48px;
+    border-radius: 14px;
+    font-size: 16px;
+  }
+
+  .grupo-campo textarea,
+  .modal-login-form textarea {
+    min-height: 112px;
+  }
+
+  .grade-formulario,
+  .grade-campos-info,
+  .grade-detalhes,
+  .grade-detalhes-transportadoras,
+  .grade-transportadoras {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  .acoes-formulario {
+    position: sticky;
+    bottom: calc(var(--mobile-nav-altura) + var(--mobile-safe-bottom) + 12px);
+    z-index: 650;
+    margin: 18px -4px 0;
+    padding: 8px;
+    border: 1px solid rgba(226, 232, 240, 0.88);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.14);
+    backdrop-filter: blur(16px);
+  }
+
+  .botao-primario,
+  .botao-secundario,
+  .botao-campo-acao,
+  .botao-acao,
+  .botao-card {
+    min-height: 46px;
+    border-radius: 14px;
+  }
+
+  .tabela-responsiva,
+  .tabela-container {
+    overflow: visible;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .tabela-responsiva table,
+  .tabela-container table,
+  table {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border-spacing: 0;
+  }
+
+  table thead {
+    display: none;
+  }
+
+  table tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  table tr.linha-tabela,
+  table tbody tr {
+    display: grid;
+    gap: 7px;
+    padding: 14px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.055);
+    animation: mobileCardIn 180ms ease-out both;
+  }
+
+  table td {
+    display: grid;
+    grid-template-columns: minmax(92px, 36%) minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    border: none;
+    min-height: 30px;
+    font-size: 0.86rem;
+  }
+
+  table td::before {
+    content: attr(data-label);
+    color: var(--cor-texto-secundario);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  table td:empty {
+    display: none;
+  }
+
+  table td.coluna-selecao,
+  table td:has(input[type="checkbox"]) {
+    grid-template-columns: 1fr;
+    justify-items: end;
+    min-height: 0;
+  }
+
+  table td.coluna-selecao::before,
+  table td:has(input[type="checkbox"])::before {
+    display: none;
+  }
+
+  .grupo-acoes {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  .grupo-acoes .botao-acao,
+  .botao-acao {
+    width: auto;
+    flex: 1 1 118px;
+    justify-content: center;
+  }
+
+  .modal-sucesso {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-sucesso .caixa-modal-sucesso,
+  .caixa-modal-sucesso,
+  .modal-login-caixa,
+  .modal-conteudo {
+    width: 100%;
+    max-width: none;
+    max-height: min(88dvh, 720px);
+    overflow-y: auto;
+    border-radius: 24px 24px 0 0;
+    padding: 22px 18px calc(22px + var(--mobile-safe-bottom));
+    animation: mobileSheetIn 210ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .paginacao-container {
+    border-radius: 18px;
+    padding: 14px;
+  }
+
+  .toast-container {
+    top: auto;
+    bottom: calc(var(--mobile-nav-altura) + var(--mobile-safe-bottom) + 18px);
+    left: 12px;
+    right: 12px;
+  }
+
+  .toast {
+    border-radius: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .conteudo-principal {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .titulo-pagina {
+    font-size: 1.26rem;
+  }
+
+  .grade-resumo,
+  .grade-resumo-motoristas,
+  .grade-resumo-veiculos,
+  .grade-resumo-viagens,
+  .grade-resumo-despesas,
+  .grade-cards-resumo,
+  .grade-metricas {
+    gap: 8px;
+  }
+
+  .card-resumo {
+    padding: 13px;
+  }
+
+  table td {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    align-items: start;
+  }
+}
+
+@keyframes mobileSheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mobileCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -872,6 +872,52 @@ function configurarBotaoSair() {
     botaoSair.addEventListener("click", encerrarSessao);
 }
 
+function aplicarRotulosMobileTabelas(raiz) {
+    const escopo = raiz && raiz.querySelectorAll ? raiz : document;
+
+    escopo.querySelectorAll("table").forEach(function (tabela) {
+        const cabecalhos = Array.from(tabela.querySelectorAll("thead th")).map(function (th) {
+            return (th.textContent || "").trim();
+        });
+
+        if (cabecalhos.length === 0) return;
+
+        tabela.querySelectorAll("tbody tr").forEach(function (linha) {
+            Array.from(linha.children).forEach(function (celula, indice) {
+                if (!celula || celula.dataset.label) return;
+                const rotulo = cabecalhos[indice] || "";
+                if (rotulo) {
+                    celula.dataset.label = rotulo;
+                }
+            });
+        });
+    });
+}
+
+function observarTabelasMobile() {
+    aplicarRotulosMobileTabelas(document);
+
+    const observador = new MutationObserver(function (mutacoes) {
+        let deveAtualizar = false;
+        mutacoes.forEach(function (mutacao) {
+            if (mutacao.type === "childList" && mutacao.addedNodes.length > 0) {
+                deveAtualizar = true;
+            }
+        });
+
+        if (deveAtualizar) {
+            window.requestAnimationFrame(function () {
+                aplicarRotulosMobileTabelas(document);
+            });
+        }
+    });
+
+    observador.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+
 window.obterTransportadoraIdParaCadastroMaster = obterTransportadoraIdParaCadastroMaster;
 window.anexarTransportadoraIdSeMaster = anexarTransportadoraIdSeMaster;
 window.filtrarListaPorTransportadoraMaster = filtrarListaPorTransportadoraMaster;
@@ -971,6 +1017,7 @@ document.addEventListener("DOMContentLoaded", function () {
     atualizarPainelTopo();
     marcarItemMenuLateralAtivo();
     configurarBotaoSair();
+    observarTabelasMobile();
     agendarMonitoramentoSessao();
 
     document.addEventListener("visibilitychange", verificarSessaoAoRetornarAba);
