@@ -2920,7 +2920,17 @@ button.loading::after,
 
   .valor-resumo,
   .valor-card {
-    font-size: 1.42rem;
+    font-size: 1.28rem;
+    line-height: 1.12;
+  }
+
+  .valor-resumo:not(.valor-monetario) {
+    font-size: clamp(1rem, 3.9vw, 1.18rem);
+  }
+
+  .valor-resumo.texto-menor {
+    font-size: clamp(0.92rem, 3.45vw, 1.04rem);
+    line-height: 1.08;
   }
 
   .valor-resumo.valor-monetario {
@@ -2944,22 +2954,37 @@ button.loading::after,
   .barra-filtros-relatorio {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 10px;
-    border-radius: 18px;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 16px;
     background: #f8fbff;
+  }
+
+  .campo-filtro {
+    gap: 5px;
+  }
+
+  .campo-filtro label {
+    font-size: 0.68rem;
   }
 
   .grupo-campo input,
   .grupo-campo select,
   .grupo-campo textarea,
-  .campo-filtro input,
-  .campo-filtro select,
   .modal-login-form input,
   .modal-login-form textarea {
-    min-height: 48px;
-    border-radius: 14px;
+    min-height: 42px;
+    padding: 8px 11px;
+    border-radius: 13px;
     font-size: 16px;
+  }
+
+  .campo-filtro input,
+  .campo-filtro select {
+    min-height: 42px;
+    padding: 8px 11px;
+    border-radius: 13px;
+    font-size: 0.9rem;
   }
 
   .grupo-campo textarea,

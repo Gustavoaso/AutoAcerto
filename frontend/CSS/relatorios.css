@@ -216,7 +216,7 @@
   .grade-metricas .valor-resumo,
   .grade-metricas .valor-monetario {
     max-width: 100%;
-    font-size: clamp(1.05rem, 4.2vw, 1.28rem);
+    font-size: clamp(1rem, 3.9vw, 1.18rem);
     line-height: 1.16;
     overflow-wrap: anywhere;
   }
