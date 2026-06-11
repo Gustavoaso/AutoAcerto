@@ -15,6 +15,50 @@
   flex-wrap: wrap;
 }
 
+.grupo-periodo-relatorio {
+  display: grid;
+  gap: 8px;
+}
+
+.botao-toggle-periodo {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  padding: 8px 14px;
+  border-radius: var(--raio);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--sombra-suave);
+  transition: border-color var(--transicao), background var(--transicao), box-shadow var(--transicao);
+}
+
+.botao-toggle-periodo:hover,
+.botao-toggle-periodo[aria-expanded="true"] {
+  border-color: var(--cor-borda-forte);
+  background: var(--cor-superficie-3);
+}
+
+.botao-toggle-periodo svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--transicao);
+}
+
+.botao-toggle-periodo[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
 .filtro-periodo {
   display: flex;
   gap: 4px;
@@ -22,6 +66,10 @@
   padding: 4px;
   border-radius: var(--raio);
   border: 1px solid var(--cor-borda);
+}
+
+.filtro-periodo-fechado {
+  display: none;
 }
 
 .botao-periodo {
@@ -124,6 +172,15 @@
     gap: 6px;
   }
 
+  .filtro-periodo.filtro-periodo-fechado {
+    display: none;
+  }
+
+  .grupo-periodo-relatorio,
+  .botao-toggle-periodo {
+    width: 100%;
+  }
+
   .botao-periodo {
     padding: 9px 6px;
     text-align: center;
@@ -131,7 +188,7 @@
 
   .grade-metricas .card-resumo {
     min-height: 116px;
-    padding: 14px 52px 14px 13px;
+    padding: 14px 56px 14px 13px;
     gap: 8px;
   }
 
@@ -256,7 +313,7 @@
 
 @media (max-width: 420px) {
   .grade-metricas .card-resumo {
-    padding-right: 48px;
+    padding-right: 56px;
   }
 
   .filtro-periodo {

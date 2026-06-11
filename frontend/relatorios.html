@@ -46,12 +46,21 @@
 
       <!-- Filtros de período -->
       <div class="barra-filtros-relatorio">
-        <div class="filtro-periodo">
-          <button class="botao-periodo" data-periodo="7">7 dias</button>
-          <button class="botao-periodo ativo" data-periodo="30">30 dias</button>
-          <button class="botao-periodo" data-periodo="90">90 dias</button>
-          <button class="botao-periodo" data-periodo="365">12 meses</button>
-          <button class="botao-periodo" data-periodo="0">Tudo</button>
+        <div class="grupo-periodo-relatorio">
+          <button class="botao-toggle-periodo" id="botaoTogglePeriodo" type="button" aria-expanded="false" aria-controls="opcoesPeriodoRelatorio">
+            <span>Período</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+
+          <div class="filtro-periodo filtro-periodo-fechado" id="opcoesPeriodoRelatorio">
+            <button class="botao-periodo" data-periodo="7">7 dias</button>
+            <button class="botao-periodo ativo" data-periodo="30">30 dias</button>
+            <button class="botao-periodo" data-periodo="90">90 dias</button>
+            <button class="botao-periodo" data-periodo="365">12 meses</button>
+            <button class="botao-periodo" data-periodo="0">Tudo</button>
+          </div>
         </div>
 
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">

@@ -495,6 +495,18 @@ function exportarCSV() {
 }
 
 function configurarEventosRelatorio() {
+    const botaoTogglePeriodo = document.getElementById("botaoTogglePeriodo");
+    const opcoesPeriodo = document.getElementById("opcoesPeriodoRelatorio");
+
+    if (botaoTogglePeriodo && opcoesPeriodo) {
+        botaoTogglePeriodo.addEventListener("click", function () {
+            const estaAberto = botaoTogglePeriodo.getAttribute("aria-expanded") === "true";
+
+            botaoTogglePeriodo.setAttribute("aria-expanded", String(!estaAberto));
+            opcoesPeriodo.classList.toggle("filtro-periodo-fechado", estaAberto);
+        });
+    }
+
     document.querySelectorAll(".botao-periodo").forEach(function (botao) {
         botao.addEventListener("click", function () {
             document.querySelectorAll(".botao-periodo").forEach(function (b) {

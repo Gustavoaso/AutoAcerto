@@ -898,6 +898,24 @@ html[data-tema-ui="escuro"] {
   padding-right: 76px;
 }
 
+.grade-resumo .rotulo-resumo,
+.grade-resumo-motoristas .rotulo-resumo,
+.grade-resumo-veiculos .rotulo-resumo,
+.grade-resumo-viagens .rotulo-resumo,
+.grade-resumo-despesas .rotulo-resumo,
+.grade-metricas .rotulo-resumo,
+.grade-resumo .valor-resumo,
+.grade-resumo-motoristas .valor-resumo,
+.grade-resumo-veiculos .valor-resumo,
+.grade-resumo-viagens .valor-resumo,
+.grade-resumo-despesas .valor-resumo,
+.grade-metricas .valor-resumo {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .card-resumo:hover {
   border-color: var(--cor-borda-forte);
   box-shadow: var(--sombra-card-hover);
@@ -2891,9 +2909,23 @@ button.loading::after,
     padding: 15px;
   }
 
+  .grade-resumo .card-resumo,
+  .grade-resumo-motoristas .card-resumo,
+  .grade-resumo-veiculos .card-resumo,
+  .grade-resumo-viagens .card-resumo,
+  .grade-resumo-despesas .card-resumo,
+  .grade-metricas .card-resumo {
+    padding: 15px 58px 15px 15px;
+  }
+
   .valor-resumo,
   .valor-card {
     font-size: 1.42rem;
+  }
+
+  .valor-resumo.valor-monetario {
+    font-size: clamp(1.05rem, 4.3vw, 1.24rem);
+    line-height: 1.14;
   }
 
   .painel,
