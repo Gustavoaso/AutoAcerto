@@ -158,10 +158,10 @@ async function registrarAssinaturaAtiva({ cliente, pendencia, assinaturaStripe, 
       (transportadora_id, plano_codigo, plano_nome, gateway, gateway_assinatura_id, referencia_externa, status, valor,
        stripe_customer_id, stripe_price_id, proxima_cobranca_em, cancel_at_period_end, email_pagador,
        pagamento_pendente_em, bloqueada_em, cancelada_em, ultimo_payload, data_atualizacao)
-     VALUES ($1, $2, $3, 'stripe', $4, $5, $6, $7, $8, $9, to_timestamp($10), $11, $12,
-       CASE WHEN $6 IN ('past_due', 'unpaid', 'incomplete') THEN CURRENT_TIMESTAMP ELSE NULL END,
-       CASE WHEN $6 IN ('unpaid', 'incomplete_expired', 'paused') THEN CURRENT_TIMESTAMP ELSE NULL END,
-       CASE WHEN $6 = 'canceled' THEN CURRENT_TIMESTAMP ELSE NULL END,
+     VALUES ($1, $2, $3, 'stripe', $4, $5, $6::varchar, $7, $8, $9, to_timestamp($10), $11, $12,
+       CASE WHEN $6::varchar IN ('past_due', 'unpaid', 'incomplete') THEN CURRENT_TIMESTAMP ELSE NULL END,
+       CASE WHEN $6::varchar IN ('unpaid', 'incomplete_expired', 'paused') THEN CURRENT_TIMESTAMP ELSE NULL END,
+       CASE WHEN $6::varchar = 'canceled' THEN CURRENT_TIMESTAMP ELSE NULL END,
        $13::jsonb, CURRENT_TIMESTAMP)
      ON CONFLICT (gateway_assinatura_id)
      DO UPDATE SET
@@ -424,20 +424,20 @@ async function atualizarAssinaturaExistentePorStripe(assinaturaStripe) {
   if (!planoAtual) {
     await banco.query(
       `UPDATE assinaturas
-       SET status = $1,
+       SET status = $1::varchar,
            stripe_price_id = COALESCE($2, stripe_price_id),
            proxima_cobranca_em = to_timestamp($3),
            cancel_at_period_end = $4,
            pagamento_pendente_em = CASE
-             WHEN $1 IN ('past_due', 'unpaid', 'incomplete') THEN COALESCE(pagamento_pendente_em, CURRENT_TIMESTAMP)
+             WHEN $1::varchar IN ('past_due', 'unpaid', 'incomplete') THEN COALESCE(pagamento_pendente_em, CURRENT_TIMESTAMP)
              ELSE NULL
            END,
            bloqueada_em = CASE
-             WHEN $1 IN ('unpaid', 'incomplete_expired', 'paused') THEN COALESCE(bloqueada_em, CURRENT_TIMESTAMP)
+             WHEN $1::varchar IN ('unpaid', 'incomplete_expired', 'paused') THEN COALESCE(bloqueada_em, CURRENT_TIMESTAMP)
              ELSE NULL
            END,
            cancelada_em = CASE
-             WHEN $1 = 'canceled' THEN COALESCE(cancelada_em, CURRENT_TIMESTAMP)
+             WHEN $1::varchar = 'canceled' THEN COALESCE(cancelada_em, CURRENT_TIMESTAMP)
              ELSE NULL
            END,
            ultimo_payload = $5::jsonb,
@@ -459,21 +459,21 @@ async function atualizarAssinaturaExistentePorStripe(assinaturaStripe) {
     `UPDATE assinaturas
      SET plano_codigo = $1,
          plano_nome = $2,
-         status = $3,
+         status = $3::varchar,
          valor = $4,
          stripe_price_id = $5,
          proxima_cobranca_em = to_timestamp($6),
          cancel_at_period_end = $7,
          pagamento_pendente_em = CASE
-           WHEN $3 IN ('past_due', 'unpaid', 'incomplete') THEN COALESCE(pagamento_pendente_em, CURRENT_TIMESTAMP)
+           WHEN $3::varchar IN ('past_due', 'unpaid', 'incomplete') THEN COALESCE(pagamento_pendente_em, CURRENT_TIMESTAMP)
            ELSE NULL
          END,
          bloqueada_em = CASE
-           WHEN $3 IN ('unpaid', 'incomplete_expired', 'paused') THEN COALESCE(bloqueada_em, CURRENT_TIMESTAMP)
+           WHEN $3::varchar IN ('unpaid', 'incomplete_expired', 'paused') THEN COALESCE(bloqueada_em, CURRENT_TIMESTAMP)
            ELSE NULL
          END,
          cancelada_em = CASE
-           WHEN $3 = 'canceled' THEN COALESCE(cancelada_em, CURRENT_TIMESTAMP)
+           WHEN $3::varchar = 'canceled' THEN COALESCE(cancelada_em, CURRENT_TIMESTAMP)
            ELSE NULL
          END,
          ultimo_payload = $8::jsonb,
