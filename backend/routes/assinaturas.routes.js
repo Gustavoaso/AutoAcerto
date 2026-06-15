@@ -71,6 +71,10 @@ function normalizarStatusStripe(status) {
   return String(status || "").trim().toLowerCase() || "pending";
 }
 
+function statusPermiteReativacao(status) {
+  return ["canceled", "cancelled", "unpaid", "incomplete_expired", "paused", "checkout_criado"].includes(String(status || "").toLowerCase());
+}
+
 function resumirErroEmail(erro) {
   if (!erro) return null;
   return String(erro.message || erro).trim().slice(0, 500) || "Falha ao enviar o e-mail.";
@@ -601,6 +605,124 @@ router.post("/portal", exigirAdmin, async (requisicao, resposta) => {
   } catch (erro) {
     console.error("Erro ao criar portal Stripe:", erro.message);
     return resposta.status(500).json({ mensagem: "Nao foi possivel abrir o gerenciamento da assinatura." });
+  }
+});
+
+router.post("/reativar", exigirAdmin, async (requisicao, resposta) => {
+  if (!stripe) {
+    return resposta.status(500).json({ mensagem: "Stripe ainda nao configurado no backend." });
+  }
+
+  try {
+    const transportadoraId = obterIdTransportadora(requisicao);
+    if (!transportadoraId) {
+      return resposta.status(400).json({ mensagem: "Transportadora nao identificada para reativar a assinatura." });
+    }
+
+    const resultado = await banco.query(
+      `SELECT a.*, t.nome AS transportadora_nome, t.cnpj AS transportadora_cnpj,
+              u.id AS admin_id, u.nome AS admin_nome, u.email AS admin_email
+       FROM assinaturas a
+       JOIN transportadoras t ON t.id = a.transportadora_id
+       LEFT JOIN LATERAL (
+         SELECT id, nome, email
+         FROM usuarios
+         WHERE transportadora_id = a.transportadora_id
+           AND perfil = 'admin'
+         ORDER BY id
+         LIMIT 1
+       ) u ON TRUE
+       WHERE a.transportadora_id = $1
+         AND a.gateway = 'stripe'
+       ORDER BY a.data_atualizacao DESC, a.id DESC
+       LIMIT 1`,
+      [transportadoraId]
+    );
+
+    if (resultado.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Nao encontramos uma assinatura anterior para reativar." });
+    }
+
+    const assinaturaAtual = resultado.rows[0];
+    if (!statusPermiteReativacao(assinaturaAtual.status)) {
+      return resposta.status(400).json({ mensagem: "A assinatura atual ainda pode ser gerenciada pelo portal da Stripe." });
+    }
+
+    const plano = obterPlano(assinaturaAtual.plano_codigo);
+    if (!plano || !plano.stripePriceId) {
+      return resposta.status(500).json({ mensagem: "O plano atual nao esta vinculado a um price do Stripe." });
+    }
+
+    if (!assinaturaAtual.stripe_customer_id) {
+      return resposta.status(404).json({ mensagem: "Nao encontramos o cliente Stripe para reativar a assinatura." });
+    }
+
+    const referenciaExterna = gerarReferenciaExterna();
+    const emailAdmin = assinaturaAtual.admin_email || assinaturaAtual.email_admin || assinaturaAtual.email_pagador || requisicao.usuario.email;
+    const nomeAdmin = assinaturaAtual.admin_nome || assinaturaAtual.nome_admin || requisicao.usuario.nome;
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      success_url: URL_FRONTEND + "/assinatura-status.html?referencia=" + encodeURIComponent(referenciaExterna),
+      cancel_url: URL_FRONTEND + "/configuracoes.html",
+      customer: assinaturaAtual.stripe_customer_id,
+      line_items: [
+        {
+          price: plano.stripePriceId,
+          quantity: 1
+        }
+      ],
+      metadata: {
+        referencia_externa: referenciaExterna,
+        plano_codigo: plano.codigo,
+        transportadora_id: String(transportadoraId),
+        reativacao: "true"
+      },
+      subscription_data: {
+        metadata: {
+          referencia_externa: referenciaExterna,
+          plano_codigo: plano.codigo,
+          transportadora_id: String(transportadoraId),
+          reativacao: "true"
+        }
+      }
+    });
+
+    await banco.query(
+      `INSERT INTO assinaturas
+        (transportadora_id, plano_codigo, plano_nome, gateway, referencia_externa, status, valor,
+         nome_transportadora, cnpj, nome_admin, email_admin, stripe_checkout_session_id,
+         stripe_customer_id, email_pagador, provisionado_em, usuario_admin_id, ultimo_payload, data_atualizacao)
+       VALUES ($1, $2, $3, 'stripe', $4, 'checkout_criado', $5,
+         $6, $7, $8, $9, $10,
+         $11, $12, CURRENT_TIMESTAMP, $13, $14::jsonb, CURRENT_TIMESTAMP)`,
+      [
+        transportadoraId,
+        plano.codigo,
+        plano.nome,
+        referenciaExterna,
+        plano.valor,
+        assinaturaAtual.transportadora_nome || assinaturaAtual.nome_transportadora,
+        assinaturaAtual.transportadora_cnpj || assinaturaAtual.cnpj,
+        nomeAdmin,
+        emailAdmin,
+        session.id,
+        assinaturaAtual.stripe_customer_id,
+        emailAdmin,
+        assinaturaAtual.admin_id || assinaturaAtual.usuario_admin_id || requisicao.usuario.id,
+        JSON.stringify(session)
+      ]
+    );
+
+    return resposta.status(201).json({
+      mensagem: "Checkout de reativacao criado com sucesso.",
+      referencia_externa: referenciaExterna,
+      checkout_url: session.url,
+      session_id: session.id
+    });
+  } catch (erro) {
+    console.error("Erro ao reativar assinatura:", erro.message);
+    return resposta.status(500).json({ mensagem: "Nao foi possivel iniciar a reativacao da assinatura." });
   }
 });
 

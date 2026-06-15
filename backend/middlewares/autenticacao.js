@@ -8,6 +8,7 @@ const NOME_COOKIE_SESSAO = "autoacerto_token";
 const METODOS_SOMENTE_LEITURA = new Set(["GET", "HEAD", "OPTIONS"]);
 const ROTAS_MUTACAO_SEMPRE_PERMITIDAS = [
   /^\/assinaturas\/portal(?:\/|$)/,
+  /^\/assinaturas\/reativar(?:\/|$)/,
   /^\/auth\/logout(?:\/|$)/,
   /^\/auth\/me(?:\/|$)/,
   /^\/usuarios\/senha(?:\/|$)/,

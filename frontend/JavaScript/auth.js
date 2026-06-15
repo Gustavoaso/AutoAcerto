@@ -446,6 +446,11 @@ function obterResumoOperacionalAssinatura(dados) {
     return "Ativa" + (assinatura.proxima_cobranca_em ? " - renova em " + formatarDataTopo(assinatura.proxima_cobranca_em) : "");
 }
 
+function assinaturaPermiteReativacaoTopo(assinatura) {
+    const status = String(assinatura && assinatura.status || "").toLowerCase();
+    return ["canceled", "cancelled", "unpaid", "incomplete_expired", "paused", "checkout_criado"].includes(status);
+}
+
 function padronizarTopoPagina() {
     const topo = document.querySelector(".topo-pagina");
     const usuario = obterUsuarioLogado();
@@ -649,6 +654,8 @@ async function carregarAssinaturaLateral() {
 
         nomePlano.textContent = dados.assinatura.plano_nome || "Plano contratado";
         resumoPlano.textContent = formatarMoedaTopo(dados.assinatura.valor) + "/mes - " + obterResumoOperacionalAssinatura(dados);
+        botao.dataset.acaoAssinatura = assinaturaPermiteReativacaoTopo(dados.assinatura) ? "reativar" : "portal";
+        botao.textContent = botao.dataset.acaoAssinatura === "reativar" ? "Reativar assinatura" : "Gerenciar assinatura";
         botao.disabled = false;
     } catch (erro) {
         nomePlano.textContent = "Plano indisponivel";
@@ -659,28 +666,36 @@ async function carregarAssinaturaLateral() {
 
 async function abrirPortalAssinatura() {
     const botao = document.getElementById("botaoGerenciarAssinatura");
+    const reativar = botao && botao.dataset.acaoAssinatura === "reativar";
+
     if (botao) {
         botao.disabled = true;
-        botao.textContent = "Abrindo...";
+        botao.textContent = reativar ? "Reativando..." : "Abrindo...";
     }
 
     try {
-        const resposta = await fetch(montarUrlApi("/assinaturas/portal"), {
+        const resposta = await fetch(montarUrlApi(reativar ? "/assinaturas/reativar" : "/assinaturas/portal"), {
             method: "POST",
             headers: cabecalhosAutenticados()
         });
         const dados = await resposta.json();
 
-        if (!resposta.ok || !dados.url) {
+        const urlDestino = dados.url || dados.checkout_url;
+
+        if (!resposta.ok || !urlDestino) {
             throw new Error(dados.mensagem || "portal");
         }
 
-        window.location.href = dados.url;
+        if (dados.referencia_externa) {
+            localStorage.setItem("assinatura_referencia_ativa", dados.referencia_externa);
+        }
+
+        window.location.href = urlDestino;
     } catch (erro) {
-        alert("Nao foi possivel abrir o gerenciamento da assinatura agora.");
+        alert(reativar ? "Nao foi possivel iniciar a reativacao da assinatura agora." : "Nao foi possivel abrir o gerenciamento da assinatura agora.");
         if (botao) {
             botao.disabled = false;
-            botao.textContent = "Gerenciar assinatura";
+            botao.textContent = reativar ? "Reativar assinatura" : "Gerenciar assinatura";
         }
     }
 }
