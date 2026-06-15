@@ -38,6 +38,10 @@ function origemCorsPermitida(origem) {
   return false;
 }
 
+function requisicaoWebhookStripe(requisicao) {
+  return requisicao.originalUrl === "/assinaturas/stripe/webhook";
+}
+
 if (!process.env.JWT_SECRET) {
   throw new Error(
     "JWT_SECRET nÃ£o configurado. Defina a variÃ¡vel de ambiente antes de iniciar o servidor.\n" +
@@ -82,10 +86,18 @@ app.use(express.json({
 }));
 
 // âœ… SEGURANÃ‡A: WAF para detectar SQL Injection e XSS
-app.use(detectarSqlInjection);
-app.use(detectarXss);
+app.use(function aplicarWafSql(requisicao, resposta, proximo) {
+  if (requisicaoWebhookStripe(requisicao)) return proximo();
+  return detectarSqlInjection(requisicao, resposta, proximo);
+});
+app.use(function aplicarWafXss(requisicao, resposta, proximo) {
+  if (requisicaoWebhookStripe(requisicao)) return proximo();
+  return detectarXss(requisicao, resposta, proximo);
+});
 
 app.use(function normalizarEntrada(requisicao, resposta, proximo) {
+  if (requisicaoWebhookStripe(requisicao)) return proximo();
+
   if (requisicao.body && typeof requisicao.body === "object") {
     requisicao.body = normalizarCorpoEntrada(requisicao.body);
   }

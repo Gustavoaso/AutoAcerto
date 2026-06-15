@@ -52,12 +52,14 @@ function mailerConfigurado() {
   return diagnosticarMailer().configurado;
 }
 
-function resumirRespostaBrevo(retorno) {
-  if (!retorno) return "Falha ao enviar e-mail pela API Brevo.";
-  if (retorno.message) return String(retorno.message);
-  if (retorno.code) return String(retorno.code);
-  if (retorno.bruto) return String(retorno.bruto).slice(0, 500);
-  return "Falha ao enviar e-mail pela API Brevo.";
+function resumirRespostaBrevo(retorno, statusHttp) {
+  const prefixo = statusHttp ? "Brevo HTTP " + statusHttp + ": " : "";
+
+  if (!retorno) return prefixo + "Falha ao enviar e-mail pela API Brevo.";
+  if (retorno.message) return prefixo + String(retorno.message);
+  if (retorno.code) return prefixo + String(retorno.code);
+  if (retorno.bruto) return prefixo + String(retorno.bruto).slice(0, 500);
+  return prefixo + "Falha ao enviar e-mail pela API Brevo.";
 }
 
 async function enviarEmail(destinatario, assunto, html) {
@@ -92,7 +94,7 @@ async function enviarEmail(destinatario, assunto, html) {
   }
 
   if (!resposta.ok) {
-    throw new Error(resumirRespostaBrevo(retorno));
+    throw new Error(resumirRespostaBrevo(retorno, resposta.status));
   }
 
   return {

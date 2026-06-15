@@ -262,6 +262,21 @@ function preencherStatusAssinatura(dados) {
     }
 }
 
+function statusAssinaturaDeveContinuarConsultando(dados) {
+    const status = String(dados.status || "").toLowerCase();
+    const statusFinalSemAcesso = ["cancelled", "canceled", "paused", "unpaid", "incomplete_expired"].includes(status);
+
+    if (statusFinalSemAcesso) {
+        return false;
+    }
+
+    if (!dados.provisionado_em) {
+        return true;
+    }
+
+    return !dados.boas_vindas_email_enviado_em && !dados.boas_vindas_email_erro;
+}
+
 async function consultarStatusAssinatura(opcoes = {}) {
     const referencia = obterReferenciaAssinatura();
     const mensagem = document.getElementById("mensagemStatusAssinatura");
@@ -294,7 +309,7 @@ async function consultarStatusAssinatura(opcoes = {}) {
 
         preencherStatusAssinatura(dados);
 
-        if (!dados.provisionado_em && !["cancelled", "canceled", "paused"].includes(String(dados.status || "").toLowerCase())) {
+        if (statusAssinaturaDeveContinuarConsultando(dados)) {
             window.setTimeout(consultarStatusAssinatura, 5000);
         }
     } catch (erro) {

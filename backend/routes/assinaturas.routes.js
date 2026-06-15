@@ -778,8 +778,6 @@ router.post("/stripe/webhook", async (requisicao, resposta) => {
     return resposta.status(400).json({ mensagem: "Webhook invalido." });
   }
 
-  resposta.status(200).json({ recebido: true });
-
   try {
     if (evento.type === "checkout.session.completed") {
       const session = evento.data.object;
@@ -880,8 +878,10 @@ router.post("/stripe/webhook", async (requisicao, resposta) => {
         }
       }
     }
+    return resposta.status(200).json({ recebido: true });
   } catch (erro) {
     console.error("Erro ao processar evento Stripe:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao processar webhook Stripe." });
   }
 });
 
