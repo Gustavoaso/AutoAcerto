@@ -106,7 +106,7 @@ async function registrarResultadoEmailBoasVindas({ pendenciaId, erro }) {
 
   if (erro) {
     await banco.query(
-      `UPDATE assinaturas_pendentes
+      `UPDATE assinaturas
        SET boas_vindas_email_erro = $1,
            data_atualizacao = CURRENT_TIMESTAMP
        WHERE id = $2`,
@@ -116,7 +116,7 @@ async function registrarResultadoEmailBoasVindas({ pendenciaId, erro }) {
   }
 
   await banco.query(
-    `UPDATE assinaturas_pendentes
+    `UPDATE assinaturas
      SET boas_vindas_email_enviado_em = CURRENT_TIMESTAMP,
          boas_vindas_email_erro = NULL,
          data_atualizacao = CURRENT_TIMESTAMP
@@ -163,10 +163,12 @@ async function registrarAssinaturaAtiva({ cliente, pendencia, assinaturaStripe, 
        CASE WHEN $6::varchar IN ('unpaid', 'incomplete_expired', 'paused') THEN CURRENT_TIMESTAMP ELSE NULL END,
        CASE WHEN $6::varchar = 'canceled' THEN CURRENT_TIMESTAMP ELSE NULL END,
        $13::jsonb, CURRENT_TIMESTAMP)
-     ON CONFLICT (gateway_assinatura_id)
+     ON CONFLICT (referencia_externa)
      DO UPDATE SET
+      transportadora_id = EXCLUDED.transportadora_id,
       plano_codigo = EXCLUDED.plano_codigo,
       plano_nome = EXCLUDED.plano_nome,
+      gateway_assinatura_id = EXCLUDED.gateway_assinatura_id,
       status = EXCLUDED.status,
       valor = EXCLUDED.valor,
       stripe_customer_id = EXCLUDED.stripe_customer_id,
@@ -214,7 +216,7 @@ async function provisionarPendenciaPorReferencia(referenciaExterna, assinaturaSt
 
     const resultadoPendente = await cliente.query(
       `SELECT *
-       FROM assinaturas_pendentes
+       FROM assinaturas
        WHERE referencia_externa = $1
        FOR UPDATE`,
       [referenciaExterna]
@@ -237,10 +239,11 @@ async function provisionarPendenciaPorReferencia(referenciaExterna, assinaturaSt
       });
 
       await cliente.query(
-        `UPDATE assinaturas_pendentes
+        `UPDATE assinaturas
          SET status = $1,
              stripe_customer_id = COALESCE($2, stripe_customer_id),
              stripe_subscription_id = COALESCE($3, stripe_subscription_id),
+             gateway_assinatura_id = COALESCE($3, gateway_assinatura_id),
              ultimo_payload = $4::jsonb,
              data_atualizacao = CURRENT_TIMESTAMP
          WHERE id = $5`,
@@ -259,10 +262,11 @@ async function provisionarPendenciaPorReferencia(referenciaExterna, assinaturaSt
 
     if (!statusAssinaturaAtiva(statusStripe)) {
       await cliente.query(
-        `UPDATE assinaturas_pendentes
+        `UPDATE assinaturas
          SET status = $1,
              stripe_customer_id = COALESCE($2, stripe_customer_id),
              stripe_subscription_id = COALESCE($3, stripe_subscription_id),
+             gateway_assinatura_id = COALESCE($3, gateway_assinatura_id),
              ultimo_payload = $4::jsonb,
              data_atualizacao = CURRENT_TIMESTAMP
          WHERE id = $5`,
@@ -309,10 +313,11 @@ async function provisionarPendenciaPorReferencia(referenciaExterna, assinaturaSt
     });
 
     await cliente.query(
-      `UPDATE assinaturas_pendentes
+      `UPDATE assinaturas
        SET status = $1,
            stripe_customer_id = COALESCE($2, stripe_customer_id),
            stripe_subscription_id = COALESCE($3, stripe_subscription_id),
+           gateway_assinatura_id = COALESCE($3, gateway_assinatura_id),
            transportadora_id = $4,
            usuario_admin_id = $5,
            provisionado_em = CURRENT_TIMESTAMP,
@@ -378,9 +383,10 @@ async function sincronizarCheckoutStripePorSessionId(sessionId) {
   }
 
   await banco.query(
-    `UPDATE assinaturas_pendentes
+    `UPDATE assinaturas
      SET stripe_customer_id = COALESCE($1, stripe_customer_id),
          stripe_subscription_id = COALESCE($2, stripe_subscription_id),
+         gateway_assinatura_id = COALESCE($2, gateway_assinatura_id),
          status = $3,
          ultimo_payload = $4::jsonb,
          data_atualizacao = CURRENT_TIMESTAMP
@@ -665,7 +671,7 @@ router.post("/public/contratar", async (requisicao, resposta) => {
     });
 
     await banco.query(
-      `INSERT INTO assinaturas_pendentes
+      `INSERT INTO assinaturas
         (referencia_externa, gateway, plano_codigo, plano_nome, valor, nome_transportadora, cnpj, nome_admin, email_admin, senha_hash_admin, stripe_checkout_session_id, status, ultimo_payload, data_atualizacao)
        VALUES ($1, 'stripe', $2, $3, $4, $5, $6, $7, $8, $9, $10, 'checkout_criado', $11::jsonb, CURRENT_TIMESTAMP)`,
       [
@@ -703,7 +709,7 @@ router.get("/public/status/:referencia", async (requisicao, resposta) => {
       `SELECT id, referencia_externa, plano_codigo, plano_nome, valor, nome_transportadora, nome_admin, email_admin,
               stripe_checkout_session_id, stripe_subscription_id, status, provisionado_em, boas_vindas_email_enviado_em,
               boas_vindas_email_erro, transportadora_id, usuario_admin_id, data_cadastro
-       FROM assinaturas_pendentes
+       FROM assinaturas
        WHERE referencia_externa = $1`,
       [referencia]
     );
@@ -732,7 +738,7 @@ router.get("/public/status/:referencia", async (requisicao, resposta) => {
       `SELECT id, referencia_externa, plano_codigo, plano_nome, valor, nome_transportadora, nome_admin, email_admin,
               stripe_checkout_session_id, stripe_subscription_id, status, provisionado_em, boas_vindas_email_enviado_em,
               boas_vindas_email_erro, transportadora_id, usuario_admin_id, data_cadastro
-       FROM assinaturas_pendentes
+       FROM assinaturas
        WHERE referencia_externa = $1`,
       [referencia]
     );
@@ -745,7 +751,7 @@ router.get("/public/status/:referencia", async (requisicao, resposta) => {
         `SELECT id, referencia_externa, plano_codigo, plano_nome, valor, nome_transportadora, nome_admin, email_admin,
                 stripe_checkout_session_id, stripe_subscription_id, status, provisionado_em, boas_vindas_email_enviado_em,
                 boas_vindas_email_erro, transportadora_id, usuario_admin_id, data_cadastro
-         FROM assinaturas_pendentes
+         FROM assinaturas
          WHERE referencia_externa = $1`,
         [referencia]
       );
@@ -786,9 +792,10 @@ router.post("/stripe/webhook", async (requisicao, resposta) => {
         const referenciaExterna = String((session.metadata && session.metadata.referencia_externa) || "").trim();
 
         await banco.query(
-          `UPDATE assinaturas_pendentes
+          `UPDATE assinaturas
            SET stripe_customer_id = COALESCE($1, stripe_customer_id),
                stripe_subscription_id = COALESCE($2, stripe_subscription_id),
+               gateway_assinatura_id = COALESCE($2, gateway_assinatura_id),
                status = 'checkout_concluido',
                ultimo_payload = $3::jsonb,
                data_atualizacao = CURRENT_TIMESTAMP
@@ -828,7 +835,7 @@ router.post("/stripe/webhook", async (requisicao, resposta) => {
       );
 
       await banco.query(
-        `UPDATE assinaturas_pendentes
+        `UPDATE assinaturas
          SET status = $1,
              ultimo_payload = $2::jsonb,
              data_atualizacao = CURRENT_TIMESTAMP

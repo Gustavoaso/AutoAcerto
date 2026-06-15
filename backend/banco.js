@@ -129,50 +129,33 @@ async function criarTabelas() {
   `);
 
   await banco.query(`
-    CREATE TABLE IF NOT EXISTS assinaturas_pendentes (
-      id SERIAL PRIMARY KEY,
-      referencia_externa VARCHAR(120) NOT NULL UNIQUE,
-      gateway VARCHAR(40) NOT NULL DEFAULT 'mercado_pago',
-      plano_codigo VARCHAR(40) NOT NULL,
-      plano_nome VARCHAR(120) NOT NULL,
-      valor NUMERIC(10,2) NOT NULL,
-      nome_transportadora VARCHAR(255) NOT NULL,
-      cnpj VARCHAR(18),
-      nome_admin VARCHAR(255) NOT NULL,
-      email_admin VARCHAR(255) NOT NULL,
-      senha_hash_admin VARCHAR(255) NOT NULL,
-      mercado_pago_preapproval_id VARCHAR(120),
-      stripe_checkout_session_id VARCHAR(120),
-      stripe_customer_id VARCHAR(120),
-      stripe_subscription_id VARCHAR(120),
-      status VARCHAR(40) NOT NULL DEFAULT 'aguardando_pagamento',
-      provisionado_em TIMESTAMP,
-      boas_vindas_email_enviado_em TIMESTAMP,
-      boas_vindas_email_erro TEXT,
-      transportadora_id INTEGER REFERENCES transportadoras(id),
-      usuario_admin_id INTEGER REFERENCES usuarios(id),
-      ultimo_payload JSONB,
-      data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  await banco.query(`
     CREATE TABLE IF NOT EXISTS assinaturas (
       id SERIAL PRIMARY KEY,
-      transportadora_id INTEGER NOT NULL REFERENCES transportadoras(id) ON DELETE CASCADE,
+      transportadora_id INTEGER REFERENCES transportadoras(id) ON DELETE CASCADE,
       plano_codigo VARCHAR(40) NOT NULL,
       plano_nome VARCHAR(120) NOT NULL,
       gateway VARCHAR(40) NOT NULL DEFAULT 'mercado_pago',
-      gateway_assinatura_id VARCHAR(120) NOT NULL UNIQUE,
+      gateway_assinatura_id VARCHAR(120) UNIQUE,
       referencia_externa VARCHAR(120) NOT NULL UNIQUE,
       status VARCHAR(40) NOT NULL,
       valor NUMERIC(10,2) NOT NULL,
+      nome_transportadora VARCHAR(255),
+      cnpj VARCHAR(18),
+      nome_admin VARCHAR(255),
+      email_admin VARCHAR(255),
+      senha_hash_admin VARCHAR(255),
+      mercado_pago_preapproval_id VARCHAR(120),
+      stripe_checkout_session_id VARCHAR(120),
+      stripe_subscription_id VARCHAR(120),
       stripe_customer_id VARCHAR(120),
       stripe_price_id VARCHAR(120),
       proxima_cobranca_em TIMESTAMP,
       cancel_at_period_end BOOLEAN NOT NULL DEFAULT FALSE,
       email_pagador VARCHAR(255),
+      provisionado_em TIMESTAMP,
+      boas_vindas_email_enviado_em TIMESTAMP,
+      boas_vindas_email_erro TEXT,
+      usuario_admin_id INTEGER REFERENCES usuarios(id),
       pagamento_pendente_em TIMESTAMP,
       bloqueada_em TIMESTAMP,
       cancelada_em TIMESTAMP,
@@ -224,12 +207,11 @@ async function criarIndices() {
   await banco.query("CREATE INDEX IF NOT EXISTS idx_usuarios_motorista ON usuarios(motorista_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_recuperacao_usuario ON recuperacao_senha(usuario_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_recuperacao_token_hash ON recuperacao_senha(token_hash)");
-  await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_pendentes_email_admin ON assinaturas_pendentes(email_admin)");
-  await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_pendentes_preapproval ON assinaturas_pendentes(mercado_pago_preapproval_id)");
-  await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_pendentes_checkout_session ON assinaturas_pendentes(stripe_checkout_session_id)");
-  await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_pendentes_subscription ON assinaturas_pendentes(stripe_subscription_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_transportadora ON assinaturas(transportadora_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_gateway_assinatura ON assinaturas(gateway_assinatura_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_email_admin ON assinaturas(email_admin)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_checkout_session ON assinaturas(stripe_checkout_session_id)");
+  await banco.query("CREATE INDEX IF NOT EXISTS idx_assinaturas_subscription ON assinaturas(stripe_subscription_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_notificacoes_usuario ON notificacoes(usuario_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_notificacoes_transportadora ON notificacoes(transportadora_id)");
   await banco.query("CREATE INDEX IF NOT EXISTS idx_notificacoes_lida ON notificacoes(lida_em)");
@@ -338,7 +320,14 @@ async function garantirEstruturaUsuarios() {
   await banco.query("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0");
 }
 
-async function garantirEstruturaAssinaturas() {
+async function tabelaExiste(nomeTabela) {
+  const resultado = await banco.query("SELECT to_regclass($1) AS tabela", [nomeTabela]);
+  return Boolean(resultado.rows[0] && resultado.rows[0].tabela);
+}
+
+async function migrarAssinaturasPendentesParaAssinaturas() {
+  if (!(await tabelaExiste("assinaturas_pendentes"))) return;
+
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS gateway VARCHAR(40) NOT NULL DEFAULT 'mercado_pago'");
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS plano_codigo VARCHAR(40) NOT NULL DEFAULT 'essencial'");
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS plano_nome VARCHAR(120) NOT NULL DEFAULT 'Plano Essencial'");
@@ -355,15 +344,78 @@ async function garantirEstruturaAssinaturas() {
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS usuario_admin_id INTEGER REFERENCES usuarios(id)");
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS ultimo_payload JSONB");
   await banco.query("ALTER TABLE assinaturas_pendentes ADD COLUMN IF NOT EXISTS data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+
+  await banco.query(`
+    INSERT INTO assinaturas
+      (transportadora_id, plano_codigo, plano_nome, gateway, gateway_assinatura_id, referencia_externa, status, valor,
+       nome_transportadora, cnpj, nome_admin, email_admin, senha_hash_admin, mercado_pago_preapproval_id,
+       stripe_checkout_session_id, stripe_subscription_id, stripe_customer_id, email_pagador,
+       provisionado_em, boas_vindas_email_enviado_em, boas_vindas_email_erro, usuario_admin_id,
+       ultimo_payload, data_cadastro, data_atualizacao)
+    SELECT
+      transportadora_id, plano_codigo, plano_nome, gateway, stripe_subscription_id, referencia_externa, status, valor,
+      nome_transportadora, cnpj, nome_admin, email_admin, senha_hash_admin, mercado_pago_preapproval_id,
+      stripe_checkout_session_id, stripe_subscription_id, stripe_customer_id, email_admin,
+      provisionado_em, boas_vindas_email_enviado_em, boas_vindas_email_erro, usuario_admin_id,
+      ultimo_payload, data_cadastro, data_atualizacao
+    FROM assinaturas_pendentes
+    ON CONFLICT (referencia_externa)
+    DO UPDATE SET
+      transportadora_id = COALESCE(EXCLUDED.transportadora_id, assinaturas.transportadora_id),
+      plano_codigo = EXCLUDED.plano_codigo,
+      plano_nome = EXCLUDED.plano_nome,
+      gateway = EXCLUDED.gateway,
+      gateway_assinatura_id = COALESCE(assinaturas.gateway_assinatura_id, EXCLUDED.gateway_assinatura_id),
+      status = EXCLUDED.status,
+      valor = EXCLUDED.valor,
+      nome_transportadora = COALESCE(assinaturas.nome_transportadora, EXCLUDED.nome_transportadora),
+      cnpj = COALESCE(assinaturas.cnpj, EXCLUDED.cnpj),
+      nome_admin = COALESCE(assinaturas.nome_admin, EXCLUDED.nome_admin),
+      email_admin = COALESCE(assinaturas.email_admin, EXCLUDED.email_admin),
+      senha_hash_admin = COALESCE(assinaturas.senha_hash_admin, EXCLUDED.senha_hash_admin),
+      mercado_pago_preapproval_id = COALESCE(assinaturas.mercado_pago_preapproval_id, EXCLUDED.mercado_pago_preapproval_id),
+      stripe_checkout_session_id = COALESCE(assinaturas.stripe_checkout_session_id, EXCLUDED.stripe_checkout_session_id),
+      stripe_subscription_id = COALESCE(assinaturas.stripe_subscription_id, EXCLUDED.stripe_subscription_id),
+      stripe_customer_id = COALESCE(EXCLUDED.stripe_customer_id, assinaturas.stripe_customer_id),
+      email_pagador = COALESCE(assinaturas.email_pagador, EXCLUDED.email_pagador),
+      provisionado_em = COALESCE(assinaturas.provisionado_em, EXCLUDED.provisionado_em),
+      boas_vindas_email_enviado_em = COALESCE(assinaturas.boas_vindas_email_enviado_em, EXCLUDED.boas_vindas_email_enviado_em),
+      boas_vindas_email_erro = COALESCE(EXCLUDED.boas_vindas_email_erro, assinaturas.boas_vindas_email_erro),
+      usuario_admin_id = COALESCE(EXCLUDED.usuario_admin_id, assinaturas.usuario_admin_id),
+      ultimo_payload = COALESCE(EXCLUDED.ultimo_payload, assinaturas.ultimo_payload),
+      data_atualizacao = GREATEST(
+        COALESCE(EXCLUDED.data_atualizacao, CURRENT_TIMESTAMP),
+        COALESCE(assinaturas.data_atualizacao, CURRENT_TIMESTAMP)
+      )
+  `);
+}
+
+async function garantirEstruturaAssinaturas() {
+  await banco.query("ALTER TABLE assinaturas ALTER COLUMN transportadora_id DROP NOT NULL");
+  await banco.query("ALTER TABLE assinaturas ALTER COLUMN gateway_assinatura_id DROP NOT NULL");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS nome_transportadora VARCHAR(255)");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS cnpj VARCHAR(18)");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS nome_admin VARCHAR(255)");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS email_admin VARCHAR(255)");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS senha_hash_admin VARCHAR(255)");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS mercado_pago_preapproval_id VARCHAR(120)");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS stripe_checkout_session_id VARCHAR(120)");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(120)");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(120)");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS stripe_price_id VARCHAR(120)");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS cancel_at_period_end BOOLEAN NOT NULL DEFAULT FALSE");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS email_pagador VARCHAR(255)");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS provisionado_em TIMESTAMP");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS boas_vindas_email_enviado_em TIMESTAMP");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS boas_vindas_email_erro TEXT");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS usuario_admin_id INTEGER REFERENCES usuarios(id)");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS pagamento_pendente_em TIMESTAMP");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS bloqueada_em TIMESTAMP");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS cancelada_em TIMESTAMP");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS ultimo_payload JSONB");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+  await migrarAssinaturasPendentesParaAssinaturas();
+  await banco.query("DROP TABLE IF EXISTS assinaturas_pendentes");
 }
 
 async function garantirEstruturaNotificacoes() {

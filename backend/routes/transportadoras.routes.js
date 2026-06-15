@@ -213,7 +213,6 @@ router.delete(["/", "/:id"], exigirDonoSistema, async (requisicao, resposta) => 
       await cliente.query(`DELETE FROM despesas WHERE viagem_id IN (${placeholderIds(idsViagens, 1)})`, idsViagens);
     }
 
-    await cliente.query(`DELETE FROM assinaturas_pendentes WHERE transportadora_id IN (${marcadores})`, ids);
     await cliente.query(`DELETE FROM assinaturas WHERE transportadora_id IN (${marcadores})`, ids);
     await cliente.query(`DELETE FROM despesas WHERE transportadora_id IN (${marcadores})`, ids);
     await cliente.query(`DELETE FROM viagens WHERE transportadora_id IN (${marcadores})`, ids);
