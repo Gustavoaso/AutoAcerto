@@ -19,6 +19,10 @@ function criarIconeEditar() {
     return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
 }
 
+function criarIconeFinalizar() {
+    return '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg>';
+}
+
 async function carregarViagens() {
     try {
         const response = await fetch(urlApiViagens, { headers: cabecalhosAutenticados() });
@@ -87,6 +91,9 @@ function renderizarTabelaViagens(listaViagens) {
     listaViagens.forEach(function (viagem) {
         const linha = document.createElement("tr");
         linha.classList.add("linha-tabela");
+        const botaoFinalizar = podeEditar && viagem.status === "em andamento"
+            ? `<button class="botao-acao" onclick="abrirModalFinalizarViagem(${viagem.id})">${criarIconeFinalizar()}Finalizar</button>`
+            : "";
 
         linha.innerHTML = `
             ${exclusaoViagens ? exclusaoViagens.colunaLinha(viagem.id) : ""}
@@ -112,6 +119,7 @@ function renderizarTabelaViagens(listaViagens) {
                 <div class="grupo-acoes">
                     <button class="botao-acao" onclick="window.location.href='ver-viagem.html?id=${viagem.id}'">${criarIconeVer()}Ver</button>
                     ${podeEditar ? `<button class="botao-acao" onclick="window.location.href='editar-viagem.html?id=${viagem.id}'">${criarIconeEditar()}Editar</button>` : ""}
+                    ${botaoFinalizar}
                 </div>
             </td>
         `;
@@ -120,6 +128,76 @@ function renderizarTabelaViagens(listaViagens) {
     });
 
     if (exclusaoViagens) exclusaoViagens.aposRender(listaViagens);
+}
+
+function obterViagemPorId(idViagem) {
+    return viagens.find(function (viagem) {
+        return String(viagem.id) === String(idViagem);
+    });
+}
+
+function abrirModalFinalizarViagem(idViagem) {
+    const viagem = obterViagemPorId(idViagem);
+    const modal = document.getElementById("modalFinalizarViagem");
+    const campoKmFinal = document.getElementById("kmFinalFinalizacao");
+
+    if (!viagem || !modal || !campoKmFinal) return;
+
+    modal.dataset.viagemId = idViagem;
+    modal.dataset.kmInicial = viagem.km_inicial == null ? "" : viagem.km_inicial;
+    campoKmFinal.value = "";
+    campoKmFinal.min = viagem.km_inicial == null ? "0" : String(viagem.km_inicial);
+    modal.classList.remove("oculto");
+    campoKmFinal.focus();
+}
+
+function fecharModalFinalizarViagem() {
+    const modal = document.getElementById("modalFinalizarViagem");
+    if (!modal) return;
+
+    modal.classList.add("oculto");
+    modal.dataset.viagemId = "";
+    modal.dataset.kmInicial = "";
+}
+
+async function confirmarFinalizacaoViagem() {
+    const modal = document.getElementById("modalFinalizarViagem");
+    const campoKmFinal = document.getElementById("kmFinalFinalizacao");
+    const idViagem = modal ? modal.dataset.viagemId : "";
+    const kmFinal = parseInt(campoKmFinal ? campoKmFinal.value : "", 10);
+    const kmInicial = modal && modal.dataset.kmInicial !== "" ? Number(modal.dataset.kmInicial) : null;
+
+    if (!idViagem) return;
+
+    if (!Number.isInteger(kmFinal) || kmFinal < 0) {
+        alert("Informe o KM final da viagem.");
+        return;
+    }
+
+    if (kmInicial !== null && kmFinal < kmInicial) {
+        alert("O KM final não pode ser menor que o KM inicial.");
+        return;
+    }
+
+    try {
+        const resposta = await fetch(urlApiViagens + "/" + idViagem + "/finalizar", {
+            method: "PATCH",
+            headers: cabecalhosAutenticados(),
+            body: JSON.stringify({ kmFinal: kmFinal })
+        });
+
+        if (!resposta.ok) {
+            const erro = await resposta.json();
+            alert(erro.mensagem || "Erro ao finalizar viagem.");
+            return;
+        }
+
+        fecharModalFinalizarViagem();
+        await carregarViagens();
+    } catch (erro) {
+        console.error("Erro ao finalizar viagem:", erro);
+        alert("Erro de conexão com a API.");
+    }
 }
 
 function atualizarResumoViagens() {
@@ -170,6 +248,26 @@ function configurarEventosViagens() {
     if (botaoNovaViagem) {
         botaoNovaViagem.addEventListener("click", function () {
             window.location.href = "cadastro-viagem.html";
+        });
+    }
+
+    const botaoCancelarFinalizacao = document.getElementById("botaoCancelarFinalizacao");
+    const botaoConfirmarFinalizacao = document.getElementById("botaoConfirmarFinalizacao");
+    const modalFinalizar = document.getElementById("modalFinalizarViagem");
+
+    if (botaoCancelarFinalizacao) {
+        botaoCancelarFinalizacao.addEventListener("click", fecharModalFinalizarViagem);
+    }
+
+    if (botaoConfirmarFinalizacao) {
+        botaoConfirmarFinalizacao.addEventListener("click", confirmarFinalizacaoViagem);
+    }
+
+    if (modalFinalizar) {
+        modalFinalizar.addEventListener("click", function (evento) {
+            if (evento.target.classList.contains("fundo-modal-finalizar")) {
+                fecharModalFinalizarViagem();
+            }
         });
     }
 

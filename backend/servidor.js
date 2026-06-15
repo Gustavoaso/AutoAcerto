@@ -928,7 +928,7 @@ app.put("/veiculos/:id", exigirAdmin, async (requisicao, resposta) => {
 app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
   const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
 
-  if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || kmInicial == null || kmFinal == null || !status) {
+  if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || kmInicial == null) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
@@ -936,14 +936,22 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
     return resposta.status(400).json({ mensagem: "A data de chegada nao pode ser menor que a data de saida." });
   }
 
+  const statusFinal = calcularStatusViagemPorPeriodo(dataSaida, dataChegada, status);
   const kmInicialNum = parseInt(kmInicial, 10);
-  const kmFinalNum = parseInt(kmFinal, 10);
+  const kmFinalInformado = kmFinal !== undefined && kmFinal !== null && kmFinal !== "";
+  const kmFinalNum = kmFinalInformado ? parseInt(kmFinal, 10) : null;
 
-  if (!Number.isInteger(kmInicialNum) || !Number.isInteger(kmFinalNum) || kmInicialNum < 0 || kmFinalNum < 0) {
-    return resposta.status(400).json({ mensagem: "Informe os KM da viagem corretamente." });
+  if (!Number.isInteger(kmInicialNum) || kmInicialNum < 0) {
+    return resposta.status(400).json({ mensagem: "Informe o KM inicial da viagem corretamente." });
   }
 
-  if (kmFinalNum < kmInicialNum) {
+  if (statusFinal === "finalizada" && (!Number.isInteger(kmFinalNum) || kmFinalNum < 0)) {
+    return resposta.status(400).json({ mensagem: "Informe o KM final da viagem." });
+  }
+
+  const kmFinalParaSalvar = statusFinal === "em andamento" ? null : kmFinalNum;
+
+  if (kmFinalNum !== null && kmFinalNum < kmInicialNum) {
     return resposta.status(400).json({ mensagem: "O KM final não pode ser menor que o KM inicial." });
   }
 
@@ -961,14 +969,12 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
       return resposta.status(400).json({ mensagem: "Motorista ou veículo não encontrado para esta transportadora." });
     }
 
-    const statusFinal = calcularStatusViagemPorPeriodo(dataSaida, dataChegada, status);
-
     const sql = `
       INSERT INTO viagens (transportadora_id, origem, destino, motorista_id, veiculo_id, data_saida, data_chegada, valor_frete, km_inicial, km_final, status, observacoes)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING id
     `;
-    const valores = [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, statusFinal, observacoes || ""];
+    const valores = [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalParaSalvar, statusFinal, observacoes || ""];
 
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Viagem cadastrada com sucesso.", id: resultado.rows[0].id });
@@ -1136,6 +1142,54 @@ app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
   } catch (erro) {
     console.error("Erro ao atualizar viagem:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao atualizar viagem no banco de dados." });
+  }
+});
+
+app.patch("/viagens/:id/finalizar", exigirAdmin, async (requisicao, resposta) => {
+  const { id } = requisicao.params;
+  const { kmFinal } = requisicao.body;
+  const kmFinalNum = parseInt(kmFinal, 10);
+
+  if (!Number.isInteger(kmFinalNum) || kmFinalNum < 0) {
+    return resposta.status(400).json({ mensagem: "Informe o KM final da viagem." });
+  }
+
+  try {
+    const transportadoraId = await transportadoraEscopoMutacao(requisicao, "viagens", id);
+    if (transportadoraId === null) {
+      return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
+    }
+
+    const viagemAtual = await banco.query(
+      "SELECT km_inicial, status FROM viagens WHERE id=$1 AND transportadora_id=$2",
+      [id, transportadoraId]
+    );
+
+    if (viagemAtual.rows.length === 0) {
+      return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
+    }
+
+    if (viagemAtual.rows[0].status !== "em andamento") {
+      return resposta.status(400).json({ mensagem: "Apenas viagens em andamento podem ser finalizadas." });
+    }
+
+    const kmInicialAtual = viagemAtual.rows[0].km_inicial;
+    if (kmInicialAtual !== null && kmFinalNum < Number(kmInicialAtual)) {
+      return resposta.status(400).json({ mensagem: "O KM final não pode ser menor que o KM inicial." });
+    }
+
+    const resultado = await banco.query(
+      `UPDATE viagens
+       SET data_chegada=$1, km_final=$2, status='finalizada'
+       WHERE id=$3 AND transportadora_id=$4
+       RETURNING *`,
+      [obterDataHojeIso(), kmFinalNum, id, transportadoraId]
+    );
+
+    return resposta.json({ mensagem: "Viagem finalizada com sucesso.", viagem: resultado.rows[0] });
+  } catch (erro) {
+    console.error("Erro ao finalizar viagem:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao finalizar viagem." });
   }
 });
 

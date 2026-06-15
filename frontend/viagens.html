@@ -177,6 +177,24 @@
     </main>
   </div>
 
+  <div id="modalFinalizarViagem" class="modal-finalizar-viagem oculto">
+    <div class="fundo-modal-finalizar"></div>
+    <div class="caixa-modal-finalizar">
+      <h3>Finalizar viagem</h3>
+      <p>Informe o KM final para concluir a viagem. A data de chegada será atualizada para hoje.</p>
+
+      <div class="grupo-campo">
+        <label for="kmFinalFinalizacao">KM final</label>
+        <input type="number" id="kmFinalFinalizacao" min="0" step="1" placeholder="Ex: 120850" />
+      </div>
+
+      <div class="acoes-modal-finalizar">
+        <button type="button" class="botao-secundario" id="botaoCancelarFinalizacao">Cancelar</button>
+        <button type="button" class="botao-primario" id="botaoConfirmarFinalizacao">Finalizar viagem</button>
+      </div>
+    </div>
+  </div>
+
    <script src="/JavaScript/config.js"></script>
 <script src="/JavaScript/auth.js"></script>
     <script src="/JavaScript/exclusao-listas.js"></script>

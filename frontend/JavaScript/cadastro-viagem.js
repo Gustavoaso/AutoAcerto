@@ -22,12 +22,37 @@ function calcularStatusViagem(dataSaida, dataChegada) {
 
 function atualizarStatusPorDatas() {
   const status = document.getElementById("status");
+  const kmFinal = document.getElementById("kmFinal");
   const dataSaida = document.getElementById("dataSaida").value;
   const dataChegada = document.getElementById("dataChegada").value;
   const statusCalculado = calcularStatusViagem(dataSaida, dataChegada);
 
+  Array.from(status.options).forEach(function (opcao) {
+    opcao.disabled = false;
+  });
+
   if (statusCalculado) {
     status.value = statusCalculado;
+
+    Array.from(status.options).forEach(function (opcao) {
+      const opcaoOposta =
+        (statusCalculado === "em andamento" && opcao.value === "finalizada") ||
+        (statusCalculado === "finalizada" && opcao.value === "em andamento");
+
+      if (opcaoOposta) {
+        opcao.disabled = true;
+      }
+    });
+  }
+
+  if (kmFinal) {
+    const viagemEmAndamento = statusCalculado === "em andamento";
+    kmFinal.disabled = viagemEmAndamento;
+    kmFinal.required = !viagemEmAndamento;
+
+    if (viagemEmAndamento) {
+      kmFinal.value = "";
+    }
   }
 }
 
@@ -102,14 +127,15 @@ function configurarFormularioViagem() {
     }
 
     const kmInicialNum = parseInt(document.getElementById("kmInicial").value, 10);
-    const kmFinalNum = parseInt(document.getElementById("kmFinal").value, 10);
+    const kmFinalValor = document.getElementById("kmFinal").value;
+    const kmFinalNum = kmFinalValor === "" ? null : parseInt(kmFinalValor, 10);
 
-    if (isNaN(kmInicialNum) || kmInicialNum < 0 || isNaN(kmFinalNum) || kmFinalNum < 0) {
+    if (isNaN(kmInicialNum) || kmInicialNum < 0) {
       alert("Informe os KM da viagem corretamente.");
       return;
     }
 
-    if (kmFinalNum < kmInicialNum) {
+    if (kmFinalNum !== null && kmFinalNum < kmInicialNum) {
       alert("O KM final não pode ser menor que o KM inicial.");
       return;
     }
@@ -122,6 +148,11 @@ function configurarFormularioViagem() {
     }
     const statusCalculado = calcularStatusViagem(dataSaida, dataChegada);
 
+    if (statusCalculado === "finalizada" && (kmFinalNum === null || isNaN(kmFinalNum) || kmFinalNum < 0)) {
+      alert("Informe o KM final da viagem.");
+      return;
+    }
+
     let dados = {
       origem: document.getElementById("origem").value,
       destino: document.getElementById("destino").value,
@@ -131,7 +162,7 @@ function configurarFormularioViagem() {
       dataChegada: dataChegada,
       valorFrete: valorFreteNum,
       kmInicial: kmInicialNum,
-      kmFinal: kmFinalNum,
+      kmFinal: statusCalculado === "em andamento" ? null : kmFinalNum,
       status: statusCalculado || document.getElementById("status").value,
       observacoes: document.getElementById("observacoes").value
     };
@@ -167,10 +198,12 @@ function configurarFormularioViagem() {
 
   botaoLimpar.addEventListener("click", function () {
     document.getElementById("formularioViagem").reset();
+    atualizarStatusPorDatas();
   });
 
   document.getElementById("dataSaida").addEventListener("change", atualizarStatusPorDatas);
   document.getElementById("dataChegada").addEventListener("change", atualizarStatusPorDatas);
+  atualizarStatusPorDatas();
 }
 
 function iniciarPaginaCadastroViagem() {
