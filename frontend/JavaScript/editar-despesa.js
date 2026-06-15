@@ -10,8 +10,21 @@ const botaoOk = document.getElementById("botaoOkModal");
 let tipoDespesaSelecionado = "viagem";
 let viagensDisponiveis = [];
 
-function dataParaInput(dataISO) {
-    return dataISO ? String(dataISO).slice(0, 10) : "";
+function normalizarDataIso(data) {
+    if (!data) return "";
+
+    const texto = String(data).trim();
+    const dataIso = texto.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (dataIso) {
+        return dataIso[1] + "-" + dataIso[2] + "-" + dataIso[3];
+    }
+
+    const dataBrasileira = texto.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (dataBrasileira) {
+        return dataBrasileira[3] + "-" + dataBrasileira[2] + "-" + dataBrasileira[1];
+    }
+
+    return "";
 }
 
 function obterViagemSelecionada(viagemId) {
@@ -163,8 +176,8 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
 
     if (tipoDespesaSelecionado === "viagem") {
         const viagemSelecionada = obterViagemSelecionada(viagemId);
-        const dataSaida = viagemSelecionada ? dataParaInput(viagemSelecionada.data_saida) : "";
-        const dataChegada = viagemSelecionada ? dataParaInput(viagemSelecionada.data_chegada) : "";
+        const dataSaida = viagemSelecionada ? normalizarDataIso(viagemSelecionada.data_saida) : "";
+        const dataChegada = viagemSelecionada ? normalizarDataIso(viagemSelecionada.data_chegada) : "";
 
         if (dataDespesa && dataSaida && dataChegada && (dataDespesa < dataSaida || dataDespesa > dataChegada)) {
             alert("A data da despesa deve estar dentro do periodo da viagem selecionada.");

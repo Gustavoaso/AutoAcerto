@@ -164,18 +164,42 @@ async function viagemPertenceTransportadora(viagemId, transportadoraId) {
   return resultado.rows.length > 0;
 }
 
-function dataIsoValida(data) {
-  return typeof data === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data) && !Number.isNaN(new Date(data + "T00:00:00").getTime());
+function normalizarDataIso(data) {
+  if (!data) return "";
+
+  if (data instanceof Date && !Number.isNaN(data.getTime())) {
+    return data.toISOString().slice(0, 10);
+  }
+
+  if (typeof data === "string") {
+    const textoOriginal = data.trim();
+    const dataBrasileira = textoOriginal.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (dataBrasileira) {
+      return dataBrasileira[3] + "-" + dataBrasileira[2] + "-" + dataBrasileira[1];
+    }
+
+    const texto = textoOriginal.slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(texto) && !Number.isNaN(new Date(texto + "T00:00:00").getTime())) {
+      return texto;
+    }
+  }
+
+  return "";
 }
 
 function dataFinalAntesDaInicial(dataInicio, dataFim) {
-  if (!dataIsoValida(dataInicio) || !dataIsoValida(dataFim)) return true;
-  return dataFim < dataInicio;
+  const inicio = normalizarDataIso(dataInicio);
+  const fim = normalizarDataIso(dataFim);
+  if (!inicio || !fim) return true;
+  return fim < inicio;
 }
 
 function dataForaDoPeriodo(data, dataInicio, dataFim) {
-  if (!dataIsoValida(data) || !dataIsoValida(dataInicio) || !dataIsoValida(dataFim)) return true;
-  return data < dataInicio || data > dataFim;
+  const dataNormalizada = normalizarDataIso(data);
+  const inicio = normalizarDataIso(dataInicio);
+  const fim = normalizarDataIso(dataFim);
+  if (!dataNormalizada || !inicio || !fim) return true;
+  return dataNormalizada < inicio || dataNormalizada > fim;
 }
 
 // ============================================================
@@ -1122,11 +1146,11 @@ app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
     let veiculoIdFinal = null;
 
     if (tipoDespesaFinal === "viagem") {
-      const vr = await banco.query("SELECT transportadora_id, data_saida, data_chegada FROM viagens WHERE id=$1", [viagemId]);
+      const vr = await banco.query("SELECT transportadora_id, to_char(data_saida, 'YYYY-MM-DD') AS data_saida, to_char(data_chegada, 'YYYY-MM-DD') AS data_chegada FROM viagens WHERE id=$1", [viagemId]);
       if (vr.rows.length === 0) {
         return resposta.status(400).json({ mensagem: "Viagem não encontrada." });
       }
-      if (dataForaDoPeriodo(dataDespesa, String(vr.rows[0].data_saida).slice(0, 10), String(vr.rows[0].data_chegada).slice(0, 10))) {
+      if (dataForaDoPeriodo(dataDespesa, vr.rows[0].data_saida, vr.rows[0].data_chegada)) {
         return resposta.status(400).json({ mensagem: "A data da despesa deve estar dentro do periodo da viagem selecionada." });
       }
 
@@ -1267,11 +1291,11 @@ app.put("/despesas/:id", exigirAdmin, async (requisicao, resposta) => {
     let veiculoIdFinal = null;
 
     if (tipoDespesaFinal === "viagem") {
-      const vr = await banco.query("SELECT transportadora_id, data_saida, data_chegada FROM viagens WHERE id=$1", [viagemId]);
+      const vr = await banco.query("SELECT transportadora_id, to_char(data_saida, 'YYYY-MM-DD') AS data_saida, to_char(data_chegada, 'YYYY-MM-DD') AS data_chegada FROM viagens WHERE id=$1", [viagemId]);
       if (vr.rows.length === 0 || vr.rows[0].transportadora_id !== transportadoraId) {
         return resposta.status(400).json({ mensagem: "Viagem invalida para o escopo desta despesa." });
       }
-      if (dataForaDoPeriodo(dataDespesa, String(vr.rows[0].data_saida).slice(0, 10), String(vr.rows[0].data_chegada).slice(0, 10))) {
+      if (dataForaDoPeriodo(dataDespesa, vr.rows[0].data_saida, vr.rows[0].data_chegada)) {
         return resposta.status(400).json({ mensagem: "A data da despesa deve estar dentro do periodo da viagem selecionada." });
       }
 
