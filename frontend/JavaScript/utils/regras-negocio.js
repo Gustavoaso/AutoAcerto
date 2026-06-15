@@ -59,6 +59,9 @@
             if (viagem.data_saida && !dataMaiorOuIgual(dataDespesa, viagem.data_saida)) {
                 return "A data da despesa nao pode ser anterior a data de saida da viagem.";
             }
+            if (viagem.data_chegada && !dataMaiorOuIgual(viagem.data_chegada, dataDespesa)) {
+                return "A data da despesa nao pode ser posterior a data final da viagem.";
+            }
             if (!dataNaoFutura(dataDespesa)) {
                 return "A data da despesa nao pode ser futura.";
             }

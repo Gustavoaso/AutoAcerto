@@ -180,6 +180,23 @@ router.patch("/:id/finalizar", exigirAdminOuMotorista, autorizarAcessoViagem, as
       return resposta.status(400).json({ mensagem: "O KM final nao pode ser menor que o KM inicial." });
     }
 
+    const despesasFuturas = await banco.query(
+      `SELECT id, descricao, data_despesa
+       FROM despesas
+       WHERE viagem_id = $1
+         AND transportadora_id = $2
+         AND data_despesa > $3::date
+       ORDER BY data_despesa ASC, id ASC
+       LIMIT 1`,
+      [id, transportadoraId, dataChegadaFinal]
+    );
+
+    if (despesasFuturas.rows.length > 0) {
+      return resposta.status(400).json({
+        mensagem: "Existe uma despesa vinculada a esta viagem com data maior do que a data de finalizacao. Ajuste a despesa antes de concluir a viagem."
+      });
+    }
+
     const resultado = await banco.query(
       `UPDATE viagens
        SET data_chegada=$1, km_final=$2, status='finalizada'

@@ -72,7 +72,7 @@ router.post("/", exigirAdminOuMotorista, async (requisicao, resposta) => {
     let veiculoIdFinal = null;
 
     if (tipoDespesaFinal === "viagem") {
-      const vr = await banco.query("SELECT transportadora_id, motorista_id, data_saida, status FROM viagens WHERE id=$1", [viagemId]);
+      const vr = await banco.query("SELECT transportadora_id, motorista_id, data_saida, data_chegada, status FROM viagens WHERE id=$1", [viagemId]);
       if (vr.rows.length === 0) {
         return resposta.status(400).json({ mensagem: "Viagem não encontrada." });
       }
@@ -84,6 +84,9 @@ router.post("/", exigirAdminOuMotorista, async (requisicao, resposta) => {
       }
       if (!dataMaiorOuIgual(dataDespesa, vr.rows[0].data_saida)) {
         return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser anterior a data de saida da viagem." });
+      }
+      if (vr.rows[0].data_chegada && !dataMaiorOuIgual(vr.rows[0].data_chegada, dataDespesa)) {
+        return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser posterior a data final da viagem." });
       }
       if (!dataNaoFutura(dataDespesa)) {
         return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser futura." });
@@ -305,7 +308,7 @@ router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
     let veiculoIdFinal = null;
 
     if (tipoDespesaFinal === "viagem") {
-      const vr = await banco.query("SELECT transportadora_id, data_saida, status FROM viagens WHERE id=$1", [viagemId]);
+      const vr = await banco.query("SELECT transportadora_id, data_saida, data_chegada, status FROM viagens WHERE id=$1", [viagemId]);
       if (vr.rows.length === 0 || vr.rows[0].transportadora_id !== transportadoraId) {
         return resposta.status(400).json({ mensagem: "Viagem invalida para o escopo desta despesa." });
       }
@@ -314,6 +317,9 @@ router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
       }
       if (!dataMaiorOuIgual(dataDespesa, vr.rows[0].data_saida)) {
         return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser anterior a data de saida da viagem." });
+      }
+      if (vr.rows[0].data_chegada && !dataMaiorOuIgual(vr.rows[0].data_chegada, dataDespesa)) {
+        return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser posterior a data final da viagem." });
       }
       if (!dataNaoFutura(dataDespesa)) {
         return resposta.status(400).json({ mensagem: "A data da despesa nao pode ser futura." });

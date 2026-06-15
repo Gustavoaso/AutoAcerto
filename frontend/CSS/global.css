@@ -530,6 +530,17 @@ button {
   display: none;
 }
 
+.botao-notificacoes-topo {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.botao-notificacoes-topo svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
 .botao-empresa-topo {
   min-height: 40px;
   display: inline-flex;
@@ -573,14 +584,15 @@ button {
 .painel-topo-info {
   position: absolute;
   top: calc(100% + 10px);
-  right: 32px;
-  width: min(380px, calc(100vw - 40px));
-  padding: 14px 16px;
+  right: 24px;
+  width: min(380px, calc(100vw - 32px));
+  padding: 14px;
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-lg);
   background: var(--cor-superficie);
   box-shadow: var(--sombra-media);
-  z-index: 12;
+  z-index: 1000;
+  overflow: hidden;
 }
 
 .cabecalho-painel-notificacoes {
@@ -609,12 +621,14 @@ button {
 .lista-notificacoes-topo {
   display: grid;
   gap: 8px;
-  max-height: 420px;
+  max-height: 360px;
   overflow-y: auto;
+  padding-right: 2px;
 }
 
 .item-notificacao-topo {
   width: 100%;
+  min-width: 0;
   text-align: left;
   border: 1px solid var(--cor-borda);
   background: #ffffff;
@@ -639,6 +653,7 @@ button {
 .mensagem-notificacao-topo,
 .data-notificacao-topo {
   display: block;
+  overflow-wrap: anywhere;
 }
 
 .titulo-notificacao-topo {
@@ -2226,8 +2241,16 @@ textarea:invalid:not(:placeholder-shown) {
   border-color: var(--cor-erro);
 }
 
+input[type="date"]:invalid {
+  border-color: var(--cor-borda);
+}
+
 input:valid:not(:placeholder-shown),
 textarea:valid:not(:placeholder-shown) {
+  border-color: var(--cor-sucesso);
+}
+
+input[type="date"]:valid {
   border-color: var(--cor-sucesso);
 }
 

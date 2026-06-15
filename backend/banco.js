@@ -249,6 +249,12 @@ async function garantirConstraintsDominio() {
     console.warn("Erro ao dropar constraint veiculos_status_chk:", erro.message);
   }
 
+  try {
+    await banco.query("UPDATE veiculos SET status = 'ativo' WHERE status IN ('em viagem', 'manutencao', 'manutenÃ§Ã£o')");
+  } catch (erro) {
+    console.warn("Erro ao normalizar status de veiculos:", erro.message);
+  }
+
   await adicionarConstraint("motoristas_status_chk", {
     tabela: "motoristas",
     check: "status IN ('ativo', 'inativo')"
@@ -256,7 +262,7 @@ async function garantirConstraintsDominio() {
 
   await adicionarConstraint("veiculos_status_chk", {
     tabela: "veiculos",
-    check: "status IN ('ativo', 'inativo', 'em viagem', 'manutencao')"
+    check: "status IN ('ativo', 'inativo')"
   });
 
   await adicionarConstraint("veiculos_ano_chk", {

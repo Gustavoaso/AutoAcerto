@@ -30,8 +30,6 @@ function normalizarStatusVeiculo(status) {
 function criarSeloStatusVeiculo(status) {
   const statusTratado = normalizarStatusVeiculo(status);
   if (statusTratado === "ativo") return '<span class="selo-status selo-ativo">Ativo</span>';
-  if (statusTratado === "em viagem") return '<span class="selo-status selo-em-viagem">Em viagem</span>';
-  if (statusTratado === "manutencao") return '<span class="selo-status selo-manutencao">Manutencao</span>';
   return '<span class="selo-status selo-inativo">Inativo</span>';
 }
 
@@ -94,10 +92,8 @@ function atualizarResumoVeiculos(lista) {
   document.getElementById("totalVeiculos").textContent = lista.length;
   document.getElementById("totalVeiculosAtivos").textContent =
     lista.filter(function(v) { return normalizarStatusVeiculo(v.status) === "ativo"; }).length;
-  document.getElementById("totalEmViagem").textContent =
-    lista.filter(function(v) { return normalizarStatusVeiculo(v.status) === "em viagem"; }).length;
-  document.getElementById("totalEmManutencao").textContent =
-    lista.filter(function(v) { return normalizarStatusVeiculo(v.status) === "manutencao"; }).length;
+  document.getElementById("totalVeiculosInativos").textContent =
+    lista.filter(function(v) { return normalizarStatusVeiculo(v.status) !== "ativo"; }).length;
 }
 
 function aplicarFiltros() {

@@ -1,5 +1,5 @@
 const STATUS_MOTORISTA = new Set(["ativo", "inativo"]);
-const STATUS_VEICULO = new Set(["ativo", "inativo", "em viagem", "manutencao"]);
+const STATUS_VEICULO = new Set(["ativo", "inativo"]);
 const STATUS_VIAGEM = new Set(["em andamento", "finalizada", "cancelada"]);
 const CATEGORIAS_DESPESA = new Set(["combustivel", "pedagio", "alimentacao", "manutencao", "outros"]);
 const TIPOS_DESPESA = new Set(["viagem", "veiculo"]);
