@@ -279,7 +279,7 @@ function carregarViagensEmAndamento() {
 
   if (viagensEmAndamento.length === 0) {
     listaViagens.innerHTML = `
-      <div class="item-viagem">
+      <div class="item-viagem item-viagem-vazio">
         <div>
           <div class="rota-viagem">Nenhuma viagem em andamento</div>
           <div class="nome-motorista">Cadastre ou atualize uma viagem</div>
@@ -344,7 +344,7 @@ function montarFinanceiroMensal() {
     if (!chave) return;
 
     if (!mapaMeses[chave]) {
-      mapaMeses[chave] = { receita: 0, despesas: 0, lucro: 0 };
+      mapaMeses[chave] = { receita: 0, despesas: 0 };
     }
 
     mapaMeses[chave].receita += obterValorFrete(viagem);
@@ -356,28 +356,33 @@ function montarFinanceiroMensal() {
     if (!chave) return;
 
     if (!mapaMeses[chave]) {
-      mapaMeses[chave] = { receita: 0, despesas: 0, lucro: 0 };
+      mapaMeses[chave] = { receita: 0, despesas: 0 };
     }
 
     mapaMeses[chave].despesas += obterValorDespesa(despesa);
   });
 
-  return Object.keys(mapaMeses)
-    .sort()
-    .slice(-12)
+  const chavesOrdenadas = Object.keys(mapaMeses).sort();
+  let receitaAcumulada = 0;
+  let despesasAcumuladas = 0;
+
+  return chavesOrdenadas
     .map(function (chave) {
-      const item = mapaMeses[chave];
-      item.lucro = item.receita - item.despesas;
+      receitaAcumulada += mapaMeses[chave].receita;
+      despesasAcumuladas += mapaMeses[chave].despesas;
+
       return {
+        chave: chave,
         mes: usarPeriodoDiario ? obterRotuloDia(chave) : obterRotuloMes(chave),
-        receita: item.receita,
-        despesas: item.despesas,
-        lucro: item.lucro
+        receita: receitaAcumulada,
+        despesas: despesasAcumuladas,
+        lucro: receitaAcumulada - despesasAcumuladas
       };
     })
+    .slice(-12)
     .reduce(function (lista, item, indice, origem) {
       if (origem.length === 1 && usarPeriodoDiario) {
-        const dataPonto = obterDataLocal(Object.keys(mapaMeses).sort()[0]);
+        const dataPonto = obterDataLocal(item.chave);
         if (dataPonto) {
           dataPonto.setDate(dataPonto.getDate() - 1);
           lista.push({
@@ -389,6 +394,7 @@ function montarFinanceiroMensal() {
         }
       }
 
+      delete item.chave;
       lista.push(item);
       return lista;
     }, []);

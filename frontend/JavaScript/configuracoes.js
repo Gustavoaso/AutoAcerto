@@ -1,6 +1,6 @@
 // =============================================================
-// AUTOACERTO ? CONFIGURAÃ‡Ã•ES
-// Gerenciamento de perfil, usuÃ¡rios (admin) e seguranÃ§a.
+// AUTOACERTO ? CONFIGURAÇÕES
+// Gerenciamento de perfil, usuários (admin) e segurança.
 // =============================================================
 
 const urlApiUsuarios = montarUrlApi("/usuarios");
@@ -11,7 +11,7 @@ let usuariosVisiveis = [];
 let exclusaoUsuarios = null;
 
 // -------------------------------------------------------
-// SESSÃƒO
+// SESSÃO
 // -------------------------------------------------------
 
 function iniciarSessaoConfiguracoes() {
@@ -78,7 +78,7 @@ function configurarFormularioPerfil(usuario) {
 
   document.getElementById("formularioPerfil").addEventListener("submit", function (evento) {
     evento.preventDefault();
-    exibirToast("Funcionalidade disponÃ­vel em breve.", "info");
+    exibirToast("Funcionalidade disponível em breve.", "info");
   });
 }
 
@@ -88,7 +88,7 @@ function preencherTransportadoraPerfil(usuario) {
     if (usuario.perfil === "dono") {
       textoTransportadora.textContent = "Acesso global (sem transportadora fixa)";
     } else {
-      textoTransportadora.textContent = usuario.transportadora_nome || "Transportadora nÃ£o informada";
+      textoTransportadora.textContent = usuario.transportadora_nome || "Transportadora não informada";
     }
   }
 }
@@ -118,18 +118,18 @@ function preencherTipoPerfil(usuario) {
 }
 
 // -------------------------------------------------------
-// GERENCIAR USUÃRIOS (apenas admin)
+// GERENCIAR USUÁRIOS (apenas admin)
 // -------------------------------------------------------
 
 async function carregarUsuarios() {
   try {
     const resposta = await fetch(urlApiUsuarios, { headers: cabecalhosAutenticados() });
-    if (!resposta.ok) throw new Error("Erro ao buscar usuÃ¡rios.");
+    if (!resposta.ok) throw new Error("Erro ao buscar usuários.");
     listaUsuarios = await resposta.json();
     usuariosVisiveis = listaUsuarios;
     renderizarTabelaUsuarios(listaUsuarios);
   } catch (erro) {
-    console.error("Erro ao carregar usuÃ¡rios:", erro.message);
+    console.error("Erro ao carregar usuários:", erro.message);
   }
 }
 
@@ -233,7 +233,7 @@ function configurarExclusaoUsuarios() {
 }
 
 // -------------------------------------------------------
-// SEGURANÃ‡A
+// SEGURANÇA
 // -------------------------------------------------------
 
 function configurarFormularioSenha() {
@@ -255,7 +255,7 @@ function configurarFormularioSenha() {
     }
 
     if (novaSenha !== confirmar) {
-      exibirToast("As senhas nÃ£o conferem.", "erro");
+      exibirToast("As senhas não conferem.", "erro");
       return;
     }
 
@@ -277,7 +277,7 @@ function configurarFormularioSenha() {
       document.getElementById("formularioSenha").reset();
     } catch (erro) {
       console.error("Erro ao alterar senha:", erro.message);
-      exibirToast("Erro de conexÃ£o com o servidor.", "erro");
+      exibirToast("Erro de conexão com o servidor.", "erro");
     }
   });
 }
@@ -300,7 +300,7 @@ function exibirToast(mensagem, tipo) {
 }
 
 // -------------------------------------------------------
-// INICIALIZAÃ‡ÃƒO
+// INICIALIZAÇÃO
 // -------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", iniciarSessaoConfiguracoes);

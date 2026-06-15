@@ -8,6 +8,17 @@ const idDespesa = params.get("id");
 const modal = document.getElementById("modalSucesso");
 const botaoOk = document.getElementById("botaoOkModal");
 let tipoDespesaSelecionado = "viagem";
+let viagensDisponiveis = [];
+
+function dataParaInput(dataISO) {
+    return dataISO ? String(dataISO).slice(0, 10) : "";
+}
+
+function obterViagemSelecionada(viagemId) {
+    return viagensDisponiveis.find(function (viagem) {
+        return String(viagem.id) === String(viagemId);
+    });
+}
 
 async function carregarViagens(viagemIdSelecionada) {
     try {
@@ -16,6 +27,7 @@ async function carregarViagens(viagemIdSelecionada) {
         if (!response.ok) return;
 
         const viagens = await response.json();
+        viagensDisponiveis = viagens;
         const selectViagem = document.getElementById("viagemId");
 
         viagens.forEach(function (viagem) {
@@ -146,13 +158,27 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         return;
     }
 
+    const viagemId = tipoDespesaSelecionado === "viagem" ? document.getElementById("viagemId").value : null;
+    const dataDespesa = document.getElementById("dataDespesa").value;
+
+    if (tipoDespesaSelecionado === "viagem") {
+        const viagemSelecionada = obterViagemSelecionada(viagemId);
+        const dataSaida = viagemSelecionada ? dataParaInput(viagemSelecionada.data_saida) : "";
+        const dataChegada = viagemSelecionada ? dataParaInput(viagemSelecionada.data_chegada) : "";
+
+        if (dataDespesa && dataSaida && dataChegada && (dataDespesa < dataSaida || dataDespesa > dataChegada)) {
+            alert("A data da despesa deve estar dentro do periodo da viagem selecionada.");
+            return;
+        }
+    }
+
     const dados = {
         tipoDespesa: tipoDespesaSelecionado,
-        viagemId: tipoDespesaSelecionado === "viagem" ? document.getElementById("viagemId").value : null,
+        viagemId: viagemId,
         veiculoId: tipoDespesaSelecionado === "veiculo" ? document.getElementById("veiculoId").value : null,
         descricao: document.getElementById("descricao").value,
         categoria: document.getElementById("categoria").value,
-        dataDespesa: document.getElementById("dataDespesa").value,
+        dataDespesa: dataDespesa,
         valor: valorNum,
         observacoes: document.getElementById("observacoes").value
     };

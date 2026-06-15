@@ -27,7 +27,7 @@ app.get("/", (requisicao, resposta) => {
 });
 
 // ============================================================
-// MIDDLEWARE ? AUTENTICAÃ‡ÃƒO
+// MIDDLEWARE ? AUTENTICAÇÃO
 // ============================================================
 
 function autenticar(requisicao, resposta, proximo) {
@@ -35,19 +35,19 @@ function autenticar(requisicao, resposta, proximo) {
   const token = cabecalho.startsWith("Bearer ") ? cabecalho.slice(7) : null;
 
   if (!token) {
-    return resposta.status(401).json({ mensagem: "Token de autenticaÃ§Ã£o nÃ£o informado." });
+    return resposta.status(401).json({ mensagem: "Token de autenticação não informado." });
   }
 
   try {
     const payload = jwt.verify(token, SEGREDO_JWT);
     const transportadoraOk = payload.transportadora_id != null || payload.perfil === "dono";
     if (!transportadoraOk) {
-      return resposta.status(401).json({ mensagem: "SessÃ£o invÃ¡lida. FaÃ§a login novamente." });
+      return resposta.status(401).json({ mensagem: "Sessão inválida. Faça login novamente." });
     }
     requisicao.usuario = payload;
     proximo();
   } catch (erro) {
-    return resposta.status(401).json({ mensagem: "Token invÃ¡lido ou expirado." });
+    return resposta.status(401).json({ mensagem: "Token inválido ou expirado." });
   }
 }
 
@@ -101,13 +101,13 @@ async function transportadoraIdParaPost(requisicao, corpo) {
     }
     const ok = await banco.query("SELECT 1 FROM transportadoras WHERE id=$1", [id]);
     if (ok.rows.length === 0) {
-      return { erro: "Transportadora nÃ£o encontrada." };
+      return { erro: "Transportadora não encontrada." };
     }
     return { id };
   }
   const idJwt = obterIdTransportadora(requisicao);
   if (idJwt == null) {
-    return { erro: "SessÃ£o sem transportadora vinculada." };
+    return { erro: "Sessão sem transportadora vinculada." };
   }
   return { id: idJwt };
 }
@@ -164,6 +164,20 @@ async function viagemPertenceTransportadora(viagemId, transportadoraId) {
   return resultado.rows.length > 0;
 }
 
+function dataIsoValida(data) {
+  return typeof data === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data) && !Number.isNaN(new Date(data + "T00:00:00").getTime());
+}
+
+function dataFinalAntesDaInicial(dataInicio, dataFim) {
+  if (!dataIsoValida(dataInicio) || !dataIsoValida(dataFim)) return true;
+  return dataFim < dataInicio;
+}
+
+function dataForaDoPeriodo(data, dataInicio, dataFim) {
+  if (!dataIsoValida(data) || !dataIsoValida(dataInicio) || !dataIsoValida(dataFim)) return true;
+  return data < dataInicio || data > dataFim;
+}
+
 // ============================================================
 // AUTH ? LOGIN
 // ============================================================
@@ -187,18 +201,18 @@ app.post("/auth/login", async (requisicao, resposta) => {
     const resultado = await banco.query(sql, [email]);
 
     if (resultado.rows.length === 0) {
-      return resposta.status(401).json({ mensagem: "E-mail ou senha invÃ¡lidos." });
+      return resposta.status(401).json({ mensagem: "E-mail ou senha inválidos." });
     }
 
     const usuario = resultado.rows[0];
 
     if (!usuario.ativo) {
-      return resposta.status(403).json({ mensagem: "UsuÃ¡rio inativo. Entre em contato com o administrador." });
+      return resposta.status(403).json({ mensagem: "Usuário inativo. Entre em contato com o administrador." });
     }
 
     const senhaCorreta = await bcrypt.compare(senha, usuario.senha_hash);
     if (!senhaCorreta) {
-      return resposta.status(401).json({ mensagem: "E-mail ou senha invÃ¡lidos." });
+      return resposta.status(401).json({ mensagem: "E-mail ou senha inválidos." });
     }
 
     const payload = {
@@ -262,7 +276,7 @@ app.get("/transportadoras/:id", exigirDonoSistema, async (requisicao, resposta) 
     const resultado = await banco.query(sql, [id]);
     
     if (resultado.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "Transportadora nÃ£o encontrada." });
+      return resposta.status(404).json({ mensagem: "Transportadora não encontrada." });
     }
     
     return resposta.json(resultado.rows[0]);
@@ -282,7 +296,7 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
   } = requisicao.body;
 
   if (!nomeTransportadora || !nomeUsuario || !emailUsuario || !senhaUsuario) {
-    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
+    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   const cliente = await banco.connect();
@@ -315,7 +329,7 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
   } catch (erro) {
     await cliente.query("ROLLBACK");
     if (erro.code === "23505") {
-      return resposta.status(400).json({ mensagem: "JÃ¡ existe um usuÃ¡rio cadastrado com esse e-mail." });
+      return resposta.status(400).json({ mensagem: "Já existe um usuário cadastrado com esse e-mail." });
     }
     console.error("Erro ao criar transportadora:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao criar transportadora." });
@@ -330,7 +344,7 @@ app.put("/transportadoras/:id", exigirDonoSistema, async (requisicao, resposta) 
     const { nome, cnpj, ativo } = requisicao.body;
 
     if (!nome) {
-      return resposta.status(400).json({ mensagem: "O nome da transportadora Ã© obrigatÃ³rio." });
+      return resposta.status(400).json({ mensagem: "O nome da transportadora é obrigatório." });
     }
 
     const sql = `
@@ -342,7 +356,7 @@ app.put("/transportadoras/:id", exigirDonoSistema, async (requisicao, resposta) 
     const resultado = await banco.query(sql, [nome, cnpj || null, ativo, id]);
 
     if (resultado.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "Transportadora nÃ£o encontrada." });
+      return resposta.status(404).json({ mensagem: "Transportadora não encontrada." });
     }
 
     return resposta.json({ mensagem: "Transportadora atualizada com sucesso." });
@@ -353,7 +367,7 @@ app.put("/transportadoras/:id", exigirDonoSistema, async (requisicao, resposta) 
 });
 
 // ============================================================
-// USUÃRIOS
+// USUÁRIOS
 // ============================================================
 
 app.get("/usuarios", exigirAdminOuDono, async (requisicao, resposta) => {
@@ -383,8 +397,8 @@ app.get("/usuarios", exigirAdminOuDono, async (requisicao, resposta) => {
     const resultado = await banco.query(sql, valores);
     return resposta.json(resultado.rows);
   } catch (erro) {
-    console.error("Erro ao buscar usuÃ¡rios:", erro.message);
-    return resposta.status(500).json({ mensagem: "Erro ao buscar usuÃ¡rios." });
+    console.error("Erro ao buscar usuários:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao buscar usuários." });
   }
 });
 
@@ -410,12 +424,12 @@ app.get("/usuarios/:id", exigirAdminOuDono, async (requisicao, resposta) => {
     }
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "UsuÃ¡rio nÃ£o encontrado." });
+      return resposta.status(404).json({ mensagem: "Usuário não encontrado." });
     }
     return resposta.json(resultado.rows[0]);
   } catch (erro) {
-    console.error("Erro ao buscar usuÃ¡rio:", erro.message);
-    return resposta.status(500).json({ mensagem: "Erro ao buscar usuÃ¡rio." });
+    console.error("Erro ao buscar usuário:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao buscar usuário." });
   }
 });
 
@@ -423,15 +437,15 @@ app.post("/usuarios", exigirAdmin, async (requisicao, resposta) => {
   const { nome, email, senha, perfil, motorista_id, ativo } = requisicao.body;
 
   if (!nome || !email || !senha || !perfil) {
-    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
+    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   if (perfil !== "admin" && perfil !== "motorista") {
-    return resposta.status(400).json({ mensagem: "Perfil invÃ¡lido para esta transportadora." });
+    return resposta.status(400).json({ mensagem: "Perfil inválido para esta transportadora." });
   }
 
   if (perfil === "motorista" && !motorista_id) {
-    return resposta.status(400).json({ mensagem: "Vincule um motorista para usuÃ¡rios do perfil motorista." });
+    return resposta.status(400).json({ mensagem: "Vincule um motorista para usuários do perfil motorista." });
   }
 
   try {
@@ -443,7 +457,7 @@ app.post("/usuarios", exigirAdmin, async (requisicao, resposta) => {
 
     const motoristaValido = await motoristaPertenceTransportadora(motorista_id, transportadoraId);
     if (!motoristaValido) {
-      return resposta.status(400).json({ mensagem: "Motorista nÃ£o encontrado para esta transportadora." });
+      return resposta.status(400).json({ mensagem: "Motorista não encontrado para esta transportadora." });
     }
 
     const senhaHash = await bcrypt.hash(senha, 10);
@@ -457,15 +471,15 @@ app.post("/usuarios", exigirAdmin, async (requisicao, resposta) => {
     const resultado = await banco.query(sql, valores);
 
     return resposta.status(201).json({
-      mensagem: "UsuÃ¡rio criado com sucesso.",
+      mensagem: "Usuário criado com sucesso.",
       id: resultado.rows[0].id
     });
   } catch (erro) {
     if (erro.code === "23505") {
-      return resposta.status(400).json({ mensagem: "JÃ¡ existe um usuÃ¡rio cadastrado com esse e-mail." });
+      return resposta.status(400).json({ mensagem: "Já existe um usuário cadastrado com esse e-mail." });
     }
-    console.error("Erro ao criar usuÃ¡rio:", erro.message);
-    return resposta.status(500).json({ mensagem: "Erro ao criar usuÃ¡rio." });
+    console.error("Erro ao criar usuário:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao criar usuário." });
   }
 });
 
@@ -559,7 +573,7 @@ app.patch("/usuarios/senha", autenticar, async (requisicao, resposta) => {
     );
 
     if (resultado.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "UsuÃ¡rio nÃ£o encontrado." });
+      return resposta.status(404).json({ mensagem: "Usuário não encontrado." });
     }
 
     const senhaCorreta = await bcrypt.compare(senhaAtual, resultado.rows[0].senha_hash);
@@ -588,7 +602,7 @@ app.post("/motoristas", exigirAdmin, async (requisicao, resposta) => {
   const { nome, cpf, telefone, cnh, status } = requisicao.body;
 
   if (!nome || !cpf || !telefone || !cnh || !status) {
-    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
+    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   try {
@@ -609,7 +623,7 @@ app.post("/motoristas", exigirAdmin, async (requisicao, resposta) => {
     return resposta.status(201).json({ mensagem: "Motorista cadastrado com sucesso.", id: resultado.rows[0].id });
   } catch (erro) {
     if (erro.code === "23505") {
-      return resposta.status(400).json({ mensagem: "JÃ¡ existe um motorista cadastrado com esse CPF." });
+      return resposta.status(400).json({ mensagem: "Já existe um motorista cadastrado com esse CPF." });
     }
     console.error("Erro ao salvar motorista:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao salvar motorista no banco de dados." });
@@ -664,7 +678,7 @@ app.get("/motoristas/:id", exigirAdminOuDono, async (requisicao, resposta) => {
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "Motorista nÃ£o encontrado." });
+      return resposta.status(404).json({ mensagem: "Motorista não encontrado." });
     }
     return resposta.json(resultado.rows[0]);
   } catch (erro) {
@@ -678,13 +692,13 @@ app.put("/motoristas/:id", exigirAdmin, async (requisicao, resposta) => {
   const { nome, cpf, telefone, cnh, status } = requisicao.body;
 
   if (!nome || !cpf || !telefone || !cnh || !status) {
-    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
+    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   try {
     const transportadoraId = await transportadoraEscopoMutacao(requisicao, "motoristas", id);
     if (transportadoraId === null) {
-      return resposta.status(404).json({ mensagem: "Motorista nÃ£o encontrado." });
+      return resposta.status(404).json({ mensagem: "Motorista não encontrado." });
     }
 
     const sql = `
@@ -697,12 +711,12 @@ app.put("/motoristas/:id", exigirAdmin, async (requisicao, resposta) => {
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "Motorista nÃ£o encontrado." });
+      return resposta.status(404).json({ mensagem: "Motorista não encontrado." });
     }
     return resposta.json({ mensagem: "Motorista atualizado com sucesso.", motorista: resultado.rows[0] });
   } catch (erro) {
     if (erro.code === "23505") {
-      return resposta.status(400).json({ mensagem: "JÃ¡ existe um motorista cadastrado com esse CPF." });
+      return resposta.status(400).json({ mensagem: "Já existe um motorista cadastrado com esse CPF." });
     }
     console.error("Erro ao atualizar motorista:", erro.message);
     return resposta.status(500).json({ mensagem: "Erro ao atualizar motorista no banco de dados." });
@@ -710,7 +724,7 @@ app.put("/motoristas/:id", exigirAdmin, async (requisicao, resposta) => {
 });
 
 // ============================================================
-// VEÃCULOS
+// VEÍCULOS
 // ============================================================
 
 app.post("/veiculos", exigirAdmin, async (req, res) => {
@@ -749,13 +763,13 @@ app.post("/veiculos", exigirAdmin, async (req, res) => {
     const valores = [transportadoraId, modeloTratado, placaTratada, statusTratado, anoTratado, observacoesTratadas];
 
     const resultado = await banco.query(sql, valores);
-    return res.status(201).json({ mensagem: "VeÃ­culo cadastrado com sucesso.", id: resultado.rows[0].id });
+    return res.status(201).json({ mensagem: "Veículo cadastrado com sucesso.", id: resultado.rows[0].id });
   } catch (erro) {
     if (erro.code === "23505") {
-      return res.status(400).json({ mensagem: "JÃ¡ existe um veÃ­culo cadastrado com essa placa." });
+      return res.status(400).json({ mensagem: "Já existe um veículo cadastrado com essa placa." });
     }
     console.error("ERRO SQL VEICULOS:", erro);
-    return res.status(500).json({ mensagem: "Erro ao salvar veÃ­culo no banco de dados.", detalhe: erro.message });
+    return res.status(500).json({ mensagem: "Erro ao salvar veículo no banco de dados.", detalhe: erro.message });
   }
 });
 
@@ -781,8 +795,8 @@ app.get("/veiculos", exigirAdminOuDono, async (requisicao, resposta) => {
     const resultado = await banco.query(sql, valores);
     return resposta.json(resultado.rows);
   } catch (erro) {
-    console.error("Erro ao buscar veÃ­culos:", erro.message);
-    return resposta.status(500).json({ mensagem: "Erro ao buscar veÃ­culos." });
+    console.error("Erro ao buscar veículos:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao buscar veículos." });
   }
 });
 
@@ -807,12 +821,12 @@ app.get("/veiculos/:id", exigirAdminOuDono, async (requisicao, resposta) => {
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "VeÃ­culo nÃ£o encontrado." });
+      return resposta.status(404).json({ mensagem: "Veículo não encontrado." });
     }
     return resposta.json(resultado.rows[0]);
   } catch (erro) {
-    console.error("Erro ao buscar veÃ­culo:", erro.message);
-    return resposta.status(500).json({ mensagem: "Erro ao buscar veÃ­culo." });
+    console.error("Erro ao buscar veículo:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao buscar veículo." });
   }
 });
 
@@ -841,7 +855,7 @@ app.put("/veiculos/:id", exigirAdmin, async (requisicao, resposta) => {
   try {
     const transportadoraId = await transportadoraEscopoMutacao(requisicao, "veiculos", id);
     if (transportadoraId === null) {
-      return resposta.status(404).json({ mensagem: "VeÃ­culo nÃ£o encontrado." });
+      return resposta.status(404).json({ mensagem: "Veículo não encontrado." });
     }
 
     const sql = `
@@ -854,15 +868,15 @@ app.put("/veiculos/:id", exigirAdmin, async (requisicao, resposta) => {
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "VeÃ­culo nÃ£o encontrado." });
+      return resposta.status(404).json({ mensagem: "Veículo não encontrado." });
     }
-    return resposta.json({ mensagem: "VeÃ­culo atualizado com sucesso.", veiculo: resultado.rows[0] });
+    return resposta.json({ mensagem: "Veículo atualizado com sucesso.", veiculo: resultado.rows[0] });
   } catch (erro) {
     if (erro.code === "23505") {
-      return resposta.status(400).json({ mensagem: "JÃ¡ existe um veÃ­culo cadastrado com essa placa." });
+      return resposta.status(400).json({ mensagem: "Já existe um veículo cadastrado com essa placa." });
     }
-    console.error("Erro ao atualizar veÃ­culo:", erro.message);
-    return resposta.status(500).json({ mensagem: "Erro ao atualizar veÃ­culo no banco de dados." });
+    console.error("Erro ao atualizar veículo:", erro.message);
+    return resposta.status(500).json({ mensagem: "Erro ao atualizar veículo no banco de dados." });
   }
 });
 
@@ -874,7 +888,11 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
   const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
 
   if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || kmInicial == null || kmFinal == null || !status) {
-    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatÃ³rios." });
+    return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
+  }
+
+  if (dataFinalAntesDaInicial(dataSaida, dataChegada)) {
+    return resposta.status(400).json({ mensagem: "A data de chegada nao pode ser menor que a data de saida." });
   }
 
   const kmInicialNum = parseInt(kmInicial, 10);
@@ -885,7 +903,7 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
   }
 
   if (kmFinalNum < kmInicialNum) {
-    return resposta.status(400).json({ mensagem: "O KM final nÃƒÂ£o pode ser menor que o KM inicial." });
+    return resposta.status(400).json({ mensagem: "O KM final não pode ser menor que o KM inicial." });
   }
 
   try {
@@ -899,7 +917,7 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
     const veiculoValido = await veiculoPertenceTransportadora(veiculoId, transportadoraId);
 
     if (!motoristaValido || !veiculoValido) {
-      return resposta.status(400).json({ mensagem: "Motorista ou veÃ­culo nÃ£o encontrado para esta transportadora." });
+      return resposta.status(400).json({ mensagem: "Motorista ou veículo não encontrado para esta transportadora." });
     }
 
     const sql = `
@@ -991,7 +1009,7 @@ app.get("/viagens/:id", autenticar, async (requisicao, resposta) => {
 
   if (usuario.perfil === "motorista") {
     if (!usuario.motorista_id) {
-      return resposta.status(404).json({ mensagem: "Viagem nÃ£o encontrada." });
+      return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
     }
     sql += " AND v.motorista_id = $3";
     valores.push(usuario.motorista_id);
@@ -1000,7 +1018,7 @@ app.get("/viagens/:id", autenticar, async (requisicao, resposta) => {
   try {
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "Viagem nÃ£o encontrada." });
+      return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
     }
     return resposta.json(resultado.rows[0]);
   } catch (erro) {
@@ -1015,6 +1033,10 @@ app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
 
   if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
+  }
+
+  if (dataFinalAntesDaInicial(dataSaida, dataChegada)) {
+    return resposta.status(400).json({ mensagem: "A data de chegada nao pode ser menor que a data de saida." });
   }
 
   let kmInicialNum = null;
@@ -1042,14 +1064,14 @@ app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
   try {
     const transportadoraId = await transportadoraEscopoMutacao(requisicao, "viagens", id);
     if (transportadoraId === null) {
-      return resposta.status(404).json({ mensagem: "Viagem nÃ£o encontrada." });
+      return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
     }
 
     const motoristaValido = await motoristaPertenceTransportadora(motoristaId, transportadoraId);
     const veiculoValido = await veiculoPertenceTransportadora(veiculoId, transportadoraId);
 
     if (!motoristaValido || !veiculoValido) {
-      return resposta.status(400).json({ mensagem: "Motorista ou veÃ­culo nÃ£o encontrado para esta transportadora." });
+      return resposta.status(400).json({ mensagem: "Motorista ou veículo não encontrado para esta transportadora." });
     }
 
     const sql = `
@@ -1065,7 +1087,7 @@ app.put("/viagens/:id", exigirAdmin, async (requisicao, resposta) => {
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {
-      return resposta.status(404).json({ mensagem: "Viagem nÃ£o encontrada." });
+      return resposta.status(404).json({ mensagem: "Viagem não encontrada." });
     }
     return resposta.json({ mensagem: "Viagem atualizada com sucesso.", viagem: resultado.rows[0] });
   } catch (erro) {
@@ -1100,16 +1122,20 @@ app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
     let veiculoIdFinal = null;
 
     if (tipoDespesaFinal === "viagem") {
-      const vr = await banco.query("SELECT transportadora_id FROM viagens WHERE id=$1", [viagemId]);
+      const vr = await banco.query("SELECT transportadora_id, data_saida, data_chegada FROM viagens WHERE id=$1", [viagemId]);
       if (vr.rows.length === 0) {
-        return resposta.status(400).json({ mensagem: "Viagem nÃ£o encontrada." });
+        return resposta.status(400).json({ mensagem: "Viagem não encontrada." });
       }
+      if (dataForaDoPeriodo(dataDespesa, String(vr.rows[0].data_saida).slice(0, 10), String(vr.rows[0].data_chegada).slice(0, 10))) {
+        return resposta.status(400).json({ mensagem: "A data da despesa deve estar dentro do periodo da viagem selecionada." });
+      }
+
       tid = vr.rows[0].transportadora_id;
       viagemIdFinal = viagemId;
     } else {
       const veiculo = await banco.query("SELECT transportadora_id FROM veiculos WHERE id=$1", [veiculoId]);
       if (veiculo.rows.length === 0) {
-        return resposta.status(400).json({ mensagem: "Veiculo nÃƒÂ£o encontrado." });
+        return resposta.status(400).json({ mensagem: "Veiculo não encontrado." });
       }
       tid = veiculo.rows[0].transportadora_id;
       veiculoIdFinal = veiculoId;
@@ -1117,7 +1143,7 @@ app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
 
     if (!usuarioEhDonoSistema(requisicao)) {
       if (tid !== obterIdTransportadora(requisicao)) {
-        return resposta.status(400).json({ mensagem: "Viagem nÃ£o encontrada para esta transportadora." });
+        return resposta.status(400).json({ mensagem: "Viagem não encontrada para esta transportadora." });
       }
     }
 
@@ -1241,10 +1267,14 @@ app.put("/despesas/:id", exigirAdmin, async (requisicao, resposta) => {
     let veiculoIdFinal = null;
 
     if (tipoDespesaFinal === "viagem") {
-      const vr = await banco.query("SELECT transportadora_id FROM viagens WHERE id=$1", [viagemId]);
+      const vr = await banco.query("SELECT transportadora_id, data_saida, data_chegada FROM viagens WHERE id=$1", [viagemId]);
       if (vr.rows.length === 0 || vr.rows[0].transportadora_id !== transportadoraId) {
         return resposta.status(400).json({ mensagem: "Viagem invalida para o escopo desta despesa." });
       }
+      if (dataForaDoPeriodo(dataDespesa, String(vr.rows[0].data_saida).slice(0, 10), String(vr.rows[0].data_chegada).slice(0, 10))) {
+        return resposta.status(400).json({ mensagem: "A data da despesa deve estar dentro do periodo da viagem selecionada." });
+      }
+
       viagemIdFinal = viagemId;
     } else {
       const veiculo = await banco.query("SELECT transportadora_id FROM veiculos WHERE id=$1", [veiculoId]);

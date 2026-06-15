@@ -136,13 +136,20 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         return;
     }
 
+    const dataSaida = document.getElementById("dataSaida").value;
+    const dataChegada = document.getElementById("dataChegada").value;
+    if (dataSaida && dataChegada && dataChegada < dataSaida) {
+        alert("A data de chegada nao pode ser menor que a data de saida.");
+        return;
+    }
+
     const dados = {
         origem: document.getElementById("origem").value,
         destino: document.getElementById("destino").value,
         motoristaId: document.getElementById("motoristaId").value,
         veiculoId: document.getElementById("veiculoId").value,
-        dataSaida: document.getElementById("dataSaida").value,
-        dataChegada: document.getElementById("dataChegada").value,
+        dataSaida: dataSaida,
+        dataChegada: dataChegada,
         valorFrete: valorFreteNum,
         kmInicial: kmInicialNum,
         kmFinal: kmFinalNum,

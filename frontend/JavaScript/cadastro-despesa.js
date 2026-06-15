@@ -9,6 +9,17 @@ const botaoOk = document.getElementById("botaoOkModal");
 let tipoDespesaSelecionado = "viagem";
 const paramsDespesa = new URLSearchParams(window.location.search);
 const viagemPreSelecionada = paramsDespesa.get("viagemId");
+let viagensDisponiveis = [];
+
+function dataParaInput(dataISO) {
+  return dataISO ? String(dataISO).slice(0, 10) : "";
+}
+
+function obterViagemSelecionada(viagemId) {
+  return viagensDisponiveis.find(function (viagem) {
+    return String(viagem.id) === String(viagemId);
+  });
+}
 
 async function carregarViagens() {
   try {
@@ -22,6 +33,7 @@ async function carregarViagens() {
     if (typeof filtrarListaPorTransportadoraMaster === "function") {
       viagens = filtrarListaPorTransportadoraMaster(viagens);
     }
+    viagensDisponiveis = viagens;
 
     const selectViagem = document.getElementById("viagemId");
     selectViagem.innerHTML = '<option value="">Selecione</option>';
@@ -116,13 +128,27 @@ function configurarFormularioDespesa() {
       return;
     }
 
+    const viagemId = tipoDespesaSelecionado === "viagem" ? document.getElementById("viagemId").value : null;
+    const dataDespesa = document.getElementById("dataDespesa").value;
+
+    if (tipoDespesaSelecionado === "viagem") {
+      const viagemSelecionada = obterViagemSelecionada(viagemId);
+      const dataSaida = viagemSelecionada ? dataParaInput(viagemSelecionada.data_saida) : "";
+      const dataChegada = viagemSelecionada ? dataParaInput(viagemSelecionada.data_chegada) : "";
+
+      if (dataDespesa && dataSaida && dataChegada && (dataDespesa < dataSaida || dataDespesa > dataChegada)) {
+        alert("A data da despesa deve estar dentro do periodo da viagem selecionada.");
+        return;
+      }
+    }
+
     const dados = {
       tipoDespesa: tipoDespesaSelecionado,
-      viagemId: tipoDespesaSelecionado === "viagem" ? document.getElementById("viagemId").value : null,
+      viagemId: viagemId,
       veiculoId: tipoDespesaSelecionado === "veiculo" ? document.getElementById("veiculoId").value : null,
       descricao: document.getElementById("descricao").value,
       categoria: document.getElementById("categoria").value,
-      dataDespesa: document.getElementById("dataDespesa").value,
+      dataDespesa: dataDespesa,
       valor: valorNum
     };
 

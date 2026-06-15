@@ -357,6 +357,10 @@
   transform: translateY(-1px);
 }
 
+.item-viagem-vazio {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .icone-viagem-andamento {
   width: 38px;
   height: 38px;
