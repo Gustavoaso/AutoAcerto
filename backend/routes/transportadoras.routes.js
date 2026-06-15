@@ -12,10 +12,33 @@ router.get("/", exigirDonoSistema, async (requisicao, resposta) => {
     const sql = `
       SELECT
         t.id, t.nome, t.cnpj, t.ativo, t.data_cadastro,
-        COUNT(u.id) FILTER (WHERE u.perfil = 'admin') AS total_admins
+        COUNT(u.id) FILTER (WHERE u.perfil = 'admin') AS total_admins,
+        a.plano_codigo AS assinatura_plano_codigo,
+        a.plano_nome AS assinatura_plano_nome,
+        a.status AS assinatura_status,
+        a.valor AS assinatura_valor,
+        a.gateway AS assinatura_gateway,
+        a.gateway_assinatura_id AS assinatura_gateway_id,
+        a.stripe_customer_id AS assinatura_stripe_customer_id,
+        a.proxima_cobranca_em AS assinatura_proxima_cobranca_em,
+        a.cancel_at_period_end AS assinatura_cancel_at_period_end,
+        a.pagamento_pendente_em AS assinatura_pagamento_pendente_em,
+        a.bloqueada_em AS assinatura_bloqueada_em,
+        a.cancelada_em AS assinatura_cancelada_em,
+        a.data_atualizacao AS assinatura_data_atualizacao
       FROM transportadoras t
       LEFT JOIN usuarios u ON u.transportadora_id = t.id
+      LEFT JOIN LATERAL (
+        SELECT *
+        FROM assinaturas a
+        WHERE a.transportadora_id = t.id
+        ORDER BY a.data_atualizacao DESC, a.id DESC
+        LIMIT 1
+      ) a ON TRUE
       GROUP BY t.id
+        , a.plano_codigo, a.plano_nome, a.status, a.valor, a.gateway, a.gateway_assinatura_id,
+          a.stripe_customer_id, a.proxima_cobranca_em, a.cancel_at_period_end,
+          a.pagamento_pendente_em, a.bloqueada_em, a.cancelada_em, a.data_atualizacao
       ORDER BY t.id DESC
     `;
     const resultado = await banco.query(sql);
@@ -32,11 +55,34 @@ router.get("/:id", exigirDonoSistema, async (requisicao, resposta) => {
     const sql = `
       SELECT
         t.id, t.nome, t.cnpj, t.ativo, t.data_cadastro,
-        COUNT(u.id) FILTER (WHERE u.perfil = 'admin') AS total_admins
+        COUNT(u.id) FILTER (WHERE u.perfil = 'admin') AS total_admins,
+        a.plano_codigo AS assinatura_plano_codigo,
+        a.plano_nome AS assinatura_plano_nome,
+        a.status AS assinatura_status,
+        a.valor AS assinatura_valor,
+        a.gateway AS assinatura_gateway,
+        a.gateway_assinatura_id AS assinatura_gateway_id,
+        a.stripe_customer_id AS assinatura_stripe_customer_id,
+        a.proxima_cobranca_em AS assinatura_proxima_cobranca_em,
+        a.cancel_at_period_end AS assinatura_cancel_at_period_end,
+        a.pagamento_pendente_em AS assinatura_pagamento_pendente_em,
+        a.bloqueada_em AS assinatura_bloqueada_em,
+        a.cancelada_em AS assinatura_cancelada_em,
+        a.data_atualizacao AS assinatura_data_atualizacao
       FROM transportadoras t
       LEFT JOIN usuarios u ON u.transportadora_id = t.id
+      LEFT JOIN LATERAL (
+        SELECT *
+        FROM assinaturas a
+        WHERE a.transportadora_id = t.id
+        ORDER BY a.data_atualizacao DESC, a.id DESC
+        LIMIT 1
+      ) a ON TRUE
       WHERE t.id = $1
       GROUP BY t.id
+        , a.plano_codigo, a.plano_nome, a.status, a.valor, a.gateway, a.gateway_assinatura_id,
+          a.stripe_customer_id, a.proxima_cobranca_em, a.cancel_at_period_end,
+          a.pagamento_pendente_em, a.bloqueada_em, a.cancelada_em, a.data_atualizacao
     `;
     const resultado = await banco.query(sql, [id]);
     

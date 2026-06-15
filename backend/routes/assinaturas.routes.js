@@ -6,6 +6,7 @@ const banco = require("../banco");
 const { normalizarEmail, emailValido, cnpjValido } = require("../validacoes");
 const { exigirAdmin } = require("../middlewares/autenticacao");
 const { obterIdTransportadora } = require("../helpers/escopo");
+const { montarResumoAssinatura } = require("../helpers/assinaturas");
 const { FRONTEND_URL, diagnosticarMailer, mailerConfigurado, enviarEmail, montarEmailBoasVindasAssinatura } = require("../helpers/mailer");
 
 const router = express.Router();
@@ -150,11 +151,18 @@ async function registrarAssinaturaAtiva({ cliente, pendencia, assinaturaStripe, 
     nome: pendencia.plano_nome,
     valor: pendencia.valor
   };
+  const statusAtual = normalizarStatusStripe(assinaturaStripe.status);
 
   await cliente.query(
     `INSERT INTO assinaturas
-      (transportadora_id, plano_codigo, plano_nome, gateway, gateway_assinatura_id, referencia_externa, status, valor, stripe_customer_id, stripe_price_id, proxima_cobranca_em, cancel_at_period_end, email_pagador, ultimo_payload, data_atualizacao)
-     VALUES ($1, $2, $3, 'stripe', $4, $5, $6, $7, $8, $9, to_timestamp($10), $11, $12, $13::jsonb, CURRENT_TIMESTAMP)
+      (transportadora_id, plano_codigo, plano_nome, gateway, gateway_assinatura_id, referencia_externa, status, valor,
+       stripe_customer_id, stripe_price_id, proxima_cobranca_em, cancel_at_period_end, email_pagador,
+       pagamento_pendente_em, bloqueada_em, cancelada_em, ultimo_payload, data_atualizacao)
+     VALUES ($1, $2, $3, 'stripe', $4, $5, $6, $7, $8, $9, to_timestamp($10), $11, $12,
+       CASE WHEN $6 IN ('past_due', 'unpaid', 'incomplete') THEN CURRENT_TIMESTAMP ELSE NULL END,
+       CASE WHEN $6 IN ('unpaid', 'incomplete_expired', 'paused') THEN CURRENT_TIMESTAMP ELSE NULL END,
+       CASE WHEN $6 = 'canceled' THEN CURRENT_TIMESTAMP ELSE NULL END,
+       $13::jsonb, CURRENT_TIMESTAMP)
      ON CONFLICT (gateway_assinatura_id)
      DO UPDATE SET
       plano_codigo = EXCLUDED.plano_codigo,
@@ -166,6 +174,18 @@ async function registrarAssinaturaAtiva({ cliente, pendencia, assinaturaStripe, 
       proxima_cobranca_em = EXCLUDED.proxima_cobranca_em,
       cancel_at_period_end = EXCLUDED.cancel_at_period_end,
       email_pagador = EXCLUDED.email_pagador,
+      pagamento_pendente_em = CASE
+        WHEN EXCLUDED.status IN ('past_due', 'unpaid', 'incomplete') THEN COALESCE(assinaturas.pagamento_pendente_em, CURRENT_TIMESTAMP)
+        ELSE NULL
+      END,
+      bloqueada_em = CASE
+        WHEN EXCLUDED.status IN ('unpaid', 'incomplete_expired', 'paused') THEN COALESCE(assinaturas.bloqueada_em, CURRENT_TIMESTAMP)
+        ELSE NULL
+      END,
+      cancelada_em = CASE
+        WHEN EXCLUDED.status = 'canceled' THEN COALESCE(assinaturas.cancelada_em, CURRENT_TIMESTAMP)
+        ELSE NULL
+      END,
       ultimo_payload = EXCLUDED.ultimo_payload,
       data_atualizacao = CURRENT_TIMESTAMP`,
     [
@@ -174,7 +194,7 @@ async function registrarAssinaturaAtiva({ cliente, pendencia, assinaturaStripe, 
       planoAtual.nome,
       assinaturaStripe.id,
       pendencia.referencia_externa,
-      normalizarStatusStripe(assinaturaStripe.status),
+      statusAtual,
       planoAtual.valor,
       String(assinaturaStripe.customer || pendencia.stripe_customer_id || ""),
       priceIdAtual,
@@ -399,6 +419,7 @@ async function atualizarAssinaturaExistentePorStripe(assinaturaStripe) {
     : null;
   const priceIdAtual = itemPrincipal && itemPrincipal.price ? itemPrincipal.price.id : null;
   const planoAtual = obterPlanoPorStripePriceId(priceIdAtual);
+  const statusAtual = normalizarStatusStripe(assinaturaStripe.status);
 
   if (!planoAtual) {
     await banco.query(
@@ -407,11 +428,23 @@ async function atualizarAssinaturaExistentePorStripe(assinaturaStripe) {
            stripe_price_id = COALESCE($2, stripe_price_id),
            proxima_cobranca_em = to_timestamp($3),
            cancel_at_period_end = $4,
+           pagamento_pendente_em = CASE
+             WHEN $1 IN ('past_due', 'unpaid', 'incomplete') THEN COALESCE(pagamento_pendente_em, CURRENT_TIMESTAMP)
+             ELSE NULL
+           END,
+           bloqueada_em = CASE
+             WHEN $1 IN ('unpaid', 'incomplete_expired', 'paused') THEN COALESCE(bloqueada_em, CURRENT_TIMESTAMP)
+             ELSE NULL
+           END,
+           cancelada_em = CASE
+             WHEN $1 = 'canceled' THEN COALESCE(cancelada_em, CURRENT_TIMESTAMP)
+             ELSE NULL
+           END,
            ultimo_payload = $5::jsonb,
            data_atualizacao = CURRENT_TIMESTAMP
        WHERE gateway = 'stripe' AND gateway_assinatura_id = $6`,
       [
-        normalizarStatusStripe(assinaturaStripe.status),
+        statusAtual,
         priceIdAtual,
         assinaturaStripe.current_period_end || null,
         Boolean(assinaturaStripe.cancel_at_period_end),
@@ -431,13 +464,25 @@ async function atualizarAssinaturaExistentePorStripe(assinaturaStripe) {
          stripe_price_id = $5,
          proxima_cobranca_em = to_timestamp($6),
          cancel_at_period_end = $7,
+         pagamento_pendente_em = CASE
+           WHEN $3 IN ('past_due', 'unpaid', 'incomplete') THEN COALESCE(pagamento_pendente_em, CURRENT_TIMESTAMP)
+           ELSE NULL
+         END,
+         bloqueada_em = CASE
+           WHEN $3 IN ('unpaid', 'incomplete_expired', 'paused') THEN COALESCE(bloqueada_em, CURRENT_TIMESTAMP)
+           ELSE NULL
+         END,
+         cancelada_em = CASE
+           WHEN $3 = 'canceled' THEN COALESCE(cancelada_em, CURRENT_TIMESTAMP)
+           ELSE NULL
+         END,
          ultimo_payload = $8::jsonb,
          data_atualizacao = CURRENT_TIMESTAMP
      WHERE gateway = 'stripe' AND gateway_assinatura_id = $9`,
     [
       planoAtual.codigo,
       planoAtual.nome,
-      normalizarStatusStripe(assinaturaStripe.status),
+      statusAtual,
       planoAtual.valor,
       priceIdAtual,
       assinaturaStripe.current_period_end || null,
@@ -471,7 +516,7 @@ router.get("/minha", exigirAdmin, async (requisicao, resposta) => {
       banco.query(
         `SELECT id, plano_codigo, plano_nome, status, valor, gateway, gateway_assinatura_id,
                 stripe_customer_id, stripe_price_id, proxima_cobranca_em, cancel_at_period_end,
-                data_cadastro, data_atualizacao
+                pagamento_pendente_em, bloqueada_em, cancelada_em, data_cadastro, data_atualizacao
          FROM assinaturas
          WHERE transportadora_id = $1
          ORDER BY data_atualizacao DESC, id DESC
@@ -489,6 +534,7 @@ router.get("/minha", exigirAdmin, async (requisicao, resposta) => {
 
     return resposta.json({
       assinatura,
+      operacional: montarResumoAssinatura(assinatura),
       plano: plano ? {
         codigo: plano.codigo,
         nome: plano.nome,
@@ -775,6 +821,8 @@ router.post("/stripe/webhook", async (requisicao, resposta) => {
         `UPDATE assinaturas
          SET status = $1,
              cancel_at_period_end = FALSE,
+             cancelada_em = COALESCE(cancelada_em, CURRENT_TIMESTAMP),
+             bloqueada_em = COALESCE(bloqueada_em, CURRENT_TIMESTAMP),
              ultimo_payload = $2::jsonb,
              data_atualizacao = CURRENT_TIMESTAMP
          WHERE gateway = 'stripe' AND gateway_assinatura_id = $3`,
@@ -799,11 +847,37 @@ router.post("/stripe/webhook", async (requisicao, resposta) => {
         await banco.query(
           `UPDATE assinaturas
            SET status = 'past_due',
+               pagamento_pendente_em = COALESCE(pagamento_pendente_em, CURRENT_TIMESTAMP),
                ultimo_payload = $1::jsonb,
                data_atualizacao = CURRENT_TIMESTAMP
            WHERE gateway = 'stripe' AND gateway_assinatura_id = $2`,
           [JSON.stringify(invoice), subscriptionId]
         );
+      }
+    }
+
+    if (evento.type === "invoice.payment_succeeded" || evento.type === "invoice.paid") {
+      const invoice = evento.data.object;
+      const subscriptionId = invoice.subscription ? String(invoice.subscription) : "";
+
+      if (subscriptionId) {
+        try {
+          const resultado = await sincronizarAssinaturaStripePorId(subscriptionId);
+          if (!resultado.ok && resultado.assinaturaStripe) {
+            await atualizarAssinaturaExistentePorStripe(resultado.assinaturaStripe);
+          }
+        } catch {
+          await banco.query(
+            `UPDATE assinaturas
+             SET status = 'active',
+                 pagamento_pendente_em = NULL,
+                 bloqueada_em = NULL,
+                 ultimo_payload = $1::jsonb,
+                 data_atualizacao = CURRENT_TIMESTAMP
+             WHERE gateway = 'stripe' AND gateway_assinatura_id = $2`,
+            [JSON.stringify(invoice), subscriptionId]
+          );
+        }
       }
     }
   } catch (erro) {

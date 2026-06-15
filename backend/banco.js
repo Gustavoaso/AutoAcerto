@@ -97,6 +97,7 @@ async function criarTabelas() {
       categoria VARCHAR(30) NOT NULL,
       data_despesa DATE NOT NULL,
       valor NUMERIC(10,2) NOT NULL,
+      observacoes TEXT,
       data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -172,6 +173,9 @@ async function criarTabelas() {
       proxima_cobranca_em TIMESTAMP,
       cancel_at_period_end BOOLEAN NOT NULL DEFAULT FALSE,
       email_pagador VARCHAR(255),
+      pagamento_pendente_em TIMESTAMP,
+      bloqueada_em TIMESTAMP,
+      cancelada_em TIMESTAMP,
       ultimo_payload JSONB,
       data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -327,6 +331,7 @@ async function garantirEstruturaDespesas() {
   await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS anexo_cupom_nome VARCHAR(255)");
   await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS anexo_cupom_tipo VARCHAR(100)");
   await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS anexo_cupom_base64 TEXT");
+  await banco.query("ALTER TABLE despesas ADD COLUMN IF NOT EXISTS observacoes TEXT");
 }
 
 async function garantirEstruturaUsuarios() {
@@ -354,6 +359,9 @@ async function garantirEstruturaAssinaturas() {
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS stripe_price_id VARCHAR(120)");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS cancel_at_period_end BOOLEAN NOT NULL DEFAULT FALSE");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS email_pagador VARCHAR(255)");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS pagamento_pendente_em TIMESTAMP");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS bloqueada_em TIMESTAMP");
+  await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS cancelada_em TIMESTAMP");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS ultimo_payload JSONB");
   await banco.query("ALTER TABLE assinaturas ADD COLUMN IF NOT EXISTS data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
 }

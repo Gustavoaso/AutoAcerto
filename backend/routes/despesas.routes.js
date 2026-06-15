@@ -11,13 +11,14 @@ const { notificarAdministradoresTransportadora } = require("../helpers/notificac
 const router = express.Router();
 
 router.post("/", exigirAdminOuMotorista, async (requisicao, resposta) => {
-  const { tipoDespesa, viagemId, veiculoId, descricao, categoria, dataDespesa, valor, anexoCupomNome, anexoCupomTipo, anexoCupomBase64 } = requisicao.body;
+  const { tipoDespesa, viagemId, veiculoId, descricao, categoria, dataDespesa, valor, observacoes, anexoCupomNome, anexoCupomTipo, anexoCupomBase64 } = requisicao.body;
   const tipoDespesaFinal = String(tipoDespesa || "").trim().toLowerCase();
   const categoriaTratada = String(categoria || "").trim().toLowerCase();
   const usuario = requisicao.usuario;
   const anexoNomeTratado = anexoCupomNome ? String(anexoCupomNome).trim().slice(0, 255) : null;
   const anexoTipoTratado = anexoCupomTipo ? String(anexoCupomTipo).trim().slice(0, 100) : null;
   const anexoBase64Tratado = anexoCupomBase64 ? String(anexoCupomBase64).trim() : null;
+  const observacoesTratadas = observacoes ? String(observacoes).trim() : null;
 
   if (!descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
@@ -105,11 +106,11 @@ router.post("/", exigirAdminOuMotorista, async (requisicao, resposta) => {
     }
 
     const sql = `
-      INSERT INTO despesas (transportadora_id, viagem_id, veiculo_id, tipo_despesa, descricao, categoria, data_despesa, valor, anexo_cupom_nome, anexo_cupom_tipo, anexo_cupom_base64)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      INSERT INTO despesas (transportadora_id, viagem_id, veiculo_id, tipo_despesa, descricao, categoria, data_despesa, valor, observacoes, anexo_cupom_nome, anexo_cupom_tipo, anexo_cupom_base64)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING id
     `;
-    const valores = [tid, viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoriaTratada, dataDespesa, valor, anexoNomeTratado, anexoTipoTratado, anexoBase64Tratado];
+    const valores = [tid, viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoriaTratada, dataDespesa, valor, observacoesTratadas, anexoNomeTratado, anexoTipoTratado, anexoBase64Tratado];
 
     const resultado = await banco.query(sql, valores);
     const despesaId = resultado.rows[0].id;
@@ -167,7 +168,7 @@ router.get("/", autenticar, async (requisicao, resposta) => {
   let sql = `
     SELECT
       d.id, d.viagem_id, d.veiculo_id, d.tipo_despesa, d.descricao, d.categoria,
-      d.data_despesa, d.valor, d.data_cadastro,
+      d.data_despesa, d.valor, d.observacoes, d.data_cadastro,
       v.origem, v.destino,
       m.nome AS motorista_nome,
       COALESCE(ve_despesa.modelo, ve_viagem.modelo) AS veiculo_modelo,
@@ -223,7 +224,7 @@ router.get("/:id", autenticar, autorizarAcessoDespesa, async (requisicao, respos
   let sql = `
     SELECT
       d.id, d.viagem_id, d.veiculo_id, d.tipo_despesa, d.descricao, d.categoria,
-      d.data_despesa, d.valor, d.data_cadastro, d.anexo_cupom_nome, d.anexo_cupom_tipo, d.anexo_cupom_base64,
+      d.data_despesa, d.valor, d.observacoes, d.data_cadastro, d.anexo_cupom_nome, d.anexo_cupom_tipo, d.anexo_cupom_base64,
       v.origem, v.destino,
       m.nome AS motorista_nome,
       COALESCE(ve_despesa.modelo, ve_viagem.modelo) AS veiculo_modelo,
@@ -257,9 +258,10 @@ router.get("/:id", autenticar, autorizarAcessoDespesa, async (requisicao, respos
 
 router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
   const { id } = requisicao.params;
-  const { tipoDespesa, viagemId, veiculoId, descricao, categoria, dataDespesa, valor } = requisicao.body;
+  const { tipoDespesa, viagemId, veiculoId, descricao, categoria, dataDespesa, valor, observacoes } = requisicao.body;
   const tipoDespesaFinal = String(tipoDespesa || "").trim().toLowerCase();
   const categoriaTratada = String(categoria || "").trim().toLowerCase();
+  const observacoesTratadas = observacoes ? String(observacoes).trim() : null;
 
   if (!descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
@@ -328,11 +330,11 @@ router.put("/:id", exigirAdmin, async (requisicao, resposta) => {
     const sql = `
       UPDATE despesas SET
         viagem_id=$1, veiculo_id=$2, tipo_despesa=$3,
-        descricao=$4, categoria=$5, data_despesa=$6, valor=$7
-      WHERE id=$8 AND transportadora_id=$9
+        descricao=$4, categoria=$5, data_despesa=$6, valor=$7, observacoes=$8
+      WHERE id=$9 AND transportadora_id=$10
       RETURNING *
     `;
-    const valores = [viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoriaTratada, dataDespesa, valor, id, transportadoraId];
+    const valores = [viagemIdFinal, veiculoIdFinal, tipoDespesaFinal, descricao, categoriaTratada, dataDespesa, valor, observacoesTratadas, id, transportadoraId];
 
     const resultado = await banco.query(sql, valores);
     if (resultado.rows.length === 0) {

@@ -35,6 +35,44 @@ function formatarDataTransportadora(dataISO) {
     return dia + "/" + mes + "/" + ano;
 }
 
+function formatarMoedaTransportadora(valor) {
+    return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    }).format(Number(valor || 0));
+}
+
+function obterSeloAssinaturaTransportadora(transportadora) {
+    const status = String(transportadora.assinatura_status || "").toLowerCase();
+    const plano = window.AutoAcertoHtml.texto(transportadora.assinatura_plano_nome, "Sem assinatura");
+
+    if (!status) {
+        return '<div class="assinatura-transportadora"><span class="selo-status selo-inativo">Sem assinatura</span><span class="texto-secundario">Nenhum registro local</span></div>';
+    }
+
+    const ativa = status === "active" || status === "trialing";
+    const pendente = status === "past_due" || status === "incomplete";
+    const cancelada = status === "canceled" || status === "unpaid" || status === "incomplete_expired" || status === "paused";
+    const classe = ativa ? "selo-ativo" : pendente ? "selo-pendente" : cancelada ? "selo-inativo" : "selo-neutro";
+    const texto = ativa
+        ? "Ativa"
+        : pendente
+            ? "Pagamento pendente"
+            : cancelada
+                ? "Bloqueada"
+                : status;
+    const valor = transportadora.assinatura_valor
+        ? " - " + formatarMoedaTransportadora(transportadora.assinatura_valor) + "/mes"
+        : "";
+
+    return `
+        <div class="assinatura-transportadora">
+            <span class="selo-status ${classe}">${texto}</span>
+            <span class="texto-secundario">${plano}${valor}</span>
+        </div>
+    `;
+}
+
 function exibirToastTransportadora(mensagem, tipo) {
     const toast = document.getElementById("toastTransportadora");
     if (!toast) return;
@@ -74,7 +112,7 @@ function renderizarTabelaTransportadoras(lista) {
     transportadorasVisiveis = lista;
 
     if (lista.length === 0) {
-        corpo.innerHTML = '<tr><td colspan="6" class="celula-vazia">Nenhuma transportadora cadastrada.</td></tr>';
+        corpo.innerHTML = '<tr><td colspan="7" class="celula-vazia">Nenhuma transportadora cadastrada.</td></tr>';
         if (exclusaoTransportadoras) exclusaoTransportadoras.aposRender([]);
         return;
     }
@@ -86,6 +124,7 @@ function renderizarTabelaTransportadoras(lista) {
         const nomeTransportadora = window.AutoAcertoHtml.texto(transportadora.nome, "-");
         const cnpjTransportadora = window.AutoAcertoHtml.texto(transportadora.cnpj, "—");
         const totalAdmins = Number(transportadora.total_admins || 0);
+        const seloAssinatura = obterSeloAssinaturaTransportadora(transportadora);
 
         const seloStatus = transportadora.ativo
             ?'<span class="selo-status selo-ativo">Ativa</span>'
@@ -104,6 +143,7 @@ function renderizarTabelaTransportadoras(lista) {
             </td>
             <td data-label="CNPJ">${cnpjTransportadora}</td>
             <td data-label="Admins">${totalAdmins}</td>
+            <td data-label="Assinatura">${seloAssinatura}</td>
             <td data-label="Status">${seloStatus}</td>
             <td data-label="Acoes">
                 <div class="grupo-acoes">

@@ -315,7 +315,10 @@ router.get("/me", autenticar, async (requisicao, resposta) => {
     }
 
     return resposta.json({
-      usuario: resultado.rows[0],
+      usuario: {
+        ...resultado.rows[0],
+        assinatura_resumo: requisicao.usuario.assinatura_resumo || null
+      },
       sessao_expira_em: requisicao.usuario.token_exp || null
     });
   } catch (erro) {

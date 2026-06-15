@@ -158,6 +158,32 @@ function tratarSessaoExpiradaSeNecessario(resposta, url) {
     return resposta;
 }
 
+let avisoAssinaturaBloqueadaExibido = false;
+
+function tratarAssinaturaBloqueadaSeNecessario(resposta) {
+    if (!resposta || resposta.status !== 402) return resposta;
+    if (avisoAssinaturaBloqueadaExibido) return resposta;
+
+    avisoAssinaturaBloqueadaExibido = true;
+    resposta.clone().json().then(function (dados) {
+        window.alert((dados && dados.mensagem) || "Regularize sua assinatura para criar ou alterar dados.");
+    }).catch(function () {
+        window.alert("Regularize sua assinatura para criar ou alterar dados.");
+    }).finally(function () {
+        window.setTimeout(function () {
+            avisoAssinaturaBloqueadaExibido = false;
+        }, 1500);
+    });
+
+    return resposta;
+}
+
+function tratarRespostaAutenticada(resposta, url) {
+    tratarSessaoExpiradaSeNecessario(resposta, url);
+    tratarAssinaturaBloqueadaSeNecessario(resposta);
+    return resposta;
+}
+
 async function verificarSessaoAoRetornarAba() {
     if (document.visibilityState !== "visible") return;
     if (window.location.pathname.endsWith("/login.html")) return;
@@ -395,6 +421,31 @@ function formatarDataTopo(valor) {
     }).format(data);
 }
 
+function obterResumoOperacionalAssinatura(dados) {
+    const assinatura = dados && dados.assinatura;
+    const operacional = dados && dados.operacional;
+
+    if (!assinatura) return "Plano nao localizado";
+
+    if (operacional && operacional.status_operacional === "ativa_cancelamento_agendado") {
+        return "Ativa ate " + (formatarDataTopo(assinatura.proxima_cobranca_em) || "o fim do ciclo");
+    }
+
+    if (operacional && operacional.status_operacional === "pagamento_pendente_tolerancia") {
+        return "Pagamento pendente ate " + (formatarDataTopo(operacional.data_limite_regularizacao) || "regularizacao");
+    }
+
+    if (operacional && operacional.status_operacional === "pagamento_pendente_bloqueada") {
+        return "Pagamento pendente - somente leitura";
+    }
+
+    if (operacional && operacional.status_operacional === "bloqueada") {
+        return "Assinatura inativa - somente leitura";
+    }
+
+    return "Ativa" + (assinatura.proxima_cobranca_em ? " - renova em " + formatarDataTopo(assinatura.proxima_cobranca_em) : "");
+}
+
 function padronizarTopoPagina() {
     const topo = document.querySelector(".topo-pagina");
     const usuario = obterUsuarioLogado();
@@ -596,14 +647,8 @@ async function carregarAssinaturaLateral() {
             return;
         }
 
-        const limite = dados.plano && dados.plano.limiteVeiculos == null
-            ? "veiculos ilimitados"
-            : "ate " + (dados.plano ? dados.plano.limiteVeiculos : 0) + " veiculos";
-        const uso = dados.uso ? dados.uso.veiculos : 0;
-        const cancelamento = dados.assinatura.cancel_at_period_end ? " - cancela no fim do ciclo" : "";
-
         nomePlano.textContent = dados.assinatura.plano_nome || "Plano contratado";
-        resumoPlano.textContent = formatarMoedaTopo(dados.assinatura.valor) + "/mes - " + uso + " de " + limite + cancelamento;
+        resumoPlano.textContent = formatarMoedaTopo(dados.assinatura.valor) + "/mes - " + obterResumoOperacionalAssinatura(dados);
         botao.disabled = false;
     } catch (erro) {
         nomePlano.textContent = "Plano indisponivel";
@@ -987,7 +1032,7 @@ function configurarFetchAutenticado() {
 
         novasOpcoes.headers = headers;
         return fetchOriginal(recursoFinal, novasOpcoes).then(function (resposta) {
-            return tratarSessaoExpiradaSeNecessario(resposta, urlFinal);
+            return tratarRespostaAutenticada(resposta, urlFinal);
         });
     };
 

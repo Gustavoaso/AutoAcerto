@@ -1,8 +1,18 @@
 const jwt = require("jsonwebtoken");
 const banco = require("../banco");
+const { assinaturaPermiteMutacao, montarResumoAssinatura } = require("../helpers/assinaturas");
 
 const SEGREDO_JWT = process.env.JWT_SECRET;
 const NOME_COOKIE_SESSAO = "autoacerto_token";
+
+const METODOS_SOMENTE_LEITURA = new Set(["GET", "HEAD", "OPTIONS"]);
+const ROTAS_MUTACAO_SEMPRE_PERMITIDAS = [
+  /^\/assinaturas\/portal(?:\/|$)/,
+  /^\/auth\/logout(?:\/|$)/,
+  /^\/auth\/me(?:\/|$)/,
+  /^\/usuarios\/senha(?:\/|$)/,
+  /^\/notificacoes(?:\/|$)/
+];
 
 function extrairTokenCookie(cookieHeader) {
   if (!cookieHeader) return null;
@@ -16,6 +26,39 @@ function extrairTokenCookie(cookieHeader) {
   }
 
   return null;
+}
+
+function mutacaoSemprePermitida(requisicao) {
+  const caminho = requisicao.originalUrl ? requisicao.originalUrl.split("?")[0] : "";
+  return ROTAS_MUTACAO_SEMPRE_PERMITIDAS.some(function (regex) {
+    return regex.test(caminho);
+  });
+}
+
+async function obterAssinaturaAtualTransportadora(transportadoraId) {
+  if (!transportadoraId) return null;
+
+  const resultado = await banco.query(
+    `SELECT id, transportadora_id, plano_codigo, plano_nome, status, valor, gateway,
+            gateway_assinatura_id, referencia_externa, stripe_customer_id, stripe_price_id,
+            proxima_cobranca_em, cancel_at_period_end, email_pagador,
+            pagamento_pendente_em, bloqueada_em, cancelada_em, data_cadastro, data_atualizacao
+     FROM assinaturas
+     WHERE transportadora_id = $1
+     ORDER BY data_atualizacao DESC, id DESC
+     LIMIT 1`,
+    [transportadoraId]
+  );
+
+  return resultado.rows[0] || null;
+}
+
+function responderAssinaturaBloqueada(resposta, decisao) {
+  return resposta.status(402).json({
+    mensagem: decisao.mensagem,
+    codigo: decisao.codigo,
+    data_limite_regularizacao: decisao.data_limite_regularizacao || null
+  });
 }
 
 async function autenticar(requisicao, resposta, proximo) {
@@ -59,6 +102,22 @@ async function autenticar(requisicao, resposta, proximo) {
       token_version: usuarioAtual.token_version,
       token_exp: typeof payload.exp === "number" ? new Date(payload.exp * 1000).toISOString() : null
     };
+
+    if (usuarioAtual.perfil !== "dono" && usuarioAtual.transportadora_id != null) {
+      const assinatura = await obterAssinaturaAtualTransportadora(usuarioAtual.transportadora_id);
+      requisicao.usuario.assinatura = assinatura;
+      requisicao.usuario.assinatura_resumo = montarResumoAssinatura(assinatura);
+
+      if (
+        !METODOS_SOMENTE_LEITURA.has(String(requisicao.method || "").toUpperCase()) &&
+        !mutacaoSemprePermitida(requisicao)
+      ) {
+        const decisao = assinaturaPermiteMutacao(assinatura);
+        if (!decisao.permitido) {
+          return responderAssinaturaBloqueada(resposta, decisao);
+        }
+      }
+    }
 
     proximo();
   } catch {

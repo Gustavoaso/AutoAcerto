@@ -18,6 +18,53 @@ function formatarDataTransportadora(dataISO) {
     return dia + "/" + mes + "/" + ano;
 }
 
+function formatarMoedaTransportadora(valor) {
+    return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    }).format(Number(valor || 0));
+}
+
+function definirTexto(id, valor) {
+    const elemento = document.getElementById(id);
+    if (elemento) elemento.textContent = valor;
+}
+
+function definirHtml(id, html) {
+    const elemento = document.getElementById(id);
+    if (elemento) elemento.innerHTML = html;
+}
+
+function obterTextoStatusAssinatura(status) {
+    const statusTratado = String(status || "").toLowerCase();
+    if (!statusTratado) return "Sem assinatura";
+    if (statusTratado === "active" || statusTratado === "trialing") return "Ativa";
+    if (statusTratado === "past_due" || statusTratado === "incomplete") return "Pagamento pendente";
+    if (["canceled", "unpaid", "incomplete_expired", "paused"].includes(statusTratado)) return "Bloqueada";
+    return statusTratado;
+}
+
+function criarGrupoDetalheAssinatura(rotulo, id) {
+    return `
+        <div class="grupo-detalhe">
+            <span class="rotulo-detalhe">${rotulo}</span>
+            <span class="valor-detalhe" id="${id}">-</span>
+        </div>
+    `;
+}
+
+function garantirCamposAssinatura() {
+    const grade = document.querySelector(".grade-detalhes-transportadoras");
+    if (!grade || document.getElementById("detalhePlanoAssinatura")) return;
+
+    grade.insertAdjacentHTML("beforeend",
+        criarGrupoDetalheAssinatura("Plano da assinatura", "detalhePlanoAssinatura") +
+        criarGrupoDetalheAssinatura("Status da assinatura", "detalheStatusAssinatura") +
+        criarGrupoDetalheAssinatura("Proxima cobranca", "detalheProximaCobranca") +
+        criarGrupoDetalheAssinatura("ID assinatura Stripe", "detalheAssinaturaGateway")
+    );
+}
+
 function exibirToastTransportadora(mensagem, tipo) {
     const toast = document.getElementById("toastTransportadora");
     if (!toast) return;
@@ -56,38 +103,29 @@ async function carregarDetalhesTransportadora() {
 }
 
 function renderizarDetalhes(t) {
-    const container = document.getElementById("containerDetalhes");
-    if (!container) return;
+    garantirCamposAssinatura();
+
     const nomeTransportadora = window.AutoAcertoHtml.texto(t.nome, "-");
     const cnpjTransportadora = window.AutoAcertoHtml.texto(t.cnpj, "Não informado");
-    const totalAdmins = Number(t.total_admins || 0);
 
     const seloStatus = t.ativo
         ? '<span class="selo-status selo-ativo">Ativa</span>'
         : '<span class="selo-status selo-inativo">Inativa</span>';
 
-    container.innerHTML = `
-        <div class="linha-info">
-            <span class="rotulo-info">Nome:</span>
-            <span class="valor-info">${nomeTransportadora}</span>
-        </div>
-        <div class="linha-info">
-            <span class="rotulo-info">CNPJ:</span>
-            <span class="valor-info">${cnpjTransportadora}</span>
-        </div>
-        <div class="linha-info">
-            <span class="rotulo-info">Status:</span>
-            <span class="valor-info">${seloStatus}</span>
-        </div>
-        <div class="linha-info">
-            <span class="rotulo-info">Data de cadastro:</span>
-            <span class="valor-info">${formatarDataTransportadora(t.data_cadastro)}</span>
-        </div>
-        <div class="linha-info">
-            <span class="rotulo-info">Total de administradores:</span>
-            <span class="valor-info">${totalAdmins}</span>
-        </div>
-    `;
+    const planoAssinatura = t.assinatura_plano_nome
+        ? window.AutoAcertoHtml.texto(t.assinatura_plano_nome, "-") + " - " + formatarMoedaTransportadora(t.assinatura_valor)
+        : "Sem assinatura local";
+
+    definirTexto("detalheNome", t.nome || "-");
+    definirTexto("detalheCnpjTopo", t.cnpj || "CNPJ nao informado");
+    definirTexto("detalheNomeGrid", nomeTransportadora);
+    definirTexto("detalheCnpj", cnpjTransportadora);
+    definirHtml("detalheStatus", seloStatus);
+    definirTexto("detalheDataCadastro", formatarDataTransportadora(t.data_cadastro));
+    definirTexto("detalhePlanoAssinatura", planoAssinatura);
+    definirTexto("detalheStatusAssinatura", obterTextoStatusAssinatura(t.assinatura_status));
+    definirTexto("detalheProximaCobranca", formatarDataTransportadora(t.assinatura_proxima_cobranca_em));
+    definirTexto("detalheAssinaturaGateway", t.assinatura_gateway_id || "-");
 }
 
 document.getElementById("botaoVoltar").addEventListener("click", function () {

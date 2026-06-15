@@ -60,6 +60,22 @@
   margin-bottom: 2px;
 }
 
+.assinatura-transportadora {
+  display: grid;
+  gap: 4px;
+  min-width: 150px;
+}
+
+.selo-pendente {
+  background: var(--cor-alerta-clara);
+  color: var(--cor-alerta);
+}
+
+.selo-neutro {
+  background: var(--cor-info-clara);
+  color: var(--cor-info);
+}
+
 /* Estilos para páginas de ver e editar */
 .cabecalho-pagina {
   display: flex;
