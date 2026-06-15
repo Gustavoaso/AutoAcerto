@@ -7,6 +7,30 @@ const botaoLimpar = document.getElementById("botaoLimpar");
 const modal = document.getElementById("modalSucesso");
 const botaoOk = document.getElementById("botaoOkModal");
 
+function obterDataHojeCampo() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoje.getDate()).padStart(2, "0");
+  return ano + "-" + mes + "-" + dia;
+}
+
+function calcularStatusViagem(dataSaida, dataChegada) {
+  if (!dataSaida || !dataChegada) return "";
+  return dataChegada >= obterDataHojeCampo() ? "em andamento" : "finalizada";
+}
+
+function atualizarStatusPorDatas() {
+  const status = document.getElementById("status");
+  const dataSaida = document.getElementById("dataSaida").value;
+  const dataChegada = document.getElementById("dataChegada").value;
+  const statusCalculado = calcularStatusViagem(dataSaida, dataChegada);
+
+  if (statusCalculado) {
+    status.value = statusCalculado;
+  }
+}
+
 async function carregarMotoristas() {
   try {
     const response = await fetch(urlApiMotoristas, { headers: cabecalhosAutenticados() });
@@ -96,6 +120,7 @@ function configurarFormularioViagem() {
       alert("A data de chegada nao pode ser menor que a data de saida.");
       return;
     }
+    const statusCalculado = calcularStatusViagem(dataSaida, dataChegada);
 
     let dados = {
       origem: document.getElementById("origem").value,
@@ -107,7 +132,7 @@ function configurarFormularioViagem() {
       valorFrete: valorFreteNum,
       kmInicial: kmInicialNum,
       kmFinal: kmFinalNum,
-      status: document.getElementById("status").value,
+      status: statusCalculado || document.getElementById("status").value,
       observacoes: document.getElementById("observacoes").value
     };
 
@@ -143,6 +168,9 @@ function configurarFormularioViagem() {
   botaoLimpar.addEventListener("click", function () {
     document.getElementById("formularioViagem").reset();
   });
+
+  document.getElementById("dataSaida").addEventListener("change", atualizarStatusPorDatas);
+  document.getElementById("dataChegada").addEventListener("change", atualizarStatusPorDatas);
 }
 
 function iniciarPaginaCadastroViagem() {

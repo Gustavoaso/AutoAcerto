@@ -202,6 +202,23 @@ function dataForaDoPeriodo(data, dataInicio, dataFim) {
   return dataNormalizada < inicio || dataNormalizada > fim;
 }
 
+function obterDataHojeIso() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoje.getDate()).padStart(2, "0");
+  return ano + "-" + mes + "-" + dia;
+}
+
+function calcularStatusViagemPorPeriodo(dataSaida, dataChegada, statusPadrao) {
+  const inicio = normalizarDataIso(dataSaida);
+  const fim = normalizarDataIso(dataChegada);
+
+  if (!inicio || !fim) return statusPadrao;
+
+  return fim >= obterDataHojeIso() ? "em andamento" : "finalizada";
+}
+
 // ============================================================
 // AUTH ? LOGIN
 // ============================================================
@@ -944,12 +961,14 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
       return resposta.status(400).json({ mensagem: "Motorista ou veículo não encontrado para esta transportadora." });
     }
 
+    const statusFinal = calcularStatusViagemPorPeriodo(dataSaida, dataChegada, status);
+
     const sql = `
       INSERT INTO viagens (transportadora_id, origem, destino, motorista_id, veiculo_id, data_saida, data_chegada, valor_frete, km_inicial, km_final, status, observacoes)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING id
     `;
-    const valores = [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, status, observacoes || ""];
+    const valores = [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicialNum, kmFinalNum, statusFinal, observacoes || ""];
 
     const resultado = await banco.query(sql, valores);
     return resposta.status(201).json({ mensagem: "Viagem cadastrada com sucesso.", id: resultado.rows[0].id });
