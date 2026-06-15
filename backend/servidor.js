@@ -202,6 +202,30 @@ function dataForaDoPeriodo(data, dataInicio, dataFim) {
   return dataNormalizada < inicio || dataNormalizada > fim;
 }
 
+async function obterViagemParaDespesa(viagemId, dataDespesa) {
+  const dataDespesaNormalizada = normalizarDataIso(dataDespesa);
+  if (!dataDespesaNormalizada) {
+    return { erro: "Data da despesa invalida." };
+  }
+
+  const resultado = await banco.query(
+    `SELECT
+       transportadora_id,
+       to_char(data_saida, 'YYYY-MM-DD') AS data_saida,
+       to_char(data_chegada, 'YYYY-MM-DD') AS data_chegada,
+       ($2::date BETWEEN data_saida AND data_chegada) AS data_no_periodo
+     FROM viagens
+     WHERE id=$1`,
+    [viagemId, dataDespesaNormalizada]
+  );
+
+  if (resultado.rows.length === 0) {
+    return { erro: "Viagem não encontrada." };
+  }
+
+  return { viagem: resultado.rows[0], dataDespesa: dataDespesaNormalizada };
+}
+
 function obterDataHojeIso() {
   const hoje = new Date();
   const ano = hoje.getFullYear();
@@ -1219,15 +1243,15 @@ app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
     let veiculoIdFinal = null;
 
     if (tipoDespesaFinal === "viagem") {
-      const vr = await banco.query("SELECT transportadora_id, to_char(data_saida, 'YYYY-MM-DD') AS data_saida, to_char(data_chegada, 'YYYY-MM-DD') AS data_chegada FROM viagens WHERE id=$1", [viagemId]);
-      if (vr.rows.length === 0) {
-        return resposta.status(400).json({ mensagem: "Viagem não encontrada." });
+      const validacaoViagem = await obterViagemParaDespesa(viagemId, dataDespesa);
+      if (validacaoViagem.erro) {
+        return resposta.status(400).json({ mensagem: validacaoViagem.erro });
       }
-      if (dataForaDoPeriodo(dataDespesa, vr.rows[0].data_saida, vr.rows[0].data_chegada)) {
+      if (!validacaoViagem.viagem.data_no_periodo) {
         return resposta.status(400).json({ mensagem: "A data da despesa deve estar dentro do periodo da viagem selecionada." });
       }
 
-      tid = vr.rows[0].transportadora_id;
+      tid = validacaoViagem.viagem.transportadora_id;
       viagemIdFinal = viagemId;
     } else {
       const veiculo = await banco.query("SELECT transportadora_id FROM veiculos WHERE id=$1", [veiculoId]);
@@ -1364,11 +1388,11 @@ app.put("/despesas/:id", exigirAdmin, async (requisicao, resposta) => {
     let veiculoIdFinal = null;
 
     if (tipoDespesaFinal === "viagem") {
-      const vr = await banco.query("SELECT transportadora_id, to_char(data_saida, 'YYYY-MM-DD') AS data_saida, to_char(data_chegada, 'YYYY-MM-DD') AS data_chegada FROM viagens WHERE id=$1", [viagemId]);
-      if (vr.rows.length === 0 || vr.rows[0].transportadora_id !== transportadoraId) {
+      const validacaoViagem = await obterViagemParaDespesa(viagemId, dataDespesa);
+      if (validacaoViagem.erro || validacaoViagem.viagem.transportadora_id !== transportadoraId) {
         return resposta.status(400).json({ mensagem: "Viagem invalida para o escopo desta despesa." });
       }
-      if (dataForaDoPeriodo(dataDespesa, vr.rows[0].data_saida, vr.rows[0].data_chegada)) {
+      if (!validacaoViagem.viagem.data_no_periodo) {
         return resposta.status(400).json({ mensagem: "A data da despesa deve estar dentro do periodo da viagem selecionada." });
       }
 

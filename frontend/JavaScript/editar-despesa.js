@@ -33,6 +33,16 @@ function obterViagemSelecionada(viagemId) {
     });
 }
 
+function dataForaDoPeriodo(data, dataInicio, dataFim) {
+    const dataNormalizada = normalizarDataIso(data);
+    const inicio = normalizarDataIso(dataInicio);
+    const fim = normalizarDataIso(dataFim);
+
+    if (!dataNormalizada || !inicio || !fim) return true;
+
+    return dataNormalizada < inicio || dataNormalizada > fim;
+}
+
 async function carregarViagens(viagemIdSelecionada) {
     try {
         const response = await fetch(urlApiViagens,{ headers: cabecalhosAutenticados() });
@@ -176,10 +186,8 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
 
     if (tipoDespesaSelecionado === "viagem") {
         const viagemSelecionada = obterViagemSelecionada(viagemId);
-        const dataSaida = viagemSelecionada ? normalizarDataIso(viagemSelecionada.data_saida) : "";
-        const dataChegada = viagemSelecionada ? normalizarDataIso(viagemSelecionada.data_chegada) : "";
 
-        if (dataDespesa && dataSaida && dataChegada && (dataDespesa < dataSaida || dataDespesa > dataChegada)) {
+        if (!viagemSelecionada || dataForaDoPeriodo(dataDespesa, viagemSelecionada.data_saida, viagemSelecionada.data_chegada)) {
             alert("A data da despesa deve estar dentro do periodo da viagem selecionada.");
             return;
         }
