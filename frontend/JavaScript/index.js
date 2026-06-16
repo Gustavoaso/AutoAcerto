@@ -235,6 +235,26 @@ function atualizarDashboard() {
   atualizarResumoFinanceiro();
   carregarViagensEmAndamento();
   carregarGraficoFinanceiro();
+  ativarAnimacoesDashboard();
+}
+
+function ativarAnimacoesDashboard() {
+  const seletores = [
+    ".secao-boas-vindas",
+    ".card-resumo",
+    ".painel-financeiro",
+    ".painel-viagens"
+  ];
+
+  seletores.forEach(function (seletor, indiceBase) {
+    const elementos = document.querySelectorAll(seletor);
+    elementos.forEach(function (elemento, indice) {
+      if (!elemento.classList.contains("dash-entrada")) {
+        elemento.classList.add("dash-entrada");
+        elemento.style.animationDelay = (indiceBase * 0.06 + indice * 0.04) + "s";
+      }
+    });
+  });
 }
 
 function atualizarCardsResumo() {
