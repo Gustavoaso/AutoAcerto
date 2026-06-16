@@ -760,6 +760,15 @@ button {
   align-items: flex-start;
   gap: 16px;
   margin-bottom: 20px;
+  padding: 18px 20px;
+  border: 1px solid rgba(191, 219, 254, 0.72);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 255, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 18px 40px rgba(15, 23, 42, 0.07);
 }
 
 .titulo-pagina {
@@ -1109,9 +1118,13 @@ html[data-tema-ui="escuro"] {
 ------------------------------------------------------- */
 .tabela-responsiva {
   overflow-x: auto;
-  border-radius: var(--raio-lg);
-  border: 1px solid var(--cor-borda);
-  background: var(--cor-superficie);
+  border-radius: 22px;
+  border: 1px solid rgba(191, 219, 254, 0.55);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 255, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 16px 34px rgba(15, 23, 42, 0.05);
 }
 
 table {
@@ -1129,7 +1142,7 @@ thead th {
   letter-spacing: 0;
   border-bottom: 1px solid var(--cor-borda);
   white-space: nowrap;
-  background: #fbfcff;
+  background: linear-gradient(180deg, #fcfdff, #f6f9ff);
 }
 
 tbody td {
@@ -1406,10 +1419,14 @@ tbody td {
    FORMULÁRIOS
 ------------------------------------------------------- */
 .painel-formulario {
-  background: var(--cor-superficie);
-  border-radius: var(--raio);
-  border: 1px solid var(--cor-borda);
-  box-shadow: var(--sombra-suave);
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 255, 0.96));
+  border-radius: 24px;
+  border: 1px solid rgba(191, 219, 254, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 18px 40px rgba(15, 23, 42, 0.07);
   padding: 26px 30px;
   transition: border-color var(--transicao), box-shadow var(--transicao);
 }
@@ -1747,10 +1764,14 @@ tbody td {
 }
 
 .painel-dados {
-  background: var(--cor-superficie);
-  border-radius: var(--raio);
-  border: 1px solid var(--cor-borda);
-  box-shadow: var(--sombra-suave);
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 255, 0.96));
+  border-radius: 24px;
+  border: 1px solid rgba(191, 219, 254, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 18px 40px rgba(15, 23, 42, 0.07);
   padding: 24px;
   transition: border-color var(--transicao), box-shadow var(--transicao);
 }
