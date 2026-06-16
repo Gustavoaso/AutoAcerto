@@ -95,22 +95,55 @@
       <!-- Cards de métricas -->
       <div class="grade-metricas">
         <div class="card-resumo">
-          <span class="rotulo-resumo">Receita total</span>
+          <div class="topo-card">
+            <span class="icone-card-resumo lucro">
+              <svg viewBox="0 0 24 24">
+                <path d="M7 8h10" />
+                <path d="M7 12h10" />
+                <path d="M7 16h6" />
+              </svg>
+            </span>
+            <span class="rotulo-resumo">Receita total</span>
+          </div>
           <strong class="valor-resumo valor-monetario" id="metricaReceita">R$ 0,00</strong>
         </div>
 
         <div class="card-resumo">
-          <span class="rotulo-resumo">Total de despesas</span>
+          <div class="topo-card">
+            <span class="icone-card-resumo vermelho">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 7h16v12H4z" />
+                <path d="M16 7V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2" />
+              </svg>
+            </span>
+            <span class="rotulo-resumo">Total de despesas</span>
+          </div>
           <strong class="valor-resumo valor-monetario" id="metricaDespesas">R$ 0,00</strong>
         </div>
 
         <div class="card-resumo">
-          <span class="rotulo-resumo">Lucro líquido</span>
+          <div class="topo-card">
+            <span class="icone-card-resumo azul">
+              <svg viewBox="0 0 24 24">
+                <path d="M3 17l6-6 4 4 8-8" />
+                <path d="M14 7h7v7" />
+              </svg>
+            </span>
+            <span class="rotulo-resumo">Lucro líquido</span>
+          </div>
           <strong class="valor-resumo valor-monetario" id="metricaLucro">R$ 0,00</strong>
         </div>
 
         <div class="card-resumo">
-          <span class="rotulo-resumo">Viagens no período</span>
+          <div class="topo-card">
+            <span class="icone-card-resumo verde">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+            </span>
+            <span class="rotulo-resumo">Viagens no período</span>
+          </div>
           <strong class="valor-resumo" id="metricaViagens">0</strong>
         </div>
       </div>
