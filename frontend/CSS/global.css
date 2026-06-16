@@ -901,14 +901,16 @@ html[data-tema-ui="escuro"] {
 }
 
 .card-resumo {
-  background: var(--cor-superficie);
-  border-radius: var(--raio-lg);
-  border: 1px solid var(--cor-borda);
-  box-shadow: var(--sombra-suave);
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 255, 0.96));
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.07);
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   position: relative;
   overflow: hidden;
   transition: border-color var(--transicao), box-shadow var(--transicao), transform var(--transicao);
@@ -943,9 +945,9 @@ html[data-tema-ui="escuro"] {
 }
 
 .card-resumo:hover {
-  border-color: var(--cor-borda-forte);
-  box-shadow: var(--sombra-card-hover);
-  transform: translateY(-1px);
+  border-color: rgba(37, 99, 235, 0.18);
+  box-shadow: 0 22px 46px rgba(15, 23, 42, 0.1);
+  transform: translateY(-2px);
 }
 
 .grade-resumo .card-resumo::before,
@@ -958,10 +960,11 @@ html[data-tema-ui="escuro"] {
   position: absolute;
   right: 18px;
   top: 18px;
-  width: 42px;
-  height: 42px;
-  border-radius: var(--raio);
-  background: var(--cor-info-clara);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(240, 246, 255, 0.95));
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.14);
 }
 
 .grade-resumo .card-resumo::after,
@@ -972,46 +975,14 @@ html[data-tema-ui="escuro"] {
 .grade-metricas .card-resumo::after {
   content: "";
   position: absolute;
-  right: 29px;
-  top: 29px;
+  right: 30px;
+  top: 30px;
   width: 20px;
   height: 20px;
-  background: var(--cor-info);
+  background: var(--cor-primaria);
   -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 17l6-6 4 4 8-8' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14 7h7v7' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 17l6-6 4 4 8-8' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14 7h7v7' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
 }
-
-.grade-resumo .card-resumo:nth-child(1)::before,
-.grade-resumo-motoristas .card-resumo:nth-child(1)::before,
-.grade-metricas .card-resumo:nth-child(1)::before { background: var(--cor-roxo-clara); }
-
-.grade-resumo .card-resumo:nth-child(1)::after,
-.grade-resumo-motoristas .card-resumo:nth-child(1)::after,
-.grade-metricas .card-resumo:nth-child(1)::after { background: var(--cor-roxo); }
-
-.grade-resumo .card-resumo:nth-child(2)::before,
-.grade-resumo-veiculos .card-resumo:nth-child(2)::before,
-.grade-metricas .card-resumo:nth-child(2)::before { background: var(--cor-info-clara); }
-
-.grade-resumo .card-resumo:nth-child(2)::after,
-.grade-resumo-veiculos .card-resumo:nth-child(2)::after,
-.grade-metricas .card-resumo:nth-child(2)::after { background: var(--cor-info); }
-
-.grade-resumo .card-resumo:nth-child(3)::before,
-.grade-resumo-viagens .card-resumo:nth-child(3)::before,
-.grade-metricas .card-resumo:nth-child(3)::before { background: var(--cor-sucesso-clara); }
-
-.grade-resumo .card-resumo:nth-child(3)::after,
-.grade-resumo-viagens .card-resumo:nth-child(3)::after,
-.grade-metricas .card-resumo:nth-child(3)::after { background: var(--cor-sucesso); }
-
-.grade-resumo .card-resumo:nth-child(4)::before,
-.grade-resumo-despesas .card-resumo:nth-child(4)::before,
-.grade-metricas .card-resumo:nth-child(4)::before { background: var(--cor-perigo-clara); }
-
-.grade-resumo .card-resumo:nth-child(4)::after,
-.grade-resumo-despesas .card-resumo:nth-child(4)::after,
-.grade-metricas .card-resumo:nth-child(4)::after { background: var(--cor-perigo); }
 
 .grade-resumo-motoristas .card-resumo::after {
   -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 21a8 8 0 0 0-16 0' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='7' r='4' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E") center / contain no-repeat;
