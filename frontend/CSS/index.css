@@ -286,7 +286,7 @@
 }
 
 .linhas-grade line {
-  stroke: #e8edf5;
+  stroke: #edf2f7;
   stroke-width: 1;
 }
 
@@ -297,9 +297,19 @@
   stroke-linejoin: round;
 }
 
-.linha-receita { stroke: #22c55e; }
-.linha-lucro { stroke: #2563eb; }
-.linha-despesas { stroke: #f43f5e; }
+.linha-receita { stroke: #5b8cff; }
+.linha-lucro { stroke: #14b8a6; }
+.linha-despesas { stroke: #fb7185; }
+
+.barra-grafico {
+  transition: opacity var(--transicao), transform var(--transicao), filter var(--transicao);
+  filter: saturate(0.92);
+}
+
+.barra-grafico:hover {
+  opacity: 1;
+  filter: saturate(1);
+}
 
 .ponto-grafico {
   stroke: var(--cor-superficie);
@@ -371,9 +381,9 @@
   display: inline-block;
 }
 
-.legenda-receita { background: #22c55e; }
-.legenda-lucro { background: #2563eb; }
-.legenda-despesas { background: #f43f5e; }
+.legenda-receita { background: #5b8cff; }
+.legenda-lucro { background: #14b8a6; }
+.legenda-despesas { background: #fb7185; }
 
 .lista-viagens {
   display: flex;

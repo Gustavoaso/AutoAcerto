@@ -532,9 +532,9 @@ function carregarGraficoFinanceiro() {
   const deslocamentoInicial = larguraGrupo / 2;
   const yZero = escalaY(0);
   const series = [
-    { chave: "receita", cor: "#22c55e", preenchimento: "rgba(34, 197, 94, 0.22)" },
-    { chave: "despesas", cor: "#f43f5e", preenchimento: "rgba(244, 63, 94, 0.22)" },
-    { chave: "lucro", cor: "#2563eb", preenchimento: "rgba(37, 99, 235, 0.22)" }
+    { chave: "receita", cor: "#4f8cff", preenchimento: "rgba(79, 140, 255, 0.32)" },
+    { chave: "despesas", cor: "#fb7185", preenchimento: "rgba(251, 113, 133, 0.28)" },
+    { chave: "lucro", cor: "#14b8a6", preenchimento: "rgba(20, 184, 166, 0.28)" }
   ];
 
   dados.forEach(function (item, indice) {
@@ -552,10 +552,11 @@ function carregarGraficoFinanceiro() {
       barra.setAttribute("y", y);
       barra.setAttribute("width", larguraBarra);
       barra.setAttribute("height", altura);
-      barra.setAttribute("rx", Math.min(larguraBarra / 2, 5));
+      barra.setAttribute("rx", Math.min(larguraBarra / 2, 8));
       barra.setAttribute("fill", serie.preenchimento);
+      barra.setAttribute("fill-opacity", "0.95");
       barra.setAttribute("stroke", serie.cor);
-      barra.setAttribute("stroke-width", "1.2");
+      barra.setAttribute("stroke-width", "0.8");
       barra.setAttribute("class", "barra-grafico");
       barra.addEventListener("mouseenter", function (evento) {
         mostrarTooltipGrafico(evento, item, serie.chave);
