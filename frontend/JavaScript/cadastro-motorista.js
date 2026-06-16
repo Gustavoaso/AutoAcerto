@@ -33,6 +33,9 @@ function configurarFormularioMotorista() {
       });
 
       if (!response.ok) {
+        if (typeof respostaEhBloqueioAssinatura === "function" && respostaEhBloqueioAssinatura(response)) {
+          return;
+        }
         const texto = await response.text();
         console.error("Erro da API:", response.status, texto);
         try {

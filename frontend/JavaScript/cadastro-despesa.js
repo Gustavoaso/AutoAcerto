@@ -309,6 +309,9 @@ function configurarFormularioDespesa() {
       });
 
       if (!response.ok) {
+        if (typeof respostaEhBloqueioAssinatura === "function" && respostaEhBloqueioAssinatura(response)) {
+          return;
+        }
         const erro = await response.json();
         alert(erro.mensagem || "Erro ao cadastrar despesa.");
         return;

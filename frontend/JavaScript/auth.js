@@ -159,16 +159,89 @@ function tratarSessaoExpiradaSeNecessario(resposta, url) {
 }
 
 let avisoAssinaturaBloqueadaExibido = false;
+let modalAvisoGlobalAberto = false;
+const alertaNativo = window.alert.bind(window);
+
+function fecharModalAvisoGlobal(modal) {
+    if (!modal) return;
+    modal.remove();
+    modalAvisoGlobalAberto = false;
+}
+
+function obterConfiguracaoAvisoGlobal(tipo) {
+    const mapa = {
+        erro: { classe: "modal-aviso-erro", icone: "!" },
+        aviso: { classe: "modal-aviso-aviso", icone: "!" },
+        info: { classe: "modal-aviso-info", icone: "i" },
+        sucesso: { classe: "modal-aviso-sucesso", icone: "✓" }
+    };
+
+    return mapa[tipo] || mapa.aviso;
+}
+
+function mostrarModalAvisoGlobal(mensagem, titulo, tipo, acaoAoFechar) {
+    if (!document.body) return alertaNativo(mensagem);
+    if (modalAvisoGlobalAberto) return;
+
+    modalAvisoGlobalAberto = true;
+    const configuracao = obterConfiguracaoAvisoGlobal(tipo);
+
+    const modal = document.createElement("div");
+    modal.className = "modal-sucesso " + configuracao.classe;
+    modal.innerHTML =
+        '<div class="fundo-modal-sucesso"></div>' +
+        '<div class="caixa-modal-sucesso">' +
+            '<div class="icone-aviso-global" aria-hidden="true">' + configuracao.icone + '</div>' +
+            '<h3>' + (titulo || "Aviso") + '</h3>' +
+            '<p>' + mensagem + '</p>' +
+            '<div class="acoes-modal-sucesso">' +
+                '<button type="button" class="botao-primario" id="botaoAvisoGlobalOk">OK</button>' +
+            '</div>' +
+        '</div>';
+
+    document.body.appendChild(modal);
+    const botao = modal.querySelector("#botaoAvisoGlobalOk");
+    if (botao) {
+        botao.focus();
+        botao.addEventListener("click", function () {
+            fecharModalAvisoGlobal(modal);
+            if (typeof acaoAoFechar === "function") acaoAoFechar();
+        });
+    }
+
+    modal.querySelector(".fundo-modal-sucesso").addEventListener("click", function () {
+        fecharModalAvisoGlobal(modal);
+        if (typeof acaoAoFechar === "function") acaoAoFechar();
+    });
+}
+
+function respostaEhBloqueioAssinatura(resposta) {
+    return Boolean(resposta && resposta.status === 402);
+}
+
+function exibirAlertaErroConexao(contexto) {
+    const mensagem = contexto
+        ? "Erro de conexao ao " + contexto + "."
+        : "Erro de conexao com a API.";
+    mostrarModalAvisoGlobal(mensagem, "Erro", "erro");
+}
+
+function exibirAlertaRegistroNaoEncontrado(entidade, destino) {
+    const nomeEntidade = entidade || "Registro";
+    mostrarModalAvisoGlobal(nomeEntidade + " nao encontrado.", "Nao encontrado", "aviso", function () {
+        if (destino) window.location.href = destino;
+    });
+}
 
 function tratarAssinaturaBloqueadaSeNecessario(resposta) {
-    if (!resposta || resposta.status !== 402) return resposta;
+    if (!respostaEhBloqueioAssinatura(resposta)) return resposta;
     if (avisoAssinaturaBloqueadaExibido) return resposta;
 
     avisoAssinaturaBloqueadaExibido = true;
     resposta.clone().json().then(function (dados) {
-        window.alert((dados && dados.mensagem) || "Regularize sua assinatura para criar ou alterar dados.");
+        mostrarModalAvisoGlobal((dados && dados.mensagem) || "Regularize sua assinatura para criar ou alterar dados.", "Assinatura", "aviso");
     }).catch(function () {
-        window.alert("Regularize sua assinatura para criar ou alterar dados.");
+        mostrarModalAvisoGlobal("Regularize sua assinatura para criar ou alterar dados.", "Assinatura", "aviso");
     }).finally(function () {
         window.setTimeout(function () {
             avisoAssinaturaBloqueadaExibido = false;
@@ -982,6 +1055,12 @@ window.obterTransportadoraIdParaCadastroMaster = obterTransportadoraIdParaCadast
 window.anexarTransportadoraIdSeMaster = anexarTransportadoraIdSeMaster;
 window.filtrarListaPorTransportadoraMaster = filtrarListaPorTransportadoraMaster;
 window.validarTransportadoraMasterParaCadastro = validarTransportadoraMasterParaCadastro;
+window.respostaEhBloqueioAssinatura = respostaEhBloqueioAssinatura;
+window.exibirAlertaErroConexao = exibirAlertaErroConexao;
+window.exibirAlertaRegistroNaoEncontrado = exibirAlertaRegistroNaoEncontrado;
+window.alert = function (mensagem) {
+    mostrarModalAvisoGlobal(String(mensagem ?? ""), "Aviso", "aviso");
+};
 
 // ==================== FETCH INTERCEPTOR ====================
 

@@ -27,19 +27,27 @@ function formatarCategoria(categoria) {
     return "Outros";
 }
 
+function exibirDespesaNaoEncontrada() {
+    if (typeof exibirAlertaRegistroNaoEncontrado === "function") {
+        exibirAlertaRegistroNaoEncontrado("Despesa", "despesas.html");
+        return;
+    }
+
+    alert("Despesa nao encontrada.");
+    window.location.href = "despesas.html";
+}
+
 async function carregarDespesa() {
     if (!idDespesa) {
-        alert("Despesa nao encontrada.");
-        window.location.href = "despesas.html";
+        exibirDespesaNaoEncontrada();
         return;
     }
 
     try {
-        const response = await fetch(urlApiDespesas + "/" + idDespesa,{ headers: cabecalhosAutenticados() });
+        const response = await fetch(urlApiDespesas + "/" + idDespesa, { headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
-            alert("Despesa nao encontrada.");
-            window.location.href = "despesas.html";
+            exibirDespesaNaoEncontrada();
             return;
         }
 
@@ -62,7 +70,11 @@ async function carregarDespesa() {
         renderizarAnexoCupom(despesa);
     } catch (erro) {
         console.error("Erro ao carregar despesa:", erro);
-        alert("Erro de conexao com a API.");
+        if (typeof exibirAlertaErroConexao === "function") {
+            exibirAlertaErroConexao("carregar despesa");
+        } else {
+            alert("Erro de conexao com a API.");
+        }
     }
 }
 

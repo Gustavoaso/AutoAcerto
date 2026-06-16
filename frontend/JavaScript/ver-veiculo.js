@@ -4,12 +4,12 @@ const params = new URLSearchParams(window.location.search);
 const idVeiculo = params.get("id");
 
 function formatarPlacaExibicao(placa) {
-  if (!placa) return "—";
+  if (!placa) return "-";
   if (window.AutoAcertoMascaras) {
     return window.AutoAcertoMascaras.aplicarPlaca(String(placa).replace(/-/g, ""));
   }
   const u = String(placa).toUpperCase().replace(/[^A-Z0-9]/g, "");
-  if (u.length <= 3) return u || "—";
+  if (u.length <= 3) return u || "-";
   return u.slice(0, 3) + "-" + u.slice(3);
 }
 
@@ -18,7 +18,7 @@ function normalizarStatusVeiculo(status) {
 }
 
 function formatarDataHora(dataISO) {
-  if (!dataISO) return "—";
+  if (!dataISO) return "-";
   const data = new Date(dataISO);
   const dia = String(data.getDate()).padStart(2, "0");
   const mes = String(data.getMonth() + 1).padStart(2, "0");
@@ -28,19 +28,27 @@ function formatarDataHora(dataISO) {
   return dia + "/" + mes + "/" + ano + " " + hora + ":" + minuto;
 }
 
+function exibirVeiculoNaoEncontrado() {
+  if (typeof exibirAlertaRegistroNaoEncontrado === "function") {
+    exibirAlertaRegistroNaoEncontrado("Veiculo", "veiculos.html");
+    return;
+  }
+
+  alert("Veiculo nao encontrado.");
+  window.location.href = "veiculos.html";
+}
+
 async function carregarVeiculo() {
   if (!idVeiculo) {
-    alert("Veículo não encontrado.");
-    window.location.href = "veiculos.html";
+    exibirVeiculoNaoEncontrado();
     return;
   }
 
   try {
-    const response = await fetch(urlApi + "/" + idVeiculo,{ headers: cabecalhosAutenticados() });
+    const response = await fetch(urlApi + "/" + idVeiculo, { headers: cabecalhosAutenticados() });
 
     if (!response.ok) {
-      alert("Veículo não encontrado.");
-      window.location.href = "veiculos.html";
+      exibirVeiculoNaoEncontrado();
       return;
     }
 
@@ -51,26 +59,27 @@ async function carregarVeiculo() {
     document.getElementById("detalhePlacaTopo").textContent = placaFmt;
     document.getElementById("detalheModeloGrid").textContent = veiculo.modelo;
     document.getElementById("detalhePlaca").textContent = placaFmt;
-    document.getElementById("detalheAno").textContent = veiculo.ano || "—";
-    document.getElementById("detalheObservacoes").textContent = veiculo.observacoes || "—";
+    document.getElementById("detalheAno").textContent = veiculo.ano || "-";
+    document.getElementById("detalheObservacoes").textContent = veiculo.observacoes || "-";
     document.getElementById("detalheDataCadastro").textContent = formatarDataHora(veiculo.data_cadastro);
 
     const statusEl = document.getElementById("detalheStatus");
     const statusMap = {
-      "ativo":      ["selo-ativo",      "Ativo"],
-      "em viagem":  ["selo-em-viagem",  "Em viagem"],
-      "manutenção": ["selo-manutencao", "Manutenção"],
-      "inativo":    ["selo-inativo",    "Inativo"]
+      "ativo": ["selo-ativo", "Ativo"],
+      "em viagem": ["selo-em-viagem", "Em viagem"],
+      "manutencao": ["selo-manutencao", "Manutencao"],
+      "inativo": ["selo-inativo", "Inativo"]
     };
     const statusTratado = normalizarStatusVeiculo(veiculo.status);
-    const [classe, texto] = statusTratado === "manutencao"
-      ? ["selo-manutencao", "Manutencao"]
-      : (statusMap[statusTratado] || ["selo-inativo", "Inativo"]);
-    statusEl.innerHTML = '<span class="selo-status ' + classe + '">' + texto + '</span>';
-
+    const statusAtual = statusMap[statusTratado] || ["selo-inativo", "Inativo"];
+    statusEl.innerHTML = '<span class="selo-status ' + statusAtual[0] + '">' + statusAtual[1] + "</span>";
   } catch (error) {
-    console.error("Erro ao carregar veículo:", error);
-    alert("Erro de conexão com o servidor.");
+    console.error("Erro ao carregar veiculo:", error);
+    if (typeof exibirAlertaErroConexao === "function") {
+      exibirAlertaErroConexao("carregar veiculo");
+    } else {
+      alert("Erro de conexao com o servidor.");
+    }
   }
 }
 
@@ -80,10 +89,6 @@ document.getElementById("botaoVoltar").addEventListener("click", function () {
 
 document.getElementById("botaoEditar").addEventListener("click", function () {
   window.location.href = "editar-veiculo.html?id=" + idVeiculo;
-});
-
-document.querySelector(".botao-sair").addEventListener("click", function () {
-  alert("Saindo do sistema...");
 });
 
 carregarVeiculo();

@@ -5,7 +5,7 @@ const idViagem = params.get("id");
 let viagemAtual = null;
 
 function formatarData(dataISO) {
-    if (!dataISO) return "—";
+    if (!dataISO) return "-";
     const data = new Date(dataISO);
     const dia = String(data.getUTCDate()).padStart(2, "0");
     const mes = String(data.getUTCMonth() + 1).padStart(2, "0");
@@ -14,7 +14,7 @@ function formatarData(dataISO) {
 }
 
 function formatarDataHora(dataISO) {
-    if (!dataISO) return "—";
+    if (!dataISO) return "-";
     const data = new Date(dataISO);
     const dia = String(data.getDate()).padStart(2, "0");
     const mes = String(data.getMonth() + 1).padStart(2, "0");
@@ -29,6 +29,16 @@ function formatarMoeda(valor) {
         style: "currency",
         currency: "BRL"
     });
+}
+
+function exibirViagemNaoEncontrada() {
+    if (typeof exibirAlertaRegistroNaoEncontrado === "function") {
+        exibirAlertaRegistroNaoEncontrado("Viagem", "viagens.html");
+        return;
+    }
+
+    alert("Viagem nao encontrada.");
+    window.location.href = "viagens.html";
 }
 
 function configurarAcoesViagem(viagem) {
@@ -48,8 +58,7 @@ function configurarAcoesViagem(viagem) {
 
 async function carregarViagem() {
     if (!idViagem) {
-        alert("Viagem não encontrada.");
-        window.location.href = "viagens.html";
+        exibirViagemNaoEncontrada();
         return;
     }
 
@@ -57,8 +66,7 @@ async function carregarViagem() {
         const response = await fetch(urlApiViagens + "/" + idViagem, { headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
-            alert("Viagem não encontrada.");
-            window.location.href = "viagens.html";
+            exibirViagemNaoEncontrada();
             return;
         }
 
@@ -66,17 +74,17 @@ async function carregarViagem() {
 
         document.getElementById("detalheOrigem").textContent = viagem.origem;
         document.getElementById("detalheDestino").textContent = viagem.destino;
-        document.getElementById("detalheMotorista").textContent = viagem.motorista_nome || "—";
+        document.getElementById("detalheMotorista").textContent = viagem.motorista_nome || "-";
         document.getElementById("detalheVeiculo").textContent =
             viagem.veiculo_modelo
-                ? viagem.veiculo_modelo + " — " + viagem.veiculo_placa
-                : "—";
+                ? viagem.veiculo_modelo + " - " + viagem.veiculo_placa
+                : "-";
         document.getElementById("detalheDataSaida").textContent = formatarData(viagem.data_saida);
         document.getElementById("detalheDataChegada").textContent = viagem.data_chegada
             ? formatarData(viagem.data_chegada)
             : "Pendente";
         document.getElementById("detalheValorFrete").textContent = formatarMoeda(viagem.valor_frete);
-        document.getElementById("detalheObservacoes").textContent = viagem.observacoes || "—";
+        document.getElementById("detalheObservacoes").textContent = viagem.observacoes || "-";
         document.getElementById("detalheDataCadastro").textContent = formatarDataHora(viagem.data_cadastro);
 
         const statusEl = document.getElementById("detalheStatus");
@@ -92,7 +100,11 @@ async function carregarViagem() {
         configurarAcoesViagem(viagem);
     } catch (erro) {
         console.error("Erro ao carregar viagem:", erro);
-        alert("Erro de conexão com a API.");
+        if (typeof exibirAlertaErroConexao === "function") {
+            exibirAlertaErroConexao("carregar viagem");
+        } else {
+            alert("Erro de conexao com a API.");
+        }
     }
 }
 

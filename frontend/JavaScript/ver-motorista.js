@@ -3,19 +3,27 @@ const urlApi = montarUrlApi("/motoristas");
 const params = new URLSearchParams(window.location.search);
 const idMotorista = params.get("id");
 
+function exibirMotoristaNaoEncontrado() {
+    if (typeof exibirAlertaRegistroNaoEncontrado === "function") {
+        exibirAlertaRegistroNaoEncontrado("Motorista", "motoristas.html");
+        return;
+    }
+
+    alert("Motorista nao encontrado.");
+    window.location.href = "motoristas.html";
+}
+
 async function carregarMotorista() {
     if (!idMotorista) {
-        alert("Motorista não encontrado.");
-        window.location.href = "motoristas.html";
+        exibirMotoristaNaoEncontrado();
         return;
     }
 
     try {
-        const response = await fetch(urlApi + "/" + idMotorista,{ headers: cabecalhosAutenticados() });
+        const response = await fetch(urlApi + "/" + idMotorista, { headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
-            alert("Motorista não encontrado.");
-            window.location.href = "motoristas.html";
+            exibirMotoristaNaoEncontrado();
             return;
         }
 
@@ -32,10 +40,13 @@ async function carregarMotorista() {
         } else {
             statusEl.innerHTML = '<span class="selo-status selo-inativo">Inativo</span>';
         }
-
     } catch (error) {
         console.error("Erro ao carregar motorista:", error);
-        alert("Erro de conexão com a API");
+        if (typeof exibirAlertaErroConexao === "function") {
+            exibirAlertaErroConexao("carregar motorista");
+        } else {
+            alert("Erro de conexao com a API.");
+        }
     }
 }
 

@@ -12,19 +12,27 @@ function exibirMensagem(texto, classe) {
   mensagemRetorno.className = "mensagem-retorno " + classe;
 }
 
+function exibirVeiculoNaoEncontrado() {
+  if (typeof exibirAlertaRegistroNaoEncontrado === "function") {
+    exibirAlertaRegistroNaoEncontrado("Veiculo", "veiculos.html");
+    return;
+  }
+
+  alert("Veiculo nao encontrado.");
+  window.location.href = "veiculos.html";
+}
+
 async function carregarVeiculo() {
   if (!idVeiculo) {
-    alert("Veículo não encontrado.");
-    window.location.href = "veiculos.html";
+    exibirVeiculoNaoEncontrado();
     return;
   }
 
   try {
-    const response = await fetch(urlApi + "/" + idVeiculo,{ headers: cabecalhosAutenticados() });
+    const response = await fetch(urlApi + "/" + idVeiculo, { headers: cabecalhosAutenticados() });
 
     if (!response.ok) {
-      alert("Veículo não encontrado.");
-      window.location.href = "veiculos.html";
+      exibirVeiculoNaoEncontrado();
       return;
     }
 
@@ -41,8 +49,12 @@ async function carregarVeiculo() {
       p.value = window.AutoAcertoMascaras.aplicarPlaca(p.value);
     }
   } catch (error) {
-    console.error("Erro ao carregar veículo:", error);
-    alert("Erro de conexão com o servidor.");
+    console.error("Erro ao carregar veiculo:", error);
+    if (typeof exibirAlertaErroConexao === "function") {
+      exibirAlertaErroConexao("carregar veiculo");
+    } else {
+      alert("Erro de conexao com o servidor.");
+    }
   }
 }
 
@@ -54,7 +66,7 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
   const observacoes = document.getElementById("observacoes").value.trim();
 
   if (!modelo || !placa || !status) {
-    exibirMensagem("Preencha todos os campos obrigatórios.", "erro");
+    exibirMensagem("Preencha todos os campos obrigatorios.", "erro");
     return;
   }
 
@@ -69,7 +81,7 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
 
     if (!response.ok) {
       const erro = await response.json();
-      exibirMensagem(erro.mensagem || "Erro ao atualizar veículo.", "erro");
+      exibirMensagem(erro.mensagem || "Erro ao atualizar veiculo.", "erro");
       return;
     }
 
@@ -77,7 +89,7 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
     modal.classList.remove("oculto");
   } catch (error) {
     console.error("Erro:", error);
-    exibirMensagem("Erro de conexão com o servidor.", "erro");
+    exibirMensagem("Erro de conexao com o servidor.", "erro");
   }
 });
 

@@ -117,6 +117,9 @@ function configurarFormularioViagem() {
       });
 
       if (!response.ok) {
+        if (typeof respostaEhBloqueioAssinatura === "function" && respostaEhBloqueioAssinatura(response)) {
+          return;
+        }
         const erro = await response.json();
         alert(erro.mensagem || "Erro ao cadastrar viagem.");
         return;

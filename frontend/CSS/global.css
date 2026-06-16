@@ -1669,6 +1669,43 @@ tbody td {
   line-height: 1.5;
 }
 
+.icone-aviso-global {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--cor-alerta-clara);
+  color: var(--cor-alerta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.modal-aviso-erro .icone-aviso-global {
+  background: var(--cor-erro-clara);
+  color: var(--cor-erro);
+}
+
+.modal-aviso-info .icone-aviso-global {
+  background: var(--cor-info-clara);
+  color: var(--cor-info);
+}
+
+.modal-aviso-sucesso .icone-aviso-global {
+  background: var(--cor-sucesso-clara);
+  color: var(--cor-sucesso);
+}
+
+.modal-aviso-erro .botao-primario {
+  box-shadow: 0 10px 22px rgba(220, 38, 38, 0.18);
+}
+
+.modal-aviso-info .botao-primario {
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.18);
+}
+
 .acoes-modal-sucesso {
   display: flex;
   gap: 10px;

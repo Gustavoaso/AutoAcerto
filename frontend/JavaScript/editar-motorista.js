@@ -17,19 +17,27 @@ function aplicarMascarasNosCampos() {
     if (cnh) cnh.value = M.aplicarCnh(cnh.value);
 }
 
+function exibirMotoristaNaoEncontrado() {
+    if (typeof exibirAlertaRegistroNaoEncontrado === "function") {
+        exibirAlertaRegistroNaoEncontrado("Motorista", "motoristas.html");
+        return;
+    }
+
+    alert("Motorista nao encontrado.");
+    window.location.href = "motoristas.html";
+}
+
 async function carregarMotorista() {
     if (!idMotorista) {
-        alert("Motorista não encontrado.");
-        window.location.href = "motoristas.html";
+        exibirMotoristaNaoEncontrado();
         return;
     }
 
     try {
-        const response = await fetch(urlApi + "/" + idMotorista,{ headers: cabecalhosAutenticados() });
+        const response = await fetch(urlApi + "/" + idMotorista, { headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
-            alert("Motorista não encontrado.");
-            window.location.href = "motoristas.html";
+            exibirMotoristaNaoEncontrado();
             return;
         }
 
@@ -43,7 +51,11 @@ async function carregarMotorista() {
         aplicarMascarasNosCampos();
     } catch (error) {
         console.error("Erro ao carregar motorista:", error);
-        alert("Erro de conexão com a API");
+        if (typeof exibirAlertaErroConexao === "function") {
+            exibirAlertaErroConexao("carregar motorista");
+        } else {
+            alert("Erro de conexao com a API.");
+        }
     }
 }
 
@@ -68,6 +80,9 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         });
 
         if (!response.ok) {
+            if (typeof respostaEhBloqueioAssinatura === "function" && respostaEhBloqueioAssinatura(response)) {
+                return;
+            }
             const erro = await response.json();
             alert(erro.mensagem || "Erro ao atualizar motorista");
             return;
@@ -76,7 +91,11 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         modal.classList.remove("oculto");
     } catch (error) {
         console.error("Erro geral:", error);
-        alert("Erro de conexão com a API");
+        if (typeof exibirAlertaErroConexao === "function") {
+            exibirAlertaErroConexao("atualizar motorista");
+        } else {
+            alert("Erro de conexao com a API.");
+        }
     }
 });
 
