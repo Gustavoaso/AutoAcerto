@@ -379,9 +379,10 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
     senhaUsuario
   } = requisicao.body;
 
-  if (!nomeTransportadora || !nomeUsuario || !emailUsuario || !senhaUsuario) {
+  if (!nomeTransportadora || !cnpj || !nomeUsuario || !emailUsuario || !senhaUsuario) {
     const campos = [];
     if (!nomeTransportadora) campos.push(campoObrigatorio("nomeTransportadora", "Nome da transportadora"));
+    if (!cnpj) campos.push(campoObrigatorio("cnpj", "CNPJ"));
     if (!nomeUsuario) campos.push(campoObrigatorio("nomeUsuario", "Nome do administrador"));
     if (!emailUsuario) campos.push(campoObrigatorio("emailUsuario", "E-mail"));
     if (!senhaUsuario) campos.push(campoObrigatorio("senhaUsuario", "Senha inicial"));
@@ -396,18 +397,32 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
 
   try {
     const cnpjNormalizado = normalizarCnpjBusca(cnpj);
-    const duplicada = await cliente.query(
-      `SELECT id FROM transportadoras
-       WHERE lower(trim(nome)) = lower(trim($1))
-          OR ($2 <> '' AND regexp_replace(COALESCE(cnpj, ''), '\\D', '', 'g') = $2)
-       LIMIT 1`,
+    const duplicidade = await cliente.query(
+      `SELECT
+         EXISTS (
+           SELECT 1 FROM transportadoras
+           WHERE lower(trim(nome)) = lower(trim($1))
+         ) AS nome_duplicado,
+         EXISTS (
+           SELECT 1 FROM transportadoras
+           WHERE $2 <> ''
+             AND regexp_replace(COALESCE(cnpj, ''), '\\D', '', 'g') = $2
+         ) AS cnpj_duplicado`,
       [normalizarTextoBusca(nomeTransportadora), cnpjNormalizado]
     );
 
-    if (duplicada.rows.length > 0) {
-      const campos = [{ campo: "nomeTransportadora", mensagem: "Ja existe uma transportadora com este nome." }];
-      if (cnpjNormalizado) campos.push({ campo: "cnpj", mensagem: "Confira o CNPJ informado." });
-      return erroValidacao(resposta, "Ja existe uma transportadora cadastrada com estes dados.", campos);
+    const nomeDuplicado = duplicidade.rows[0].nome_duplicado;
+    const cnpjDuplicado = duplicidade.rows[0].cnpj_duplicado;
+
+    if (nomeDuplicado || cnpjDuplicado) {
+      const campos = [];
+      if (nomeDuplicado) {
+        campos.push({ campo: "nomeTransportadora", mensagem: "Ja existe uma transportadora com este nome." });
+      }
+      if (cnpjDuplicado) {
+        campos.push({ campo: "cnpj", mensagem: "Ja existe uma transportadora com este CNPJ." });
+      }
+      return erroValidacao(resposta, "Ja existe uma transportadora cadastrada com os dados informados.", campos);
     }
 
     const usuarioDuplicado = await cliente.query(

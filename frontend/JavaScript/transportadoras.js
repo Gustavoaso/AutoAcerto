@@ -130,9 +130,10 @@ function configurarFormularioTransportadora() {
             senhaUsuario: document.getElementById("campoSenhaAdmin").value
         };
 
-        if (!dados.nomeTransportadora || !dados.nomeUsuario || !dados.emailUsuario || !dados.senhaUsuario) {
+        if (!dados.nomeTransportadora || !dados.cnpj || !dados.nomeUsuario || !dados.emailUsuario || !dados.senhaUsuario) {
             const campos = [];
             if (!dados.nomeTransportadora) campos.push({ campo: "nomeTransportadora", mensagem: "Informe o nome da transportadora." });
+            if (!dados.cnpj) campos.push({ campo: "cnpj", mensagem: "Informe o CNPJ da transportadora." });
             if (!dados.nomeUsuario) campos.push({ campo: "nomeUsuario", mensagem: "Informe o nome do administrador." });
             if (!dados.emailUsuario) campos.push({ campo: "emailUsuario", mensagem: "Informe o e-mail do administrador." });
             if (!dados.senhaUsuario) campos.push({ campo: "senhaUsuario", mensagem: "Informe a senha inicial." });
