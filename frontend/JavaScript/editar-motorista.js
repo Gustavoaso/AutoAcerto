@@ -19,7 +19,7 @@ function aplicarMascarasNosCampos() {
 
 async function carregarMotorista() {
     if (!idMotorista) {
-        alert("Motorista não encontrado.");
+        exibirModalErroCadastro("Motorista nao encontrado.");
         window.location.href = "motoristas.html";
         return;
     }
@@ -28,7 +28,7 @@ async function carregarMotorista() {
         const response = await fetch(urlApi + "/" + idMotorista,{ headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
-            alert("Motorista não encontrado.");
+            exibirModalErroCadastro("Motorista nao encontrado.");
             window.location.href = "motoristas.html";
             return;
         }
@@ -43,12 +43,13 @@ async function carregarMotorista() {
         aplicarMascarasNosCampos();
     } catch (error) {
         console.error("Erro ao carregar motorista:", error);
-        alert("Erro de conexão com a API");
+        exibirModalErroCadastro("Erro de conexao com a API.");
     }
 }
 
 document.getElementById("botaoSalvarEdicao").addEventListener("click", async function (e) {
     e.preventDefault();
+    limparValidacoesCadastro();
 
     const dados = {
         nome: document.getElementById("nome").value.trim(),
@@ -58,25 +59,35 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         status: document.getElementById("status").value
     };
 
+    const campos = [];
+    if (!dados.nome) campos.push({ campo: "nome", mensagem: "Informe o nome do motorista." });
+    if (!dados.cpf) campos.push({ campo: "cpf", mensagem: "Informe o CPF do motorista." });
+    if (!dados.telefone) campos.push({ campo: "telefone", mensagem: "Informe o telefone do motorista." });
+    if (!dados.cnh) campos.push({ campo: "cnh", mensagem: "Informe a CNH do motorista." });
+    if (!dados.status) campos.push({ campo: "status", mensagem: "Selecione o status do motorista." });
+
+    if (campos.length > 0) {
+        exibirModalErroCadastro("Preencha os campos obrigatorios.", campos);
+        return;
+    }
+
     try {
         const response = await fetch(urlApi + "/" + idMotorista, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: cabecalhosAutenticados(),
             body: JSON.stringify(dados)
         });
 
         if (!response.ok) {
             const erro = await response.json();
-            alert(erro.mensagem || "Erro ao atualizar motorista");
+            exibirModalErroCadastro(erro.mensagem || "Erro ao atualizar motorista.", erro.campos);
             return;
         }
 
         modal.classList.remove("oculto");
     } catch (error) {
         console.error("Erro geral:", error);
-        alert("Erro de conexão com a API");
+        exibirModalErroCadastro("Erro de conexao com a API.");
     }
 });
 
