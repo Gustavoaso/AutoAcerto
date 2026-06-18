@@ -13,13 +13,27 @@ function configurarFormularioMotorista() {
       return;
     }
 
+    limparValidacoesCadastro();
+
     let dados = {
-      nome: document.getElementById("nome").value,
-      cpf: document.getElementById("cpf").value,
-      telefone: document.getElementById("telefone").value,
-      cnh: document.getElementById("cnh").value,
-      status: document.getElementById("status").value
+      nome: document.getElementById("nome").value.trim(),
+      cpf: document.getElementById("cpf").value.trim(),
+      telefone: document.getElementById("telefone").value.trim(),
+      cnh: document.getElementById("cnh").value.trim(),
+      status: document.getElementById("status").value.trim()
     };
+
+    const campos = [];
+    if (!dados.nome) campos.push({ campo: "nome", mensagem: "Informe o nome do motorista." });
+    if (!dados.cpf) campos.push({ campo: "cpf", mensagem: "Informe o CPF do motorista." });
+    if (!dados.telefone) campos.push({ campo: "telefone", mensagem: "Informe o telefone do motorista." });
+    if (!dados.cnh) campos.push({ campo: "cnh", mensagem: "Informe a CNH do motorista." });
+    if (!dados.status) campos.push({ campo: "status", mensagem: "Selecione o status do motorista." });
+
+    if (campos.length > 0) {
+      exibirModalErroCadastro("Preencha os campos obrigatorios.", campos);
+      return;
+    }
 
     if (typeof anexarTransportadoraIdSeMaster === "function") {
       dados = anexarTransportadoraIdSeMaster(dados);
@@ -34,14 +48,14 @@ function configurarFormularioMotorista() {
 
       if (!response.ok) {
         const erro = await response.json();
-        alert(erro.mensagem || "Erro ao cadastrar Motorista.");
+        exibirModalErroCadastro(erro.mensagem || "Erro ao cadastrar motorista.", erro.campos);
         return;
       }
 
       modal.classList.remove("oculto");
     } catch (error) {
       console.error("Erro geral:", error);
-      alert("Erro de conexão com a API");
+      exibirModalErroCadastro("Erro de conexao com a API.");
     }
   });
 

@@ -13,6 +13,8 @@ function exibirMensagem(texto, classe) {
 
 function configurarFormularioVeiculo() {
   botaoSalvar.addEventListener("click", async function () {
+    limparValidacoesCadastro();
+
     const modelo = document.getElementById("modelo").value.trim();
     const placa = document.getElementById("placa").value.trim();
     const status = document.getElementById("status").value.trim();
@@ -21,11 +23,11 @@ function configurarFormularioVeiculo() {
 
     if (!modelo || !placa || !status) {
       const camposPendentes = [];
-      if (!modelo) camposPendentes.push("modelo");
-      if (!placa) camposPendentes.push("placa");
-      if (!status) camposPendentes.push("status");
+      if (!modelo) camposPendentes.push({ campo: "modelo", mensagem: "Informe o modelo do veiculo." });
+      if (!placa) camposPendentes.push({ campo: "placa", mensagem: "Informe a placa do veiculo." });
+      if (!status) camposPendentes.push({ campo: "status", mensagem: "Selecione o status do veiculo." });
 
-      exibirMensagem("Preencha os campos obrigatorios: " + camposPendentes.join(", ") + ".", "erro");
+      exibirModalErroCadastro("Preencha os campos obrigatorios.", camposPendentes);
       return;
     }
 
@@ -50,7 +52,7 @@ function configurarFormularioVeiculo() {
 
       if (!response.ok) {
         const erro = await response.json();
-        exibirMensagem(erro.mensagem || "Erro ao cadastrar veículo.", "erro");
+        exibirModalErroCadastro(erro.mensagem || "Erro ao cadastrar veiculo.", erro.campos);
         return;
       }
 
@@ -58,7 +60,7 @@ function configurarFormularioVeiculo() {
       modal.classList.remove("oculto");
     } catch (error) {
       console.error(error);
-      exibirMensagem("Erro de conexão com o servidor.", "erro");
+      exibirModalErroCadastro("Erro de conexao com o servidor.");
     }
   });
 

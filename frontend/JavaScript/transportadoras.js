@@ -120,6 +120,7 @@ function configurarFormularioTransportadora() {
 
     formulario.addEventListener("submit", async function (evento) {
         evento.preventDefault();
+        limparValidacoesCadastro();
 
         const dados = {
             nomeTransportadora: document.getElementById("campoNomeTransportadora").value.trim(),
@@ -130,12 +131,19 @@ function configurarFormularioTransportadora() {
         };
 
         if (!dados.nomeTransportadora || !dados.nomeUsuario || !dados.emailUsuario || !dados.senhaUsuario) {
-            exibirToastTransportadora("Preencha todos os campos obrigatórios.", "erro");
+            const campos = [];
+            if (!dados.nomeTransportadora) campos.push({ campo: "nomeTransportadora", mensagem: "Informe o nome da transportadora." });
+            if (!dados.nomeUsuario) campos.push({ campo: "nomeUsuario", mensagem: "Informe o nome do administrador." });
+            if (!dados.emailUsuario) campos.push({ campo: "emailUsuario", mensagem: "Informe o e-mail do administrador." });
+            if (!dados.senhaUsuario) campos.push({ campo: "senhaUsuario", mensagem: "Informe a senha inicial." });
+            exibirModalErroCadastro("Preencha os campos obrigatorios.", campos);
             return;
         }
 
         if (dados.senhaUsuario.length < 8) {
-            exibirToastTransportadora("A senha inicial deve ter pelo menos 8 caracteres.", "erro");
+            exibirModalErroCadastro("A senha inicial deve ter pelo menos 8 caracteres.", [
+                { campo: "senhaUsuario", mensagem: "Informe uma senha com pelo menos 8 caracteres." }
+            ]);
             return;
         }
 
@@ -152,7 +160,7 @@ function configurarFormularioTransportadora() {
             const retorno = await resposta.json();
 
             if (!resposta.ok) {
-                exibirToastTransportadora(retorno.mensagem || "Erro ao cadastrar transportadora.", "erro");
+                exibirModalErroCadastro(retorno.mensagem || "Erro ao cadastrar transportadora.", retorno.campos);
                 return;
             }
 
@@ -161,7 +169,7 @@ function configurarFormularioTransportadora() {
             carregarTransportadoras();
         } catch (erro) {
             console.error("Erro ao cadastrar transportadora:", erro.message);
-            exibirToastTransportadora("Erro de conexão com o servidor.", "erro");
+            exibirModalErroCadastro("Erro de conexao com o servidor.");
         } finally {
             botao.disabled = false;
             botao.textContent = "Cadastrar transportadora";

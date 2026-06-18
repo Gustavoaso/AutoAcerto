@@ -1306,6 +1306,31 @@ tbody td {
   justify-content: center;
 }
 
+.icone-erro-cadastro {
+  background: var(--cor-erro-clara);
+  color: var(--cor-erro);
+}
+
+.lista-erros-cadastro {
+  margin: -8px 0 20px;
+  padding-left: 18px;
+  text-align: left;
+  color: var(--cor-erro);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.lista-erros-cadastro.oculto {
+  display: none;
+}
+
+input.campo-invalido,
+select.campo-invalido,
+textarea.campo-invalido {
+  border-color: var(--cor-erro) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+}
+
 /* -------------------------------------------------------
    SEÇÃO DE DETALHES (ver-motorista, ver-veiculo, etc.)
 ------------------------------------------------------- */

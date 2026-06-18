@@ -113,8 +113,24 @@ async function carregarVeiculos() {
 function configurarFormularioViagem() {
   botaoSalvar.addEventListener("click", async function (e) {
     e.preventDefault();
+    limparValidacoesCadastro();
 
     if (typeof validarTransportadoraMasterParaCadastro === "function" && !validarTransportadoraMasterParaCadastro()) {
+      return;
+    }
+
+    const camposObrigatorios = [];
+    if (!document.getElementById("origem").value.trim()) camposObrigatorios.push({ campo: "origem", mensagem: "Informe a origem da viagem." });
+    if (!document.getElementById("destino").value.trim()) camposObrigatorios.push({ campo: "destino", mensagem: "Informe o destino da viagem." });
+    if (!document.getElementById("motoristaId").value) camposObrigatorios.push({ campo: "motoristaId", mensagem: "Selecione o motorista." });
+    if (!document.getElementById("veiculoId").value) camposObrigatorios.push({ campo: "veiculoId", mensagem: "Selecione o veiculo." });
+    if (!document.getElementById("dataSaida").value) camposObrigatorios.push({ campo: "dataSaida", mensagem: "Informe a data de saida." });
+    if (!document.getElementById("dataChegada").value) camposObrigatorios.push({ campo: "dataChegada", mensagem: "Informe a data de chegada." });
+    if (!document.getElementById("valorFrete").value.trim()) camposObrigatorios.push({ campo: "valorFrete", mensagem: "Informe o valor do frete." });
+    if (!document.getElementById("kmInicial").value.trim()) camposObrigatorios.push({ campo: "kmInicial", mensagem: "Informe o KM inicial." });
+
+    if (camposObrigatorios.length > 0) {
+      exibirModalErroCadastro("Preencha os campos obrigatorios.", camposObrigatorios);
       return;
     }
 
@@ -122,7 +138,9 @@ function configurarFormularioViagem() {
       ? window.AutoAcertoMascaras.moedaParaNumero(document.getElementById("valorFrete").value)
       : parseFloat(document.getElementById("valorFrete").value);
     if (isNaN(valorFreteNum) || valorFreteNum <= 0) {
-      alert("Informe um valor de frete válido.");
+      exibirModalErroCadastro("Informe um valor de frete valido.", [
+        { campo: "valorFrete", mensagem: "Informe um valor maior que zero." }
+      ]);
       return;
     }
 
@@ -131,25 +149,33 @@ function configurarFormularioViagem() {
     const kmFinalNum = kmFinalValor === "" ? null : parseInt(kmFinalValor, 10);
 
     if (isNaN(kmInicialNum) || kmInicialNum < 0) {
-      alert("Informe os KM da viagem corretamente.");
+      exibirModalErroCadastro("Informe os KM da viagem corretamente.", [
+        { campo: "kmInicial", mensagem: "Informe um KM inicial maior ou igual a zero." }
+      ]);
       return;
     }
 
     if (kmFinalNum !== null && kmFinalNum < kmInicialNum) {
-      alert("O KM final não pode ser menor que o KM inicial.");
+      exibirModalErroCadastro("O KM final nao pode ser menor que o KM inicial.", [
+        { campo: "kmFinal", mensagem: "Informe um KM final maior ou igual ao inicial." }
+      ]);
       return;
     }
 
     const dataSaida = document.getElementById("dataSaida").value;
     const dataChegada = document.getElementById("dataChegada").value;
     if (dataSaida && dataChegada && dataChegada < dataSaida) {
-      alert("A data de chegada nao pode ser menor que a data de saida.");
+      exibirModalErroCadastro("A data de chegada nao pode ser menor que a data de saida.", [
+        { campo: "dataChegada", mensagem: "Informe uma data igual ou posterior a saida." }
+      ]);
       return;
     }
     const statusCalculado = calcularStatusViagem(dataSaida, dataChegada);
 
     if (statusCalculado === "finalizada" && (kmFinalNum === null || isNaN(kmFinalNum) || kmFinalNum < 0)) {
-      alert("Informe o KM final da viagem.");
+      exibirModalErroCadastro("Informe o KM final da viagem.", [
+        { campo: "kmFinal", mensagem: "Informe o KM final." }
+      ]);
       return;
     }
 
@@ -180,14 +206,14 @@ function configurarFormularioViagem() {
 
       if (!response.ok) {
         const erro = await response.json();
-        alert(erro.mensagem || "Erro ao cadastrar viagem.");
+        exibirModalErroCadastro(erro.mensagem || "Erro ao cadastrar viagem.", erro.campos);
         return;
       }
 
       modal.classList.remove("oculto");
     } catch (erro) {
       console.error("Erro geral:", erro);
-      alert("Erro de conexão com a API.");
+      exibirModalErroCadastro("Erro de conexao com a API.");
     }
   });
 

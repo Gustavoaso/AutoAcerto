@@ -200,6 +200,131 @@ function configurarBotaoSair() {
     botaoSair.addEventListener("click", encerrarSessao);
 }
 
+// ==================== MODAL DE VALIDACAO ====================
+
+const mapaCamposValidacao = {
+    nomeTransportadora: "campoNomeTransportadora",
+    cnpj: "campoCnpjTransportadora",
+    nomeUsuario: "campoNomeAdmin",
+    emailUsuario: "campoEmailAdmin",
+    senhaUsuario: "campoSenhaAdmin",
+    nome: "nome",
+    cpf: "cpf",
+    telefone: "telefone",
+    cnh: "cnh",
+    status: "status",
+    modelo: "modelo",
+    placa: "placa",
+    origem: "origem",
+    destino: "destino",
+    motoristaId: "motoristaId",
+    veiculoId: "veiculoId",
+    dataSaida: "dataSaida",
+    dataChegada: "dataChegada",
+    valorFrete: "valorFrete",
+    kmInicial: "kmInicial",
+    kmFinal: "kmFinal",
+    viagemId: "viagemId",
+    descricao: "descricao",
+    categoria: "categoria",
+    dataDespesa: "dataDespesa",
+    valor: "valor",
+    email: "campoEmail",
+    senha: "campoSenha",
+    perfil: "campoPerfil",
+    motorista_id: "campoMotoristaId"
+};
+
+function obterCampoValidacao(nomeCampo) {
+    const idCampo = mapaCamposValidacao[nomeCampo] || nomeCampo;
+    const nomeCampoFormatado = String(nomeCampo || "");
+    const idCampoPadrao = nomeCampoFormatado
+        ? "campo" + nomeCampoFormatado.charAt(0).toUpperCase() + nomeCampoFormatado.slice(1)
+        : "";
+    return document.getElementById(idCampo) ||
+           document.getElementById(idCampoPadrao) ||
+           document.getElementById(nomeCampoFormatado) ||
+           document.querySelector("[name='" + nomeCampoFormatado + "']");
+}
+
+function limparValidacoesCadastro() {
+    document.querySelectorAll(".campo-invalido").forEach(function (campo) {
+        campo.classList.remove("campo-invalido");
+        campo.removeAttribute("aria-invalid");
+        campo.removeAttribute("title");
+    });
+}
+
+function marcarCamposInvalidos(campos) {
+    (campos || []).forEach(function (item) {
+        const campo = obterCampoValidacao(item.campo);
+        if (!campo) return;
+        campo.classList.add("campo-invalido");
+        campo.setAttribute("aria-invalid", "true");
+        if (item.mensagem) campo.setAttribute("title", item.mensagem);
+    });
+}
+
+function garantirModalErroCadastro() {
+    let modal = document.getElementById("modalErroCadastro");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id = "modalErroCadastro";
+    modal.className = "modal-sucesso modal-erro-cadastro oculto";
+    modal.innerHTML = `
+        <div class="fundo-modal-sucesso"></div>
+        <div class="caixa-modal-sucesso">
+            <div class="icone-sucesso icone-erro-cadastro">!</div>
+            <h3>Revise o cadastro</h3>
+            <p id="textoModalErroCadastro">Encontramos campos que precisam de ajuste.</p>
+            <ul id="listaModalErroCadastro" class="lista-erros-cadastro"></ul>
+            <div class="acoes-modal-sucesso">
+                <button type="button" class="botao-primario" id="botaoOkModalErroCadastro">Entendi</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector(".fundo-modal-sucesso").addEventListener("click", fecharModalErroCadastro);
+    modal.querySelector("#botaoOkModalErroCadastro").addEventListener("click", fecharModalErroCadastro);
+
+    return modal;
+}
+
+function fecharModalErroCadastro() {
+    const modal = document.getElementById("modalErroCadastro");
+    if (modal) modal.classList.add("oculto");
+}
+
+function exibirModalErroCadastro(mensagem, campos) {
+    const modal = garantirModalErroCadastro();
+    const texto = modal.querySelector("#textoModalErroCadastro");
+    const lista = modal.querySelector("#listaModalErroCadastro");
+    const camposValidacao = Array.isArray(campos) ? campos : [];
+
+    limparValidacoesCadastro();
+    marcarCamposInvalidos(camposValidacao);
+
+    texto.textContent = mensagem || "Encontramos campos que precisam de ajuste.";
+    lista.innerHTML = "";
+
+    camposValidacao.forEach(function (item) {
+        if (!item || !item.mensagem) return;
+        const li = document.createElement("li");
+        li.textContent = item.mensagem;
+        lista.appendChild(li);
+    });
+
+    lista.classList.toggle("oculto", lista.children.length === 0);
+    modal.classList.remove("oculto");
+
+    const primeiroCampo = camposValidacao.length ? obterCampoValidacao(camposValidacao[0].campo) : null;
+    if (primeiroCampo && typeof primeiroCampo.focus === "function") {
+        setTimeout(function () { primeiroCampo.focus(); }, 80);
+    }
+}
+
 // ==================== FETCH INTERCEPTOR ====================
 
 function configurarFetchAutenticado() {

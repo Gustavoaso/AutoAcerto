@@ -243,6 +243,25 @@ function calcularStatusViagemPorPeriodo(dataSaida, dataChegada, statusPadrao) {
   return fim >= obterDataHojeIso() ? "em andamento" : "finalizada";
 }
 
+function erroValidacao(resposta, mensagem, campos) {
+  return resposta.status(400).json({
+    mensagem,
+    campos: campos || []
+  });
+}
+
+function campoObrigatorio(campo, rotulo) {
+  return { campo, mensagem: rotulo + " e obrigatorio." };
+}
+
+function normalizarTextoBusca(valor) {
+  return String(valor || "").trim();
+}
+
+function normalizarCnpjBusca(valor) {
+  return String(valor || "").replace(/\D/g, "");
+}
+
 // ============================================================
 // AUTH ? LOGIN
 // ============================================================
@@ -361,12 +380,47 @@ app.post("/transportadoras", exigirDonoSistema, async (requisicao, resposta) => 
   } = requisicao.body;
 
   if (!nomeTransportadora || !nomeUsuario || !emailUsuario || !senhaUsuario) {
+    const campos = [];
+    if (!nomeTransportadora) campos.push(campoObrigatorio("nomeTransportadora", "Nome da transportadora"));
+    if (!nomeUsuario) campos.push(campoObrigatorio("nomeUsuario", "Nome do administrador"));
+    if (!emailUsuario) campos.push(campoObrigatorio("emailUsuario", "E-mail"));
+    if (!senhaUsuario) campos.push(campoObrigatorio("senhaUsuario", "Senha inicial"));
+    return erroValidacao(resposta, "Preencha os campos obrigatorios.", campos);
+  }
+
+  if (!nomeTransportadora || !nomeUsuario || !emailUsuario || !senhaUsuario) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   const cliente = await banco.connect();
 
   try {
+    const cnpjNormalizado = normalizarCnpjBusca(cnpj);
+    const duplicada = await cliente.query(
+      `SELECT id FROM transportadoras
+       WHERE lower(trim(nome)) = lower(trim($1))
+          OR ($2 <> '' AND regexp_replace(COALESCE(cnpj, ''), '\\D', '', 'g') = $2)
+       LIMIT 1`,
+      [normalizarTextoBusca(nomeTransportadora), cnpjNormalizado]
+    );
+
+    if (duplicada.rows.length > 0) {
+      const campos = [{ campo: "nomeTransportadora", mensagem: "Ja existe uma transportadora com este nome." }];
+      if (cnpjNormalizado) campos.push({ campo: "cnpj", mensagem: "Confira o CNPJ informado." });
+      return erroValidacao(resposta, "Ja existe uma transportadora cadastrada com estes dados.", campos);
+    }
+
+    const usuarioDuplicado = await cliente.query(
+      "SELECT id FROM usuarios WHERE lower(email)=lower($1) LIMIT 1",
+      [emailUsuario]
+    );
+
+    if (usuarioDuplicado.rows.length > 0) {
+      return erroValidacao(resposta, "Ja existe um usuario cadastrado com esse e-mail.", [
+        { campo: "emailUsuario", mensagem: "Use outro e-mail." }
+      ]);
+    }
+
     await cliente.query("BEGIN");
 
     const resultadoTransportadora = await cliente.query(`
@@ -502,6 +556,27 @@ app.post("/usuarios", exigirAdmin, async (requisicao, resposta) => {
   const { nome, email, senha, perfil, motorista_id, ativo } = requisicao.body;
 
   if (!nome || !email || !senha || !perfil) {
+    const campos = [];
+    if (!nome) campos.push(campoObrigatorio("nome", "Nome"));
+    if (!email) campos.push(campoObrigatorio("email", "E-mail"));
+    if (!senha) campos.push(campoObrigatorio("senha", "Senha"));
+    if (!perfil) campos.push(campoObrigatorio("perfil", "Perfil"));
+    return erroValidacao(resposta, "Preencha os campos obrigatorios.", campos);
+  }
+
+  if (perfil !== "admin" && perfil !== "motorista") {
+    return erroValidacao(resposta, "Perfil invalido para esta transportadora.", [
+      { campo: "perfil", mensagem: "Selecione admin ou motorista." }
+    ]);
+  }
+
+  if (perfil === "motorista" && !motorista_id) {
+    return erroValidacao(resposta, "Vincule um motorista para usuarios do perfil motorista.", [
+      { campo: "motorista_id", mensagem: "Selecione um motorista." }
+    ]);
+  }
+
+  if (!nome || !email || !senha || !perfil) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
@@ -523,6 +598,17 @@ app.post("/usuarios", exigirAdmin, async (requisicao, resposta) => {
     const motoristaValido = await motoristaPertenceTransportadora(motorista_id, transportadoraId);
     if (!motoristaValido) {
       return resposta.status(400).json({ mensagem: "Motorista não encontrado para esta transportadora." });
+    }
+
+    const usuarioDuplicado = await banco.query(
+      "SELECT id FROM usuarios WHERE lower(email)=lower($1) LIMIT 1",
+      [email]
+    );
+
+    if (usuarioDuplicado.rows.length > 0) {
+      return erroValidacao(resposta, "Ja existe um usuario cadastrado com esse e-mail.", [
+        { campo: "email", mensagem: "Use outro e-mail." }
+      ]);
     }
 
     const senhaHash = await bcrypt.hash(senha, 10);
@@ -667,6 +753,16 @@ app.post("/motoristas", exigirAdmin, async (requisicao, resposta) => {
   const { nome, cpf, telefone, cnh, status } = requisicao.body;
 
   if (!nome || !cpf || !telefone || !cnh || !status) {
+    const campos = [];
+    if (!nome) campos.push(campoObrigatorio("nome", "Nome"));
+    if (!cpf) campos.push(campoObrigatorio("cpf", "CPF"));
+    if (!telefone) campos.push(campoObrigatorio("telefone", "Telefone"));
+    if (!cnh) campos.push(campoObrigatorio("cnh", "CNH"));
+    if (!status) campos.push(campoObrigatorio("status", "Status"));
+    return erroValidacao(resposta, "Preencha os campos obrigatorios.", campos);
+  }
+
+  if (!nome || !cpf || !telefone || !cnh || !status) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
@@ -676,6 +772,17 @@ app.post("/motoristas", exigirAdmin, async (requisicao, resposta) => {
       return resposta.status(400).json({ mensagem: escopo.erro });
     }
     const transportadoraId = escopo.id;
+
+    const motoristaDuplicado = await banco.query(
+      "SELECT id FROM motoristas WHERE cpf=$1 LIMIT 1",
+      [cpf]
+    );
+
+    if (motoristaDuplicado.rows.length > 0) {
+      return erroValidacao(resposta, "Ja existe um motorista cadastrado com esse CPF.", [
+        { campo: "cpf", mensagem: "Use outro CPF." }
+      ]);
+    }
 
     const sql = `
       INSERT INTO motoristas (transportadora_id, nome, cpf, telefone, cnh, status)
@@ -810,7 +917,9 @@ app.post("/veiculos", exigirAdmin, async (req, res) => {
     if (!modeloTratado) pendentes.push("modelo");
     if (!placaTratada) pendentes.push("placa");
     if (!statusTratado) pendentes.push("status");
-    return res.status(400).json({ mensagem: "Preencha os campos obrigatorios: " + pendentes.join(", ") + "." });
+    return erroValidacao(res, "Preencha os campos obrigatorios: " + pendentes.join(", ") + ".", pendentes.map(function (campo) {
+      return campoObrigatorio(campo, campo.charAt(0).toUpperCase() + campo.slice(1));
+    }));
   }
 
   try {
@@ -819,6 +928,17 @@ app.post("/veiculos", exigirAdmin, async (req, res) => {
       return res.status(400).json({ mensagem: escopo.erro });
     }
     const transportadoraId = escopo.id;
+
+    const veiculoDuplicado = await banco.query(
+      "SELECT id FROM veiculos WHERE placa=$1 LIMIT 1",
+      [placaTratada]
+    );
+
+    if (veiculoDuplicado.rows.length > 0) {
+      return erroValidacao(res, "Ja existe um veiculo cadastrado com essa placa.", [
+        { campo: "placa", mensagem: "Use outra placa." }
+      ]);
+    }
 
     const sql = `
       INSERT INTO veiculos (transportadora_id, modelo, placa, status, ano, observacoes)
@@ -953,11 +1073,26 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
   const { origem, destino, motoristaId, veiculoId, dataSaida, dataChegada, valorFrete, kmInicial, kmFinal, status, observacoes } = requisicao.body;
 
   if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || kmInicial == null) {
+    const campos = [];
+    if (!origem) campos.push(campoObrigatorio("origem", "Origem"));
+    if (!destino) campos.push(campoObrigatorio("destino", "Destino"));
+    if (!motoristaId) campos.push(campoObrigatorio("motoristaId", "Motorista"));
+    if (!veiculoId) campos.push(campoObrigatorio("veiculoId", "Veiculo"));
+    if (!dataSaida) campos.push(campoObrigatorio("dataSaida", "Data de saida"));
+    if (!dataChegada) campos.push(campoObrigatorio("dataChegada", "Data de chegada"));
+    if (!valorFrete) campos.push(campoObrigatorio("valorFrete", "Valor do frete"));
+    if (kmInicial == null) campos.push(campoObrigatorio("kmInicial", "KM inicial"));
+    return erroValidacao(resposta, "Preencha os campos obrigatorios.", campos);
+  }
+
+  if (!origem || !destino || !motoristaId || !veiculoId || !dataSaida || !dataChegada || !valorFrete || kmInicial == null) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatórios." });
   }
 
   if (dataFinalAntesDaInicial(dataSaida, dataChegada)) {
-    return resposta.status(400).json({ mensagem: "A data de chegada nao pode ser menor que a data de saida." });
+    return erroValidacao(resposta, "A data de chegada nao pode ser menor que a data de saida.", [
+      { campo: "dataChegada", mensagem: "Informe uma data igual ou posterior a saida." }
+    ]);
   }
 
   const statusFinal = calcularStatusViagemPorPeriodo(dataSaida, dataChegada, status);
@@ -966,17 +1101,23 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
   const kmFinalNum = kmFinalInformado ? parseInt(kmFinal, 10) : null;
 
   if (!Number.isInteger(kmInicialNum) || kmInicialNum < 0) {
-    return resposta.status(400).json({ mensagem: "Informe o KM inicial da viagem corretamente." });
+    return erroValidacao(resposta, "Informe o KM inicial da viagem corretamente.", [
+      { campo: "kmInicial", mensagem: "Informe um numero maior ou igual a zero." }
+    ]);
   }
 
   if (statusFinal === "finalizada" && (!Number.isInteger(kmFinalNum) || kmFinalNum < 0)) {
-    return resposta.status(400).json({ mensagem: "Informe o KM final da viagem." });
+    return erroValidacao(resposta, "Informe o KM final da viagem.", [
+      { campo: "kmFinal", mensagem: "Informe o KM final." }
+    ]);
   }
 
   const kmFinalParaSalvar = statusFinal === "em andamento" ? null : kmFinalNum;
 
   if (kmFinalNum !== null && kmFinalNum < kmInicialNum) {
-    return resposta.status(400).json({ mensagem: "O KM final não pode ser menor que o KM inicial." });
+    return erroValidacao(resposta, "O KM final nao pode ser menor que o KM inicial.", [
+      { campo: "kmFinal", mensagem: "Informe um KM final maior ou igual ao inicial." }
+    ]);
   }
 
   try {
@@ -991,6 +1132,30 @@ app.post("/viagens", exigirAdmin, async (requisicao, resposta) => {
 
     if (!motoristaValido || !veiculoValido) {
       return resposta.status(400).json({ mensagem: "Motorista ou veículo não encontrado para esta transportadora." });
+    }
+
+    const viagemDuplicada = await banco.query(
+      `SELECT id FROM viagens
+       WHERE transportadora_id=$1
+         AND lower(trim(origem)) = lower(trim($2))
+         AND lower(trim(destino)) = lower(trim($3))
+         AND motorista_id=$4
+         AND veiculo_id=$5
+         AND data_saida=$6
+         AND data_chegada=$7
+       LIMIT 1`,
+      [transportadoraId, origem, destino, motoristaId, veiculoId, dataSaida, dataChegada]
+    );
+
+    if (viagemDuplicada.rows.length > 0) {
+      return erroValidacao(resposta, "Ja existe uma viagem cadastrada com estes mesmos dados.", [
+        { campo: "origem", mensagem: "Confira origem e destino." },
+        { campo: "destino", mensagem: "Confira origem e destino." },
+        { campo: "motoristaId", mensagem: "Confira o motorista." },
+        { campo: "veiculoId", mensagem: "Confira o veiculo." },
+        { campo: "dataSaida", mensagem: "Confira o periodo." },
+        { campo: "dataChegada", mensagem: "Confira o periodo." }
+      ]);
     }
 
     const sql = `
@@ -1226,6 +1391,27 @@ app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
   const tipoDespesaFinal = tipoDespesa === "veiculo" ? "veiculo" : "viagem";
 
   if (!descricao || !categoria || !dataDespesa || !valor) {
+    const campos = [];
+    if (!descricao) campos.push(campoObrigatorio("descricao", "Descricao"));
+    if (!categoria) campos.push(campoObrigatorio("categoria", "Categoria"));
+    if (!dataDespesa) campos.push(campoObrigatorio("dataDespesa", "Data da despesa"));
+    if (!valor) campos.push(campoObrigatorio("valor", "Valor"));
+    return erroValidacao(resposta, "Preencha os campos obrigatorios.", campos);
+  }
+
+  if (tipoDespesaFinal === "viagem" && !viagemId) {
+    return erroValidacao(resposta, "Informe a viagem da despesa.", [
+      { campo: "viagemId", mensagem: "Selecione uma viagem." }
+    ]);
+  }
+
+  if (tipoDespesaFinal === "veiculo" && !veiculoId) {
+    return erroValidacao(resposta, "Informe o veiculo da despesa.", [
+      { campo: "veiculoId", mensagem: "Selecione um veiculo." }
+    ]);
+  }
+
+  if (!descricao || !categoria || !dataDespesa || !valor) {
     return resposta.status(400).json({ mensagem: "Preencha todos os campos obrigatorios." });
   }
 
@@ -1266,6 +1452,30 @@ app.post("/despesas", exigirAdmin, async (requisicao, resposta) => {
       if (tid !== obterIdTransportadora(requisicao)) {
         return resposta.status(400).json({ mensagem: "Viagem não encontrada para esta transportadora." });
       }
+    }
+
+    const despesaDuplicada = await banco.query(
+      `SELECT id FROM despesas
+       WHERE transportadora_id=$1
+         AND tipo_despesa=$2
+         AND COALESCE(viagem_id, 0)=COALESCE($3, 0)
+         AND COALESCE(veiculo_id, 0)=COALESCE($4, 0)
+         AND lower(trim(descricao))=lower(trim($5))
+         AND categoria=$6
+         AND data_despesa=$7
+         AND valor=$8
+       LIMIT 1`,
+      [tid, tipoDespesaFinal, viagemIdFinal, veiculoIdFinal, descricao, categoria, dataDespesa, valor]
+    );
+
+    if (despesaDuplicada.rows.length > 0) {
+      return erroValidacao(resposta, "Ja existe uma despesa cadastrada com estes mesmos dados.", [
+        { campo: tipoDespesaFinal === "viagem" ? "viagemId" : "veiculoId", mensagem: "Confira o vinculo selecionado." },
+        { campo: "descricao", mensagem: "Confira a descricao." },
+        { campo: "categoria", mensagem: "Confira a categoria." },
+        { campo: "dataDespesa", mensagem: "Confira a data." },
+        { campo: "valor", mensagem: "Confira o valor." }
+      ]);
     }
 
     const sql = `

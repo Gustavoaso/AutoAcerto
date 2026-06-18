@@ -57,6 +57,7 @@ function iniciar() {
 
   document.getElementById("botaoSalvar").addEventListener("click", async function () {
     exibirErro("");
+    limparValidacoesCadastro();
     const nome = document.getElementById("campoNome").value.trim();
     const email = document.getElementById("campoEmail").value.trim();
     const perfil = document.getElementById("campoPerfil").value;
@@ -68,15 +69,24 @@ function iniciar() {
       : null;
 
     if (!nome || !email || !perfil || !senha) {
-      exibirErro("Preencha nome, e-mail, perfil e senha.");
+      const campos = [];
+      if (!nome) campos.push({ campo: "nome", mensagem: "Informe o nome do usuario." });
+      if (!email) campos.push({ campo: "email", mensagem: "Informe o e-mail do usuario." });
+      if (!perfil) campos.push({ campo: "perfil", mensagem: "Selecione o perfil." });
+      if (!senha) campos.push({ campo: "senha", mensagem: "Informe a senha." });
+      exibirModalErroCadastro("Preencha os campos obrigatorios.", campos);
       return;
     }
     if (senha.length < 8) {
-      exibirErro("A senha deve ter pelo menos 8 caracteres.");
+      exibirModalErroCadastro("A senha deve ter pelo menos 8 caracteres.", [
+        { campo: "senha", mensagem: "Informe uma senha com pelo menos 8 caracteres." }
+      ]);
       return;
     }
     if (perfil === "motorista" && !motorista_id) {
-      exibirErro("Selecione o motorista vinculado.");
+      exibirModalErroCadastro("Selecione o motorista vinculado.", [
+        { campo: "motorista_id", mensagem: "Selecione um motorista." }
+      ]);
       return;
     }
 
@@ -104,12 +114,12 @@ function iniciar() {
       });
       const dados = await resposta.json();
       if (!resposta.ok) {
-        exibirErro(dados.mensagem || "Erro ao criar usuário.");
+        exibirModalErroCadastro(dados.mensagem || "Erro ao criar usuario.", dados.campos);
         return;
       }
       window.location.href = "configuracoes.html?secao=usuarios";
     } catch (e) {
-      exibirErro("Erro de conexão com o servidor.");
+      exibirModalErroCadastro("Erro de conexao com o servidor.");
     }
   });
 }

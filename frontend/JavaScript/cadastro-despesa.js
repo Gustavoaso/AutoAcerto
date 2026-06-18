@@ -136,6 +136,7 @@ function configurarTipoDespesa() {
 function configurarFormularioDespesa() {
   botaoSalvar.addEventListener("click", async function (e) {
     e.preventDefault();
+    limparValidacoesCadastro();
 
     if (typeof validarTransportadoraMasterParaCadastro === "function" && !validarTransportadoraMasterParaCadastro({
       mensagemErro: "Selecione a transportadora no topo para definir o escopo deste cadastro."
@@ -143,11 +144,30 @@ function configurarFormularioDespesa() {
       return;
     }
 
+    const camposObrigatorios = [];
+    if (tipoDespesaSelecionado === "viagem" && !document.getElementById("viagemId").value) {
+      camposObrigatorios.push({ campo: "viagemId", mensagem: "Selecione a viagem da despesa." });
+    }
+    if (tipoDespesaSelecionado === "veiculo" && !document.getElementById("veiculoId").value) {
+      camposObrigatorios.push({ campo: "veiculoId", mensagem: "Selecione o veiculo da despesa." });
+    }
+    if (!document.getElementById("descricao").value.trim()) camposObrigatorios.push({ campo: "descricao", mensagem: "Informe a descricao da despesa." });
+    if (!document.getElementById("categoria").value.trim()) camposObrigatorios.push({ campo: "categoria", mensagem: "Informe a categoria da despesa." });
+    if (!document.getElementById("dataDespesa").value) camposObrigatorios.push({ campo: "dataDespesa", mensagem: "Informe a data da despesa." });
+    if (!document.getElementById("valor").value.trim()) camposObrigatorios.push({ campo: "valor", mensagem: "Informe o valor da despesa." });
+
+    if (camposObrigatorios.length > 0) {
+      exibirModalErroCadastro("Preencha os campos obrigatorios.", camposObrigatorios);
+      return;
+    }
+
     const valorNum = window.AutoAcertoMascaras
       ? window.AutoAcertoMascaras.moedaParaNumero(document.getElementById("valor").value)
       : parseFloat(document.getElementById("valor").value);
     if (valorNum === undefined || isNaN(valorNum) || valorNum <= 0) {
-      alert("Informe um valor válido.");
+      exibirModalErroCadastro("Informe um valor valido.", [
+        { campo: "valor", mensagem: "Informe um valor maior que zero." }
+      ]);
       return;
     }
 
@@ -158,7 +178,10 @@ function configurarFormularioDespesa() {
       const viagemSelecionada = obterViagemSelecionada(viagemId);
 
       if (!viagemSelecionada || dataForaDoPeriodo(dataDespesa, viagemSelecionada.data_saida, viagemSelecionada.data_chegada)) {
-        alert("A data da despesa deve estar dentro do periodo da viagem selecionada.");
+        exibirModalErroCadastro("A data da despesa deve estar dentro do periodo da viagem selecionada.", [
+          { campo: "dataDespesa", mensagem: "Informe uma data dentro do periodo da viagem." },
+          { campo: "viagemId", mensagem: "Confira a viagem selecionada." }
+        ]);
         return;
       }
     }
@@ -182,14 +205,14 @@ function configurarFormularioDespesa() {
 
       if (!response.ok) {
         const erro = await response.json();
-        alert(erro.mensagem || "Erro ao cadastrar despesa.");
+        exibirModalErroCadastro(erro.mensagem || "Erro ao cadastrar despesa.", erro.campos);
         return;
       }
 
       modal.classList.remove("oculto");
     } catch (erro) {
       console.error("Erro geral:", erro);
-      alert("Erro de conexao com a API.");
+      exibirModalErroCadastro("Erro de conexao com a API.");
     }
   });
 
