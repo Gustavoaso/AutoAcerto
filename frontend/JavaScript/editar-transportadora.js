@@ -59,6 +59,7 @@ function preencherFormulario(t) {
 
 async function salvarEdicao(evento) {
     evento.preventDefault();
+    limparValidacoesCadastro();
 
     const id = obterParametroUrl("id");
     if (!id) return;
@@ -69,8 +70,11 @@ async function salvarEdicao(evento) {
         ativo: document.getElementById("campoStatusTransportadora").value === "true"
     };
 
-    if (!dados.nome) {
-        exibirToastTransportadora("O nome da transportadora é obrigatório.", "erro");
+    if (!dados.nome || !dados.cnpj) {
+        const campos = [];
+        if (!dados.nome) campos.push({ campo: "nomeTransportadora", mensagem: "Informe o nome da transportadora." });
+        if (!dados.cnpj) campos.push({ campo: "cnpj", mensagem: "Informe o CNPJ da transportadora." });
+        exibirModalErroCadastro("Preencha os campos obrigatorios.", campos);
         return;
     }
 
@@ -81,14 +85,14 @@ async function salvarEdicao(evento) {
     try {
         const resposta = await fetch(urlApiTransportadoras + "/" + id, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: cabecalhosAutenticados(),
             body: JSON.stringify(dados)
         });
 
         const retorno = await resposta.json();
 
         if (!resposta.ok) {
-            exibirToastTransportadora(retorno.mensagem || "Erro ao atualizar transportadora.", "erro");
+            exibirModalErroCadastro(retorno.mensagem || "Erro ao atualizar transportadora.", retorno.campos);
             return;
         }
 
@@ -96,7 +100,7 @@ async function salvarEdicao(evento) {
         setTimeout(() => window.location.href = "transportadoras.html", 1500);
     } catch (erro) {
         console.error("Erro ao salvar edição:", erro.message);
-        exibirToastTransportadora("Erro de conexão com o servidor.", "erro");
+        exibirModalErroCadastro("Erro de conexao com o servidor.");
     } finally {
         botao.disabled = false;
         botao.textContent = "Salvar alterações";

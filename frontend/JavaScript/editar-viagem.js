@@ -73,7 +73,7 @@ function formatarDataParaInput(dataISO) {
 
 async function carregarViagem() {
     if (!idViagem) {
-        alert("Viagem não encontrada.");
+        exibirModalErroCadastro("Viagem nao encontrada.");
         window.location.href = "viagens.html";
         return;
     }
@@ -82,7 +82,7 @@ async function carregarViagem() {
         const response = await fetch(urlApiViagens + "/" + idViagem,{ headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
-            alert("Viagem não encontrada.");
+            exibirModalErroCadastro("Viagem nao encontrada.");
             window.location.href = "viagens.html";
             return;
         }
@@ -108,18 +108,37 @@ async function carregarViagem() {
 
     } catch (erro) {
         console.error("Erro ao carregar viagem:", erro);
-        alert("Erro de conexão com a API.");
+        exibirModalErroCadastro("Erro de conexao com a API.");
     }
 }
 
 document.getElementById("botaoSalvarEdicao").addEventListener("click", async function (e) {
     e.preventDefault();
+    limparValidacoesCadastro();
+
+    const camposObrigatorios = [];
+    if (!document.getElementById("origem").value.trim()) camposObrigatorios.push({ campo: "origem", mensagem: "Informe a origem da viagem." });
+    if (!document.getElementById("destino").value.trim()) camposObrigatorios.push({ campo: "destino", mensagem: "Informe o destino da viagem." });
+    if (!document.getElementById("motoristaId").value) camposObrigatorios.push({ campo: "motoristaId", mensagem: "Selecione o motorista." });
+    if (!document.getElementById("veiculoId").value) camposObrigatorios.push({ campo: "veiculoId", mensagem: "Selecione o veiculo." });
+    if (!document.getElementById("dataSaida").value) camposObrigatorios.push({ campo: "dataSaida", mensagem: "Informe a data de saida." });
+    if (!document.getElementById("dataChegada").value) camposObrigatorios.push({ campo: "dataChegada", mensagem: "Informe a data de chegada." });
+    if (!document.getElementById("valorFrete").value.trim()) camposObrigatorios.push({ campo: "valorFrete", mensagem: "Informe o valor do frete." });
+    if (!document.getElementById("kmInicial").value.trim()) camposObrigatorios.push({ campo: "kmInicial", mensagem: "Informe o KM inicial." });
+    if (!document.getElementById("kmFinal").value.trim()) camposObrigatorios.push({ campo: "kmFinal", mensagem: "Informe o KM final." });
+
+    if (camposObrigatorios.length > 0) {
+        exibirModalErroCadastro("Preencha os campos obrigatorios.", camposObrigatorios);
+        return;
+    }
 
     const valorFreteNum = window.AutoAcertoMascaras
         ? window.AutoAcertoMascaras.moedaParaNumero(document.getElementById("valorFrete").value)
         : parseFloat(document.getElementById("valorFrete").value);
     if (isNaN(valorFreteNum) || valorFreteNum <= 0) {
-        alert("Informe um valor de frete válido.");
+        exibirModalErroCadastro("Informe um valor de frete valido.", [
+            { campo: "valorFrete", mensagem: "Informe um valor maior que zero." }
+        ]);
         return;
     }
 
@@ -127,19 +146,26 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
     const kmFinalNum = parseInt(document.getElementById("kmFinal").value, 10);
 
     if (isNaN(kmInicialNum) || kmInicialNum < 0 || isNaN(kmFinalNum) || kmFinalNum < 0) {
-        alert("Informe KM inicial e KM final validos.");
+        exibirModalErroCadastro("Informe KM inicial e KM final validos.", [
+            { campo: "kmInicial", mensagem: "Confira o KM inicial." },
+            { campo: "kmFinal", mensagem: "Confira o KM final." }
+        ]);
         return;
     }
 
     if (kmFinalNum < kmInicialNum) {
-        alert("O KM final nao pode ser menor que o KM inicial.");
+        exibirModalErroCadastro("O KM final nao pode ser menor que o KM inicial.", [
+            { campo: "kmFinal", mensagem: "Informe um KM final maior ou igual ao inicial." }
+        ]);
         return;
     }
 
     const dataSaida = document.getElementById("dataSaida").value;
     const dataChegada = document.getElementById("dataChegada").value;
     if (dataSaida && dataChegada && dataChegada < dataSaida) {
-        alert("A data de chegada nao pode ser menor que a data de saida.");
+        exibirModalErroCadastro("A data de chegada nao pode ser menor que a data de saida.", [
+            { campo: "dataChegada", mensagem: "Informe uma data igual ou posterior a saida." }
+        ]);
         return;
     }
 
@@ -166,14 +192,14 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
 
         if (!response.ok) {
             const erro = await response.json();
-            alert(erro.mensagem || "Erro ao atualizar viagem.");
+            exibirModalErroCadastro(erro.mensagem || "Erro ao atualizar viagem.", erro.campos);
             return;
         }
 
         modal.classList.remove("oculto");
     } catch (erro) {
         console.error("Erro geral:", erro);
-        alert("Erro de conexão com a API.");
+        exibirModalErroCadastro("Erro de conexao com a API.");
     }
 });
 

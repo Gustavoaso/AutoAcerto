@@ -89,6 +89,7 @@ function iniciar() {
 
   document.getElementById("botaoSalvar").addEventListener("click", async function () {
     exibirErro("");
+    limparValidacoesCadastro();
     const nome = document.getElementById("campoNome").value.trim();
     const email = document.getElementById("campoEmail").value.trim();
     const perfil = document.getElementById("campoPerfil").value;
@@ -99,11 +100,17 @@ function iniciar() {
       : null;
 
     if (!nome || !email || !perfil) {
-      exibirErro("Preencha nome, e-mail e perfil.");
+      const campos = [];
+      if (!nome) campos.push({ campo: "nome", mensagem: "Informe o nome do usuario." });
+      if (!email) campos.push({ campo: "email", mensagem: "Informe o e-mail do usuario." });
+      if (!perfil) campos.push({ campo: "perfil", mensagem: "Selecione o perfil." });
+      exibirModalErroCadastro("Preencha os campos obrigatorios.", campos);
       return;
     }
     if (perfil === "motorista" && !motorista_id) {
-      exibirErro("Selecione o motorista vinculado.");
+      exibirModalErroCadastro("Selecione o motorista vinculado.", [
+        { campo: "motorista_id", mensagem: "Selecione um motorista." }
+      ]);
       return;
     }
 
@@ -120,12 +127,12 @@ function iniciar() {
       });
       const dados = await resposta.json();
       if (!resposta.ok) {
-        exibirErro(dados.mensagem || "Erro ao atualizar usuário.");
+        exibirModalErroCadastro(dados.mensagem || "Erro ao atualizar usuario.", dados.campos);
         return;
       }
       window.location.href = "configuracoes.html?secao=usuarios";
     } catch (e) {
-      exibirErro("Erro de conexão com o servidor.");
+      exibirModalErroCadastro("Erro de conexao com o servidor.");
     }
   });
 }

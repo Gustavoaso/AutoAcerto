@@ -135,7 +135,7 @@ function formatarDataParaInput(dataISO) {
 
 async function carregarDespesa() {
     if (!idDespesa) {
-        alert("Despesa nao encontrada.");
+        exibirModalErroCadastro("Despesa nao encontrada.");
         window.location.href = "despesas.html";
         return;
     }
@@ -144,7 +144,7 @@ async function carregarDespesa() {
         const response = await fetch(urlApiDespesas + "/" + idDespesa,{ headers: cabecalhosAutenticados() });
 
         if (!response.ok) {
-            alert("Despesa nao encontrada.");
+            exibirModalErroCadastro("Despesa nao encontrada.");
             window.location.href = "despesas.html";
             return;
         }
@@ -166,18 +166,38 @@ async function carregarDespesa() {
         alternarTipoDespesa(despesa.tipo_despesa === "veiculo" ? "veiculo" : "viagem", false);
     } catch (erro) {
         console.error("Erro ao carregar despesa:", erro);
-        alert("Erro de conexao com a API.");
+        exibirModalErroCadastro("Erro de conexao com a API.");
     }
 }
 
 document.getElementById("botaoSalvarEdicao").addEventListener("click", async function (e) {
     e.preventDefault();
+    limparValidacoesCadastro();
+
+    const camposObrigatorios = [];
+    if (tipoDespesaSelecionado === "viagem" && !document.getElementById("viagemId").value) {
+        camposObrigatorios.push({ campo: "viagemId", mensagem: "Selecione a viagem da despesa." });
+    }
+    if (tipoDespesaSelecionado === "veiculo" && !document.getElementById("veiculoId").value) {
+        camposObrigatorios.push({ campo: "veiculoId", mensagem: "Selecione o veiculo da despesa." });
+    }
+    if (!document.getElementById("descricao").value.trim()) camposObrigatorios.push({ campo: "descricao", mensagem: "Informe a descricao da despesa." });
+    if (!document.getElementById("categoria").value.trim()) camposObrigatorios.push({ campo: "categoria", mensagem: "Informe a categoria da despesa." });
+    if (!document.getElementById("dataDespesa").value) camposObrigatorios.push({ campo: "dataDespesa", mensagem: "Informe a data da despesa." });
+    if (!document.getElementById("valor").value.trim()) camposObrigatorios.push({ campo: "valor", mensagem: "Informe o valor da despesa." });
+
+    if (camposObrigatorios.length > 0) {
+        exibirModalErroCadastro("Preencha os campos obrigatorios.", camposObrigatorios);
+        return;
+    }
 
     const valorNum = window.AutoAcertoMascaras
         ? window.AutoAcertoMascaras.moedaParaNumero(document.getElementById("valor").value)
         : parseFloat(document.getElementById("valor").value);
     if (isNaN(valorNum) || valorNum <= 0) {
-        alert("Informe um valor válido.");
+        exibirModalErroCadastro("Informe um valor valido.", [
+            { campo: "valor", mensagem: "Informe um valor maior que zero." }
+        ]);
         return;
     }
 
@@ -188,7 +208,10 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         const viagemSelecionada = obterViagemSelecionada(viagemId);
 
         if (!viagemSelecionada || dataForaDoPeriodo(dataDespesa, viagemSelecionada.data_saida, viagemSelecionada.data_chegada)) {
-            alert("A data da despesa deve estar dentro do periodo da viagem selecionada.");
+            exibirModalErroCadastro("A data da despesa deve estar dentro do periodo da viagem selecionada.", [
+                { campo: "dataDespesa", mensagem: "Informe uma data dentro do periodo da viagem." },
+                { campo: "viagemId", mensagem: "Confira a viagem selecionada." }
+            ]);
             return;
         }
     }
@@ -213,14 +236,14 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
 
         if (!response.ok) {
             const erro = await response.json();
-            alert(erro.mensagem || "Erro ao atualizar despesa.");
+            exibirModalErroCadastro(erro.mensagem || "Erro ao atualizar despesa.", erro.campos);
             return;
         }
 
         modal.classList.remove("oculto");
     } catch (erro) {
         console.error("Erro geral:", erro);
-        alert("Erro de conexao com a API.");
+        exibirModalErroCadastro("Erro de conexao com a API.");
     }
 });
 

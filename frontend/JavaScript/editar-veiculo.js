@@ -14,7 +14,7 @@ function exibirMensagem(texto, classe) {
 
 async function carregarVeiculo() {
   if (!idVeiculo) {
-    alert("Veículo não encontrado.");
+    exibirModalErroCadastro("Veiculo nao encontrado.");
     window.location.href = "veiculos.html";
     return;
   }
@@ -23,7 +23,7 @@ async function carregarVeiculo() {
     const response = await fetch(urlApi + "/" + idVeiculo,{ headers: cabecalhosAutenticados() });
 
     if (!response.ok) {
-      alert("Veículo não encontrado.");
+      exibirModalErroCadastro("Veiculo nao encontrado.");
       window.location.href = "veiculos.html";
       return;
     }
@@ -42,11 +42,13 @@ async function carregarVeiculo() {
     }
   } catch (error) {
     console.error("Erro ao carregar veículo:", error);
-    alert("Erro de conexão com o servidor.");
+    exibirModalErroCadastro("Erro de conexao com o servidor.");
   }
 }
 
 document.getElementById("botaoSalvarEdicao").addEventListener("click", async function () {
+  limparValidacoesCadastro();
+
   const modelo = document.getElementById("modelo").value.trim();
   const placa = document.getElementById("placa").value.trim();
   const status = document.getElementById("status").value;
@@ -54,7 +56,11 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
   const observacoes = document.getElementById("observacoes").value.trim();
 
   if (!modelo || !placa || !status) {
-    exibirMensagem("Preencha todos os campos obrigatórios.", "erro");
+    const campos = [];
+    if (!modelo) campos.push({ campo: "modelo", mensagem: "Informe o modelo do veiculo." });
+    if (!placa) campos.push({ campo: "placa", mensagem: "Informe a placa do veiculo." });
+    if (!status) campos.push({ campo: "status", mensagem: "Selecione o status do veiculo." });
+    exibirModalErroCadastro("Preencha os campos obrigatorios.", campos);
     return;
   }
 
@@ -63,13 +69,13 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
   try {
     const response = await fetch(urlApi + "/" + idVeiculo, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: cabecalhosAutenticados(),
       body: JSON.stringify(dados)
     });
 
     if (!response.ok) {
       const erro = await response.json();
-      exibirMensagem(erro.mensagem || "Erro ao atualizar veículo.", "erro");
+      exibirModalErroCadastro(erro.mensagem || "Erro ao atualizar veiculo.", erro.campos);
       return;
     }
 
@@ -77,7 +83,7 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
     modal.classList.remove("oculto");
   } catch (error) {
     console.error("Erro:", error);
-    exibirMensagem("Erro de conexão com o servidor.", "erro");
+    exibirModalErroCadastro("Erro de conexao com o servidor.");
   }
 });
 
