@@ -125,8 +125,6 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
     if (!document.getElementById("dataChegada").value) camposObrigatorios.push({ campo: "dataChegada", mensagem: "Informe a data de chegada." });
     if (!document.getElementById("valorFrete").value.trim()) camposObrigatorios.push({ campo: "valorFrete", mensagem: "Informe o valor do frete." });
     if (!document.getElementById("kmInicial").value.trim()) camposObrigatorios.push({ campo: "kmInicial", mensagem: "Informe o KM inicial." });
-    if (!document.getElementById("kmFinal").value.trim()) camposObrigatorios.push({ campo: "kmFinal", mensagem: "Informe o KM final." });
-
     if (camposObrigatorios.length > 0) {
         exibirModalErroCadastro("Preencha os campos obrigatorios.", camposObrigatorios);
         return;
@@ -143,17 +141,24 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
     }
 
     const kmInicialNum = parseInt(document.getElementById("kmInicial").value, 10);
-    const kmFinalNum = parseInt(document.getElementById("kmFinal").value, 10);
+    const kmFinalValor = document.getElementById("kmFinal").value.trim();
+    const kmFinalNum = kmFinalValor === "" ? null : parseInt(kmFinalValor, 10);
 
-    if (isNaN(kmInicialNum) || kmInicialNum < 0 || isNaN(kmFinalNum) || kmFinalNum < 0) {
-        exibirModalErroCadastro("Informe KM inicial e KM final validos.", [
-            { campo: "kmInicial", mensagem: "Confira o KM inicial." },
+    if (isNaN(kmInicialNum) || kmInicialNum < 0) {
+        exibirModalErroCadastro("Informe um KM inicial valido.", [
+            { campo: "kmInicial", mensagem: "Confira o KM inicial." }
+        ]);
+        return;
+    }
+
+    if (kmFinalNum !== null && (isNaN(kmFinalNum) || kmFinalNum < 0)) {
+        exibirModalErroCadastro("Informe um KM final valido.", [
             { campo: "kmFinal", mensagem: "Confira o KM final." }
         ]);
         return;
     }
 
-    if (kmFinalNum < kmInicialNum) {
+    if (kmFinalNum !== null && kmFinalNum < kmInicialNum) {
         exibirModalErroCadastro("O KM final nao pode ser menor que o KM inicial.", [
             { campo: "kmFinal", mensagem: "Informe um KM final maior ou igual ao inicial." }
         ]);
@@ -169,6 +174,14 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         return;
     }
 
+    const status = document.getElementById("status").value;
+    if (status === "finalizada" && kmFinalNum === null) {
+        exibirModalErroCadastro("Informe o KM final para viagens finalizadas.", [
+            { campo: "kmFinal", mensagem: "Informe o KM final." }
+        ]);
+        return;
+    }
+
     const dados = {
         origem: document.getElementById("origem").value,
         destino: document.getElementById("destino").value,
@@ -179,7 +192,7 @@ document.getElementById("botaoSalvarEdicao").addEventListener("click", async fun
         valorFrete: valorFreteNum,
         kmInicial: kmInicialNum,
         kmFinal: kmFinalNum,
-        status: document.getElementById("status").value,
+        status: status,
         observacoes: document.getElementById("observacoes").value
     };
 
