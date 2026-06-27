@@ -2727,8 +2727,8 @@ button.loading::after,
   --fonte: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif;
   --fonte-titulo: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Manrope", "Inter", sans-serif;
 
-  --cor-fundo-externo: #f7fbff;
-  --cor-fundo: #f4f8fd;
+  --cor-fundo-externo: #fbfcfd;
+  --cor-fundo: #f6f7f9;
   --cor-superficie: rgba(255, 255, 255, 0.78);
   --cor-superficie-2: rgba(248, 251, 255, 0.72);
   --cor-superficie-3: rgba(239, 246, 255, 0.72);
@@ -2737,22 +2737,22 @@ button.loading::after,
   --cor-texto-fraco: #98a2b3;
   --cor-primaria: #1677ff;
   --cor-primaria-escura: #075bd8;
-  --cor-primaria-clara: rgba(22, 119, 255, 0.12);
-  --cor-borda: rgba(134, 167, 214, 0.24);
-  --cor-borda-forte: rgba(64, 121, 202, 0.34);
+  --cor-primaria-clara: rgba(22, 119, 255, 0.10);
+  --cor-borda: rgba(145, 158, 171, 0.24);
+  --cor-borda-forte: rgba(102, 112, 133, 0.30);
 
-  --glass-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(246, 250, 255, 0.52));
-  --glass-bg-strong: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(240, 247, 255, 0.72));
+  --glass-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(248, 249, 251, 0.56));
+  --glass-bg-strong: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(247, 248, 250, 0.76));
   --glass-border: rgba(255, 255, 255, 0.72);
-  --glass-inner: inset 0 1px 0 rgba(255, 255, 255, 0.92), inset 0 -1px 0 rgba(64, 121, 202, 0.08);
-  --glass-shadow: 0 24px 70px rgba(39, 83, 132, 0.12), 0 8px 24px rgba(15, 23, 42, 0.06);
-  --glass-shadow-soft: 0 14px 42px rgba(39, 83, 132, 0.09), 0 2px 10px rgba(15, 23, 42, 0.04);
+  --glass-inner: inset 0 1px 0 rgba(255, 255, 255, 0.92), inset 0 -1px 0 rgba(16, 24, 40, 0.055);
+  --glass-shadow: 0 22px 62px rgba(16, 24, 40, 0.095), 0 6px 20px rgba(16, 24, 40, 0.045);
+  --glass-shadow-soft: 0 12px 34px rgba(16, 24, 40, 0.075), 0 2px 8px rgba(16, 24, 40, 0.035);
   --glass-highlight: linear-gradient(120deg, rgba(255,255,255,0.72), rgba(255,255,255,0.12) 42%, rgba(255,255,255,0));
 
   --sombra-suave: var(--glass-shadow-soft);
   --sombra-media: var(--glass-shadow);
-  --sombra-forte: 0 34px 90px rgba(39, 83, 132, 0.18);
-  --sombra-card-hover: 0 28px 72px rgba(39, 83, 132, 0.16);
+  --sombra-forte: 0 30px 82px rgba(16, 24, 40, 0.13);
+  --sombra-card-hover: 0 24px 64px rgba(16, 24, 40, 0.12);
   --raio: 14px;
   --raio-lg: 18px;
   --raio-xl: 28px;
@@ -2763,10 +2763,10 @@ button.loading::after,
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 8%, rgba(94, 177, 255, 0.32), transparent 34%),
-    radial-gradient(circle at 86% 4%, rgba(190, 221, 255, 0.45), transparent 30%),
-    radial-gradient(circle at 75% 92%, rgba(160, 236, 224, 0.24), transparent 34%),
-    linear-gradient(180deg, #fbfdff 0%, #f3f8ff 48%, #eef5fc 100%);
+    radial-gradient(circle at 10% 6%, rgba(255, 255, 255, 0.88), transparent 32%),
+    radial-gradient(circle at 86% 0%, rgba(214, 221, 231, 0.34), transparent 30%),
+    radial-gradient(circle at 74% 92%, rgba(228, 232, 238, 0.30), transparent 34%),
+    linear-gradient(180deg, #fcfdff 0%, #f7f8fa 48%, #f1f3f6 100%);
 }
 
 body::before {
@@ -2775,8 +2775,8 @@ body::before {
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(22, 119, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(22, 119, 255, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(16, 24, 40, 0.024) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 24, 40, 0.020) 1px, transparent 1px);
   background-size: 72px 72px;
   mask-image: radial-gradient(circle at 50% 8%, black, transparent 72%);
 }
@@ -2792,7 +2792,7 @@ body::before {
   border-radius: 34px;
   background:
     radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.95), transparent 28%),
-    radial-gradient(circle at 100% 14%, rgba(22, 119, 255, 0.13), transparent 34%),
+    radial-gradient(circle at 100% 14%, rgba(145, 158, 171, 0.10), transparent 34%),
     var(--glass-bg);
   box-shadow: var(--glass-shadow);
   backdrop-filter: blur(28px) saturate(1.45);
@@ -2816,13 +2816,13 @@ body::before {
   border-color: rgba(255, 255, 255, 0.78);
   border-radius: 26px;
   background: rgba(255, 255, 255, 0.46);
-  box-shadow: var(--glass-inner), 0 12px 34px rgba(39, 83, 132, 0.08);
+  box-shadow: var(--glass-inner), 0 12px 30px rgba(16, 24, 40, 0.055);
   backdrop-filter: blur(18px);
 }
 
 .imagem-logo {
   border-radius: 16px;
-  box-shadow: 0 12px 24px rgba(22, 119, 255, 0.12);
+  box-shadow: 0 12px 24px rgba(16, 24, 40, 0.08);
 }
 
 .texto-logo {
@@ -2839,7 +2839,7 @@ body::before {
 .item-menu:hover {
   background: rgba(255, 255, 255, 0.68);
   border-color: rgba(255, 255, 255, 0.78);
-  box-shadow: var(--glass-inner), 0 16px 32px rgba(39, 83, 132, 0.10);
+  box-shadow: var(--glass-inner), 0 14px 30px rgba(16, 24, 40, 0.075);
   transform: translateX(3px) translateY(-1px);
 }
 
@@ -2847,12 +2847,12 @@ body::before {
   color: #075bd8;
   background:
     radial-gradient(circle at 16% 0%, rgba(255, 255, 255, 0.95), transparent 34%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(214, 234, 255, 0.64));
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(241, 246, 255, 0.64));
   border-color: rgba(255, 255, 255, 0.88);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.96),
     inset 0 -10px 24px rgba(22, 119, 255, 0.08),
-    0 18px 44px rgba(22, 119, 255, 0.16);
+    0 16px 38px rgba(16, 24, 40, 0.10);
 }
 
 .conteudo-principal {
@@ -2890,7 +2890,7 @@ body::before {
 .botao-filtro-painel {
   border: 1px solid rgba(255, 255, 255, 0.72);
   background: var(--glass-bg-strong);
-  box-shadow: var(--glass-inner), 0 12px 28px rgba(39, 83, 132, 0.09);
+  box-shadow: var(--glass-inner), 0 12px 26px rgba(16, 24, 40, 0.065);
   backdrop-filter: blur(18px) saturate(1.25);
   -webkit-backdrop-filter: blur(18px) saturate(1.25);
   transition: transform var(--transicao), box-shadow var(--transicao), border-color var(--transicao), background var(--transicao);
@@ -2912,7 +2912,7 @@ body::before {
 .cartao-plano-lateral button:hover,
 .link-painel:hover {
   transform: translateY(-1px);
-  box-shadow: var(--glass-inner), 0 18px 42px rgba(39, 83, 132, 0.14);
+  box-shadow: var(--glass-inner), 0 16px 38px rgba(16, 24, 40, 0.095);
 }
 
 button:active,
@@ -2931,7 +2931,7 @@ select,
   border-color: rgba(255, 255, 255, 0.72);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.66);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.84), 0 10px 24px rgba(39, 83, 132, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.84), 0 10px 22px rgba(16, 24, 40, 0.045);
   backdrop-filter: blur(16px);
 }
 
