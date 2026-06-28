@@ -109,10 +109,15 @@ async function carregarPlanos() {
 
         grade.innerHTML = planos.map(criarCartaoPlano).join("");
 
-        grade.querySelectorAll("[data-plano]").forEach(function (botao) {
-            botao.addEventListener("click", function () {
-                planoSelecionado = botao.getAttribute("data-plano");
-                carregarPlanos();
+        grade.querySelectorAll("[data-plano]").forEach(function (cartao) {
+            cartao.addEventListener("click", function () {
+                planoSelecionado = cartao.getAttribute("data-plano");
+                
+                // Remove ativo from all cards
+                grade.querySelectorAll("[data-plano]").forEach(c => c.classList.remove("ativo"));
+                
+                // Add ativo to the clicked card
+                cartao.classList.add("ativo");
             });
         });
     } catch {
