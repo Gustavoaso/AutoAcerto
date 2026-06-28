@@ -34,37 +34,11 @@ function criarCartaoPlano(plano) {
     const featuredClass = isProfissional ? " featured" : "";
     const ativoClass = ativo ? " ativo" : "";
 
-    let featuresHtml = "";
-    if (plano.codigo === "essencial") {
-        featuresHtml = `
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Até 10 veículos</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Dashboard completo</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Gestão de motoristas e viagens</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Controle de despesas</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Relatórios e exportação CSV</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Suporte por e-mail</div>
-        `;
-    } else if (plano.codigo === "profissional") {
-        featuresHtml = `
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Até 20 veículos</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Tudo do plano Essencial</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Multi-usuário com perfis</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Notificações internas</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Anexo de cupom fiscal</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Suporte prioritário</div>
-        `;
-    } else if (plano.codigo === "escala") {
-        featuresHtml = `
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Veículos ilimitados</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Tudo do plano Profissional</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Multi-transportadora</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Gestão centralizada</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Relatórios avançados</div>
-            <div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Suporte dedicado</div>
-        `;
-    } else {
-        featuresHtml = `<div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>${plano.limiteVeiculos ? "Até " + plano.limiteVeiculos + " veículos" : "Veículos ilimitados"}</div>`;
-    }
+    const limiteVeiculos = plano.limiteVeiculos == null
+        ? "Veículos ilimitados"
+        : "Até " + plano.limiteVeiculos + " veículos";
+        
+    const featuresHtml = `<div class="plano-feature"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>${limiteVeiculos}</div>`;
 
     const valorFormatado = plano.valor.toString();
     const partesValor = valorFormatado.split(".");
