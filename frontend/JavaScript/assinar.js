@@ -84,7 +84,6 @@ function criarCartaoPlano(plano) {
         <div class="plano-features">
           ${featuresHtml}
         </div>
-        <button type="button" class="plano-botao${isProfissional ? ' primario' : ' secundario'}">Começar agora</button>
       </div>
     `;
 }
