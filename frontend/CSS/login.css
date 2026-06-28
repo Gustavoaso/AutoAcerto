@@ -631,10 +631,14 @@ body {
   padding: 40px 48px;
 }
 
+.layout-assinatura .bloco-formulario-login {
+  width: min(100%, 1120px);
+}
+
 .caixa-assinatura {
-  width: min(100%, 880px);
+  width: 100%;
   gap: 30px;
-  padding: 36px 34px 30px;
+  padding: 36px 40px 30px;
 }
 
 .alinhado-esquerda {
