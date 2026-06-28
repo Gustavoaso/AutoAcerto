@@ -649,75 +649,150 @@ body {
 .grade-planos {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 24px;
 }
 
 .cartao-plano-assinatura {
   text-align: left;
-  border: 1px solid #dbe5f4;
-  border-radius: 18px;
-  background: #f8fbff;
-  min-height: 208px;
-  padding: 16px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 36px;
   cursor: pointer;
-  display: grid;
-  align-content: start;
-  gap: 9px;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .cartao-plano-assinatura:hover {
-  transform: translateY(-1px);
-  border-color: #93c5fd;
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+.cartao-plano-assinatura.featured {
+  border-color: #0f62fe;
+  box-shadow: 0 4px 16px rgba(15, 98, 254, 0.12);
+}
+
+.cartao-plano-assinatura.featured:hover {
+  box-shadow: 0 8px 30px rgba(15, 98, 254, 0.18);
 }
 
 .cartao-plano-assinatura.ativo {
-  background: #eef4ff;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: #0f62fe;
+  box-shadow: 0 0 0 2px #0f62fe;
 }
 
-.tag-plano-assinatura {
-  justify-self: start;
-  padding: 5px 9px;
+.plano-popular {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background: #0f62fe;
   border-radius: 999px;
-  background: rgba(37, 99, 235, 0.1);
-  color: #1d4ed8;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
-.cartao-plano-assinatura strong {
-  font-size: 0.98rem;
-  line-height: 1.35;
-  font-weight: 700;
-  color: #13244a;
+.plano-nome {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 8px;
 }
 
-.preco-plano-assinatura {
+.plano-preco {
   display: flex;
   align-items: baseline;
   gap: 4px;
-  flex-wrap: wrap;
-  font-size: 1.48rem;
-  line-height: 1.1;
-  color: #13244a;
-  font-weight: 800;
+  margin-bottom: 4px;
 }
 
-.preco-plano-assinatura small {
-  font-size: 0.78rem;
-  color: #5f7197;
+.plano-moeda {
+  font-size: 1.125rem;
   font-weight: 600;
-  margin-left: 0;
+  color: #0f172a;
 }
 
-.descricao-plano-assinatura {
-  font-size: 0.92rem;
-  line-height: 1.55;
-  color: #5f7197;
+.plano-valor {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.plano-periodo {
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
+.plano-descricao {
+  font-size: 0.875rem;
+  color: #475569;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.plano-features {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex: 1;
+}
+
+.plano-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+.plano-feature svg {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  stroke: #059669;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.plano-botao {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  pointer-events: none; /* The card itself is clickable */
+}
+
+.plano-botao.primario {
+  color: #fff;
+  background: #0f62fe;
+  border: none;
+  box-shadow: 0 4px 16px rgba(15, 98, 254, 0.12);
+}
+
+.plano-botao.secundario {
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
 }
 
 .texto-carregando-assinatura {
