@@ -10,7 +10,7 @@ function redirecionarPorPerfil(perfil) {
     if (perfil === "dono") {
         window.location.href = "/transportadoras.html";
     } else if (perfil === "admin") {
-        window.location.href = "/index.html";
+        window.location.href = "/dashboard.html";
     } else {
         window.location.href = "/viagens.html";
     }

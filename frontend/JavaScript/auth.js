@@ -320,7 +320,7 @@ function exigirAutenticacao() {
     }
 
     if (usuario.perfil !== "dono" && paginaExclusivaDonoSistema(paginaAtual)) {
-        window.location.href = "/index.html";
+        window.location.href = "/dashboard.html";
         return null;
     }
 
@@ -444,7 +444,7 @@ function obterUrlVoltarCadastro() {
         "novo-usuario.html": "configuracoes.html?secao=usuarios"
     };
 
-    return mapa[pagina] || "index.html";
+    return mapa[pagina] || "dashboard.html";
 }
 
 function navegarVoltarCadastro() {

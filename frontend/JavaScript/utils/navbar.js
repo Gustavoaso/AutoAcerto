@@ -21,7 +21,7 @@
         
         // Obter o caminho atual para destacar a página ativa
         const caminhoAtual = window.location.pathname;
-        const paginaAtual = caminhoAtual.substring(caminhoAtual.lastIndexOf('/') + 1) || 'index.html';
+        const paginaAtual = caminhoAtual.substring(caminhoAtual.lastIndexOf('/') + 1) || 'dashboard.html';
 
         function verificarAtivo(pagina) {
             return paginaAtual === pagina ? ' ativo' : '';
@@ -33,7 +33,7 @@
                 <span class="texto-logo"><span class="texto-logo-auto">Auto</span><span class="texto-logo-acerto">Acerto</span></span>
             </div>
             <nav class="menu-lateral">
-                <a href="index.html" class="item-menu${verificarAtivo('index.html')}">
+                <a href="dashboard.html" class="item-menu${verificarAtivo('dashboard.html')}">
                     <svg viewBox="0 0 24 24">
                         <rect x="3" y="3" width="7" height="7" rx="1" />
                         <rect x="14" y="3" width="7" height="7" rx="1" />
