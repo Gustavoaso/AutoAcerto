@@ -82,10 +82,11 @@ function popularFiltroMotorista() {
     const seletorMotorista = document.getElementById("filtroMotoristaRelatorio");
 
     motoristas.forEach(function (motorista) {
-        const opcao = document.createElement("option");
-        opcao.value = motorista.id;
-        opcao.textContent = motorista.nome;
-        seletorMotorista.appendChild(opcao);
+        const botao = document.createElement("button");
+        botao.className = "botao-periodo";
+        botao.dataset.valor = motorista.id;
+        botao.textContent = motorista.nome;
+        seletorMotorista.appendChild(botao);
     });
 }
 
@@ -379,9 +380,9 @@ function atualizarMetricas(listaViagens, despesasForaDeViagem) {
 }
 
 function aplicarFiltrosRelatorio() {
-    const valorMotorista = document.getElementById("filtroMotoristaRelatorio").value;
-    const valorStatus = document.getElementById("filtroStatusRelatorio").value;
-    const valorTipoLancamento = document.getElementById("filtroTipoLancamentoRelatorio").value;
+    const valorMotorista = document.querySelector("#filtroMotoristaRelatorio .botao-periodo.ativo")?.dataset.valor || "todos";
+    const valorStatus = document.querySelector("#filtroStatusRelatorio .botao-periodo.ativo")?.dataset.valor || "todos";
+    const valorTipoLancamento = document.querySelector("#filtroTipoLancamentoRelatorio .botao-periodo.ativo")?.dataset.valor || "todos";
 
     let listaFiltrada = filtrarViagensPorPeriodo(viagens, periodoDias);
 
@@ -409,9 +410,9 @@ function aplicarFiltrosRelatorio() {
 }
 
 function exportarCSV() {
-    const valorMotorista = document.getElementById("filtroMotoristaRelatorio").value;
-    const valorStatus = document.getElementById("filtroStatusRelatorio").value;
-    const valorTipoLancamento = document.getElementById("filtroTipoLancamentoRelatorio").value;
+    const valorMotorista = document.querySelector("#filtroMotoristaRelatorio .botao-periodo.ativo")?.dataset.valor || "todos";
+    const valorStatus = document.querySelector("#filtroStatusRelatorio .botao-periodo.ativo")?.dataset.valor || "todos";
+    const valorTipoLancamento = document.querySelector("#filtroTipoLancamentoRelatorio .botao-periodo.ativo")?.dataset.valor || "todos";
 
     let listaFiltrada = filtrarViagensPorPeriodo(viagens, periodoDias);
 
@@ -504,33 +505,29 @@ function configurarEventosRelatorio() {
         });
     }
 
-    document.querySelectorAll(".botao-periodo").forEach(function (botao) {
-        botao.addEventListener("click", function () {
-            document.querySelectorAll(".botao-periodo").forEach(function (b) {
+    document.querySelectorAll(".filtro-periodo").forEach(function (container) {
+        container.addEventListener("click", function (evento) {
+            const botao = evento.target.closest(".botao-periodo");
+            if (!botao) return;
+
+            container.querySelectorAll(".botao-periodo").forEach(function (b) {
                 b.classList.remove("ativo");
             });
 
             botao.classList.add("ativo");
-            periodoDias = Number(botao.dataset.periodo);
+            
+            if (container.id === "opcoesPeriodoRelatorio") {
+                periodoDias = Number(botao.dataset.periodo);
+            }
+            
             aplicarFiltrosRelatorio();
         });
     });
 
-    document
-        .getElementById("filtroMotoristaRelatorio")
-        .addEventListener("change", aplicarFiltrosRelatorio);
-
-    document
-        .getElementById("filtroStatusRelatorio")
-        .addEventListener("change", aplicarFiltrosRelatorio);
-
-    document
-        .getElementById("filtroTipoLancamentoRelatorio")
-        .addEventListener("change", aplicarFiltrosRelatorio);
-
-    document
-        .getElementById("botaoExportarCSV")
-        .addEventListener("click", exportarCSV);
+    const botaoExportarCSV = document.getElementById("botaoExportarCSV");
+    if (botaoExportarCSV) {
+        botaoExportarCSV.addEventListener("click", exportarCSV);
+    }
 }
 
 function iniciarPaginaRelatorio() {

@@ -66,6 +66,7 @@
   padding: 4px;
   border-radius: var(--raio);
   border: 1px solid var(--cor-borda);
+  flex-wrap: wrap;
 }
 
 .filtro-periodo-fechado {
