@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 
 <body>
@@ -176,29 +177,7 @@
             </div>
           </div>
 
-          <div class="grafico-linha-financeiro">
-            <svg id="graficoLinhaFinanceiro" viewBox="0 0 720 260" preserveAspectRatio="none" aria-label="Gráfico financeiro">
-              <g class="linhas-grade">
-                <line x1="44" y1="30" x2="700" y2="30" />
-                <line x1="44" y1="80" x2="700" y2="80" />
-                <line x1="44" y1="130" x2="700" y2="130" />
-                <line x1="44" y1="180" x2="700" y2="180" />
-                <line x1="44" y1="230" x2="700" y2="230" />
-              </g>
-              <g id="rotulosGraficoFinanceiro"></g>
-              <g id="barrasGraficoFinanceiro"></g>
-              <path id="linhaReceita" class="linha-grafico linha-receita" d="" />
-              <path id="linhaLucro" class="linha-grafico linha-lucro" d="" />
-              <path id="linhaDespesas" class="linha-grafico linha-despesas" d="" />
-              <g id="pontosGraficoFinanceiro"></g>
-            </svg>
-            <div id="tooltipGraficoFinanceiro" class="tooltip-grafico oculto"></div>
-            <div class="legenda-linhas">
-              <span><i class="legenda-receita"></i>Receita</span>
-              <span><i class="legenda-lucro"></i>Lucro líquido</span>
-              <span><i class="legenda-despesas"></i>Despesas</span>
-            </div>
-          </div>
+          <div id="graficoDashboard" class="grafico-financeiro-apex"></div>
         </div>
 
         <div class="painel painel-viagens">

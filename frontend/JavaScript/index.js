@@ -442,143 +442,96 @@ function montarFinanceiroMensal() {
     }, []);
 }
 
-function criarPathLinha(dados, chave, escalaY, inicioX, espacamento) {
-  return dados.map(function (item, indice) {
-    const x = inicioX + indice * espacamento;
-    const y = escalaY(item[chave]);
-    return (indice === 0 ? "M" : "L") + x + " " + y;
-  }).join(" ");
-}
-
-function obterPosicaoXGrafico(indice, totalItens, inicioX, largura) {
-  if (totalItens <= 1) {
-    return inicioX + (largura / 2);
-  }
-
-  const espacamento = largura / (totalItens - 1);
-  return inicioX + indice * espacamento;
-}
-
-function mostrarTooltipGrafico(evento, item, serie) {
-  const tooltip = document.getElementById("tooltipGraficoFinanceiro");
-  const areaGrafico = document.querySelector(".grafico-linha-financeiro");
-
-  if (!tooltip || !areaGrafico) return;
-
-  const nomesSeries = {
-    receita: "Receita",
-    despesas: "Despesas",
-    lucro: "Lucro líquido"
-  };
-  const limites = areaGrafico.getBoundingClientRect();
-
-  tooltip.innerHTML = "<span>" + item.mes + " - " + nomesSeries[serie] + "</span>" + formatarMoeda(item[serie]);
-  tooltip.style.left = (evento.clientX - limites.left) + "px";
-  tooltip.style.top = (evento.clientY - limites.top) + "px";
-  tooltip.classList.remove("oculto");
-}
-
-function esconderTooltipGrafico() {
-  const tooltip = document.getElementById("tooltipGraficoFinanceiro");
-  if (tooltip) {
-    tooltip.classList.add("oculto");
-  }
-}
-
 function carregarGraficoFinanceiro() {
-  const svg = document.getElementById("graficoLinhaFinanceiro");
-  if (!svg) return;
+  const container = document.querySelector("#graficoDashboard");
+  if (!container) return;
 
   const dados = montarFinanceiroMensal();
-  const rotulos = document.getElementById("rotulosGraficoFinanceiro");
-  const barras = document.getElementById("barrasGraficoFinanceiro");
-  const pontos = document.getElementById("pontosGraficoFinanceiro");
-  rotulos.innerHTML = "";
-  barras.innerHTML = "";
-  pontos.innerHTML = "";
+  container.innerHTML = "";
 
   if (dados.length === 0) {
-    document.getElementById("linhaReceita").setAttribute("d", "");
-    document.getElementById("linhaLucro").setAttribute("d", "");
-    document.getElementById("linhaDespesas").setAttribute("d", "");
+    container.innerHTML = '<div class="grafico-vazio">Nenhum dado financeiro para o período.</div>';
     return;
   }
 
-  const inicioX = 44;
-  const largura = 656;
-  const topo = 30;
-  const base = 230;
-  const valores = [];
+  const opcoesGrafico = {
+    series: [
+      { name: "Receita", data: dados.map(function(i) { return i.receita; }) },
+      { name: "Lucro Líquido", data: dados.map(function(i) { return i.lucro; }) },
+      { name: "Despesas", data: dados.map(function(i) { return i.despesas; }) }
+    ],
+    chart: {
+      type: 'bar',
+      height: 320,
+      fontFamily: 'Inter, sans-serif',
+      toolbar: { show: false },
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 800,
+        dynamicAnimation: { enabled: true, speed: 350 }
+      }
+    },
+    plotOptions: {
+      bar: {
+        horizontal: true,
+        borderRadius: 4,
+        barHeight: '70%',
+        dataLabels: { position: 'top' }
+      }
+    },
+    dataLabels: {
+      enabled: false
+    },
+    stroke: {
+      show: true,
+      width: 2,
+      colors: ['transparent']
+    },
+    xaxis: {
+      categories: dados.map(function(i) { return i.mes; }),
+      labels: {
+        style: { colors: '#6b7280', fontSize: '11px', fontWeight: 500 },
+        formatter: function (val) {
+          return new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+            maximumFractionDigits: 0
+          }).format(val);
+        }
+      }
+    },
+    yaxis: {
+      labels: {
+        style: { colors: '#374151', fontSize: '12px', fontWeight: 600 }
+      }
+    },
+    colors: ['#4f8cff', '#14b8a6', '#fb7185'],
+    fill: { opacity: 1 },
+    grid: {
+      borderColor: '#f3f4f6',
+      strokeDashArray: 4,
+      xaxis: { lines: { show: true } },
+      yaxis: { lines: { show: false } }
+    },
+    legend: {
+      position: 'top',
+      horizontalAlign: 'right',
+      markers: { radius: 12 },
+      itemMargin: { horizontal: 10, vertical: 0 }
+    },
+    tooltip: {
+      theme: 'light',
+      y: {
+        formatter: function (val) {
+          return formatarMoeda(val);
+        }
+      }
+    }
+  };
 
-  dados.forEach(function (item) {
-    valores.push(item.receita, item.despesas, item.lucro);
-  });
-
-  const maior = Math.max(...valores, 1);
-  const menor = Math.min(...valores, 0);
-  const amplitude = maior - menor || 1;
-
-  function escalaY(valor) {
-    return base - ((valor - menor) / amplitude) * (base - topo);
-  }
-
-  document.getElementById("linhaReceita").setAttribute("d", "");
-  document.getElementById("linhaLucro").setAttribute("d", "");
-  document.getElementById("linhaDespesas").setAttribute("d", "");
-
-  const espacamentoGrupos = dados.length <= 1 ? largura : largura / (dados.length - 1);
-  const larguraGrupo = Math.max(Math.min(espacamentoGrupos * 0.6, 52), 24);
-  const larguraBarra = Math.max((larguraGrupo - 8) / 3, 6);
-  const deslocamentoInicial = larguraGrupo / 2;
-  const yZero = escalaY(0);
-  const series = [
-    { chave: "receita", cor: "#4f8cff", preenchimento: "rgba(79, 140, 255, 0.32)" },
-    { chave: "despesas", cor: "#fb7185", preenchimento: "rgba(251, 113, 133, 0.28)" },
-    { chave: "lucro", cor: "#14b8a6", preenchimento: "rgba(20, 184, 166, 0.28)" }
-  ];
-
-  dados.forEach(function (item, indice) {
-    const centroX = obterPosicaoXGrafico(indice, dados.length, inicioX, largura);
-
-    series.forEach(function (serie, serieIndice) {
-      const valor = item[serie.chave];
-      const yValor = escalaY(valor);
-      const altura = Math.max(Math.abs(yValor - yZero), 2);
-      const y = valor >= 0 ? Math.min(yValor, yZero) : yZero;
-      const x = centroX - deslocamentoInicial + (serieIndice * larguraBarra) + (serieIndice * 4);
-      const barra = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-
-      barra.setAttribute("x", x);
-      barra.setAttribute("y", y);
-      barra.setAttribute("width", larguraBarra);
-      barra.setAttribute("height", altura);
-      barra.setAttribute("rx", Math.min(larguraBarra / 2, 8));
-      barra.setAttribute("fill", serie.preenchimento);
-      barra.setAttribute("fill-opacity", "0.95");
-      barra.setAttribute("stroke", serie.cor);
-      barra.setAttribute("stroke-width", "0.8");
-      barra.setAttribute("class", "barra-grafico");
-      barra.addEventListener("mouseenter", function (evento) {
-        mostrarTooltipGrafico(evento, item, serie.chave);
-      });
-      barra.addEventListener("mousemove", function (evento) {
-        mostrarTooltipGrafico(evento, item, serie.chave);
-      });
-      barra.addEventListener("mouseleave", esconderTooltipGrafico);
-      barras.appendChild(barra);
-    });
-  });
-
-  dados.forEach(function (item, indice) {
-    const x = obterPosicaoXGrafico(indice, dados.length, inicioX, largura);
-    const texto = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    texto.setAttribute("x", x);
-    texto.setAttribute("y", 252);
-    texto.setAttribute("text-anchor", "middle");
-    texto.setAttribute("class", "rotulo-grafico");
-    texto.textContent = item.mes;
-    rotulos.appendChild(texto);
-  });
+  const grafico = new ApexCharts(container, opcoesGrafico);
+  grafico.render();
 }
 
 function adicionarEventosBotoes() {
