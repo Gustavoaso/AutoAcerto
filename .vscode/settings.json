@@ -1,11 +1,6 @@
 {
   "github.copilot.chat.commitMessageGeneration.instructions": {
-    "ptBR": "Gere as mensagens de commit SEMPRE em português do Brasil (pt-BR)."
+    "pt-br": "Por favor, escreva a mensagem de commit inteiramente em Português do Brasil (pt-BR)."
   },
-  "github.copilot.chat.codeGeneration.instructions": [
-    {
-      "text": "Comunique-se sempre em Português."
-    }
-  ],
-  "github.copilot.chat.localeOverride": "pt-br"
+  "github.copilot.chat.localeOverride": "pt-BR"
 }

@@ -5,18 +5,15 @@ let exclusaoMotoristas = null;
 let paginacaoAtual = { paginaAtual: 1, totalPaginas: 1, totalItens: 0 };
 
 function criarIconeMotoristaLista() {
-    return '<svg viewBox="0 0 24 24">' +
-        '<path d="M20 21a8 8 0 0 0-16 0" />' +
-        '<circle cx="12" cy="7" r="4" />' +
-    '</svg>';
+    return '<i data-lucide="user"></i>';
 }
 
 function criarIconeVer() {
-    return '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>';
+    return '<i data-lucide="eye"></i>';
 }
 
 function criarIconeEditar() {
-    return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
+    return '<i data-lucide="pencil"></i>';
 }
 
 async function carregarMotoristas(pagina = 1) {
@@ -96,6 +93,10 @@ function renderizarTabela(listaMotoristas) {
     });
 
     if (exclusaoMotoristas) exclusaoMotoristas.aposRender(listaMotoristas);
+
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
 }
 
 function atualizarResumo() {
