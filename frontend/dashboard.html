@@ -54,15 +54,21 @@
             <p class="subtitulo-pagina">Acompanhe acertos, despesas, viagens e resultado operacional.</p>
           </div>
           <div class="controle-periodo-dashboard">
-            <label for="filtroPeriodoDashboard">Período</label>
+            <label for="botaoTogglePeriodoDashboard" style="visibility: hidden;" aria-hidden="true">Período</label>
             <div class="linha-periodo-dashboard">
-              <select id="filtroPeriodoDashboard">
-                <option value="0">Tudo</option>
-                <option value="30">Últimos 30 dias</option>
-                <option value="90">Últimos 90 dias</option>
-                <option value="365">Últimos 12 meses</option>
-                <option value="customizado">Personalizado</option>
-              </select>
+              <div class="grupo-filtro-segmentado">
+                <button class="botao-toggle-filtro" id="botaoTogglePeriodoDashboard" type="button" aria-expanded="false" aria-controls="opcoesPeriodoDashboard">
+                  <span>Período</span>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+                <div class="filtro-segmentado filtro-segmentado-fechado" id="opcoesPeriodoDashboard">
+                  <button class="botao-segmentado ativo" data-valor="0">Tudo</button>
+                  <button class="botao-segmentado" data-valor="30">Últimos 30 dias</button>
+                  <button class="botao-segmentado" data-valor="90">Últimos 90 dias</button>
+                  <button class="botao-segmentado" data-valor="365">Últimos 12 meses</button>
+                  <button class="botao-segmentado" data-valor="customizado">Personalizado</button>
+                </div>
+              </div>
               <div class="datas-periodo-dashboard oculto" id="datasPeriodoDashboard">
                 <input type="date" id="dataInicioDashboard" aria-label="Data inicial do dashboard">
                 <input type="date" id="dataFimDashboard" aria-label="Data final do dashboard">

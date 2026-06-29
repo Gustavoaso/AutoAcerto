@@ -557,37 +557,66 @@ function adicionarEventosBotoes() {
 }
 
 function configurarPeriodoDashboard() {
-  const filtroPeriodo = document.getElementById("filtroPeriodoDashboard");
+  const filtroPeriodo = document.getElementById("opcoesPeriodoDashboard");
   const datasPeriodo = document.getElementById("datasPeriodoDashboard");
   const dataInicio = document.getElementById("dataInicioDashboard");
   const dataFim = document.getElementById("dataFimDashboard");
 
   if (!filtroPeriodo) return;
 
-  filtroPeriodo.value = periodoDashboard.tipo;
+  const botaAtivo = document.querySelector("#opcoesPeriodoDashboard .botao-segmentado[data-valor='" + periodoDashboard.tipo + "']");
+  if (botaAtivo) {
+    document.querySelectorAll("#opcoesPeriodoDashboard .botao-segmentado").forEach(b => b.classList.remove("ativo"));
+    botaAtivo.classList.add("ativo");
+  }
 
-  filtroPeriodo.addEventListener("change", function () {
-    periodoDashboard.tipo = filtroPeriodo.value;
+  document.querySelectorAll(".botao-toggle-filtro").forEach(function (botaoToggle) {
+    botaoToggle.addEventListener("click", function () {
+      const estaAberto = botaoToggle.getAttribute("aria-expanded") === "true";
+      const idControles = botaoToggle.getAttribute("aria-controls");
+      const containerOpcoes = document.getElementById(idControles);
 
-    if (datasPeriodo) {
-      datasPeriodo.classList.toggle("oculto", periodoDashboard.tipo !== "customizado");
-    }
-
-    if (periodoDashboard.tipo === "customizado") {
-      if (!periodoDashboard.dataInicio || !periodoDashboard.dataFim) {
-        const fim = new Date();
-        const inicio = new Date();
-        inicio.setDate(fim.getDate() - 29);
-
-        periodoDashboard.dataInicio = formatarDataCampo(inicio);
-        periodoDashboard.dataFim = formatarDataCampo(fim);
-
-        if (dataInicio) dataInicio.value = periodoDashboard.dataInicio;
-        if (dataFim) dataFim.value = periodoDashboard.dataFim;
+      botaoToggle.setAttribute("aria-expanded", String(!estaAberto));
+      if (containerOpcoes) {
+        containerOpcoes.classList.toggle("filtro-segmentado-fechado", estaAberto);
       }
-    }
+    });
+  });
 
-    atualizarDashboard();
+  document.querySelectorAll(".grupo-filtro-segmentado").forEach(function (container) {
+    container.addEventListener("click", function (evento) {
+      const botao = evento.target.closest(".botao-segmentado");
+      if (!botao) return;
+
+      const paiFiltro = botao.closest(".filtro-segmentado");
+      paiFiltro.querySelectorAll(".botao-segmentado").forEach(function (b) {
+        b.classList.remove("ativo");
+      });
+
+      botao.classList.add("ativo");
+      
+      periodoDashboard.tipo = botao.dataset.valor;
+
+      if (datasPeriodo) {
+        datasPeriodo.classList.toggle("oculto", periodoDashboard.tipo !== "customizado");
+      }
+
+      if (periodoDashboard.tipo === "customizado") {
+        if (!periodoDashboard.dataInicio || !periodoDashboard.dataFim) {
+          const fim = new Date();
+          const inicio = new Date();
+          inicio.setDate(fim.getDate() - 29);
+
+          periodoDashboard.dataInicio = formatarDataCampo(inicio);
+          periodoDashboard.dataFim = formatarDataCampo(fim);
+
+          if (dataInicio) dataInicio.value = periodoDashboard.dataInicio;
+          if (dataFim) dataFim.value = periodoDashboard.dataFim;
+        }
+      }
+
+      atualizarDashboard();
+    });
   });
 
   if (dataInicio) {
