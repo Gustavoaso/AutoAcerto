@@ -125,10 +125,10 @@ button {
 ------------------------------------------------------- */
 .layout-principal {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   max-width: 100%;
   margin: 0 auto;
-
+  overflow: hidden;
 }
 
 /* -------------------------------------------------------
