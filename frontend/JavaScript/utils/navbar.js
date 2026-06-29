@@ -95,5 +95,25 @@
     document.addEventListener('DOMContentLoaded', function () {
         garantirFavicon();
         injetarMenuLateral();
+
+        // Fechar filtros expansíveis ao clicar fora
+        document.addEventListener("click", function(evento) {
+            const clicouDentroFiltro = evento.target.closest(".grupo-filtro-segmentado") || evento.target.closest(".grupo-periodo-relatorio");
+            
+            if (!clicouDentroFiltro) {
+                document.querySelectorAll(".botao-toggle-filtro, .botao-toggle-periodo").forEach(function(botaoToggle) {
+                    if (botaoToggle.getAttribute("aria-expanded") === "true") {
+                        botaoToggle.setAttribute("aria-expanded", "false");
+                        const idControles = botaoToggle.getAttribute("aria-controls");
+                        if (idControles) {
+                            const containerOpcoes = document.getElementById(idControles);
+                            if (containerOpcoes) {
+                                containerOpcoes.classList.add("filtro-segmentado-fechado", "filtro-periodo-fechado");
+                            }
+                        }
+                    }
+                });
+            }
+        });
     });
 })();
