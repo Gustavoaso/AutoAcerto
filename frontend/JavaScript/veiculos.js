@@ -97,7 +97,7 @@ function atualizarResumoVeiculos(lista) {
 
 function aplicarFiltros() {
   var pesquisa = document.getElementById("campoPesquisaVeiculo").value.toLowerCase().trim();
-  var statusSelecionado = document.getElementById("filtroStatusVeiculo").value;
+  var statusSelecionado = document.querySelector("#filtroStatusVeiculo .botao-segmentado.ativo")?.dataset.valor || "todos";
 
   var listaFiltrada = veiculosTodos.filter(function (veiculo) {
     var correspondePesquisa =
@@ -156,7 +156,34 @@ document.addEventListener("DOMContentLoaded", function () {
   carregarVeiculos();
 
   document.getElementById("campoPesquisaVeiculo").addEventListener("input", aplicarFiltros);
-  document.getElementById("filtroStatusVeiculo").addEventListener("change", aplicarFiltros);
+  
+  document.querySelectorAll(".botao-toggle-filtro").forEach(function (botaoToggle) {
+    botaoToggle.addEventListener("click", function () {
+      const estaAberto = botaoToggle.getAttribute("aria-expanded") === "true";
+      const idControles = botaoToggle.getAttribute("aria-controls");
+      const containerOpcoes = document.getElementById(idControles);
+
+      botaoToggle.setAttribute("aria-expanded", String(!estaAberto));
+      if (containerOpcoes) {
+        containerOpcoes.classList.toggle("filtro-segmentado-fechado", estaAberto);
+      }
+    });
+  });
+
+  document.querySelectorAll(".grupo-filtro-segmentado").forEach(function (container) {
+    container.addEventListener("click", function (evento) {
+      const botao = evento.target.closest(".botao-segmentado");
+      if (!botao) return;
+
+      const paiFiltro = botao.closest(".filtro-segmentado");
+      paiFiltro.querySelectorAll(".botao-segmentado").forEach(function (b) {
+        b.classList.remove("ativo");
+      });
+
+      botao.classList.add("ativo");
+      aplicarFiltros();
+    });
+  });
 
   document.getElementById("botaoNovoVeiculo").addEventListener("click", function () {
     window.location.href = "cadastro-veiculo.html";

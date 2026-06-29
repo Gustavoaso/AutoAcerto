@@ -115,7 +115,7 @@ function atualizarResumo() {
 
 function aplicarFiltros() {
     const valorPesquisa = document.getElementById("campoPesquisaMotorista").value.toLowerCase().trim();
-    const valorStatus = document.getElementById("filtroStatus").value;
+    const valorStatus = document.querySelector("#filtroStatus .botao-segmentado.ativo")?.dataset.valor || "todos";
 
     const listaFiltrada = motoristas.filter(function (motorista) {
         const correspondePesquisa =
@@ -137,8 +137,33 @@ function configurarEventos() {
     document.getElementById("campoPesquisaMotorista")
         .addEventListener("input", aplicarFiltros);
 
-    document.getElementById("filtroStatus")
-        .addEventListener("change", aplicarFiltros);
+    document.querySelectorAll(".botao-toggle-filtro").forEach(function (botaoToggle) {
+        botaoToggle.addEventListener("click", function () {
+            const estaAberto = botaoToggle.getAttribute("aria-expanded") === "true";
+            const idControles = botaoToggle.getAttribute("aria-controls");
+            const containerOpcoes = document.getElementById(idControles);
+
+            botaoToggle.setAttribute("aria-expanded", String(!estaAberto));
+            if (containerOpcoes) {
+                containerOpcoes.classList.toggle("filtro-segmentado-fechado", estaAberto);
+            }
+        });
+    });
+
+    document.querySelectorAll(".grupo-filtro-segmentado").forEach(function (container) {
+        container.addEventListener("click", function (evento) {
+            const botao = evento.target.closest(".botao-segmentado");
+            if (!botao) return;
+
+            const paiFiltro = botao.closest(".filtro-segmentado");
+            paiFiltro.querySelectorAll(".botao-segmentado").forEach(function (b) {
+                b.classList.remove("ativo");
+            });
+
+            botao.classList.add("ativo");
+            aplicarFiltros();
+        });
+    });
 
     document.getElementById("botaoNovoMotorista")
         .addEventListener("click", function () {

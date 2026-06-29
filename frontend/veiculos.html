@@ -95,13 +95,16 @@
                         <label for="campoPesquisaVeiculo">Pesquisar</label>
                         <input type="text" id="campoPesquisaVeiculo" placeholder="Placa, modelo ou observações" />
                     </div>
-                    <div class="campo-filtro">
-                        <label for="filtroStatusVeiculo">Status</label>
-                        <select id="filtroStatusVeiculo">
-                            <option value="todos">Todos</option>
-                            <option value="ativo">Ativo</option>
-                            <option value="inativo">Inativo</option>
-                        </select>
+                    <div class="grupo-filtro-segmentado">
+                        <button class="botao-toggle-filtro" id="botaoToggleStatusVeiculo" type="button" aria-expanded="false" aria-controls="filtroStatusVeiculo">
+                            <span>Status</span>
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                        </button>
+                        <div class="filtro-segmentado filtro-segmentado-fechado" id="filtroStatusVeiculo">
+                            <button class="botao-segmentado ativo" data-valor="todos">Todos</button>
+                            <button class="botao-segmentado" data-valor="ativo">Ativo</button>
+                            <button class="botao-segmentado" data-valor="inativo">Inativo</button>
+                        </div>
                     </div>
                 </div>
 

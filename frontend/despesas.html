@@ -105,16 +105,19 @@
             <input type="text" id="campoPesquisaDespesa" placeholder="Descrição, motorista, categoria ou veículo" />
           </div>
 
-          <div class="campo-filtro">
-            <label for="filtroCategoriaDespesa">Categoria</label>
-            <select id="filtroCategoriaDespesa">
-              <option value="todas">Todas</option>
-              <option value="combustivel">Combustível</option>
-              <option value="pedagio">Pedágio</option>
-              <option value="alimentacao">Alimentação</option>
-              <option value="manutencao">Manutenção</option>
-              <option value="outros">Outros</option>
-            </select>
+          <div class="grupo-filtro-segmentado">
+            <button class="botao-toggle-filtro" id="botaoToggleCategoriaDespesa" type="button" aria-expanded="false" aria-controls="filtroCategoriaDespesa">
+              <span>Categoria</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+            <div class="filtro-segmentado filtro-segmentado-fechado" id="filtroCategoriaDespesa">
+              <button class="botao-segmentado ativo" data-valor="todas">Todas</button>
+              <button class="botao-segmentado" data-valor="combustivel">Combustível</button>
+              <button class="botao-segmentado" data-valor="pedagio">Pedágio</button>
+              <button class="botao-segmentado" data-valor="alimentacao">Alimentação</button>
+              <button class="botao-segmentado" data-valor="manutencao">Manutenção</button>
+              <button class="botao-segmentado" data-valor="outros">Outros</button>
+            </div>
           </div>
         </div>
 

@@ -103,14 +103,17 @@
             <input type="text" id="campoPesquisaViagem" placeholder="Origem, destino, motorista, veículo ou placa" />
           </div>
 
-          <div class="campo-filtro">
-            <label for="filtroStatusViagem">Status</label>
-            <select id="filtroStatusViagem">
-              <option value="todos">Todos</option>
-              <option value="em andamento">Em andamento</option>
-              <option value="finalizada">Finalizada</option>
-              <option value="cancelada">Cancelada</option>
-            </select>
+          <div class="grupo-filtro-segmentado">
+            <button class="botao-toggle-filtro" id="botaoToggleStatusViagem" type="button" aria-expanded="false" aria-controls="filtroStatusViagem">
+              <span>Status</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+            <div class="filtro-segmentado filtro-segmentado-fechado" id="filtroStatusViagem">
+              <button class="botao-segmentado ativo" data-valor="todos">Todos</button>
+              <button class="botao-segmentado" data-valor="em andamento">Em andamento</button>
+              <button class="botao-segmentado" data-valor="finalizada">Finalizada</button>
+              <button class="botao-segmentado" data-valor="cancelada">Cancelada</button>
+            </div>
           </div>
         </div>
 
