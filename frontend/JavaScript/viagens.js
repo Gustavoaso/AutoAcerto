@@ -11,22 +11,19 @@ let paginacaoAtual = {
 };
 
 function criarIconeViagemLista() {
-    return '<svg viewBox="0 0 24 24">' +
-        '<path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" />' +
-        '<circle cx="12" cy="9" r="2.5" />' +
-    '</svg>';
+    return '<i data-lucide="map-pin"></i>';
 }
 
 function criarIconeVer() {
-    return '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>';
+    return '<i data-lucide="eye"></i>';
 }
 
 function criarIconeEditar() {
-    return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
+    return '<i data-lucide="pencil"></i>';
 }
 
 function criarIconeConcluir() {
-    return '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg>';
+    return '<i data-lucide="check"></i>';
 }
 
 function abrirFinalizacaoViagem(idViagem) {
@@ -215,6 +212,10 @@ function renderizarTabelaViagens(listaViagens) {
     });
 
     if (exclusaoViagens) exclusaoViagens.aposRender(listaViagens);
+
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
 }
 
 function atualizarResumoViagens() {

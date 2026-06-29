@@ -52,18 +52,11 @@ function dataDentroDoPeriodo(dataValor, dias) {
 }
 
 function criarIconeViagemLista() {
-    return '<svg viewBox="0 0 24 24">' +
-        '<path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" />' +
-        '<circle cx="12" cy="9" r="2.5" />' +
-    '</svg>';
+    return '<i data-lucide="map-pin"></i>';
 }
 
 function criarIconeForaViagem() {
-    return '<svg viewBox="0 0 24 24">' +
-        '<path d="M4 7h16v12H4z" />' +
-        '<path d="M16 7V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2" />' +
-        '<path d="M8 13h8" />' +
-    '</svg>';
+    return '<i data-lucide="receipt"></i>';
 }
 
 async function carregarDadosRelatorio() {
@@ -265,6 +258,10 @@ function renderizarTabelaRelatorio(listaViagens, despesasForaDeViagem) {
     }
 
     atualizarRodapeTabela(totalReceita, totalDespesasGeral);
+
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
 }
 
 function atualizarRodapeTabela(totalReceita, totalDespesas) {

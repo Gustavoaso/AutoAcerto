@@ -1,4 +1,4 @@
-﻿const urlApi = montarUrlApi("/veiculos");
+const urlApi = montarUrlApi("/veiculos");
 
 let veiculosTodos = [];
 let veiculosVisiveis = [];
@@ -6,20 +6,15 @@ let exclusaoVeiculos = null;
 let paginacaoAtual = { paginaAtual: 1, totalPaginas: 1, totalItens: 0 };
 
 function criarIconeVeiculoLista() {
-  return '<svg viewBox="0 0 24 24">' +
-    '<path d="M10 17h4V5H2v12h3" />' +
-    '<path d="M14 8h4l4 4v5h-3" />' +
-    '<circle cx="7.5" cy="17.5" r="2.5" />' +
-    '<circle cx="16.5" cy="17.5" r="2.5" />' +
-  '</svg>';
+  return '<i data-lucide="truck"></i>';
 }
 
 function criarIconeVer() {
-  return '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>';
+  return '<i data-lucide="eye"></i>';
 }
 
 function criarIconeEditar() {
-  return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
+  return '<i data-lucide="pencil"></i>';
 }
 
 function normalizarStatusVeiculo(status) {
@@ -86,6 +81,10 @@ function renderizarTabelaVeiculos(lista) {
   });
 
   if (exclusaoVeiculos) exclusaoVeiculos.aposRender(lista);
+  
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
 }
 
 function atualizarResumoVeiculos(lista) {

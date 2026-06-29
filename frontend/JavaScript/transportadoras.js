@@ -10,20 +10,15 @@ let transportadorasVisiveis = [];
 let exclusaoTransportadoras = null;
 
 function criarIconeTransportadoraLista() {
-    return '<svg viewBox="0 0 24 24">' +
-        '<rect x="3" y="4" width="18" height="16" rx="2" />' +
-        '<path d="M7 8h10" />' +
-        '<path d="M7 12h10" />' +
-        '<path d="M7 16h6" />' +
-    '</svg>';
+    return '<i data-lucide="building"></i>';
 }
 
 function criarIconeVer() {
-    return '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>';
+    return '<i data-lucide="eye"></i>';
 }
 
 function criarIconeEditar() {
-    return '<svg viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>';
+    return '<i data-lucide="pencil"></i>';
 }
 
 function formatarDataTransportadora(dataISO) {
@@ -157,6 +152,10 @@ function renderizarTabelaTransportadoras(lista) {
     });
 
     if (exclusaoTransportadoras) exclusaoTransportadoras.aposRender(lista);
+
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
 }
 
 function configurarFormularioTransportadora() {
