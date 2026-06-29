@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoAcerto - Dashboard</title>
+  <link rel="stylesheet" href="/CSS/index.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="layout-principal">
+    <aside class="barra-lateral"></aside>
+
+    <main class="conteudo-principal">
+      <header class="topo-pagina">
+        <div class="acoes-topo">
+          <button class="botao-empresa-topo" type="button" aria-label="Empresa atual">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16" />
+              <path d="M3 21h18" />
+              <path d="M8 7h2M8 11h2M8 15h2M14 7h1M14 11h1M14 15h1" />
+            </svg>
+            <span class="nome-empresa-topo">Carregando...</span>
+          </button>
+          <span class="divisor-topo"></span>
+          <button class="botao-icone" type="button" aria-label="Notificações">
+            <svg viewBox="0 0 24 24">
+              <path d="M10.3 21a2 2 0 0 0 3.4 0" />
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+            </svg>
+          </button>
+          <button class="botao-icone" type="button" aria-label="Alternar tema">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z" />
+            </svg>
+          </button>
+          <div class="perfil-usuario">
+            <div class="avatar-usuario">--</div>
+            <span class="nome-usuario">Carregando...</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="secao-boas-vindas">
+        <div class="cabecalho-boas-vindas">
+          <div>
+            <h2 class="titulo-pagina">Dashboard Financeiro</h2>
+            <p class="subtitulo-pagina">Acompanhe acertos, despesas, viagens e resultado operacional.</p>
+          </div>
+          <div class="controle-periodo-dashboard">
+            <label for="filtroPeriodoDashboard">Período</label>
+            <div class="linha-periodo-dashboard">
+              <select id="filtroPeriodoDashboard">
+                <option value="0">Tudo</option>
+                <option value="30">Últimos 30 dias</option>
+                <option value="90">Últimos 90 dias</option>
+                <option value="365">Últimos 12 meses</option>
+                <option value="customizado">Personalizado</option>
+              </select>
+              <div class="datas-periodo-dashboard oculto" id="datasPeriodoDashboard">
+                <input type="date" id="dataInicioDashboard" aria-label="Data inicial do dashboard">
+                <input type="date" id="dataFimDashboard" aria-label="Data final do dashboard">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grade-cards-resumo">
+        <div class="card-resumo">
+          <div class="topo-card">
+            <span class="icone-card-wrapper roxo">
+              <svg viewBox="0 0 24 24">
+                <path d="M20 21a8 8 0 0 0-16 0" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </span>
+            <span class="titulo-card">Motoristas</span>
+          </div>
+          <div class="valor-card" id="quantidadeMotoristas">0</div>
+          <div class="descricao-card">Cadastrados</div>
+          <button class="botao-card" id="botaoVerMotoristas">Ver motoristas <span>→</span></button>
+        </div>
+
+        <div class="card-resumo">
+          <div class="topo-card">
+            <span class="icone-card-wrapper azul">
+              <svg viewBox="0 0 24 24">
+                <path d="M10 17h4V5H2v12h3" />
+                <path d="M14 8h4l4 4v5h-3" />
+                <circle cx="7.5" cy="17.5" r="2.5" />
+                <circle cx="16.5" cy="17.5" r="2.5" />
+              </svg>
+            </span>
+            <span class="titulo-card">Veículos</span>
+          </div>
+          <div class="valor-card" id="quantidadeVeiculos">0</div>
+          <div class="descricao-card">Ativos</div>
+          <button class="botao-card" id="botaoVerVeiculos">Ver veículos <span>→</span></button>
+        </div>
+
+        <div class="card-resumo">
+          <div class="topo-card">
+            <span class="icone-card-wrapper verde">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+            </span>
+            <span class="titulo-card">Viagens</span>
+          </div>
+          <div class="valor-card" id="quantidadeViagens">0</div>
+          <div class="descricao-card">Realizadas</div>
+          <button class="botao-card" id="botaoLancarViagem">Ver viagens <span>→</span></button>
+        </div>
+
+        <div class="card-resumo">
+          <div class="topo-card">
+            <span class="icone-card-wrapper vermelho">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 7h16v12H4z" />
+                <path d="M16 7V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2" />
+                <path d="M8 13h8" />
+              </svg>
+            </span>
+            <span class="titulo-card">Despesas</span>
+          </div>
+          <div class="valor-card" id="valorDespesas">R$ 0,00</div>
+          <div class="descricao-card">Total no período</div>
+          <button class="botao-card" id="botaoLancarDespesa">Ver despesas <span>→</span></button>
+        </div>
+
+        <div class="card-resumo">
+          <div class="topo-card">
+            <span class="icone-card-wrapper lucro">
+              <svg viewBox="0 0 24 24">
+                <path d="M3 17l6-6 4 4 8-8" />
+                <path d="M14 7h7v7" />
+              </svg>
+            </span>
+            <span class="titulo-card">Lucro líquido</span>
+          </div>
+          <div class="valor-card" id="valorLucroCard">R$ 0,00</div>
+          <div class="descricao-card">No período</div>
+          <button class="botao-card" id="botaoVerRelatorio">Ver relatório <span>→</span></button>
+        </div>
+      </section>
+
+      <section class="grade-dashboard">
+        <div class="painel painel-financeiro">
+          <div class="cabecalho-painel">
+            <h3>Resumo Financeiro</h3>
+            <span class="botao-filtro-painel" id="rotuloPeriodoPainel">Tudo</span>
+          </div>
+
+          <div class="linha-resumo-financeiro">
+            <div class="mini-card mini-card-verde">
+              <span class="rotulo-mini-card">Receita</span>
+              <strong id="valorReceita">R$ 0,00</strong>
+              <span class="variacao-mini-card positiva">↗ Resultado bruto</span>
+            </div>
+            <div class="mini-card mini-card-vermelho">
+              <span class="rotulo-mini-card">Despesas</span>
+              <strong id="valorResumoDespesas">R$ 0,00</strong>
+              <span class="variacao-mini-card negativa">↘ Custos lançados</span>
+            </div>
+            <div class="mini-card mini-card-azul">
+              <span class="rotulo-mini-card">Lucro Líquido</span>
+              <strong id="valorLucro">R$ 0,00</strong>
+              <span class="variacao-mini-card positiva">↗ Saldo operacional</span>
+            </div>
+          </div>
+
+          <div class="grafico-linha-financeiro">
+            <svg id="graficoLinhaFinanceiro" viewBox="0 0 720 260" preserveAspectRatio="none" aria-label="Gráfico financeiro">
+              <g class="linhas-grade">
+                <line x1="44" y1="30" x2="700" y2="30" />
+                <line x1="44" y1="80" x2="700" y2="80" />
+                <line x1="44" y1="130" x2="700" y2="130" />
+                <line x1="44" y1="180" x2="700" y2="180" />
+                <line x1="44" y1="230" x2="700" y2="230" />
+              </g>
+              <g id="rotulosGraficoFinanceiro"></g>
+              <g id="barrasGraficoFinanceiro"></g>
+              <path id="linhaReceita" class="linha-grafico linha-receita" d="" />
+              <path id="linhaLucro" class="linha-grafico linha-lucro" d="" />
+              <path id="linhaDespesas" class="linha-grafico linha-despesas" d="" />
+              <g id="pontosGraficoFinanceiro"></g>
+            </svg>
+            <div id="tooltipGraficoFinanceiro" class="tooltip-grafico oculto"></div>
+            <div class="legenda-linhas">
+              <span><i class="legenda-receita"></i>Receita</span>
+              <span><i class="legenda-lucro"></i>Lucro líquido</span>
+              <span><i class="legenda-despesas"></i>Despesas</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="painel painel-viagens">
+          <div class="cabecalho-painel">
+            <h3>Viagens em Andamento</h3>
+            <a href="viagens.html" class="link-painel">Ver todas →</a>
+          </div>
+          <div class="lista-viagens" id="listaViagens"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/JavaScript/utils/navbar.js"></script>
+  <script src="/JavaScript/utils/formatar.js"></script>
+  <script src="/JavaScript/config.js"></script>
+  <script src="/JavaScript/auth.js"></script>
+  <script src="/JavaScript/index.js"></script>
+</body>
+
+</html>
