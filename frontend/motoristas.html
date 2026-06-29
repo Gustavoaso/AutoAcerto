@@ -109,15 +109,18 @@
                         <input type="text" id="campoPesquisaMotorista" placeholder="Nome, CPF, telefone ou CNH" />
                     </div>
 
-                    <div class="grupo-filtro-segmentado">
-                        <button class="botao-toggle-filtro" id="botaoToggleStatusMotorista" type="button" aria-expanded="false" aria-controls="filtroStatus">
-                            <span>Status</span>
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-                        </button>
-                        <div class="filtro-segmentado filtro-segmentado-fechado" id="filtroStatus">
-                            <button class="botao-segmentado ativo" data-valor="todos">Todos</button>
-                            <button class="botao-segmentado" data-valor="ativo">Ativo</button>
-                            <button class="botao-segmentado" data-valor="inativo">Inativo</button>
+                    <div class="campo-filtro">
+                        <label style="visibility: hidden;" aria-hidden="true">Filtro</label>
+                        <div class="grupo-filtro-segmentado">
+                            <button class="botao-toggle-filtro" id="botaoToggleStatusMotorista" type="button" aria-expanded="false" aria-controls="filtroStatus">
+                                <span>Status</span>
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                            </button>
+                            <div class="filtro-segmentado filtro-segmentado-fechado" id="filtroStatus">
+                                <button class="botao-segmentado ativo" data-valor="todos">Todos</button>
+                                <button class="botao-segmentado" data-valor="ativo">Ativo</button>
+                                <button class="botao-segmentado" data-valor="inativo">Inativo</button>
+                            </div>
                         </div>
                     </div>
                 </div>

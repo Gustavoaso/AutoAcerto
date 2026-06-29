@@ -105,18 +105,21 @@
             <input type="text" id="campoPesquisaDespesa" placeholder="Descrição, motorista, categoria ou veículo" />
           </div>
 
-          <div class="grupo-filtro-segmentado">
-            <button class="botao-toggle-filtro" id="botaoToggleCategoriaDespesa" type="button" aria-expanded="false" aria-controls="filtroCategoriaDespesa">
-              <span>Categoria</span>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-            </button>
-            <div class="filtro-segmentado filtro-segmentado-fechado" id="filtroCategoriaDespesa">
-              <button class="botao-segmentado ativo" data-valor="todas">Todas</button>
-              <button class="botao-segmentado" data-valor="combustivel">Combustível</button>
-              <button class="botao-segmentado" data-valor="pedagio">Pedágio</button>
-              <button class="botao-segmentado" data-valor="alimentacao">Alimentação</button>
-              <button class="botao-segmentado" data-valor="manutencao">Manutenção</button>
-              <button class="botao-segmentado" data-valor="outros">Outros</button>
+          <div class="campo-filtro">
+            <label style="visibility: hidden;" aria-hidden="true">Filtro</label>
+            <div class="grupo-filtro-segmentado">
+              <button class="botao-toggle-filtro" id="botaoToggleCategoriaDespesa" type="button" aria-expanded="false" aria-controls="filtroCategoriaDespesa">
+                <span>Categoria</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+              </button>
+              <div class="filtro-segmentado filtro-segmentado-fechado" id="filtroCategoriaDespesa">
+                <button class="botao-segmentado ativo" data-valor="todas">Todas</button>
+                <button class="botao-segmentado" data-valor="combustivel">Combustível</button>
+                <button class="botao-segmentado" data-valor="pedagio">Pedágio</button>
+                <button class="botao-segmentado" data-valor="alimentacao">Alimentação</button>
+                <button class="botao-segmentado" data-valor="manutencao">Manutenção</button>
+                <button class="botao-segmentado" data-valor="outros">Outros</button>
+              </div>
             </div>
           </div>
         </div>

@@ -103,16 +103,19 @@
             <input type="text" id="campoPesquisaViagem" placeholder="Origem, destino, motorista, veículo ou placa" />
           </div>
 
-          <div class="grupo-filtro-segmentado">
-            <button class="botao-toggle-filtro" id="botaoToggleStatusViagem" type="button" aria-expanded="false" aria-controls="filtroStatusViagem">
-              <span>Status</span>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-            </button>
-            <div class="filtro-segmentado filtro-segmentado-fechado" id="filtroStatusViagem">
-              <button class="botao-segmentado ativo" data-valor="todos">Todos</button>
-              <button class="botao-segmentado" data-valor="em andamento">Em andamento</button>
-              <button class="botao-segmentado" data-valor="finalizada">Finalizada</button>
-              <button class="botao-segmentado" data-valor="cancelada">Cancelada</button>
+          <div class="campo-filtro">
+            <label style="visibility: hidden;" aria-hidden="true">Filtro</label>
+            <div class="grupo-filtro-segmentado">
+              <button class="botao-toggle-filtro" id="botaoToggleStatusViagem" type="button" aria-expanded="false" aria-controls="filtroStatusViagem">
+                <span>Status</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+              </button>
+              <div class="filtro-segmentado filtro-segmentado-fechado" id="filtroStatusViagem">
+                <button class="botao-segmentado ativo" data-valor="todos">Todos</button>
+                <button class="botao-segmentado" data-valor="em andamento">Em andamento</button>
+                <button class="botao-segmentado" data-valor="finalizada">Finalizada</button>
+                <button class="botao-segmentado" data-valor="cancelada">Cancelada</button>
+              </div>
             </div>
           </div>
         </div>
