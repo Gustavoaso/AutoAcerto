@@ -65,16 +65,22 @@
         </div>
 
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <div class="campo-filtro">
-            <label>Motorista</label>
-            <div class="filtro-periodo" id="filtroMotoristaRelatorio">
+          <div class="grupo-periodo-relatorio">
+            <button class="botao-toggle-periodo" id="botaoToggleMotorista" type="button" aria-expanded="false" aria-controls="filtroMotoristaRelatorio">
+              <span>Motorista</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+            <div class="filtro-periodo filtro-periodo-fechado" id="filtroMotoristaRelatorio">
               <button class="botao-periodo ativo" data-valor="todos">Todos</button>
             </div>
           </div>
 
-          <div class="campo-filtro">
-            <label>Status da viagem</label>
-            <div class="filtro-periodo" id="filtroStatusRelatorio">
+          <div class="grupo-periodo-relatorio">
+            <button class="botao-toggle-periodo" id="botaoToggleStatus" type="button" aria-expanded="false" aria-controls="filtroStatusRelatorio">
+              <span>Status da viagem</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+            <div class="filtro-periodo filtro-periodo-fechado" id="filtroStatusRelatorio">
               <button class="botao-periodo ativo" data-valor="todos">Todos</button>
               <button class="botao-periodo" data-valor="em andamento">Em andamento</button>
               <button class="botao-periodo" data-valor="finalizada">Finalizada</button>
@@ -82,9 +88,12 @@
             </div>
           </div>
 
-          <div class="campo-filtro">
-            <label>Tipo de lançamento</label>
-            <div class="filtro-periodo" id="filtroTipoLancamentoRelatorio">
+          <div class="grupo-periodo-relatorio">
+            <button class="botao-toggle-periodo" id="botaoToggleTipo" type="button" aria-expanded="false" aria-controls="filtroTipoLancamentoRelatorio">
+              <span>Tipo de lançamento</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+            <div class="filtro-periodo filtro-periodo-fechado" id="filtroTipoLancamentoRelatorio">
               <button class="botao-periodo ativo" data-valor="todos">Todos</button>
               <button class="botao-periodo" data-valor="viagens">Somente viagens</button>
               <button class="botao-periodo" data-valor="fora">Fora de viagem</button>

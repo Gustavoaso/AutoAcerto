@@ -493,17 +493,18 @@ function exportarCSV() {
 }
 
 function configurarEventosRelatorio() {
-    const botaoTogglePeriodo = document.getElementById("botaoTogglePeriodo");
-    const opcoesPeriodo = document.getElementById("opcoesPeriodoRelatorio");
+    document.querySelectorAll(".botao-toggle-periodo").forEach(function (botaoToggle) {
+        botaoToggle.addEventListener("click", function () {
+            const estaAberto = botaoToggle.getAttribute("aria-expanded") === "true";
+            const idControles = botaoToggle.getAttribute("aria-controls");
+            const containerOpcoes = document.getElementById(idControles);
 
-    if (botaoTogglePeriodo && opcoesPeriodo) {
-        botaoTogglePeriodo.addEventListener("click", function () {
-            const estaAberto = botaoTogglePeriodo.getAttribute("aria-expanded") === "true";
-
-            botaoTogglePeriodo.setAttribute("aria-expanded", String(!estaAberto));
-            opcoesPeriodo.classList.toggle("filtro-periodo-fechado", estaAberto);
+            botaoToggle.setAttribute("aria-expanded", String(!estaAberto));
+            if (containerOpcoes) {
+                containerOpcoes.classList.toggle("filtro-periodo-fechado", estaAberto);
+            }
         });
-    }
+    });
 
     document.querySelectorAll(".filtro-periodo").forEach(function (container) {
         container.addEventListener("click", function (evento) {
