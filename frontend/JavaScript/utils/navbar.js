@@ -21,7 +21,16 @@
         
         // Obter o caminho atual para destacar a página ativa
         const caminhoAtual = window.location.pathname;
-        const paginaAtual = caminhoAtual.substring(caminhoAtual.lastIndexOf('/') + 1) || 'dashboard.html';
+        let paginaAtual = caminhoAtual.split('/').pop().split('?')[0].split('#')[0];
+        
+        if (!paginaAtual || paginaAtual === "" || paginaAtual === "/") {
+            paginaAtual = 'dashboard.html';
+        }
+        
+        // Garante que a comparação funcione mesmo se o servidor ocultar o .html da URL
+        if (!paginaAtual.endsWith('.html')) {
+            paginaAtual += '.html';
+        }
 
         function verificarAtivo(pagina) {
             return paginaAtual === pagina ? ' ativo' : '';
@@ -85,10 +94,15 @@
             botaoSair.addEventListener('click', window.encerrarSessao);
         }
 
-        // Renderizar ícones do Lucide no menu recém-injetado
-        if (window.lucide) {
-            window.lucide.createIcons();
+        // Renderizar ícones do Lucide de forma robusta
+        function renderizarIcones() {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            } else {
+                setTimeout(renderizarIcones, 50);
+            }
         }
+        renderizarIcones();
     }
 
     // Injetar logo no carregamento do DOM
