@@ -153,9 +153,14 @@ function renderizarTabelaTransportadoras(lista) {
 
     if (exclusaoTransportadoras) exclusaoTransportadoras.aposRender(lista);
 
-    if (window.lucide) {
-        window.lucide.createIcons();
+    function renderizarIconesTabela() {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        } else {
+            setTimeout(renderizarIconesTabela, 50);
+        }
     }
+    renderizarIconesTabela();
 }
 
 function configurarFormularioTransportadora() {

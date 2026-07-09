@@ -218,9 +218,14 @@ function renderizarTabelaDespesas(listaDespesas) {
 
     if (exclusaoDespesas) exclusaoDespesas.aposRender(listaDespesas);
 
-    if (window.lucide) {
-        window.lucide.createIcons();
+    function renderizarIconesTabela() {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        } else {
+            setTimeout(renderizarIconesTabela, 50);
+        }
     }
+    renderizarIconesTabela();
 }
 
 function descobrirMaiorCategoria() {

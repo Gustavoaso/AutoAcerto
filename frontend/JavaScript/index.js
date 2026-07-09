@@ -462,7 +462,7 @@ function carregarGraficoFinanceiro() {
     ],
     chart: {
       type: 'bar',
-      height: '100%',
+      height: 250,
       fontFamily: 'Inter, sans-serif',
       toolbar: { show: false },
       animations: {

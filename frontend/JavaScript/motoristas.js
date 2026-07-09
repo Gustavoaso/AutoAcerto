@@ -94,9 +94,14 @@ function renderizarTabela(listaMotoristas) {
 
     if (exclusaoMotoristas) exclusaoMotoristas.aposRender(listaMotoristas);
 
-    if (window.lucide) {
-        window.lucide.createIcons();
+    function renderizarIconesTabela() {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        } else {
+            setTimeout(renderizarIconesTabela, 50);
+        }
     }
+    renderizarIconesTabela();
 }
 
 function atualizarResumo() {
