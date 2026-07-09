@@ -33,7 +33,17 @@
         }
 
         function verificarAtivo(pagina) {
-            return paginaAtual === pagina ? ' ativo' : '';
+            if (paginaAtual === pagina) return ' ativo';
+            
+            // Mantém a navbar ativa quando o usuário acessa sub-páginas (visualizar, editar, cadastrar)
+            if (pagina === 'motoristas.html' && paginaAtual.includes('motorista')) return ' ativo';
+            if (pagina === 'veiculos.html' && paginaAtual.includes('veiculo')) return ' ativo';
+            if (pagina === 'viagens.html' && paginaAtual.includes('viag')) return ' ativo';
+            if (pagina === 'despesas.html' && paginaAtual.includes('despesa')) return ' ativo';
+            if (pagina === 'relatorios.html' && paginaAtual.includes('relatorio')) return ' ativo';
+            if (pagina === 'transportadoras.html' && paginaAtual.includes('transportadora')) return ' ativo';
+            
+            return '';
         }
 
         const menuHtml = `

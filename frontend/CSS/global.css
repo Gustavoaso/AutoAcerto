@@ -91,6 +91,8 @@ html {
 }
 
 body {
+  margin: 0;
+  padding: 0;
   font-family: var(--fonte);
   font-size: 0.9375rem;
   line-height: 1.6;
@@ -98,6 +100,8 @@ body {
   background:
     radial-gradient(circle at top, rgba(37, 99, 235, 0.06), transparent 34%),
     var(--cor-fundo);
+  height: 100vh;
+  overflow: hidden;
 }
 
 h1, h2, h3, h4, .titulo-pagina, .texto-logo, .rotulo-resumo, .titulo-card, .rotulo-mini-card, .cabecalho-painel h3 {
