@@ -1515,8 +1515,8 @@ tbody td {
 }
 
 .botao-acao svg {
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   stroke: var(--cor-texto-secundario);
   fill: none;
   stroke-width: 1.75;
